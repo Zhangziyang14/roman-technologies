@@ -1,0 +1,11 @@
+<stack>
+  <description brief="roman-technologies">roman-technologies</description>
+  <author>Maintained by Kelvin</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/roman-technologies</url>
+  <depend stack="common_msgs" /> <!-- sensor_msgs -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- std_msgs -->
+
+</stack>
