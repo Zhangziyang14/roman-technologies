@@ -8,56 +8,52 @@ char *path=NULL;
 void BaseController::init()
 {
     // intialize subscribers
-    leftEngine  = new Motor(106);
-    rightEngine = new Motor(107);
-    armEngine   = new Motor(108);
-
-    leftEngine->init(path);
-    rightEngine->init(path);
-    armEngine->init(path);
+    mKey_sub = mNodeHandle.subscribe("joy", 10, &BaseController::keyCB, this);
+    mTwist_pub = mNodeHandle.advertise<geometry_msgs::Twist>("movementTopic", 10);
 
     ROS_INFO("BaseController initialized");
 }
 
-/**
- * Drives the base forward
-*/
-  void BaseController::moveForward(double speed){
-      leftEngine->setSpeed(speed);
-      rightEngine->setSpeed(speed);
-  }
+void BaseController::keyCB(const sensor_msgs::Joy& msg){
 
-  /**
-   * Drives the base backward
-  */
-  void BaseController::moveBackward(double speed){
-      leftEngine->setSpeed(-speed);
-      rightEngine->setSpeed(-speed);
-  }
+    geometry_msgs::Twist twist_msg;
 
-  /**
-   * Turns the base to the left
-  */
-  void BaseController::turnLeft(double speed){
-      leftEngine->setSpeed(-speed);
-      rightEngine->setSpeed(speed);
-  }
+    //No button is pressed, so sum of vector is zero -> stand still
+    if(std::accumulate(msg.buttons.begin(), msg.buttons.end(), 0) == 0){
 
-  /**
-   * Turns the base to the right
-  */
-  void BaseController::turnRight(double speed){
-      leftEngine->setSpeed(speed);
-      rightEngine->setSpeed(-speed);
-  }
+        twist_msg.linear.x = 0;
+        twist_msg.angular.z = 0;
+        mTwist_pub.publish(twist_msg);
+    }
+    else{
+	    for(size_t i =0; i < msg.buttons.size(); i++){
 
-  /**
-   * Stops the base
-  */
-  void BaseController::brake(){
-      leftEngine->setSpeed(0);
-  }
+	    if(msg.buttons[i] == 0)
+		    continue;
 
+	        switch(i){
+
+            //Accelerate when X button is pressed
+	        case PS3_X:
+                    twist_msg.linear.x = -0.5f * float(msg.axes[PS3_X]);
+                    ROS_INFO("DEBUG %f", -0.5f * float(msg.axes[PS3_X]));                    
+                    if(msg.axes[PS3_LEFT_HORIZONTAL]){
+                        twist_msg.angular.z = 4.f * float(msg.axes[PS3_LEFT_HORIZONTAL]);
+                        ROS_INFO("DEBUG %f", 4.f * float(msg.axes[PS3_LEFT_HORIZONTAL]));
+                    }
+                    mTwist_pub.publish(twist_msg);
+	        break;
+	       
+            //Brake if O button has been pressed
+            case PS3_O:            
+                twist_msg.linear.x = 0;
+                twist_msg.angular.z = 0;
+                mTwist_pub.publish(twist_msg);
+            break;
+            }
+        }
+    }
+}
 
 int main(int argc, char **argv)
 {
