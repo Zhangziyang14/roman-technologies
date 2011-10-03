@@ -1,9 +1,0 @@
-<launch>
-
-  <group ns="/">
-    <node pkg="gripper" name="MotorHandler" type="MotorHandler"/>
-    <node pkg="gripper" name="Controller" type="Controller"/>
-    <node pkg="gripper" name="TemperatureListener" type="TemperatureListener"/>
-  </group>
-
-</launch>
