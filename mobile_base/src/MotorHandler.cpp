@@ -5,11 +5,11 @@
  */
 void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 {
-	double left_vel = msg.linear.x - msg.angular.z * wheel_radius;
-	double right_vel = msg.linear.x + msg.angular.z * wheel_radius;
+	double left_vel = msg.linear.x - msg.angular.z * WHEEL_RADIUS;
+	double right_vel = msg.linear.x + msg.angular.z * WHEEL_RADIUS;
 
-	right_engine.setSpeed(right_vel);
-	left_engine.setSpeed(left_vel);
+	mRightMotor.setSpeed(right_vel);
+	mLeftMotor.setSpeed(left_vel);
 }
 
 /**
@@ -17,7 +17,7 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 */
 void MotorHandler::tweakCB(const mobile_base::tweak msg)
 {
-	Motor *motor = mMotorId == MID_LEFT ? &left_engine : &right_engine;
+	Motor *motor = mMotorId == MID_LEFT ? &mLeftMotor : &mRightMotor;
 
 	switch (msg.data)
 	{
@@ -58,8 +58,8 @@ void MotorHandler::init(char *path)
 {
 	twist_sub = nh_.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
 	tweak_sub = nh_.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
-	left_engine.init(path);
-	right_engine.init(path);
+	mLeftMotor.init(path);
+	mRightMotor.init(path);
 
 	ROS_INFO("Initializing completed.");
 }

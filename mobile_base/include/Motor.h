@@ -3,7 +3,6 @@
 
 #include <CDxlGeneric.h>
 #include <threemxl/C3mxlROS.h>
-#include <string>
 
 #define DEFAULT_P 0.01
 #define DEFAULT_I 0.0
