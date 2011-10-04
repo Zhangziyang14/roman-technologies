@@ -2,10 +2,13 @@
 #define __BASECONTROLLER_H
 
 #include <ros/ros.h>
+#include <std_msgs/Int32.h>
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
+#include <tweak.h>
 #include <numeric>
 #include <vector>
+#include <math.h>
 #include <iostream>
 
 enum PS3Key
@@ -15,6 +18,10 @@ enum PS3Key
 	PS3_LEFT_VERTICAL       = 1,
 	PS3_RIGHT_HORIZONTAL    = 2,
 	PS3_RIGHT_VERTICAL      = 3,
+    PS3_UP                  = 4,
+    PS3_RIGHT               = 5,
+    PS3_DOWN                = 6,
+    PS3_LEFT                = 7,
 	PS3_L2                  = 8,
 	PS3_R2                  = 9,
 	PS3_L1                  = 10,
@@ -30,7 +37,9 @@ protected:
     ros::NodeHandle mNodeHandle;    /// ROS node handle
     ros::Subscriber mKey_sub;       /// Key input subscriber, reads key input data
     ros::Publisher mTwist_pub;      /// Twist message publisher, publishes movement data for engines
+    ros::Publisher mTweak_pub;      /// Integer message publisher, publishes integers for the DPAD buttons
 
+    PS3Key mKeyPressed;  /// Remembers the last pressed button 
 public:
     /// Constructor
     BaseController() : mNodeHandle("") { }

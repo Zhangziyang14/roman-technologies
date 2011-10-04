@@ -74,19 +74,29 @@ void Motor::setAcceleration(double acceleration){
   * Sets speed of the motor when in SPEED_MODE
  */
 void Motor::setSpeed(double speed){
+        setAcceleration(5);
+        motor_->setSpeed(speed);        
+}
 
-    if(speed == 0){
-        setMode(STOP_MODE);
-    }
-    else{
-        if(cmode != SPEED_MODE){
-            cout << "Motor not in speed mode" << endl;
-            setMode(SPEED_MODE);
-        }
+/**
+ * Sets speed pid
+ */
+void Motor::setPID(double p, double i, double d){
+    motor_->setPIDSpeed(p, d, i, 0, false);
+}
 
-        setAcceleration(10);
-        motor_->setSpeed(speed);
-    }
+/**
+ * Gets speed pid
+ */
+void Motor::printPID(){
+	double p;
+	double i;
+	double d;
+	double i_limit;
+
+	motor_->getPIDSpeed(p, d, i, i_limit);
+
+	ROS_INFO("p: %f, i: %f, d: %f, i_limit: %f \n", p, i, d, i_limit);
 }
 
 int Motor::getMode(){
@@ -141,9 +151,10 @@ void Motor::init(char *path){
         cout << "Using direct connection" << endl;
         motor_ = new C3mxl();
 
-        serial_port_.port_open("/dev/mobile_manipulator", LxSerial::RS485_FTDI);
+        serial_port_.port_open("/dev/motorusb", LxSerial::RS485_FTDI);
         serial_port_.set_speed(LxSerial::S921600);
-        motor_->setSerialPort(&serial_port_);
+        motor_->setSerialPort(&serial_port_);    
+        motor_->setPIDSpeed(0.01, 0, 0, 0, false);
     }
 
     // initialize the motor
@@ -154,3 +165,4 @@ void Motor::init(char *path){
     delete config;
     cout << "Motor " << engine_number << " initializing completed." << endl;
 }
+

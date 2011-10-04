@@ -6,16 +6,21 @@
 #include <threemxl/example.h>
 #include <threemxl/C3mxlROS.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Joy.h>
+#include <mobile_base/tweak.h>
+#include <threemxl/dxlassert.h>
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
 {
 protected:
     ros::NodeHandle nh_;             /// ROS node handle
-    ros::Subscriber twist_sub;
+    ros::Subscriber twist_sub;       /// Listens to Twist messages for movement
+    ros::Subscriber tweak_sub;       /// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
+
     Motor left_engine;               /// Motor for left wheel
     Motor right_engine;              /// Motor for right wheel
-    //Motor arm_engine;                /// Motor for arm
+    //Motor arm_engine;              /// Motor for arm
 
 public:
     /// Constructor

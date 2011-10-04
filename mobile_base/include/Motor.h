@@ -50,6 +50,8 @@ public:
     void setMode(int mode);
     void setSpeed(double speed);
     void setAcceleration(double aceleration);
+    void setPID(double p, double i, double d);
+    void printPID();
 
     int getMode();
     int getID();
