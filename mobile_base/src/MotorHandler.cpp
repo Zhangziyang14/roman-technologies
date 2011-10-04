@@ -116,6 +116,7 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 			ID = RIGHT_MOTOR;
 		}
 	}
+}
 
 /**
  * Initalize MotorHandler and its attributes.

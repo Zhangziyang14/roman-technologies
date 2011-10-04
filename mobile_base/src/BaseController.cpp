@@ -15,6 +15,9 @@ void BaseController::init()
     ROS_INFO("BaseController initialized");
 }
 
+/**
+ * Handles key events from the PS3 controller.
+ */
 void BaseController::keyCB(const sensor_msgs::Joy& msg){
 
     geometry_msgs::Twist twist_msg;

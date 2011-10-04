@@ -37,6 +37,7 @@ public:
     void init(char *path);
 
     void moveCB(const geometry_msgs::Twist& msg);
+    void tweakCB(const mobile_base::tweak msg);
 };    
 
 #endif /* __MOTORHANDLER_H */
