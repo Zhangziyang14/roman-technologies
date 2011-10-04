@@ -1,5 +1,8 @@
 #include "Util.h"
 
+/**
+ * Scales the color of the disparity image so the closest point is red and the furthest point is blue.
+ */
 void colorizeDisparity( const cv::Mat& gray, cv::Mat& rgb, double maxDisp=-1.f, float S=1.f, float V=1.f )
 {
 	CV_Assert( !gray.empty() );
@@ -53,6 +56,9 @@ void colorizeDisparity( const cv::Mat& gray, cv::Mat& rgb, double maxDisp=-1.f, 
 	}
 }
 
+/**
+ * Returns the max distance of the kinect depth sensor.
+ */
 float getMaxDisparity(cv::VideoCapture& capture)
 {
 	const int minDistance = 400; // mm
@@ -61,6 +67,9 @@ float getMaxDisparity(cv::VideoCapture& capture)
 	return b * F / minDistance;
 }
 
+/**
+ * Constantly grabs images from the Kinect and performs operations on these images if necessary.
+ */
 void kinectLoop(cv::VideoCapture *capture)
 {
 	bool quit = false;
