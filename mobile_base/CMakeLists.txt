@@ -23,6 +23,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(BaseController src/BaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
+rosbuild_add_executable(KinectTest src/KinectTest.cpp)
+
+link_directories(/usr/local/lib )
+include_directories(/usr/local/include)
+target_link_libraries(KinectTest opencv_core opencv_imgproc opencv_highgui)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
