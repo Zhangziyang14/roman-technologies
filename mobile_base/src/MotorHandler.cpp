@@ -29,9 +29,10 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 		motor->printPID();
 		break;
 
+	case PS3_LEFT:
 	case PS3_RIGHT:
 		// toggle through P-I-D
-		mPIDFocus = PIDParameter((mPIDFocus + 1) % PID_PARAM_MAX);
+		mPIDFocus = PIDParameter((mPIDFocus + (msg.data == PS3_LEFT ? -1 : 1)) % PID_PARAM_MAX);
 
 		switch (mPIDFocus)
 		{

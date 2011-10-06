@@ -20,7 +20,7 @@ double &PID::operator[](unsigned int i)
  */
 void Motor::setMode(ControlMode mode)
 {
-	if (cmode != mode)
+	if (cmode == mode)
 		return; // already in this mode, nothing needs to be done
 
 	cmode = mode;
@@ -105,7 +105,7 @@ void Motor::init(char *path)
         serial_port_.port_open("/dev/motorusb", LxSerial::RS485_FTDI);
         serial_port_.set_speed(LxSerial::S921600);
         motor_->setSerialPort(&serial_port_);    
-        motor_->setPIDSpeed(0.01, 0, 0, 0, false);
+        //motor_->setPIDSpeed(0.01, 0, 0, 0, false);
     }
 
     // initialize the motor

@@ -107,7 +107,6 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
             default:
                 break;
             }
-	        usleep(1000000);
         }
     }
 }
