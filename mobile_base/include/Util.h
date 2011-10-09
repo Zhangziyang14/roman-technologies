@@ -1,7 +1,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#include "sensor_msgs/PointCloud2.h"
+#include "sensor_msgs/LaserScan.h"
 
 #include "opencv/cxcore.h"  
 #include "opencv/cvwimage.h"
@@ -12,6 +12,7 @@
 #define ROBOT_RADIUS 0.35f
 #define EVADE_DISTANCE 700 // mm
 
+typedef unsigned int uint32;
 typedef unsigned short int uint16;
 typedef unsigned char uint8;
 
@@ -20,7 +21,6 @@ enum DisplayType
 	DISPLAY_TYPE_RGB,
 	DISPLAY_TYPE_GRAY,
 	DISPLAY_TYPE_DEPTH,
-	DISPLAY_TYPE_DISPARITY,
 	DISPLAY_TYPE_TOTAL,
 };
 
@@ -77,6 +77,8 @@ inline uint16 getDepthFromCloud(int x, int y, IplImage *image)
 	return getDepthFromRealPoint(p);
 }
 inline uint16 getDepthFromCloud(cv::Point p, IplImage *image) { return getDepthFromCloud(p.x, p.y, image); };
+
+inline
 
 
 #endif

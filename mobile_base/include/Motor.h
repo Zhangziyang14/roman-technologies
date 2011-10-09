@@ -87,6 +87,8 @@ public:
     void updatePID();
     void printPID();
 
+    inline int getLinearPosition() { return motor_->getLinearPos(); };
+
     int getMode();
     int getID();
 

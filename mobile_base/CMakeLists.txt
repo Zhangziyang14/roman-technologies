@@ -24,6 +24,7 @@ rosbuild_genmsg()
 rosbuild_add_executable(BaseController src/BaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
 rosbuild_add_executable(Kinect src/Kinect.cpp)
+rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
 
 link_directories(/usr/local/lib )
 include_directories(/usr/local/include)

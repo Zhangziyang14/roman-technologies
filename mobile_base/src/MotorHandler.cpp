@@ -69,8 +69,6 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "MotorHandler");
 
-	ros::NodeHandle n;
-
 	char *path=NULL;
 	if (argc == 2)
 		path = argv[1];

@@ -1,81 +1,89 @@
 #include "Util.h"
+#include "ros/ros.h"
+#include "nav_msgs/Odometry.h"
+#include "tf/transform_broadcaster.h"
 
-/**
- * Scales the color of the disparity image so the closest point is red and the furthest point is blue.
- */
-void colorizeDisparity( const cv::Mat& gray, cv::Mat& rgb, double maxDisp=-1.f, float S=1.f, float V=1.f )
+#define MIN_HEIGHT 0.10
+#define MAX_HEIGHT 0.15
+#define ANGLE_MIN -M_PI_2
+#define ANGLE_MAX M_PI_2
+#define ANGLE_INCREMENT (M_PI/180.0/2.0)
+#define SCAN_TIME (1.0/30.0)
+#define RANGE_MIN 0.45
+#define RANGE_MAX 10.0
+#define OUTPUT_FRAME_ID "/openni_depth_frame"
+
+#define PUSH_LASERSCAN_TIME 1
+
+sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud)
 {
-	CV_Assert( !gray.empty() );
-	CV_Assert( gray.type() == CV_8UC1 );
+	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
+	ROS_INFO("Got cloud\n");
 
-	if( maxDisp <= 0 )
+	//output->header = cloud->header;
+	output->header.stamp = ros::Time::now();
+	output->header.frame_id = OUTPUT_FRAME_ID;
+	output->angle_min = ANGLE_MIN;
+	output->angle_max = ANGLE_MAX;
+	output->angle_increment = ANGLE_INCREMENT;
+	output->time_increment = 0.0;
+	output->scan_time = SCAN_TIME;
+	output->range_min = RANGE_MIN;
+	output->range_max = RANGE_MAX;
+
+	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
+	output->ranges.assign(ranges_size, output->range_max + 1.0);
+
+	for (int row = 0; row < cloud.height; row++)
 	{
-		maxDisp = 0;
-		minMaxLoc( gray, 0, &maxDisp );
-	}
-
-	rgb.create( gray.size(), CV_8UC3 );
-	rgb = cv::Scalar::all(0);
-	if (maxDisp < 1)
-		return;
-
-	for (int y = 0; y < gray.rows; y++)
-	{
-		for (int x = 0; x < gray.cols; x++)
+		for (int col = 0; col < cloud.width; col++)
 		{
-			uchar d = gray.at<uchar>(y,x);
-			unsigned int H = ((uchar)maxDisp - d) * 240 / (uchar)maxDisp;
+			cv::Point3f p = getPointFromCloud(col, row, &cloud);
 
-			unsigned int hi = (H/60) % 6;
-			float f = H/60.f - H/60;
-			float p = V * (1 - S);
-			float q = V * (1 - f * S);
-			float t = V * (1 - (1 - f) * S);
+			if (p.x == 0 || p.y == 0 || p.z == 0)
+			{
+				//ROS_INFO("rejected for zero point");
+				continue;
+			}
+			if ( std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z) )
+			{
+				//ROS_INFO("rejected for nan in point(%f, %f, %f)\n", p.x, p.y, p.z);
+				continue;
+			}
+			if (-p.y > MAX_HEIGHT || -p.y < MIN_HEIGHT)
+			{
+				//ROS_INFO("rejected for height %f not in range (%f, %f)\n", p.x, MIN_HEIGHT, MAX_HEIGHT);
+				continue;
+			}
 
-			cv::Point3f res;
-
-			if( hi == 0 ) //R = V,	G = t,	B = p
-				res = cv::Point3f(p, t, V);
-			if( hi == 1 ) // R = q,	G = V,	B = p
-				res = cv::Point3f(p, V, q);
-			if( hi == 2 ) // R = p,	G = V,	B = t
-				res = cv::Point3f(t, V, p);
-			if( hi == 3 ) // R = p,	G = q,	B = V
-				res = cv::Point3f(V, q, p);
-			if( hi == 4 ) // R = t,	G = p,	B = V
-				res = cv::Point3f(V, p, t);
-			if( hi == 5 ) // R = V,	G = p,	B = q
-				res = cv::Point3f(q, p, V);
-
-			uchar b = (uchar)(std::max(0.f, std::min(res.x, 1.f)) * 255.f);
-			uchar g = (uchar)(std::max(0.f, std::min(res.y, 1.f)) * 255.f);
-			uchar r = (uchar)(std::max(0.f, std::min(res.z, 1.f)) * 255.f);
-
-			rgb.at<cv::Point3_<uchar> >(y,x) = cv::Point3_<uchar>(b, g, r);
+			double angle = -atan2(p.x, p.z);
+			if (angle < output->angle_min || angle > output->angle_max)
+			{
+				//ROS_INFO("rejected for angle %f not in range (%f, %f)\n", angle, output->angle_min, output->angle_max);
+				continue;
+			}
+			int index = (angle - output->angle_min) / output->angle_increment;
+			//printf ("index xyz( %f %f %f) angle %f index %d\n", x, y, z, angle, index);
+			double range_sq = p.z*p.z + p.x*p.x;
+			if (output->ranges[index] * output->ranges[index] > range_sq)
+				output->ranges[index] = sqrt(range_sq);
 		}
 	}
-}
 
-/**
- * Returns the max distance of the kinect depth sensor.
- */
-float getMaxDisparity(cv::VideoCapture& capture)
-{
-	const int minDistance = 400; // mm
-	float b = (float)capture.get( CV_CAP_OPENNI_DEPTH_GENERATOR_BASELINE ); // mm
-	float F = (float)capture.get( CV_CAP_OPENNI_DEPTH_GENERATOR_FOCAL_LENGTH ); // pixels
-	return b * F / minDistance;
+	return output;
 }
 
 /**
  * Constantly grabs images from the Kinect and performs operations on these images if necessary.
  */
-void kinectLoop(cv::VideoCapture *capture)
+void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 {
 	bool quit = false;
 	DisplayType displayType = DISPLAY_TYPE_DEPTH;
+	time_t laserTime = time(NULL) + PUSH_LASERSCAN_TIME;
+	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
 
-	while (quit == false)
+	while (quit == false && ros::ok())
 	{
 		cv::Mat image, pointCloud;
 		IplImage iplImage;
@@ -113,7 +121,7 @@ void kinectLoop(cv::VideoCapture *capture)
 				cv::Point p = cvPoint(rgb.width >> 1, rgb.height >> 1);
 				cvDrawCircle(&rgb, p, 5, cvScalar(0, 255, 0), 1, CV_AA);
 
-				int minDepth = 9999;
+				/*int minDepth = 9999;
 				cv::Point closestPoint;
 				for (int y = 0; y < pc.height; y++)
 				{
@@ -143,22 +151,17 @@ void kinectLoop(cv::VideoCapture *capture)
 				{
 					cvDrawCircle(&rgb, closestPoint, 5, cvScalar(0, 0, 255), 1, CV_AA);
 					std::cout << "Closest obstacle at :" << minDepth << std::endl;
+				}*/
+
+				if (time(NULL) >= laserTime)
+				{
+					sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
+					laser_pub.publish(laserscan);
+
+					laserTime = time(NULL) + PUSH_LASERSCAN_TIME;
 				}
 
 				cvShowImage(WINDOW_NAME, &rgb);
-			}
-			break;
-		case DISPLAY_TYPE_DISPARITY:
-			if (capture->retrieve(image, CV_CAP_OPENNI_DISPARITY_MAP))
-			{
-				//if( isColorizeDisp )
-				{
-					cv::Mat colorDisparityMap;
-					colorizeDisparity(image, colorDisparityMap, /*isFixedMaxDisp ? getMaxDisparity(capture) :*/ -1);
-					cv::Mat validColorDisparityMap;
-					colorDisparityMap.copyTo(validColorDisparityMap, image != 0);
-					imshow(WINDOW_NAME, validColorDisparityMap);
-				}
 			}
 			break;
 		default:
@@ -184,6 +187,10 @@ void kinectLoop(cv::VideoCapture *capture)
 
 int main(int argc, char* argv[])
 {
+	ros::init(argc, argv, "Kinect");
+
+	ros::NodeHandle n;
+
 	std::cout << "Kinect opening ..." << std::endl;
 	cv::VideoCapture capture(CV_CAP_OPENNI);
 	if( !capture.isOpened() )
@@ -208,7 +215,7 @@ int main(int argc, char* argv[])
 			"FPS\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FPS) << std::endl;
 
 	cvNamedWindow(WINDOW_NAME);
-	kinectLoop(&capture);
+	kinectLoop(&capture, &n);
 
 	return 0;
 }
