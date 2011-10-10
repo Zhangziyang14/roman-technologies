@@ -8,7 +8,7 @@ void MotorHandler::publishRobotSpeed()
 		right_speed = mRightMotor.getRotationSpeed();
 		left_speed = mLeftMotor.getRotationSpeed();
 
-		speed.linear.x  = (right_speed * WHEEL_RADIUS + left_speed * WHEEL_RADIUS)/2;
+		speed.linear.x  = (right_speed * WHEEL_RADIUS + left_speed * WHEEL_RADIUS)/2.0;
 		speed.angular.z = right_speed * BASE_RADIUS - left_speed * BASE_RADIUS;
 
 		speed_pub.publish(speed);
