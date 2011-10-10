@@ -11,21 +11,25 @@
 #include <BaseController.h>
 
 #define WHEEL_RADIUS 0.1475
+#define BASE_RADIUS	 0.25
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
 {
 protected:
-    ros::NodeHandle nh_;			/// ROS node handle
-    ros::Subscriber twist_sub;		/// Listens to Twist messages for movement
-    ros::Subscriber tweak_sub;		/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
+    ros::NodeHandle nh_;				/// ROS node handle
+    ros::Subscriber twist_sub;			/// Listens to Twist messages for movement
+    ros::Subscriber tweak_sub;			/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
+    ros::Publisher speed_pub;			/// Publishes robot's speed
+    geometry_msgs::Twist speed;			/// Twist message containing the current speed of the robot
+    double left_speed, right_speed;		/// Current speeds for left and right wheels in rad/s
 
-    Motor mLeftMotor;				/// Motor for left wheel
-    Motor mRightMotor;				/// Motor for right wheel
-    //Motor arm_engine;				/// Motor for arm
+    Motor mLeftMotor;					/// Motor for left wheel
+    Motor mRightMotor;					/// Motor for right wheel
+    //Motor arm_engine;					/// Motor for arm
 
-    MotorId mMotorId;				/// Id of the motor that is currently being controlled
-    PIDParameter mPIDFocus;			/// One of the PID parameters that is to be changed on button events
+    MotorId mMotorId;					/// Id of the motor that is currently being controlled
+    PIDParameter mPIDFocus;				/// One of the PID parameters that is to be changed on button events
 
 public:
     /// Constructor
@@ -38,11 +42,13 @@ public:
         nh_.shutdown();
     }
 
-    /// Initialize node
+    /// Initialise node
     void init(char *path);
 
+    void publishRobotSpeed();
     void moveCB(const geometry_msgs::Twist& msg);
     void tweakCB(const mobile_base::tweak msg);
+
 };    
 
 #endif /* __MOTORHANDLER_H */

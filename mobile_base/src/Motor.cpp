@@ -66,6 +66,18 @@ void Motor::setSpeed(double speed)
 }
 
 /**
+  * Gets speed of the motor when in SPEED_MODE
+ */
+double Motor::getRotationSpeed()
+{
+	motor_->getState();
+	motor_->getStatus();
+
+	//ROS_INFO("PRESENT SPEED, %f rad/s", motor_->presentSpeed());
+    return motor_->presentSpeed();
+}
+
+/**
  * Sets speed pid
  */
 void Motor::updatePID()
@@ -105,7 +117,6 @@ void Motor::init(char *path)
         serial_port_.port_open("/dev/motorusb", LxSerial::RS485_FTDI);
         serial_port_.set_speed(LxSerial::S921600);
         motor_->setSerialPort(&serial_port_);    
-        //motor_->setPIDSpeed(0.01, 0, 0, 0, false);
     }
 
     // initialize the motor
