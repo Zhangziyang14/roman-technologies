@@ -13,7 +13,7 @@
 #define RANGE_MAX 10.0
 #define OUTPUT_FRAME_ID "/openni_depth_frame"
 
-#define PUSH_LASERSCAN_TIME 1
+#define PUSH_LASERSCAN_TIME (500*1000)
 
 sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud)
 {
@@ -80,7 +80,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 {
 	bool quit = false;
 	DisplayType displayType = DISPLAY_TYPE_DEPTH;
-	time_t laserTime = time(NULL) + PUSH_LASERSCAN_TIME;
+	long unsigned int laserTime = ros::Time::now().toNSec();
 	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
 
 	while (quit == false && ros::ok())
@@ -153,12 +153,12 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 					std::cout << "Closest obstacle at :" << minDepth << std::endl;
 				}*/
 
-				if (time(NULL) >= laserTime)
+				if (ros::Time::now().toNSec() >= laserTime)
 				{
 					sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
 					laser_pub.publish(laserscan);
 
-					laserTime = time(NULL) + PUSH_LASERSCAN_TIME;
+					laserTime = ros::Time::now().toNSec() + PUSH_LASERSCAN_TIME;
 				}
 
 				cvShowImage(WINDOW_NAME, &rgb);
