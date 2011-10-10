@@ -5,25 +5,40 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
 
+double vx = 0.0;
+double vy = 0.0;
+double vth = 0.0;
+double th = 0.0;
+
+void twistCb(const geometry_msgs::Twist &twist)
+{
+	vx = twist.linear.x;// * cos(th);
+	vy = twist.linear.y;// * sin(th);
+	vth = twist.angular.z;
+
+	ROS_INFO("vx: %lf, vy: %lf, vth: %lf", vx, vy, vth);
+}
+
 int main(int argc, char ** argv)
 {
 	ros::init(argc, argv, "MovementSimulator");
 	ros::NodeHandle node;
 	ros::Publisher odom_publisher = node.advertise<nav_msgs::Odometry>("odom", 50);
+	ros::Subscriber twist_sub = node.subscribe("/speedFeedbackTopic", 1, twistCb);
 	tf::TransformBroadcaster odom_broadcaster;
 	double x = 0.0;
 	double y = 0.0;
-	double th = 0.0;
+	//double th = 0.0;
 	
-	double vx = 0.1;
+	/*double vx = 0.1;
 	double vy = -0.1;
-	double vth = 0.1;
+	double vth = 0.1;*/
 	
 	ros::Time current_time, last_time;
 	current_time = ros::Time::now();
 	last_time = ros::Time::now();
 	
-	ros::Rate rate(1.0);
+	ros::Rate rate(100.0);
 	while (node.ok())
 	{
 		current_time = ros::Time::now();
@@ -47,8 +62,8 @@ int main(int argc, char ** argv)
 		odom_trans.header.frame_id = "odom";
 		odom_trans.child_frame_id = "base_link";
 		
-		odom_trans.transform.translation.x = 0.0;//x;
-		odom_trans.transform.translation.y = 0.0;//y;
+		odom_trans.transform.translation.x = x;
+		odom_trans.transform.translation.y = y;
 		odom_trans.transform.translation.z = 0.0;
 		odom_trans.transform.rotation = odom_quat;
 		
@@ -79,6 +94,7 @@ int main(int argc, char ** argv)
 		
 		last_time = current_time;
 		rate.sleep();
+		ros::spinOnce();
 	}
 	return 0;
 }
