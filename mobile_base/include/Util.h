@@ -78,7 +78,4 @@ inline uint16 getDepthFromCloud(int x, int y, IplImage *image)
 }
 inline uint16 getDepthFromCloud(cv::Point p, IplImage *image) { return getDepthFromCloud(p.x, p.y, image); };
 
-inline
-
-
 #endif

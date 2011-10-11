@@ -8,6 +8,8 @@
 #define DEFAULT_I 0.0
 #define DEFAULT_D 0.0
 
+#define DEFAULT_ACCELERATION 5
+
 enum ControlMode
 {
     CM_NONE = -1,
@@ -47,7 +49,7 @@ public:
 	PID() : p(0.0), i(0.0), d(0.0) {}
 	PID(double proportional, double integral, double derivative) : p(proportional), i(integral), d(derivative) {}
 
-	double &operator[](unsigned int i);
+	double &operator[](PIDParameter p);
 
 	double p;
 	double i;

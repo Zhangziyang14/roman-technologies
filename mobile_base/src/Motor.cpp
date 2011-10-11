@@ -2,9 +2,12 @@
 
 using namespace std;
 
-double &PID::operator[](unsigned int i)
+/**
+ * Square bracket operator so it can be used as a sort of array.
+ */
+double &PID::operator[](PIDParameter p)
 {
-	switch (i)
+	switch (p)
 	{
 	case PID_PARAM_P: return this->p;
 	case PID_PARAM_I: return this->i;
@@ -47,12 +50,6 @@ void Motor::setMode(ControlMode mode)
  */
 void Motor::setAcceleration(double acceleration)
 {
-    if (cmode != CM_SPEED_MODE)
-    {
-        cout << "Motor not in speed mode" << endl;
-        setMode(CM_SPEED_MODE);
-    }
-
     motor_->setAcceleration(acceleration);
 }
 
@@ -61,7 +58,14 @@ void Motor::setAcceleration(double acceleration)
  */
 void Motor::setSpeed(double speed)
 {
-	setAcceleration(5);
+	if (cmode != CM_SPEED_MODE)
+	{
+        cout << "Motor not in speed mode, setting it now." << endl;
+        setMode(CM_SPEED_MODE);
+
+		setAcceleration(DEFAULT_ACCELERATION);
+	}
+
     motor_->setSpeed(speed);
 }
 

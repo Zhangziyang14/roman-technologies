@@ -1,7 +1,5 @@
 #include "Util.h"
 #include "ros/ros.h"
-#include "nav_msgs/Odometry.h"
-#include "tf/transform_broadcaster.h"
 
 #define MIN_HEIGHT 0.10
 #define MAX_HEIGHT 0.15

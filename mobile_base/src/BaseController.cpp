@@ -1,13 +1,11 @@
 #include <BaseController.h>
 
-char *path=NULL;
-
 /**
  * Reads the speed feedback from MotorHandler
  */
 void BaseController::readCurrentSpeed(const geometry_msgs::Twist& msg)
 {
-	current_speed = msg;
+	mCurrentSpeed = msg;
 }
 
 /**
@@ -17,9 +15,9 @@ void BaseController::init()
 {
 	//initialise subscribers
 	mKey_sub = mNodeHandle.subscribe("joy", 1, &BaseController::keyCB, this);
-	speed_sub = mNodeHandle.subscribe("/speedFeedbackTopic", 1, &BaseController::readCurrentSpeed, this);
-	mTwist_pub = mNodeHandle.advertise<geometry_msgs::Twist>("/movementTopic", 1);
-	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("/tweakTopic", 10);
+	mSpeed_sub = mNodeHandle.subscribe("speedFeedbackTopic", 1, &BaseController::readCurrentSpeed, this);
+	mTwist_pub = mNodeHandle.advertise<geometry_msgs::Twist>("movementTopic", 1);
+	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
 
 	ROS_INFO("BaseController initialised");
 }
@@ -33,10 +31,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 	mobile_base::tweak button;
 
 	//No button is pressed, so sum of vector is zero -> stand still
-	if(std::accumulate(msg.buttons.begin(), msg.buttons.end(), 0) == 0){
+	if (std::accumulate(msg.buttons.begin(), msg.buttons.end(), 0) == 0)
+	{
 
 		//Nothing is pressed and analog stick is not tilted
-		if(msg.axes[PS3_LEFT_HORIZONTAL] == 0)
+		if (msg.axes[PS3_LEFT_HORIZONTAL] == 0)
 		{
 			twist_msg.linear.x = 0;
 			twist_msg.angular.z = 0;
@@ -59,9 +58,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 	{
 		twist_msg.linear.x = 0;
 		twist_msg.angular.z = 0;
-		//double after = 0;
-		//double before = 0;
-		for(size_t i = 0; i < msg.buttons.size(); i++)
+		for (size_t i = 0; i < msg.buttons.size(); i++)
 		{
 			if(msg.buttons[i] == 0)
 				continue;
@@ -70,28 +67,14 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 			{
 			//Accelerate when X button is pressed
 			case PS3_X:
-				twist_msg.linear.x = -1.8f * float(msg.axes[PS3_X]);
-				if(msg.axes[PS3_LEFT_HORIZONTAL] != 0)
+				twist_msg.linear.x = -MAX_LINEAR_SPEED * float(msg.axes[PS3_X]);
+				if (msg.axes[PS3_LEFT_HORIZONTAL])
 				{
-					//Afhankelijk maken van mate waarin Analog stick is ingedrukt?
-					if(msg.axes[PS3_LEFT_HORIZONTAL] > 0)
-						twist_msg.angular.z = ROBOT_ANGULAR_SPEED;
-					else
-						twist_msg.angular.z = -ROBOT_ANGULAR_SPEED;
+					//Depending on the amplitude of the joystick
+					twist_msg.angular.z = msg.axes[PS3_LEFT_HORIZONTAL] > 0 ? calcRobotAngularSpeed() : -calcRobotAngularSpeed();
 
-					//before = twist_msg.angular.z;
-
-					if(ROBOT_ANGULAR_SPEED > MAX_ANGULAR_SPEED)
-					{
-						if(msg.axes[PS3_LEFT_HORIZONTAL] > 0)
-							twist_msg.angular.z = MAX_ANGULAR_SPEED;
-						else
-							twist_msg.angular.z = -MAX_ANGULAR_SPEED;
-
-						//after = twist_msg.angular.z;
-					}
-					//ROS_INFO("BEFORE CLIPPING \t \t AFTER CLIPPING \t \t LINEAR SPEED");
-					//ROS_INFO("%f \t \t %f \t \t %f", before, after, current_speed.linear.x);
+					if (abs(calcRobotAngularSpeed()) > MAX_ANGULAR_SPEED)
+						twist_msg.angular.z = msg.axes[PS3_LEFT_HORIZONTAL] > 0 ? MAX_ANGULAR_SPEED : -MAX_ANGULAR_SPEED;
 				}
 
 				mTwist_pub.publish(twist_msg);
@@ -99,25 +82,13 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 
 				//Go in reverse when Square button is pressed
 			case PS3_S:
-				twist_msg.linear.x = 1.8f * float(msg.axes[PS3_S]);
-				if(msg.axes[PS3_LEFT_HORIZONTAL] != 0)
+				twist_msg.linear.x = MAX_LINEAR_SPEED * float(msg.axes[PS3_S]);
+				if (msg.axes[PS3_LEFT_HORIZONTAL])
 				{
-					if(msg.axes[PS3_LEFT_HORIZONTAL] > 0)
-						twist_msg.angular.z = ROBOT_ANGULAR_SPEED;
-					else
-						twist_msg.angular.z = -ROBOT_ANGULAR_SPEED;
+					twist_msg.angular.z = msg.axes[PS3_LEFT_HORIZONTAL] > 0 ? calcRobotAngularSpeed() : -calcRobotAngularSpeed();
 
-					if(ROBOT_ANGULAR_SPEED > MAX_ANGULAR_SPEED)
-					{
-						if(msg.axes[PS3_LEFT_HORIZONTAL] > 0)
-							twist_msg.angular.z = MAX_ANGULAR_SPEED;
-						else
-							twist_msg.angular.z = -MAX_ANGULAR_SPEED;
-
-						//after = twist_msg.angular.z;
-					}
-					//ROS_INFO("BEFORE CLIPPING \t \t AFTER CLIPPING \t \t LINEAR SPEED");
-					//ROS_INFO("%f \t \t %f \t \t %f", before, after, current_speed.linear.x);
+					if (calcRobotAngularSpeed() > MAX_ANGULAR_SPEED)
+						twist_msg.angular.z = msg.axes[PS3_LEFT_HORIZONTAL] > 0 ? MAX_ANGULAR_SPEED : -MAX_ANGULAR_SPEED;
 				}
 
 				mTwist_pub.publish(twist_msg);
@@ -181,6 +152,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "controller");
 	BaseController base_controller;
 
+	char *path = NULL;
 	if (argc == 2)
 		path = argv[1];
 

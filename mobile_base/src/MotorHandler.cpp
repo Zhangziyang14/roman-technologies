@@ -1,21 +1,22 @@
 #include <MotorHandler.h>
 
 /**
- * Publishes the linear and angular speed of the robot to Basecontroller
+ * Publishes the linear and angular speed of the robot
  */
 void MotorHandler::publishRobotSpeed()
 {
-		right_speed = mRightMotor.getRotationSpeed();
-		left_speed = mLeftMotor.getRotationSpeed();
+	mRightMotorSpeed = mRightMotor.getRotationSpeed();
+	mLeftMotorSpeed = mLeftMotor.getRotationSpeed();
 
-		speed.linear.x  = (right_speed * WHEEL_RADIUS + left_speed * WHEEL_RADIUS)/2.0;
-		speed.angular.z = right_speed * BASE_RADIUS - left_speed * BASE_RADIUS;
+	mCurrentSpeed.linear.x  = (mRightMotorSpeed + mLeftMotorSpeed) * WHEEL_RADIUS / 2.0;
+	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * getBaseRadius();
+	ROS_INFO("BaseRadius: %f", getBaseRadius());
 
-		speed_pub.publish(speed);
+	mSpeedSub.publish(mCurrentSpeed);
 }
 
 /**
- * Called when a Twist message is received over the motor topic.
+ * Controls the speed of the motors based on the received twist message.
  */
 void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 {
@@ -37,7 +38,7 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 	{
 	case PS3_UP:
 	case PS3_DOWN:
-		motor->mPID[mPIDFocus] += msg.data == PS3_DOWN ? -0.01 : 0.01;
+		motor->mPID[mPIDFocus] += msg.data == PS3_DOWN ? -PID_TWEAK_STEP : PID_TWEAK_STEP;
 		motor->mPID[mPIDFocus] = std::max(0.0, motor->mPID[mPIDFocus]);
 		motor->updatePID();
 		motor->printPID();
@@ -71,17 +72,13 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
  */
 void MotorHandler::init(char *path)
 {
-	speed_pub = nh_.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
-	tweak_sub = nh_.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
-	twist_sub = nh_.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
+	mSpeedSub = mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
+	mTweakPIDSub = mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
+	mTwistSub = mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
 
 	ROS_INFO("Initialising completed.");
-}
-
-void helloWorld(){
-	std::cout << "HELLO!"<<endl;
 }
 
 int main(int argc, char **argv)
