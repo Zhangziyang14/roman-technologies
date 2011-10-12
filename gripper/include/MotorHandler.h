@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 #include <CDxlGeneric.h>
-#include <MotorControl.h>
+#include <gripper/MotorControl.h>
 
 enum ControlMode
 {

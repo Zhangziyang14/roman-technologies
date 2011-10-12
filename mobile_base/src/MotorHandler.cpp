@@ -10,7 +10,7 @@ void MotorHandler::publishRobotSpeed()
 
 	mCurrentSpeed.linear.x  = (mRightMotorSpeed + mLeftMotorSpeed) * WHEEL_RADIUS / 2.0;
 	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * getBaseRadius();
-	ROS_INFO("BaseRadius: %f", getBaseRadius());
+	ROS_INFO("BaseRadius: %f, left_speed: %d, right_speed: %d", getBaseRadius(), mLeftMotorSpeed, mRightMotorSpeed);
 
 	mSpeedSub.publish(mCurrentSpeed);
 }

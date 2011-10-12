@@ -55,6 +55,7 @@ int main(int argc, char ** argv)
 		
 		//since all odometry is 6DOF we'll need a quaternion created from yaw
 		geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
+		ROS_INFO("x: %f, y: %f, th: %f", x, y, th);
 		
 		//first, we'll publish the transform over tf
 		geometry_msgs::TransformStamped odom_trans;

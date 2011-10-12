@@ -53,9 +53,9 @@ public:
 
     inline double getBaseRadius()
     {
-    	if (mLeftMotorSpeed + mRightMotorSpeed == 0)
+    	if (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed) == 0)
     		return 0.0;
-    	return BASE_RADIUS * 2 * std::max(mLeftMotorSpeed, mRightMotorSpeed) / (mLeftMotorSpeed + mRightMotorSpeed);
+    	return BASE_RADIUS * 2 * std::max(abs(mLeftMotorSpeed), abs(mRightMotorSpeed)) / (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed));
     };
 
 };    
