@@ -57,6 +57,10 @@ void Controller::init()
     mMotor_pub   = mNodeHandle.advertise<gripper::MotorControl>("motorTopic", 10);
     mJoint_pub   = mNodeHandle.advertise<sensor_msgs::JointState>("joint_states", 10);
 
+    std_msgs::Bool msg;
+    msg.data = mSensorActive;
+    mSensor_pub.publish(msg);
+
     ROS_INFO("Controller initialized");
 }
 

@@ -23,7 +23,7 @@ void PS3Controller::keyCB(const sensor_msgs::Joy& msg)
     //ROS_INFO("Key Received. Id = %d, value = %d", msg->keys[i], msg->values[i]);
 
     gripper::MotorControl mc;
-    std_msgs::Empty empty_msg;
+    std_msgs::Bool bool_msg;
 
     //No button is pressed, so sum of vector is zero
     if(std::accumulate(msg.buttons.begin(), msg.buttons.end(), 0) == 0)
@@ -85,8 +85,11 @@ void PS3Controller::keyCB(const sensor_msgs::Joy& msg)
 				if (mKeyPressed != PS3_NONE)
 					break;
 
-				ROS_INFO("SENSOR TOGGLED");
-				mSensor_pub.publish(empty_msg);
+				mSensorActive = !mSensorActive;
+				bool_msg.data = mSensorActive;
+
+				ROS_INFO("SENSOR %s", mSensorActive ? "ACTIVATED" : "DEACTIVATED");
+				mSensor_pub.publish(bool_msg);
 
 				mKeyPressed = PS3_T;
 				break;

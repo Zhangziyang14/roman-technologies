@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <Motor.h>
 #include <threemxl/example.h>
-#include <geometry_msgs/Twist.h>
+#include <mobile_base/BaseMotorControl.h>
 #include <sensor_msgs/Joy.h>
 #include <mobile_base/tweak.h>
 #include <threemxl/dxlassert.h>
@@ -48,7 +48,7 @@ public:
     void init(char *path);
 
     void publishRobotSpeed();
-    void moveCB(const geometry_msgs::Twist& msg);
+    void moveCB(const mobile_base::BaseMotorControl& msg);
     void tweakCB(const mobile_base::tweak msg);
 
     inline double getBaseRadius()

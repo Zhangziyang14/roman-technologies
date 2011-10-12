@@ -10,7 +10,6 @@ void MotorHandler::publishRobotSpeed()
 
 	mCurrentSpeed.linear.x  = (mRightMotorSpeed + mLeftMotorSpeed) * WHEEL_RADIUS / 2.0;
 	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * getBaseRadius();
-	ROS_INFO("BaseRadius: %f, left_speed: %d, right_speed: %d", getBaseRadius(), mLeftMotorSpeed, mRightMotorSpeed);
 
 	mSpeedSub.publish(mCurrentSpeed);
 }
@@ -18,10 +17,10 @@ void MotorHandler::publishRobotSpeed()
 /**
  * Controls the speed of the motors based on the received twist message.
  */
-void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
+void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
-	double left_vel  = (msg.linear.x  - msg.angular.z * BASE_RADIUS) / WHEEL_RADIUS;
-	double right_vel = (msg.linear.x  + msg.angular.z* BASE_RADIUS) / WHEEL_RADIUS;
+	double left_vel  = msg.left_motor_speed ? msg.left_motor_speed / WHEEL_RADIUS : (msg.twist.linear.x  - msg.twist.angular.z * BASE_RADIUS) / WHEEL_RADIUS;
+	double right_vel = msg.right_motor_speed ? msg.right_motor_speed / WHEEL_RADIUS : (msg.twist.linear.x  + msg.twist.angular.z* BASE_RADIUS) / WHEEL_RADIUS;
 
 	mRightMotor.setSpeed(right_vel);
 	mLeftMotor.setSpeed(left_vel);

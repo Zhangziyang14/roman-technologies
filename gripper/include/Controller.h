@@ -42,9 +42,11 @@ protected:
 
     GripperState mGripperState;     /// Defines the state of the gripper
 
+    bool mSensorActive;
+
 public:
     /// Constructor
-    Controller() : mNodeHandle(""), mGripperState(GS_NONE) { }
+    Controller() : mNodeHandle(""), mGripperState(GS_NONE), mSensorActive(true) { }
     
     /// Destructor
     ~Controller()

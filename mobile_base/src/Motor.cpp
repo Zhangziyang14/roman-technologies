@@ -127,6 +127,7 @@ void Motor::init(char *path)
     motor_->setConfig(config->setID(mMotorId));
     motor_->init(false);
     setMode(CM_STOP_MODE);
+    motor_->setEncoderCountMotor(500); // hack until motor is flashed with correct number
 
     delete config;
     cout << "Motor " << mMotorId << " initializing completed." << endl;
