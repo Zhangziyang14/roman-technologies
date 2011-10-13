@@ -2,6 +2,7 @@
 #define UTIL_H_
 
 #include "sensor_msgs/LaserScan.h"
+#include "sensor_msgs/Image.h"
 
 #include "opencv/cxcore.h"  
 #include "opencv/cvwimage.h"
@@ -16,44 +17,13 @@ typedef unsigned int uint32;
 typedef unsigned short int uint16;
 typedef unsigned char uint8;
 
-enum DisplayType
+template <class depthType>
+inline depthType *getPixel(int x, int y, IplImage *image, int channel = 0)
 {
-	DISPLAY_TYPE_RGB,
-	DISPLAY_TYPE_GRAY,
-	DISPLAY_TYPE_DEPTH,
-	DISPLAY_TYPE_TOTAL,
-};
-
-inline uint16 *getPixelU16(int x, int y, IplImage *image, int channel = 0)
-{
-	return &((uint16 *)image->imageData)[(image->width * y + x) * image->nChannels + channel];
+	return &((depthType *)image->imageData)[(image->width * y + x) * image->nChannels + channel];
 }
-inline uint16 *getPixelU16(cv::Point p, IplImage *image, int channel = 0) { return getPixelU16(p.x, p.y, image, channel); };
-
-
-
-inline uint8 *getPixelU8(int x, int y, IplImage *image, int channel = 0)
-{
-	return &((uint8 *)image->imageData)[(image->width * y + x) * image->nChannels + channel];
-}
-inline uint8 *getPixelU8(cv::Point p, IplImage *image, int channel = 0) { return getPixelU8(p.x, p.y, image, channel); };
-
-
-
-inline bool *getPixelU1(int x, int y, IplImage *image, int channel = 0)
-{
-	return &((bool *)image->imageData)[(image->width * y + x) * image->nChannels + channel];
-}
-inline bool *getPixelU1(cv::Point p, IplImage *image, int channel = 0) { return getPixelU1(p.x, p.y, image, channel); };
-
-
-
-inline float *getPixelF32(int x, int y, IplImage *image, int channel = 0)
-{
-	return &((float *)image->imageData)[(image->width * y + x) * image->nChannels + channel];
-}
-inline float *getPixelF32(cv::Point p, IplImage *image, int channel = 0) { return getPixelF32(p.x, p.y, image, channel); };
-
+template <class depthType>
+inline depthType *getPixel(cv::Point p, IplImage *image, int channel = 0) { return getPixel<depthType>(p.x, p.y, image, channel); };
 
 inline uint16 getDepthFromRealPoint(cv::Point3f p)
 {
@@ -61,13 +31,12 @@ inline uint16 getDepthFromRealPoint(cv::Point3f p)
 	return uint16(1000 * sqrt(p.x*p.x + p.y*p.y + p.z*p.z));
 }
 
-
 inline cv::Point3f getPointFromCloud(int x, int y, IplImage *image)
 {
 	cv::Point3f p;
-	p.x = *getPixelF32(x, y, image, 0);
-	p.y = *getPixelF32(x, y, image, 1);
-	p.z = *getPixelF32(x, y, image, 2);
+	p.x = *getPixel<float>(x, y, image, 0);
+	p.y = *getPixel<float>(x, y, image, 1);
+	p.z = *getPixel<float>(x, y, image, 2);
 	return p;
 }
 
