@@ -46,7 +46,7 @@ void UltrasoneController::readSensorDataCB(const gripper::DistancePtr& msg)
 int main(int argc, char **argv)
 {
     // init ros and controller
-    ros::init(argc, argv, "controller");
+    ros::init(argc, argv, "UltrasoneController");
     UltrasoneController controller;
     controller.init();
     ros::spin();

@@ -153,7 +153,7 @@ void PS3Controller::keyCB(const sensor_msgs::Joy& msg)
 int main(int argc, char **argv)
 {
     // init ros and controller
-    ros::init(argc, argv, "controller");
+    ros::init(argc, argv, "PS3Controller");
     PS3Controller controller;
     controller.init();
     ros::spin();
