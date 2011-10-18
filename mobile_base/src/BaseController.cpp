@@ -1,5 +1,19 @@
 #include <BaseController.h>
 
+void BaseController::checkConnections()
+{
+		if(mSpeed_sub.getNumPublishers() == 0)
+		{
+			ROS_INFO("%s has died.", mSpeed_sub.getTopic().c_str());
+//			command("shell");
+		}
+		else if(mKey_sub.getNumPublishers() == 0)
+		{
+			ROS_INFO("%s has  died",mKey_sub.getTopic().c_str());
+
+		}
+}
+
 /**
  * Reads the speed feedback from MotorHandler
  */

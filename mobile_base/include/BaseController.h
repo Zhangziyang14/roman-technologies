@@ -6,6 +6,7 @@
 #include <sensor_msgs/Joy.h>
 #include <mobile_base/BaseMotorControl.h>
 #include <mobile_base/tweak.h>
+#include <MotorHandler.h>
 #include <numeric>
 #include <vector>
 #include <math.h>
@@ -70,7 +71,6 @@ protected:
 	geometry_msgs::Twist mCurrentSpeed;		/// Holds current speed of the robot
 
 	PS3ControlMode mControlMode;			/// Type of control mode for the PS3 controller. Default is PS3_CONTROL_GAME.
-
 public:
 	/// Constructor
 	BaseController() : mNodeHandle(""), mControlMode(PS3_CONTROL_GAME) { }
@@ -88,6 +88,9 @@ public:
 	/// Listen to PS3 controller
 	void keyCB(const sensor_msgs::Joy& msg);
 	void readCurrentSpeed(const geometry_msgs::Twist& msg);
+	void checkConnections();
+
+	inline void killNode(){ mNodeHandle.shutdown(); };
 
 	inline double calcRobotAngularSpeed() { return (1.0/mCurrentSpeed.linear.x*10.0) * SPEED_CONST; };
 };

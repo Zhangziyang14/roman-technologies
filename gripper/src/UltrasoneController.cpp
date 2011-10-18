@@ -12,7 +12,7 @@ void UltrasoneController::init()
 	Controller::init();
 
     // initialize subscribers
-    mSensor_sub = mNodeHandle.subscribe("sensorFeedbackTopic", 10, &UltrasoneController::readSensorDataCB, this);
+    mSensor_sub = mNodeHandle.subscribe("pingFeedbackTopic", 10, &UltrasoneController::readSensorDataCB, this);
 }
 
 /**

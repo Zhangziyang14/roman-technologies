@@ -8,7 +8,7 @@
 #define DEFAULT_I 0.0
 #define DEFAULT_D 0.0
 
-#define DEFAULT_ACCELERATION 5
+#define DEFAULT_ACCELERATION 2
 
 enum ControlMode
 {
@@ -92,6 +92,9 @@ public:
     double getRotationSpeed();
     int getMode();
     int getID();
+    int ping();
+
+    inline bool checkPort(){ return serial_port_.is_port_open(); };
 
     PID mPID;
 };    

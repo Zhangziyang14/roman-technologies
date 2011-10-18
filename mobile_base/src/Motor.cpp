@@ -75,7 +75,6 @@ void Motor::setSpeed(double speed)
 double Motor::getRotationSpeed()
 {
 	motor_->getState();
-	motor_->getStatus();
 
 	//ROS_INFO("PRESENT SPEED, %f rad/s", motor_->presentSpeed());
     return motor_->presentSpeed();
@@ -100,6 +99,13 @@ void Motor::printPID()
 	ROS_INFO("p: %f, i: %f, d: %f, i_limit: %f \n", p, i, d, i_limit);
 }
 
+/**
+ * Pings the motor
+ */
+int Motor::ping()
+{
+	return motor_->ping();
+}
 /**
  * Initalize Motor and its attributes.
 */
@@ -130,5 +136,5 @@ void Motor::init(char *path)
     motor_->setEncoderCountMotor(500); // hack until motor is flashed with correct number
 
     delete config;
-    cout << "Motor " << mMotorId << " initializing completed." << endl;
+    cout << "Motor " << mMotorId << " initialising completed." << endl;
 }

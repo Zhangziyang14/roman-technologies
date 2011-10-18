@@ -48,11 +48,11 @@ void Controller::UpdateJoints()
 }
 
 /**
- * Initalize the attributes of the controller
+ * Initalise the attributes of the controller
 */
 void Controller::init()
 {
-    // intialize publishers
+    // intialise publishers
     mSensor_pub  = mNodeHandle.advertise<std_msgs::Bool>("sensorTopic", 10);
     mMotor_pub   = mNodeHandle.advertise<gripper::MotorControl>("motorTopic", 10);
     mJoint_pub   = mNodeHandle.advertise<sensor_msgs::JointState>("joint_states", 10);

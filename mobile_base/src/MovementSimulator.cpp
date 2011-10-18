@@ -67,6 +67,7 @@ int main(int argc, char ** argv)
 		odom_trans.transform.translation.y = y;
 		odom_trans.transform.translation.z = 0.0;
 		odom_trans.transform.rotation = odom_quat;
+		ROS_INFO("x: %f, y: %f, th: %f", x, y, th);
 		
 		//send the transform
 		odom_broadcaster.sendTransform(odom_trans);

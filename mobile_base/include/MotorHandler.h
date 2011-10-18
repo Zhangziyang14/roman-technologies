@@ -3,12 +3,12 @@
 
 #include <ros/ros.h>
 #include <Motor.h>
-#include <threemxl/example.h>
+#include <BaseController.h>
 #include <mobile_base/BaseMotorControl.h>
 #include <sensor_msgs/Joy.h>
 #include <mobile_base/tweak.h>
-#include <threemxl/dxlassert.h>
 #include <BaseController.h>
+#include <boost/thread.hpp>
 
 #define WHEEL_RADIUS 0.1475
 #define BASE_RADIUS 0.25
@@ -21,14 +21,13 @@ protected:
     ros::NodeHandle mNodeHandle;		/// ROS node handle
     ros::Subscriber mTwistSub;			/// Listens to Twist messages for movement
     ros::Subscriber mTweakPIDSub;		/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
-    ros::Publisher mSpeedSub;			/// Publishes robot's speed
+    ros::Publisher mSpeedPub;			/// Publishes robot's speed
     geometry_msgs::Twist mCurrentSpeed;	/// Twist message containing the current speed of the robot
     double mLeftMotorSpeed;				/// Current speeds for left wheel in rad/s
     double mRightMotorSpeed;			/// Current speeds for right wheel in rad/s
 
     Motor mLeftMotor;					/// Motor for left wheel
     Motor mRightMotor;					/// Motor for right wheel
-    //Motor mArmMotor;					/// Motor for arm
 
     MotorId mMotorId;					/// Id of the motor that is currently being controlled
     PIDParameter mPIDFocus;				/// One of the PID parameters that is to be changed on button events
@@ -50,6 +49,7 @@ public:
     void publishRobotSpeed();
     void moveCB(const mobile_base::BaseMotorControl& msg);
     void tweakCB(const mobile_base::tweak msg);
+    void checkMotorConnections(char* path);
 
     inline double getBaseRadius()
     {
@@ -57,7 +57,6 @@ public:
     		return 0.0;
     	return BASE_RADIUS * 2 * std::max(abs(mLeftMotorSpeed), abs(mRightMotorSpeed)) / (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed));
     };
-
 };    
 
 #endif /* __MOTORHANDLER_H */

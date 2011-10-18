@@ -1,5 +1,19 @@
 #include <MotorHandler.h>
 
+/*
+void MotorHandler::checkConnections()
+{
+	if(mTweakPIDSub.getNumPublishers() == 0 || mTwistSub.getNumPublishers() == 0)
+	{
+		if(mTweakPIDSub.getNumPublishers() == 0)
+			ROS_INFO("%s has died", mTweakPIDSub.getTopic().c_str());
+		else
+			ROS_INFO("%s has died", mTwistSub.getTopic().c_str());
+
+		mController.killNode();
+	}
+}*/
+
 /**
  * Publishes the linear and angular speed of the robot
  */
@@ -11,7 +25,30 @@ void MotorHandler::publishRobotSpeed()
 	mCurrentSpeed.linear.x  = (mRightMotorSpeed + mLeftMotorSpeed) * WHEEL_RADIUS / 2.0;
 	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * getBaseRadius();
 
-	mSpeedSub.publish(mCurrentSpeed);
+	mSpeedPub.publish(mCurrentSpeed);
+}
+
+/**
+ * Check whether the Motors are still alive and re-initialise them if not
+ */
+void MotorHandler::checkMotorConnections(char* path)
+{
+	try
+	{
+		if(mLeftMotor.checkPort())
+		{
+			mLeftMotor.init(path);
+		}
+
+		if(mRightMotor.checkPort())
+		{
+			mRightMotor.init(path);
+		}
+	}
+	catch(char * str)
+	{
+		ROS_INFO("Cannot ping");
+	}
 }
 
 /**
@@ -71,7 +108,7 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
  */
 void MotorHandler::init(char *path)
 {
-	mSpeedSub = mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
+	mSpeedPub = mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
 	mTweakPIDSub = mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
 	mTwistSub = mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
 	mLeftMotor.init(path);
@@ -93,6 +130,7 @@ int main(int argc, char **argv)
 
 	while(ros::ok())
 	{
+		motorHandler.checkMotorConnections(path);
 		motorHandler.publishRobotSpeed();
 		ros::spinOnce();
 	}
