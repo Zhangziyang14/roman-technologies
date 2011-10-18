@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	ros::init(argc, argv, "KinectDisplay");
 	ros::NodeHandle n;
 	image_transport::ImageTransport it(n);
-	image_transport::Subscriber image_sub = it.subscribe("image", 1, imageCb);
+	image_transport::Subscriber image_sub = it.subscribe("image", 1, &imageCb);
 
 	cv::startWindowThread();
 	cvNamedWindow(WINDOW_NAME);

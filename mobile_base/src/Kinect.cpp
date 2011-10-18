@@ -182,20 +182,22 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 			IplImage rgb = image;
 			IplImage pc = pointCloud;
 
-			processImage(&rgb, &pc);
+			//processImage(&rgb, &pc);
 
 			// SLAM
-			if (ros::Time::now().toNSec() >= laserTime)
+			/*if (ros::Time::now().toNSec() >= laserTime)
 			{
 				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
 				if (laserscan)
 					laser_pub.publish(laserscan);
 				laserTime = ros::Time::now().toNSec() + PUSH_LASERSCAN_TIME;
-			}
+			}*/
 
 			//cvShowImage(WINDOW_NAME, &rgb);
 			sensor_msgs::ImagePtr imageMsg = iplImageToImage(&rgb);
+			//std::cout << imageMsg->step << std::endl;
 			image_pub.publish(imageMsg);
+			//std::cout << "2" << std::endl;
 		}
 
 		int key = cv::waitKey(30);

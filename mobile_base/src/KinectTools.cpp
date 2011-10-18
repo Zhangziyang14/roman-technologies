@@ -88,7 +88,9 @@ sensor_msgs::ImagePtr iplImageToImage(IplImage *image)
 	//output->data.resize(size_t(image->width * image->height * image->nChannels));
 	//memcpy(&output->data[0], image->imageData, output->data.size());
 	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
-	output->step = image->width * image->nChannels;
+	output->step = image->width * image->nChannels; // god knows why its * 2, it says its wrong otherwise
+	output->is_bigendian = false;
+	output->encoding = "bgr8";
 	return output;
 }
 
@@ -100,7 +102,7 @@ IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image)
 		return NULL;
 	}
 
-	IplImage *output = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, image->step / image->width);
+	IplImage *output = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, image->step / (image->width));
 	output->imageData = (char *)&image->data[0];
 	return output;
 }
