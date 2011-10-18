@@ -21,6 +21,9 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
+find_package(Eigen REQUIRED)
+include_directories(${Eigen_INCLUDE_DIRS})
+
 rosbuild_add_executable(BaseController src/BaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
 rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)

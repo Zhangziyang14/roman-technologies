@@ -85,13 +85,14 @@ sensor_msgs::ImagePtr iplImageToImage(IplImage *image)
 	output->header.stamp = ros::Time::now();
 	output->width = image->width;
 	output->height = image->height;
-	output->data.resize(size_t(image->width * image->height * image->nChannels));
-	memcpy(&output->data[0], image->imageData, output->data.size());
+	//output->data.resize(size_t(image->width * image->height * image->nChannels));
+	//memcpy(&output->data[0], image->imageData, output->data.size());
+	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
 	output->step = image->width * image->nChannels;
 	return output;
 }
 
-IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image)
+IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image)
 {
 	if (image->width == 0)
 	{
@@ -101,5 +102,39 @@ IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image)
 
 	IplImage *output = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, image->step / image->width);
 	output->imageData = (char *)&image->data[0];
+	return output;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image)
+{
+	pcl::PointCloud<pcl::PointXYZ>::Ptr output(new pcl::PointCloud<pcl::PointXYZ>);
+	output->header.stamp = ros::Time::now();
+	output->width = image->width;
+	output->height = image->height;
+	output->is_dense = false;
+	output->points.resize(output->width * output->height);
+
+	pcl::PointCloud<pcl::PointXYZ>::iterator it = output->begin();
+
+	for (uint32 y = 0; y < output->height; y++)
+	{
+		for (uint32 x = 0; x < output->width; x++, it++)
+		{
+			pcl::PointXYZ &p = *it;
+			if (*getPixel<float>(x, y, image, 2) == 0.f)
+			{
+				p.x = p.y = p.z = std::numeric_limits<float>::quiet_NaN();
+				continue;
+			}
+
+			p.x = *getPixel<float>(x, y, image, 0);
+			p.y = *getPixel<float>(x, y, image, 1);
+			p.z = *getPixel<float>(x, y, image, 2);
+		}
+	}
+
+	//output->points.resize(size_t(image->width * image->height * image->nChannels));
+	//memcpy(&output->points[0], image->imageData, output->points.size());
+	//output->points.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
 	return output;
 }

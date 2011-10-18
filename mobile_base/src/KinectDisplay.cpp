@@ -7,10 +7,11 @@
 
 #include "Util.h"
 #include "ros/ros.h"
+#include <image_transport/image_transport.h>
 
-IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
+IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
 
-void imageCb(sensor_msgs::ImagePtr image)
+void imageCb(const sensor_msgs::ImageConstPtr &image)
 {
 	IplImage *iplImg = imageToSharedIplImage(image);
 	if (iplImg)
@@ -24,7 +25,8 @@ int main(int argc, char* argv[])
 {
 	ros::init(argc, argv, "KinectDisplay");
 	ros::NodeHandle n;
-	ros::Subscriber image_sub = n.subscribe("image", 1, imageCb);
+	image_transport::ImageTransport it(n);
+	image_transport::Subscriber image_sub = it.subscribe("image", 1, imageCb);
 
 	cv::startWindowThread();
 	cvNamedWindow(WINDOW_NAME);

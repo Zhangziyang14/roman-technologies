@@ -9,6 +9,13 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/features/integral_image_normal.h>
+//#include <pcl/io/pcd_io.h>
+//#include <pcl/kdtree/kdtree_flann.h>
+//#include <pcl/surface/mls.h>
+
 #define WINDOW_NAME "KinectTest"
 #define ROBOT_RADIUS 0.35f
 #define EVADE_DISTANCE 700 // mm

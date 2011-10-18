@@ -5,8 +5,8 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
 
-double vx = 0.0;
-double vy = 0.0;
+double vx = 0.5;
+double vy = 0.5;
 double vth = 0.0;
 double th = 0.0;
 
