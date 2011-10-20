@@ -102,7 +102,8 @@ void Motor::printPID()
 int Motor::getLog()
 {
 	motor_->getLog();
-	return motor_->presentLog();
+	//return motor_->presentLog();
+	return 0;
 }
 
 /**
