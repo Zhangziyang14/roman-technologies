@@ -32,7 +32,7 @@ void BaseController::init()
 	mSpeed_sub = mNodeHandle.subscribe("speedFeedbackTopic", 1, &BaseController::readCurrentSpeed, this);
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
-
+	mCurrentSpeed.linear.x = 1.0;
 	ROS_INFO("BaseController initialised");
 }
 
@@ -72,7 +72,6 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 		default:
 			break;
 		}
-
 		mMotorControl_pub.publish(bmc_msg);
 	}
 	else
@@ -97,8 +96,8 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 					//Depending on the amplitude of the joystick
 					bmc_msg.twist.angular.z = msg.axes[PS3_AXIS_LEFT_HORIZONTAL] > 0 ? calcRobotAngularSpeed() : -calcRobotAngularSpeed();
 
-					if (abs(calcRobotAngularSpeed()) > MAX_ANGULAR_SPEED)
-						bmc_msg.twist.angular.z = msg.axes[PS3_AXIS_LEFT_HORIZONTAL] > 0 ? MAX_ANGULAR_SPEED : -MAX_ANGULAR_SPEED;
+					//if (abs(calcRobotAngularSpeed()) > MAX_ANGULAR_SPEED)
+						//bmc_msg.twist.angular.z = msg.axes[PS3_AXIS_LEFT_HORIZONTAL] > 0 ? MAX_ANGULAR_SPEED : -MAX_ANGULAR_SPEED;
 				}
 
 				mMotorControl_pub.publish(bmc_msg);
@@ -114,8 +113,8 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 				{
 					bmc_msg.twist.angular.z = msg.axes[PS3_AXIS_LEFT_HORIZONTAL] > 0 ? calcRobotAngularSpeed() : -calcRobotAngularSpeed();
 
-					if (calcRobotAngularSpeed() > MAX_ANGULAR_SPEED)
-						bmc_msg.twist.angular.z = msg.axes[PS3_AXIS_LEFT_HORIZONTAL] > 0 ? MAX_ANGULAR_SPEED : -MAX_ANGULAR_SPEED;
+					//if (calcRobotAngularSpeed() > MAX_ANGULAR_SPEED)
+						//bmc_msg.twist.angular.z = msg.axes[PS3_AXIS_LEFT_HORIZONTAL] > 0 ? MAX_ANGULAR_SPEED : -MAX_ANGULAR_SPEED;
 				}
 
 				mMotorControl_pub.publish(bmc_msg);
@@ -165,6 +164,27 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg){
 				mTweak_pub.publish(button);
 				mKeyPressed = PS3_LEFT;
 				break;
+
+			case PS3_L1:
+				if(mKeyPressed != PS3_NONE)
+					break;
+
+				button.data = PS3_L1;
+				button.motorID = MID_LEFT;
+				mTweak_pub.publish(button);
+				mKeyPressed = PS3_L1;
+				break;
+
+			case PS3_R1:
+				if(mKeyPressed != PS3_NONE)
+					break;
+
+				button.data = PS3_R1;
+				button.motorID = MID_RIGHT;
+				mTweak_pub.publish(button);
+				mKeyPressed = PS3_R1;
+				break;
+
 
 			case PS3_SELECT:
 				if (mKeyPressed != PS3_NONE)

@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 
 	while(ros::ok())
 	{
-		motorHandler.checkMotorConnections(path);
+//		motorHandler.checkMotorConnections(path);
 		motorHandler.publishRobotSpeed();
 		ros::spinOnce();
 	}

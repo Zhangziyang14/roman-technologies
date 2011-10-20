@@ -92,7 +92,7 @@ public:
 
 	inline void killNode(){ mNodeHandle.shutdown(); };
 
-	inline double calcRobotAngularSpeed() { return (1.0/mCurrentSpeed.linear.x*10.0) * SPEED_CONST; };
+	inline double calcRobotAngularSpeed() { return (1.0/mCurrentSpeed.linear.x) * SPEED_CONST; };
 };
 
 #endif /* __CONTROLLER_H */
