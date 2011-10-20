@@ -99,6 +99,12 @@ void Motor::printPID()
 	ROS_INFO("p: %f, i: %f, d: %f, i_limit: %f \n", p, i, d, i_limit);
 }
 
+int Motor::getLog()
+{
+	motor_->getLog();
+	return motor_->presentLog();
+}
+
 /**
  * Pings the motor
  */

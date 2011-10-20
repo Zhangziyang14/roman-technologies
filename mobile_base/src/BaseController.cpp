@@ -93,7 +93,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 
 			//Accelerate when X button is pressed and reverse when square button is pressed
 			float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
-			bmc_msg.twist.linear.x = lin_speed * msg.axes[PS3_X];
+			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];
 			mMotorControl_pub.publish(bmc_msg);
 			break;
 		}

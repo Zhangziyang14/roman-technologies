@@ -91,6 +91,7 @@ public:
 
     double getRotationSpeed();
     int getMode();
+    int getLog();
     int getID();
     int ping();
 
