@@ -13,11 +13,12 @@
 #include <iostream>
 #include <std_msgs/Empty.h>
 
-#define FW_MAX 					50
-#define MASS 					16.5
-#define SPEED_CONST 			(FW_MAX/MASS)
-#define MAX_ANGULAR_SPEED		0.5 // Rad/s
-#define MAX_LINEAR_SPEED		1.8 // Rad/s
+#define FW_MAX 						50
+#define MASS 						16.5
+#define SPEED_CONST 				(FW_MAX/MASS)
+#define MAX_ANGULAR_AT_TOP_SPEED	0.1  // m/s
+#define MAX_ANGULAR_AT_LOW_SPEED	0.5  // m/s
+#define MAX_LINEAR_SPEED			1.46 // m/s
 
 enum PS3Key
 {
@@ -64,7 +65,7 @@ protected:
 	ros::Subscriber mSpeed_sub;		 		/// Listens to Twist messages as feedback for robot's current speed
 	ros::Subscriber mKey_sub;        		/// Key input subscriber, reads key input data
 
-	ros::Publisher mMotorControl_pub;       		/// Twist message publisher, publishes movement data for engines
+	ros::Publisher mMotorControl_pub;       /// Twist message publisher, publishes movement data for engines
 	ros::Publisher mTweak_pub;       		/// Integer message publisher, publishes integers for the DPAD buttons
 
 	PS3Key mKeyPressed;  					/// Remembers the last pressed button
@@ -92,7 +93,8 @@ public:
 
 	inline void killNode(){ mNodeHandle.shutdown(); };
 
-	inline double calcRobotAngularSpeed() { return (1.0/mCurrentSpeed.linear.x) * SPEED_CONST; };
+	//inline double calcRobotAngularSpeed() { if (mCurrentSpeed.linear.x) return (1.0/mCurrentSpeed.linear.x*10.0) * SPEED_CONST;  else return 0.f; };
+	inline double calcRobotAngularSpeed() { return MAX_ANGULAR_AT_LOW_SPEED - ((MAX_ANGULAR_AT_LOW_SPEED - MAX_ANGULAR_AT_TOP_SPEED) * mCurrentSpeed.linear.x) / MAX_LINEAR_SPEED; };
 };
 
 #endif /* __CONTROLLER_H */

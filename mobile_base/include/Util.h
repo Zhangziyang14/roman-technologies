@@ -12,6 +12,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/features/integral_image_normal.h>
+#include <pcl/features/normal_3d.h>
 //#include <pcl/io/pcd_io.h>
 //#include <pcl/kdtree/kdtree_flann.h>
 //#include <pcl/surface/mls.h>
@@ -25,12 +26,14 @@ typedef unsigned short int uint16;
 typedef unsigned char uint8;
 
 template <class depthType>
-inline depthType *getPixel(int x, int y, IplImage *image, int channel = 0)
+inline depthType *getPixel(int index, IplImage *image, int channel = 0)
 {
-	return &((depthType *)image->imageData)[(image->width * y + x) * image->nChannels + channel];
+	return &((depthType *)image->imageData)[index * image->nChannels + channel];
 }
 template <class depthType>
-inline depthType *getPixel(cv::Point p, IplImage *image, int channel = 0) { return getPixel<depthType>(p.x, p.y, image, channel); };
+inline depthType *getPixel(int x, int y, IplImage *image, int channel = 0) { return getPixel<depthType>(image->width * y + x, image, channel); };
+template <class depthType>
+inline depthType *getPixel(cv::Point p, IplImage *image, int channel = 0) { return getPixel<depthType>(image->width * p.y + p.x, image, channel); };
 
 inline uint16 getDepthFromRealPoint(cv::Point3f p)
 {
@@ -53,5 +56,14 @@ inline uint16 getDepthFromCloud(int x, int y, IplImage *image)
 	return getDepthFromRealPoint(p);
 }
 inline uint16 getDepthFromCloud(cv::Point p, IplImage *image) { return getDepthFromCloud(p.x, p.y, image); };
+
+inline float getDistanceFromPointToPlane(Eigen::Vector4f plane, pcl::PointXYZ p)
+{
+	float divisor = sqrt(plane(0)*plane(0) + plane(1)*plane(1) + plane(2)*plane(2));
+	if (divisor == 0.f)
+		return std::numeric_limits<float>::quiet_NaN();
+
+	return (plane(0)*p.x + plane(1)*p.y + plane(2)*p.z + plane(3)) / divisor;
+}
 
 #endif

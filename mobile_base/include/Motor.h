@@ -8,7 +8,7 @@
 #define DEFAULT_I 0.0
 #define DEFAULT_D 0.0
 
-#define DEFAULT_ACCELERATION 2
+#define DEFAULT_ACCELERATION 5
 
 enum ControlMode
 {

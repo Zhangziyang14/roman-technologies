@@ -1,5 +1,4 @@
 #include <MotorHandler.h>
-
 /*
 void MotorHandler::checkConnections()
 {
@@ -11,8 +10,8 @@ void MotorHandler::checkConnections()
 			ROS_INFO("%s has died", mTwistSub.getTopic().c_str());
 
 		mController.killNode();
-	}
-}*/
+8	}
+ */
 
 /**
  * Publishes the linear and angular speed of the robot
@@ -33,22 +32,17 @@ void MotorHandler::publishRobotSpeed()
  */
 void MotorHandler::checkMotorConnections(char* path)
 {
-	try
-	{
-		if(mLeftMotor.checkPort())
-		{
-			mLeftMotor.init(path);
-		}
 
-		if(mRightMotor.checkPort())
-		{
-			mRightMotor.init(path);
-		}
-	}
-	catch(char * str)
+	if(mLeftMotor.checkPort())
 	{
-		ROS_INFO("Cannot ping");
+		mLeftMotor.init(path);
 	}
+
+	if(mRightMotor.checkPort())
+	{
+		mRightMotor.init(path);
+	}
+
 }
 
 /**
@@ -95,11 +89,11 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 
 		break;
 
-		case PS3_L1:
-		case PS3_R1:
-			mMotorId = MotorId(msg.motorID);
-			ROS_INFO("SWITCHED TO %s ENGINE", mMotorId == MID_LEFT ? "LEFT" : "RIGHT");
-			break;
+	case PS3_L1:
+	case PS3_R1:
+		mMotorId = MotorId(msg.motorID);
+		ROS_INFO("SWITCHED TO %s MOTOR", mMotorId == MID_LEFT ? "LEFT" : "RIGHT");
+		break;
 	}
 }
 
@@ -130,7 +124,6 @@ int main(int argc, char **argv)
 
 	while(ros::ok())
 	{
-//		motorHandler.checkMotorConnections(path);
 		motorHandler.publishRobotSpeed();
 		ros::spinOnce();
 	}
