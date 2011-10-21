@@ -42,7 +42,7 @@ enum MotorId
 	MID_GRIPPER = 109,
 };
 
-
+/// Class that contains PID values and some perhaps limited functions
 class PID
 {
 public:
