@@ -27,7 +27,7 @@
 /**
  * Reads the speed feedback from MotorHandler
  */
-void BaseController::readCurrentSpeed(const geometry_msgs::Twist& msg)
+void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
 {
 	mCurrentSpeed = msg;
 }
@@ -53,10 +53,27 @@ void BaseController::init()
  */
 void BaseController::keyCB(const sensor_msgs::Joy& msg)
 {
+	// make messages
 	mobile_base::BaseMotorControl bmc_msg;
 	mobile_base::tweak button;
 
-	//No button is pressed, so sum of vector is zero -> stand still
+	// initialise values (or are they by default 0?)
+	bmc_msg.twist.linear.x = 0;
+	bmc_msg.twist.angular.z = 0;
+	bmc_msg.left_motor_speed = 0.f;
+	bmc_msg.right_motor_speed = 0.f;
+
+	// initialise tweak values
+	tweak.scaleUp = false;
+	tweak.scaleDown = false;
+	tweak.toggleForward = false;
+	tweak.toggleBackward = false;
+	tweak.motorID = MID_NONE;
+
+	// did we need to send a message?
+	bool sendMsg = false;
+
+	//No button is pressed, so sum of vector is zero
 	if (std::accumulate(msg.buttons.begin(), msg.buttons.end(), 0) == 0)
 		mKeyPressed = PS3_NONE;
 
@@ -64,29 +81,30 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 	{
 	case PS3_CONTROL_GAME:
 		//Turn at current position
-		bmc_msg.twist.linear.x = 0;
 		bmc_msg.twist.angular.z = calcRobotAngularSpeed() * float(msg.axes[PS3_AXIS_LEFT_HORIZONTAL]);
+		sendMsg = true;
 		break;
 	case PS3_CONTROL_REMOTE_CONTROL:
+		// scale between 0 and MAX_LINEAR_SPEED.
 		bmc_msg.left_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_LEFT_VERTICAL];
 		bmc_msg.right_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_RIGHT_VERTICAL];
+		sendMsg = true;
 		break;
 	default:
 		break;
 	}
-	mMotorControl_pub.publish(bmc_msg);
 
-	bmc_msg.twist.linear.x = 0;
-	bmc_msg.twist.angular.z = 0;
+	// iterate all buttons
 	for (size_t i = 0; i < msg.buttons.size(); i++)
 	{
+		// is this button pressed?
 		if(msg.buttons[i] == 0)
 			continue;
 
 		switch(i)
 		{
-		case PS3_X:
-		case PS3_S:
+		case PS3_X: // forward motion
+		case PS3_S: // backward motion
 		{
 			if (mControlMode != PS3_CONTROL_GAME)
 				break;
@@ -94,75 +112,57 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 			//Accelerate when X button is pressed and reverse when square button is pressed
 			float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
 			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];
-			mMotorControl_pub.publish(bmc_msg);
+			sendMsg = true;
 			break;
 		}
 
-			//Brake if O button has been pressed
+		//Brake if O button has been pressed
 		case PS3_O:
 			bmc_msg.twist.linear.x = 0;
 			bmc_msg.twist.angular.z = 0;
-			mMotorControl_pub.publish(bmc_msg);
+			sendMsg = true;
 			break;
 
-			//Tweak buttons for PID control
+		// scale up/down current P-I-D value
 		case PS3_UP:
-			if(mKeyPressed != PS3_NONE)
-				break;
-
-			button.data = PS3_UP;
-			mTweak_pub.publish(button);
-			mKeyPressed = PS3_UP;
-			break;
-
-		case PS3_RIGHT:
-			if(mKeyPressed != PS3_NONE)
-				break;
-
-			button.data = PS3_RIGHT;
-			mTweak_pub.publish(button);
-			mKeyPressed = PS3_RIGHT;
-			break;
-
 		case PS3_DOWN:
 			if(mKeyPressed != PS3_NONE)
 				break;
 
-			button.data = PS3_DOWN;
+			if (i == PS3_UP)
+				button.scaleUp = true;
+			if (i == PS3_DOWN)
+				button.scaleDown = true;
 			mTweak_pub.publish(button);
-			mKeyPressed = PS3_DOWN;
+			mKeyPressed = i;
 			break;
 
+		// toggle through P-I-D focus
+		case PS3_RIGHT:
 		case PS3_LEFT:
 			if(mKeyPressed != PS3_NONE)
 				break;
 
-			button.data = PS3_LEFT;
+			if (i == PS3_LEFT)
+				button.toggleForward = true;
+			if (i == PS3_RIGHT)
+				button.toggleBackward = true;
 			mTweak_pub.publish(button);
-			mKeyPressed = PS3_LEFT;
+			mKeyPressed = i;
 			break;
 
+		// select a motor
 		case PS3_L1:
-			if(mKeyPressed != PS3_NONE)
-				break;
-
-			button.data = PS3_L1;
-			button.motorID = MID_LEFT;
-			mTweak_pub.publish(button);
-			mKeyPressed = PS3_L1;
-			break;
-
 		case PS3_R1:
 			if(mKeyPressed != PS3_NONE)
 				break;
 
-			button.data = PS3_R1;
-			button.motorID = MID_RIGHT;
+			button.motorID = i == PS3_L1 ? MID_LEFT : MID_RIGHT;
 			mTweak_pub.publish(button);
-			mKeyPressed = PS3_R1;
+			mKeyPressed = i;
 			break;
 
-
+		// toggle control mode
 		case PS3_SELECT:
 			if (mKeyPressed != PS3_NONE)
 				break;
@@ -176,6 +176,9 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 			break;
 		}
 	}
+
+	if (sendMsg)
+		mMotorControl_pub.publish(bmc_msg);
 }
 
 int main(int argc, char **argv)

@@ -9,8 +9,12 @@
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
 
+// forward declaration
 IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
 
+/**
+ * Receives RGB images and displays them on screen.
+ */
 void imageCb(const sensor_msgs::ImageConstPtr &image)
 {
 	IplImage *iplImg = imageToSharedIplImage(image);

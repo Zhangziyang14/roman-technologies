@@ -7,6 +7,7 @@
 
 #include "Util.h"
 
+// LaserScan parameters
 #define MIN_HEIGHT 0.10
 #define MAX_HEIGHT 0.15
 #define ANGLE_MIN -M_PI_2
@@ -17,6 +18,9 @@
 #define RANGE_MAX 10.0
 #define OUTPUT_FRAME_ID "/openni_depth_frame"
 
+/**
+ * Converts an IplImage to a LaserScan. Based on pointcloud_to_laserscan package.
+ */
 sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud)
 {
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
@@ -74,6 +78,9 @@ sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud)
 	return output;
 }
 
+/**
+ * Converts IplImage's to ros images. Needed for serialization, so it can be sent over the network.
+ */
 sensor_msgs::ImagePtr iplImageToImage(IplImage *image)
 {
 	sensor_msgs::ImagePtr output(new sensor_msgs::Image());
@@ -82,18 +89,23 @@ sensor_msgs::ImagePtr iplImageToImage(IplImage *image)
 		ROS_WARN("Cannot convert non-uint8 to sensor_msgs::Image.");
 		return output;
 	}
+
+	// copy header
 	output->header.stamp = ros::Time::now();
 	output->width = image->width;
 	output->height = image->height;
-	//output->data.resize(size_t(image->width * image->height * image->nChannels));
-	//memcpy(&output->data[0], image->imageData, output->data.size());
-	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
-	output->step = image->width * image->nChannels; // god knows why its * 2, it says its wrong otherwise
+	output->step = image->width * image->nChannels;
 	output->is_bigendian = false;
 	output->encoding = "bgr8";
+
+	// copy actual data
+	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
 	return output;
 }
 
+/**
+ * Converts ros images back to IplImage's. The memory of the ros image is the same as in the IplImage.
+ */
 IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image)
 {
 	if (image->width == 0)
@@ -107,6 +119,9 @@ IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image)
 	return output;
 }
 
+/**
+ * Converts IplImage's to pcl::PointCloud. Needed for PCL algorithms.
+ */
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image)
 {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr output(new pcl::PointCloud<pcl::PointXYZ>);
@@ -117,7 +132,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image)
 	output->points.resize(output->width * output->height);
 
 	pcl::PointCloud<pcl::PointXYZ>::iterator it = output->begin();
-
 	for (uint32 y = 0; y < output->height; y++)
 	{
 		for (uint32 x = 0; x < output->width; x++, it++)
@@ -134,9 +148,5 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image)
 			p.z = *getPixel<float>(x, y, image, 2);
 		}
 	}
-
-	//output->points.resize(size_t(image->width * image->height * image->nChannels));
-	//memcpy(&output->points[0], image->imageData, output->points.size());
-	//output->points.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
 	return output;
 }

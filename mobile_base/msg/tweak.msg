@@ -1,2 +1,5 @@
-int32 data
-int32 motorID
+bool toggleForward
+bool toggleBackward
+bool scaleUp
+bool scaleDown
+int16 motorID

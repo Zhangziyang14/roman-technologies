@@ -4,19 +4,25 @@
 
 #define PUSH_LASERSCAN_TIME (500*1000)
 
+// forward declarations of some needed functions
 sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
 sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
 IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image);
 
+/**
+ * Processes the pointcloud and display feedback on the RGB image.
+ */
 void processImage(IplImage *rgb, IplImage *pc)
 {
-	cvFlip(rgb, rgb, 1);
-	cvFlip(pc, pc, 1);
+	// flip the images, moving right in front of the screen will move right on the screen
+	//cvFlip(rgb, rgb, 1);
+	//cvFlip(pc, pc, 1);
 
-	cv::Point p = cvPoint(rgb->width >> 1, rgb->height >> 1);
-	//cvDrawCircle(rgb, p, 5, cvScalar(0, 255, 0), 1, CV_AA);
+	// center of the image
+	cv::Point p = cvPoint(pc->width >> 1, pc->height >> 1);
 
+	// convert IplImage pointcloud to pcl::PointCloud for later algorithms
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud = iplImageToPointCloud(pc);
 	if (pointcloud == NULL)
 	{
@@ -24,9 +30,8 @@ void processImage(IplImage *rgb, IplImage *pc)
 		return;
 	}
 
+	// find indices in the picture that are 'of interest'
 	std::vector<int> indices;
-	int minDepth = 9999;
-	cv::Point closestPoint;
 	for (int y = 0; y < pc->height; y++)
 	{
 		for (int x = 0; x < pc->width; x++)
@@ -40,31 +45,25 @@ void processImage(IplImage *rgb, IplImage *pc)
 				*getPixel<float>(x, y, pc, 1) < 0.f)
 			{
 				indices.push_back(pc->width * y + x);
-				//*getPixel<uint8>(x, y, rgb, 0) = 255;
-				if (depth < minDepth)
-				{
-					minDepth = depth;
-					closestPoint = cvPoint(x, y);
-				}
 			}
 		}
 	}
 
-	if (minDepth != 9999)
-	{
-		//cvDrawCircle(rgb, closestPoint, 5, cvScalar(0, 0, 255), 1, CV_AA);
-	}
-
+	// do we have interesting points?
 	if (indices.size())
 	{
 		Eigen::Vector4f plane;
 		float curvature;
+
+		// try to fit a plane on these points
 		pcl::computePointNormal<pcl::PointXYZ>(*pointcloud, indices, plane, curvature);
 
+		// all points above this fitted plane are considered obstacles and are colored red
 		for (std::vector<int>::iterator it = indices.begin(); it != indices.end(); it++)
 		{
 			float distance = getDistanceFromPointToPlane(plane, pointcloud->at(*it));
-			*getPixel<uint8>(*it, rgb, distance > 0.05f ? 2 : 0) = 255;
+			if (rgb)
+				*getPixel<uint8>(*it, rgb, distance > 0.05f ? 2 : 0) = 255;
 		}
 	}
 }
@@ -75,28 +74,39 @@ void processImage(IplImage *rgb, IplImage *pc)
 void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 {
 	bool quit = false;
-	long unsigned int laserTime = ros::Time::now().toNSec();
+
+	// this provides image compression
 	image_transport::ImageTransport it(*n);
 	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
 	image_transport::Publisher image_pub = it.advertise("image", 1);
+
+	//long unsigned int laserTime = ros::Time::now().toNSec();
+	bool captureRGB = false;
 
 	while (quit == false && ros::ok())
 	{
 		cv::Mat image, pointCloud;
 		//IplImage iplImage;
 
-		if (!capture->grab())
+		// is it required to capture RGB images ?
+		captureRGB = image_pub.getNumSubscribers() != 0;
+
+		if (capture->grab() == false)
 		{
 			std::cout << "Can not grab images." << std::endl;
 			return;
 		}
 
-		if (capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE) && capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP))
+		// try to capture a RGB and pointcloud
+		if ((captureRGB || capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
+				capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP))
 		{
-			IplImage rgb = image;
+			IplImage rgb;
+			if (captureRGB)
+				rgb = image;
 			IplImage pc = pointCloud;
 
-			processImage(&rgb, &pc);
+			processImage(captureRGB ? &rgb : NULL, &pc);
 
 			// SLAM
 			/*if (laser_pub.getNumSubscribers() && ros::Time::now().toNSec() >= laserTime)
@@ -107,6 +117,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 				laserTime = ros::Time::now().toNSec() + PUSH_LASERSCAN_TIME;
 			}*/
 
+			// do we have a listener to the RGB output ?
 			if (image_pub.getNumSubscribers())
 			{
 				sensor_msgs::ImagePtr imageMsg = iplImageToImage(&rgb);
@@ -114,6 +125,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 			}
 		}
 
+		// check for pressed keys
 		int key = cv::waitKey(30);
 		switch (key)
 		{
@@ -129,10 +141,11 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 
 int main(int argc, char* argv[])
 {
+	// init ros
 	ros::init(argc, argv, "Kinect");
-
 	ros::NodeHandle n;
 
+	// init kinect
 	std::cout << "Kinect opening ..." << std::endl;
 	cv::VideoCapture capture(CV_CAP_OPENNI);
 	if( !capture.isOpened() )
@@ -156,8 +169,6 @@ int main(int argc, char* argv[])
 			"FRAME_HEIGHT\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FRAME_HEIGHT) << std::endl <<
 			"FPS\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FPS) << std::endl;
 
-	//cvNamedWindow(WINDOW_NAME);
 	kinectLoop(&capture, &n);
-
 	return 0;
 }

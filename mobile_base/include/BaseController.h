@@ -13,11 +13,8 @@
 #include <iostream>
 #include <std_msgs/Empty.h>
 
-#define FW_MAX 						50
-#define MASS 						16.5
-#define SPEED_CONST 				(FW_MAX/MASS)
-#define MAX_ANGULAR_AT_TOP_SPEED	0.1  // m/s
-#define MAX_ANGULAR_AT_LOW_SPEED	0.5  // m/s
+#define MAX_ANGULAR_AT_TOP_SPEED	0.3  // m/s
+#define MAX_ANGULAR_AT_LOW_SPEED	0.9  // m/s
 #define MAX_LINEAR_SPEED			1.46 // m/s
 
 enum PS3Key
@@ -52,11 +49,12 @@ enum PS3Axes
 
 enum PS3ControlMode
 {
-	PS3_CONTROL_GAME,				/// Resembles how vehicles are driven in (most) games. X is throttle, left joystick is steering
-	PS3_CONTROL_REMOTE_CONTROL,		/// Resembles how (most) remote controlled vehicles are driven (left joystick is left motor, right joystick is right motor)
+	PS3_CONTROL_GAME,				/// Resembles how vehicles are driven in (most) games. X is throttle, left joystick is steering. Angular velocity is limited depending on the current linear velocity.
+	PS3_CONTROL_REMOTE_CONTROL,		/// Resembles how (most) remote controlled vehicles are driven (left joystick is left motor, right joystick is right motor). Angular velocity is limited the limit of the individual motor (MAX_LINEAR_SPEED).
 	PS3_CONTROL_TOTAL,
 };
 
+/// Controller for teleoperation
 class BaseController
 {
 protected:

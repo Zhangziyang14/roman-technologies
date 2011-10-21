@@ -1,7 +1,5 @@
 #include <Motor.h>
 
-using namespace std;
-
 /**
  * Square bracket operator so it can be used as a sort of array.
  */
@@ -28,20 +26,20 @@ void Motor::setMode(ControlMode mode)
 
 	cmode = mode;
 	motor_->set3MxlMode(mode);
-	cout << "Changed to ";
+	std::cout << "Changed to ";
     switch (mode)
     {
-    case SPEED_MODE: cout << "speed"; break;
-    case TORQUE_MODE: cout << "torque"; break;
-    case CURRENT_MODE: cout << "current"; break;
-    case STOP_MODE: cout << "stop"; break;
-    case POSITION_MODE: cout << "position"; break;
-    case SEA_MODE: cout << "sea"; break;
-    case PWM_MODE: cout << "pwm"; break;
-    case TEST_MODE: cout << "test"; break;
+    case SPEED_MODE: std::cout << "speed"; break;
+    case TORQUE_MODE: std::cout << "torque"; break;
+    case CURRENT_MODE: std::cout << "current"; break;
+    case STOP_MODE: std::cout << "stop"; break;
+    case POSITION_MODE: std::cout << "position"; break;
+    case SEA_MODE: std::cout << "sea"; break;
+    case PWM_MODE: std::cout << "pwm"; break;
+    case TEST_MODE: std::cout << "test"; break;
     default : break;
     }
-    cout << " mode." << endl;
+    std::cout << " mode." << std::endl;
 }
 
 
@@ -60,7 +58,7 @@ void Motor::setSpeed(double speed)
 {
 	if (cmode != CM_SPEED_MODE)
 	{
-        cout << "Motor not in speed mode, setting it now." << endl;
+        std::cout << "Motor not in speed mode, setting it now." << std::endl;
         setMode(CM_SPEED_MODE);
 
 		setAcceleration(DEFAULT_ACCELERATION);
@@ -123,12 +121,12 @@ void Motor::init(char *path)
     // find the connection to the motor on the 3mXl board
     if (path)
     {
-        cout << "Using shared_serial"<< endl;
+        std::cout << "Using shared_serial"<< std::endl;
         motor_ = new C3mxlROS(path);
     }
     else
     {
-        cout << "Using direct connection" << endl;
+        std::cout << "Using direct connection" << std::endl;
         motor_ = new C3mxl();
 
         serial_port_.port_open("/dev/motorusb", LxSerial::RS485_FTDI);
@@ -143,5 +141,5 @@ void Motor::init(char *path)
     motor_->setEncoderCountMotor(500); // hack until motor is flashed with correct number
 
     delete config;
-    cout << "Motor " << mMotorId << " initialising completed." << endl;
+    std::cout << "Motor " << mMotorId << " initialising completed." << std::endl;
 }

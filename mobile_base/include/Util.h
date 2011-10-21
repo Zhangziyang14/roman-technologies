@@ -13,9 +13,6 @@
 #include <pcl/point_types.h>
 #include <pcl/features/integral_image_normal.h>
 #include <pcl/features/normal_3d.h>
-//#include <pcl/io/pcd_io.h>
-//#include <pcl/kdtree/kdtree_flann.h>
-//#include <pcl/surface/mls.h>
 
 #define WINDOW_NAME "KinectTest"
 #define ROBOT_RADIUS 0.35f
@@ -25,6 +22,7 @@ typedef unsigned int uint32;
 typedef unsigned short int uint16;
 typedef unsigned char uint8;
 
+/// returns value at channel of the IplImage at index.
 template <class depthType>
 inline depthType *getPixel(int index, IplImage *image, int channel = 0)
 {
@@ -35,12 +33,14 @@ inline depthType *getPixel(int x, int y, IplImage *image, int channel = 0) { ret
 template <class depthType>
 inline depthType *getPixel(cv::Point p, IplImage *image, int channel = 0) { return getPixel<depthType>(image->width * p.y + p.x, image, channel); };
 
+/// Uses pythagoras to calculate depth from kinect to a point.
 inline uint16 getDepthFromRealPoint(cv::Point3f p)
 {
 	// pythagoras
 	return uint16(1000 * sqrt(p.x*p.x + p.y*p.y + p.z*p.z));
 }
 
+/// Returns a point from a pointcloud
 inline cv::Point3f getPointFromCloud(int x, int y, IplImage *image)
 {
 	cv::Point3f p;
@@ -50,6 +50,7 @@ inline cv::Point3f getPointFromCloud(int x, int y, IplImage *image)
 	return p;
 }
 
+/// Calculates the depth from a pointcloud at a point
 inline uint16 getDepthFromCloud(int x, int y, IplImage *image)
 {
 	cv::Point3f p = getPointFromCloud(x, y, image);
@@ -57,6 +58,7 @@ inline uint16 getDepthFromCloud(int x, int y, IplImage *image)
 }
 inline uint16 getDepthFromCloud(cv::Point p, IplImage *image) { return getDepthFromCloud(p.x, p.y, image); };
 
+/// Calculates the distance from point p to plane with the form of plane(0)*x + plane(1)*y + plane(2)*z + plane(3) = 0
 inline float getDistanceFromPointToPlane(Eigen::Vector4f plane, pcl::PointXYZ p)
 {
 	float divisor = sqrt(plane(0)*plane(0) + plane(1)*plane(1) + plane(2)*plane(2));
