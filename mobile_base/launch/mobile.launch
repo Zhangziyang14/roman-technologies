@@ -2,7 +2,7 @@
   <group ns="/">
     <node pkg="mobile_base" name="BaseMotorHandler" type="BaseMotorHandler" respawn = "true" />
     <node pkg="mobile_base" name="BaseController" type="BaseController" respawn = "true" />
-    <node pkg="joy" name="joy" type="joy_node"/>
+    <!-- node pkg="joy" name="joy" type="joy_node"/-->
   </group>
 
 </launch>
