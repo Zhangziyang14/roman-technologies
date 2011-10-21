@@ -14,9 +14,9 @@
 {
 		if(mSpeed_sub.getNumPublishers() == 0)
 		{
-			ROS_INFO("%s has died.", mSpeed_sub.getTopic().c_str());
 //			command("shell");
 		}
+			ROS_INFO("%s has died.", mSpeed_sub.getTopic().c_str());
 		else if(mKey_sub.getNumPublishers() == 0)
 		{
 			ROS_INFO("%s has  died",mKey_sub.getTopic().c_str());
@@ -55,7 +55,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 {
 	// make messages
 	mobile_base::BaseMotorControl bmc_msg;
-	mobile_base::tweak button;
+	mobile_base::tweak tweak_msg;
 
 	// initialise values (or are they by default 0?)
 	bmc_msg.twist.linear.x = 0;
@@ -64,11 +64,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 	bmc_msg.right_motor_speed = 0.f;
 
 	// initialise tweak values
-	tweak.scaleUp = false;
-	tweak.scaleDown = false;
-	tweak.toggleForward = false;
-	tweak.toggleBackward = false;
-	tweak.motorID = MID_NONE;
+	tweak_msg.scaleUp = false;
+	tweak_msg.scaleDown = false;
+	tweak_msg.toggleForward = false;
+	tweak_msg.toggleBackward = false;
+	tweak_msg.motorID = MID_NONE;
 
 	// did we need to send a message?
 	bool sendMsg = false;
@@ -130,11 +130,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 				break;
 
 			if (i == PS3_UP)
-				button.scaleUp = true;
+				tweak_msg.scaleUp = true;
 			if (i == PS3_DOWN)
-				button.scaleDown = true;
-			mTweak_pub.publish(button);
-			mKeyPressed = i;
+				tweak_msg.scaleDown = true;
+			mTweak_pub.publish(tweak_msg);
+			mKeyPressed = PS3Key(i);
 			break;
 
 		// toggle through P-I-D focus
@@ -144,11 +144,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 				break;
 
 			if (i == PS3_LEFT)
-				button.toggleForward = true;
+				tweak_msg.toggleForward = true;
 			if (i == PS3_RIGHT)
-				button.toggleBackward = true;
-			mTweak_pub.publish(button);
-			mKeyPressed = i;
+				tweak_msg.toggleBackward = true;
+			mTweak_pub.publish(tweak_msg);
+			mKeyPressed = PS3Key(i);
 			break;
 
 		// select a motor
@@ -157,9 +157,9 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 			if(mKeyPressed != PS3_NONE)
 				break;
 
-			button.motorID = i == PS3_L1 ? MID_LEFT : MID_RIGHT;
-			mTweak_pub.publish(button);
-			mKeyPressed = i;
+			tweak_msg.motorID = i == PS3_L1 ? MID_LEFT : MID_RIGHT;
+			mTweak_pub.publish(tweak_msg);
+			mKeyPressed = PS3Key(i);
 			break;
 
 		// toggle control mode

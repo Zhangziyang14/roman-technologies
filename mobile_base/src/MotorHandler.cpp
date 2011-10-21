@@ -86,7 +86,7 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 	}
 
 	// toggle the P-I-D focus
-	if (msg.toggleForward || toggleBackward)
+	if (msg.toggleForward || msg.toggleBackward)
 	{
 		// toggle through P-I-D
 		mPIDFocus = PIDParameter(mPIDFocus + (msg.toggleBackward ? -1 : 1));
