@@ -29,6 +29,7 @@ rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
 rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
 rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
 rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
+rosbuild_add_executable(AutonomeController src/AutonomeController.cpp)
 
 link_directories(/usr/local/lib )
 include_directories(/usr/local/include)
