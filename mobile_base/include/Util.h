@@ -15,7 +15,7 @@
 #include <pcl/features/normal_3d.h>
 
 #define WINDOW_NAME "KinectTest"
-#define ROBOT_RADIUS 0.35f
+#define ROBOT_RADIUS 0.30f
 #define EVADE_DISTANCE 700 // mm
 
 typedef unsigned int uint32;

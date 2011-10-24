@@ -4,11 +4,15 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/tfMessage.h>
 
-double vx = 0.5;
-double vy = 0.5;
+double vx = 0;
+double vy = 0;
 double vth = 0.0;
+
 double th = 0.0;
+double x = 0.0;
+double y = 0.0;
 
 void twistCb(const geometry_msgs::Twist &twist)
 {
@@ -19,16 +23,28 @@ void twistCb(const geometry_msgs::Twist &twist)
 	ROS_INFO("vx: %lf, vy: %lf, vth: %lf", vx, vy, vth);
 }
 
+void transformCb(const tf::tfMessage &msg)
+{
+	if (msg.transforms.size() == 0)
+		return;
+
+
+	x = msg.transforms[0].transform.translation.x;
+	y = msg.transforms[0].transform.translation.y;
+	th = tf::getYaw(msg.transforms[0].transform.rotation);
+}
+
 int main(int argc, char ** argv)
 {
 	ros::init(argc, argv, "MovementSimulator");
 	ros::NodeHandle node;
 	ros::Publisher odom_publisher = node.advertise<nav_msgs::Odometry>("odom", 50);
 	ros::Subscriber twist_sub = node.subscribe("/speedFeedbackTopic", 1, twistCb);
+	ros::Subscriber tf_sub = node.subscribe("/tf", 1, transformCb);
 	tf::TransformBroadcaster odom_broadcaster;
-	double x = 0.0;
+	/*double x = 0.0;
 	double y = 0.0;
-	//double th = 0.0;
+	double th = 0.0;*/
 	
 	/*double vx = 0.1;
 	double vy = -0.1;
