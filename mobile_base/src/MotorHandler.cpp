@@ -23,7 +23,7 @@ void MotorHandler::publishRobotSpeed()
 
 	// linear speed is the average of both motor speeds and it is converted from rad/s to m/s
 	mCurrentSpeed.linear.x  = (mRightMotorSpeed + mLeftMotorSpeed) * WHEEL_RADIUS / 2.0;
-	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * getBaseRadius();
+	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * WHEEL_RADIUS / 0.25 /2.0; //* getBaseRadius();
 
 	mSpeedPub.publish(mCurrentSpeed);
 }

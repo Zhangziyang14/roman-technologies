@@ -6,8 +6,8 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/tfMessage.h>
 
-ros::Publisher odom_publisher;
-tf::TransformBroadcaster odom_broadcaster;
+ros::Publisher *odom_publisher;
+tf::TransformBroadcaster *odom_broadcaster;
 ros::Time current_time, last_time;
 
 double vx = 0;
@@ -21,10 +21,10 @@ double y = 0.0;
 void twistCb(const geometry_msgs::Twist &twist)
 {
 	vx = twist.linear.x * cos(th);
-	vy = -twist.linear.y * sin(th);
+	vy = -twist.linear.x * sin(th);
 	vth = twist.angular.z;
 
-	ROS_INFO("vx: %lf, vy: %lf, vth: %lf", vx, vy, vth);
+	//ROS_INFO("vx: %lf, vy: %lf, vth: %lf, lin.x: %lf, ang.z: %lf", vx, vy, vth, twist.linear.x, twist.angular.z);
 
 	current_time = ros::Time::now();
 
@@ -34,13 +34,17 @@ void twistCb(const geometry_msgs::Twist &twist)
 	double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
 	double delta_th = vth * dt;
 
+	//ROS_INFO("dx: %lf, dy: %lf, dth: %lf, dt: %lf", delta_x, delta_y, delta_th, dt);
+
 	x += delta_x;
 	y += delta_y;
 	th += delta_th;
 
+	ROS_INFO("x: %lf, y: %lf, th: %lf", x, y, th);
+
 	//since all odometry is 6DOF we'll need a quaternion created from yaw
 	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
-	ROS_INFO("x: %f, y: %f, th: %f", x, y, th);
+	//ROS_INFO("x: %f, y: %f, th: %f", x, y, th);
 
 	//first, we'll publish the transform over tf
 	geometry_msgs::TransformStamped odom_trans;
@@ -52,10 +56,10 @@ void twistCb(const geometry_msgs::Twist &twist)
 	odom_trans.transform.translation.y = y;
 	odom_trans.transform.translation.z = 0.0;
 	odom_trans.transform.rotation = odom_quat;
-	ROS_INFO("x: %f, y: %f, th: %f", x, y, th);
+	//ROS_INFO("x: %f, y: %f, th: %f", x, y, th);
 
 	//send the transform
-	odom_broadcaster.sendTransform(odom_trans);
+	odom_broadcaster->sendTransform(odom_trans);
 
 	//next, we'll publish the odometry message over ROS
 	nav_msgs::Odometry odom;
@@ -77,7 +81,7 @@ void twistCb(const geometry_msgs::Twist &twist)
 	odom.twist.twist.angular.z = vth;
 
 	//publish the message
-	odom_publisher.publish(odom);
+	odom_publisher->publish(odom);
 
 	last_time = current_time;
 }
@@ -86,7 +90,8 @@ int main(int argc, char ** argv)
 {
 	ros::init(argc, argv, "MovementSimulator");
 	ros::NodeHandle node;
-	odom_publisher = node.advertise<nav_msgs::Odometry>("odom", 50);
+	odom_publisher = new ros::Publisher(node.advertise<nav_msgs::Odometry>("odom", 50));
+	odom_broadcaster = new tf::TransformBroadcaster();
 	ros::Subscriber twist_sub = node.subscribe("/speedFeedbackTopic", 1, twistCb);
 	/*double x = 0.0;
 	double y = 0.0;

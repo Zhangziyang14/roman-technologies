@@ -80,7 +80,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
 	image_transport::Publisher image_pub = it.advertise("image", 1);
 
-	//long unsigned int laserTime = ros::Time::now().toNSec();
+	long unsigned int laserTime = ros::Time::now().toNSec();
 	bool captureRGB = false;
 
 	while (quit == false && ros::ok())
@@ -109,13 +109,13 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 			processImage(captureRGB ? &rgb : NULL, &pc);
 
 			// SLAM
-			/*if (laser_pub.getNumSubscribers() && ros::Time::now().toNSec() >= laserTime)
+			if (laser_pub.getNumSubscribers() && ros::Time::now().toNSec() >= laserTime)
 			{
 				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
 				if (laserscan)
 					laser_pub.publish(laserscan);
 				laserTime = ros::Time::now().toNSec() + PUSH_LASERSCAN_TIME;
-			}*/
+			}
 
 			// do we have a listener to the RGB output ?
 			if (captureRGB)
