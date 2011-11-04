@@ -86,7 +86,7 @@ sensor_msgs::ImagePtr iplImageToImage(IplImage *image)
 	sensor_msgs::ImagePtr output(new sensor_msgs::Image());
 	if (image->depth != IPL_DEPTH_8U)
 	{
-		ROS_WARN("Cannot convert non-uint8 to sensor_msgs::Image.");
+		ROS_WARN("Cannot convert non-uint8 to sensor_msgs::Image. Depth = %d", image->depth);
 		return output;
 	}
 

@@ -49,8 +49,17 @@ void MotorHandler::checkMotorConnections(char* path)
  */
 void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
-	double left_vel  = msg.left_motor_speed ? msg.left_motor_speed / WHEEL_RADIUS : (msg.twist.linear.x  - msg.twist.angular.z * BASE_RADIUS) / WHEEL_RADIUS;
-	double right_vel = msg.right_motor_speed ? msg.right_motor_speed / WHEEL_RADIUS : (msg.twist.linear.x  + msg.twist.angular.z* BASE_RADIUS) / WHEEL_RADIUS;
+	double left_vel  = msg.left_motor_speed;
+	double right_vel = msg.right_motor_speed;
+
+	if (left_vel == 0.0 && right_vel == 0.0)
+	{
+		double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
+		double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
+
+		left_vel = vel_linear - vel_angular;
+		right_vel = vel_linear + vel_angular;
+	}
 
 	// disable positive speeds ?
 	if (mDisableForwardMotion)

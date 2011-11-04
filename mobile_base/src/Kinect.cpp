@@ -98,7 +98,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 		}
 
 		// try to capture a RGB and pointcloud
-		if ((captureRGB || capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
+		if ((captureRGB == false || capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
 				capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP))
 		{
 			IplImage rgb;
@@ -118,7 +118,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 			}*/
 
 			// do we have a listener to the RGB output ?
-			if (image_pub.getNumSubscribers())
+			if (captureRGB)
 			{
 				sensor_msgs::ImagePtr imageMsg = iplImageToImage(&rgb);
 				image_pub.publish(imageMsg);
