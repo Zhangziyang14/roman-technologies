@@ -106,7 +106,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 				rgb = image;
 			IplImage pc = pointCloud;
 
-			processImage(captureRGB ? &rgb : NULL, &pc);
+			//processImage(captureRGB ? &rgb : NULL, &pc);
 
 			// SLAM
 			if (laser_pub.getNumSubscribers() && ros::Time::now().toNSec() >= laserTime)

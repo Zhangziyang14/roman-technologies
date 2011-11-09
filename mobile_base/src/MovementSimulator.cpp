@@ -21,17 +21,17 @@ double y = 0.0;
 void twistCb(const geometry_msgs::Twist &twist)
 {
 	vx = twist.linear.x * cos(th);
-	vy = -twist.linear.x * sin(th);
+	vy = twist.linear.x * sin(th);
 	vth = twist.angular.z;
 
-	//ROS_INFO("vx: %lf, vy: %lf, vth: %lf, lin.x: %lf, ang.z: %lf", vx, vy, vth, twist.linear.x, twist.angular.z);
+	ROS_INFO("vx: %lf, vy: %lf, vth: %lf, lin.x: %lf, ang.z: %lf, th: %lf", vx, vy, vth, twist.linear.x, twist.angular.z, th);
 
 	current_time = ros::Time::now();
 
 	//compute odometry in a typical way given the velocities of the robot
 	double dt = (current_time - last_time).toSec();
-	double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
-	double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
+	double delta_x = vx * dt;//(vx * cos(th) - vy * sin(th)) * dt;
+	double delta_y = vy * dt;//(vx * sin(th) + vy * cos(th)) * dt;
 	double delta_th = vth * dt;
 
 	//ROS_INFO("dx: %lf, dy: %lf, dth: %lf, dt: %lf", delta_x, delta_y, delta_th, dt);
@@ -40,7 +40,7 @@ void twistCb(const geometry_msgs::Twist &twist)
 	y += delta_y;
 	th += delta_th;
 
-	ROS_INFO("x: %lf, y: %lf, th: %lf", x, y, th);
+	//ROS_INFO("x: %lf, y: %lf, th: %lf", x, y, th);
 
 	//since all odometry is 6DOF we'll need a quaternion created from yaw
 	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);

@@ -13,8 +13,8 @@
 #include <iostream>
 #include <std_msgs/Empty.h>
 
-#define MAX_ANGULAR_AT_TOP_SPEED	0.1  // m/s
-#define MAX_ANGULAR_AT_LOW_SPEED	0.5  // m/s
+#define MAX_ANGULAR_AT_TOP_SPEED	0.5  // m/s
+#define MAX_ANGULAR_AT_LOW_SPEED	1.5  // m/s
 #define MAX_LINEAR_SPEED		0.5 // m/s
 
 enum PS3Key
