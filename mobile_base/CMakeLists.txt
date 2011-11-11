@@ -21,20 +21,9 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-find_package(Eigen REQUIRED)
-include_directories(${Eigen_INCLUDE_DIRS})
-
 rosbuild_add_executable(BaseController src/BaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
-rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
-rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
-rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
 rosbuild_add_executable(AutonomeController src/AutonomeController.cpp)
-
-link_directories(/usr/local/lib )
-include_directories(/usr/local/include)
-target_link_libraries(Kinect opencv_core opencv_imgproc opencv_highgui)
-target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
