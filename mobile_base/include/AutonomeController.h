@@ -11,6 +11,7 @@
 #include <mobile_base/sensorFeedback.h>
 #include <mobile_base/BaseMotorControl.h>
 #include <std_msgs/UInt8.h>
+#include <std_msgs/Float64.h>
 #include "BaseController.h"
 
 #define EMERGENCY_STOP_DISTANCE 80
@@ -36,8 +37,6 @@ private:
 
 public:
 	AutonomeController() {};
-
-
 
 	void init();
 	void ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg);

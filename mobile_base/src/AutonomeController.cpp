@@ -7,7 +7,7 @@
 
 #include "AutonomeController.h"
 
-mobile_base::BaseMotorControl bmc_msg;
+std_msgs::Float64 position_msg;
 mobile_base::DisableMotor disable_msg;
 
 /**
@@ -45,14 +45,12 @@ void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 	mDisableMotor_pub.publish(disable_msg);
 
 	if(disable_msg.disableForward)
-		bmc_msg.twist.linear.x = -0.5;
+		position_msg.data = -0.5;
 	else
-		bmc_msg.twist.linear.x = 0.5;
+		position_msg.data = 0.5;
 
-	mMovement_pub.publish(bmc_msg);
+	mMovement_pub.publish(position_msg);
 }
-
-
 
 /**
  * Initialises this controller.
@@ -65,7 +63,7 @@ void AutonomeController::init()
 
 	// initialise publishers
 	mDisableMotor_pub = mNodeHandle.advertise<mobile_base::DisableMotor>("/disableMotorTopic", 10);
-	mMovement_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
+	mMovement_pub = mNodeHandle.advertise<std_msgs::Float64>("/positionTopic", 1);
 
 	ROS_INFO("AutonomeController initialised");
 }

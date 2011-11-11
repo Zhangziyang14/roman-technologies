@@ -85,6 +85,7 @@ public:
 
     void setMode(ControlMode mode);
     void setSpeed(double speed);
+    void setPosition(double position);
     void setAcceleration(double aceleration);
     void updatePID();
     void printPID();

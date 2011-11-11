@@ -68,6 +68,19 @@ void Motor::setSpeed(double speed)
 }
 
 /**
+  * Sets position of the motor when in POSITION_MODE
+ */
+void Motor::setPosition(double position)
+{
+	if (cmode != CM_POSITION_MODE)
+	{
+        std::cout << "Motor not in POSITON mode, setting it now." << std::endl;
+        setMode(CM_POSITION_MODE);
+	}
+    motor_->setLinearPos(position, false);
+}
+
+/**
   * Gets speed of the motor when in SPEED_MODE
  */
 double Motor::getRotationSpeed()

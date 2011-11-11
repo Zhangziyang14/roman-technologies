@@ -18,6 +18,18 @@ void MotorHandler::publishRobotSpeed()
 /**
  * Controls the speed of the motors based on the received twist message.
  */
+void MotorHandler::positionCB(const std_msgs::Float64& msg)
+{
+	mRightMotor.setMode(CM_POSITION_MODE);
+	mLeftMotor.setMode(CM_POSITION_MODE);
+
+	mRightMotor.setPosition(msg.data);
+	mLeftMotor.setPosition(msg.data);
+}
+
+/**
+ * Controls the speed of the motors based on the received twist message.
+ */
 void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
 	double left_vel  = msg.left_motor_speed;
@@ -119,6 +131,7 @@ void MotorHandler::init(char *path)
 
 	mTweakPIDSub = mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
 	mTwistSub = mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
+	mPositionSub = mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mDisableSub = mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
 
 	mLeftMotor.init(path);
