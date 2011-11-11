@@ -1,0 +1,21 @@
+<package>
+  <description brief="roman_bot">
+
+     roman_bot
+
+  </description>
+  <author>Hans Gaiser</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="threemxl"/>
+  <depend package="std_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="pcl"/>
+  <depend package="tf"/>
+  <depend package="image_transport"/>
+  <export>
+        <rosdoc config="rosdoc.yaml" />
+  </export>
+</package>
+

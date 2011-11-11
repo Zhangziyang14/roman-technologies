@@ -1,0 +1,4 @@
+<launch>
+	<include file="$(find mobile_base)/launch/mobile.launch"/>
+	<include file="$(find logical_unit)/launch/mapping.launch"/>
+</launch>
