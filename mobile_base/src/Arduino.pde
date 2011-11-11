@@ -1,111 +1,135 @@
 //ROS
 #include "ros.h"
 #include "mobile_base/sensorFeedback.h"
-#include "mobile_base/activateSensors.h"
-
-//I2C
+#include "std_msgs/UInt8.h"
 #include <Wire.h>
 
+byte sensorMask; // Mask containing which sensors should be on or off
 
-boolean activationState[7];
-int data[6];
-long pingData;
+int bumperFrontPin = 8;
+int bumperRearPin = 9;
+int bumperLeftPin = 10;
+int bumperRightPin = 11;
 
-const int led = 13;
-const int sensorPin = 7;
-
-void activateSensors(const mobile_base::activateSensors &msg)
+// Hardware addresses of the ultrasone sensors
+enum HW_ADDRESS
 {
-  //pinMode(led, OUTPUT);
-  //digitalWrite(led, HIGH);
-  activationState[0] = msg.fr;
-  activationState[1] = msg.fl;
-  activationState[2] = msg.cr;
-  activationState[3] = msg.cl;
-  activationState[4] = msg.rr;
-  activationState[5] = msg.rl;
-  activationState[6] = msg.ping;
+   HW_FRONT_LEFT = 0x70,
+   HW_FRONT_CENTER = 0x71,
+   HW_FRONT_RIGHT = 0x72,
+   HW_REAR_RIGHT = 0x73,
+   HW_REAR_CENTER = 0x74,
+   HW_REAR_LEFT = 0x75,
+};
+
+// Ultrasone mask flags
+enum UltrasoneSensor
+{
+  SENSOR_FRONT_LEFT = 0,
+  SENSOR_FRONT_CENTER,
+  SENSOR_FRONT_RIGHT,
+  SENSOR_RIGHT,
+  SENSOR_REAR_RIGHT,
+  SENSOR_REAR_CENTER,
+  SENSOR_REAR_LEFT,
+  SENSOR_LEFT,
+};
+
+enum BumperId
+{
+  BUMPER_UNKNOWN = 0,
+  BUMPER_FRONT,
+  BUMPER_REAR,
+  BUMPER_REAR_LEFT,
+  BUMPER_REAR_RIGHT
+};
+
+#define MAKE_FLAG(x) (1 << x)
+
+void activateSensors(const std_msgs::UInt8 &msg)
+{
+  sensorMask = msg.data;
 }
 
-//declare incomming messages
+ros::NodeHandle nh;
+
+//declare outgoing messages
 mobile_base::sensorFeedback prox_msg;
+std_msgs::UInt8 bump_msg;
 
-ros::NodeHandle  nh;
+//topic to publish ultrasone sensor data on
 ros::Publisher feedback_pub("/sensorFeedbackTopic", &prox_msg);
-ros::Subscriber<mobile_base::activateSensors> activate_sub("/sensorActivateTopic", &activateSensors);
+//topic that gives bitmasks for activating or deactivating sensors
+ros::Subscriber<std_msgs::UInt8> activate_sub("/sensorActivateTopic", &activateSensors);
+
+ros::Publisher bumper_pub("/bumperFeedbackTopic", &bump_msg);
 
 
-
-
-/**
-* setup() gets called at startup.
-*  Initiates the Two Wire Interface and the ROS node.
-*/
 void setup()
 {
- Wire.begin();
- memset(data,-1, sizeof(data));   // set all elements of data to -1 
- memset(activationState, false, sizeof(activationState));
- nh.initNode();
- nh.advertise(feedback_pub);
- nh.subscribe(activate_sub);
+  //attach interrupt 0(= pin 2) 
+  attachInterrupt(0, bumperHit, RISING);
+  pinMode(bumperFrontPin, INPUT);
+  pinMode(bumperRearPin, INPUT);
+  pinMode(bumperLeftPin, INPUT);
+  pinMode(bumperRightPin, INPUT);
+  //led
+  pinMode(13, OUTPUT);
   
-}
+  Wire.begin();
+  Serial.begin(9600);
+  sensorMask = 0;
+ 
+  nh.initNode();
+  nh.advertise(feedback_pub);
+  nh.subscribe(activate_sub);
+  nh.advertise(bumper_pub);
+};
 
-/**
-* RunLoop first 
-*/
+
 void loop()
 {
-  
-  //Read PING sensor if active
-  if (activationState[6])
-  {
-   doPulse(); // start super sonic burst
-   long duration = readPulse(); // duration in microseconds
-   pingData = microsecondsToMilimeters(duration); //distance in milimeters
-  }
-  else
-    pingData = -1;
-  
-  for (int i = 0; i < 6; i++)
-  {
-    if (activationState[i])
-      data[i] = getRange(0x70+i); 
-    else data[i] = -1;    // When sensors is not activated
-  }
-  
-  if (active()){
-  dataToMessage();
-  publishProximityData();
-  }
-  nh.spinOnce();
+  if (sensorMask & MAKE_FLAG(SENSOR_FRONT_LEFT))
+      prox_msg.frontLeft = windowFilter(getRange(HW_FRONT_LEFT));                  
+  if (sensorMask & MAKE_FLAG(SENSOR_FRONT_CENTER))
+      prox_msg.frontCenter = windowFilter(getRange(HW_FRONT_CENTER));
+  if (sensorMask & MAKE_FLAG(SENSOR_FRONT_RIGHT))
+      prox_msg.frontRight = windowFilter(getRange(HW_FRONT_RIGHT));
+  if (sensorMask & MAKE_FLAG(SENSOR_REAR_RIGHT))
+      prox_msg.rearRight = windowFilter(getRange(HW_REAR_RIGHT));
+  if (sensorMask & MAKE_FLAG(SENSOR_REAR_CENTER))
+     prox_msg.rearCenter = windowFilter(getRange(HW_REAR_CENTER));
+  if (sensorMask & MAKE_FLAG(SENSOR_REAR_LEFT))
+     prox_msg.rearLeft = windowFilter(getRange(HW_REAR_LEFT));    
+    
+  if (sensorMask != 0)
+   feedback_pub.publish(&prox_msg);
+   nh.spinOnce(); 
   delay(1);
-  
-}
+};
 
-/**
-* Publishes the sensor data to ROS
+/*
+*  Filters the sensor data within a given window frame
 */
-void publishProximityData()
+int windowFilter(int data)
 {
- feedback_pub.publish(&prox_msg);
+  if(data > 14 && data < 100)
+      return data;
+      
+  return -2;
 }
-
-
-int getRange(int address)
+/*
+void doSRF02Pulse(int address)
 {
- int range = 0;
- // step 1: instruct sensor to read echoes
-  Wire.beginTransmission(address); // transmit to device (#112 (0x70))
-                                   // the address specified in the datasheet is 224 (0xE0)
-                                   // but i2c adressing uses the high 7 bits so it's 112 (address/2)
+  Wire.beginTransmission(address); // transmit to device
   Wire.send(0x00);                 // sets register pointer to the command register (0x00)  
   Wire.send(0x51);                 // use 0x51 for measurement in centimeters
-  Wire.endTransmission();          // stop transmitting
-// step 2: wait for readings to happen
-  delay(65);                       // datasheet suggests at least 65 milliseconds
-// step 3: instruct sensor to return a particular echo reading
+  Wire.endTransmission();          // stop transmitting 
+}
+
+int readSRF02(int address)
+{
+  int range = 0;
   Wire.beginTransmission(address); // transmit to device
   Wire.send(0x02);                 // sets register pointer to echo #1 register (0x02)
   Wire.endTransmission();          // stop transmitting
@@ -118,63 +142,64 @@ int getRange(int address)
     range = range << 8;            // shift high byte to be high 8 bits
     range |= Wire.receive();       // receive low byte as lower 8 bits
   }
-  
-  return range;
-  
+return range; 
 }
-
-/**
-* Put data in message
 */
-void dataToMessage()
+
+/*
+*  Returns the measured range in cm of the SRF02 sensor at the given address
+*/
+int getRange(int address)
 {
-  prox_msg.frontLeft = data[0];   // 0x70 | 0xE0 | 112 
-  prox_msg.frontRight = data[1];  // 0x71 | 0xE1 | 113
-  prox_msg.centerLeft = data[2];  // 0x72 | 0xE2 | 114
-  prox_msg.centerRight = data[3]; // 0x73 | 0xE3 | 115
-  prox_msg.rearLeft = data[4];    // 0x74 | 0xE4 | 116
-  prox_msg.rearRight = data[5];   // 0x75 | 0xE5 | 117
-  prox_msg.ping = pingData;       //Ping Sensor 32 bit int
+    Wire.beginTransmission(address); // transmit to device
+  Wire.send(0x00);                 // sets register pointer to the command register (0x00)  
+  Wire.send(0x51);                 // use 0x51 for measurement in centimeters
+  Wire.endTransmission();          // stop transmitting 
+  delay(100);
+  
+int range = 0;
+
+  Wire.beginTransmission(address); // transmit to device
+  Wire.send(0x02);                 // sets register pointer to echo #1 register (0x02)
+  Wire.endTransmission();          // stop transmitting
+// step 4: request reading from sensor
+  Wire.requestFrom(address,2);     // request 2 bytes from slave device
+// step 5: receive reading from sensor
+   if(2 <= Wire.available())       // if two bytes were received
+  {
+    range = Wire.receive();        // receive high byte (overwrites previous reading)
+    range = range << 8;            // shift high byte to be high 8 bits
+    range |= Wire.receive();       // receive low byte as lower 8 bits
+  }
+return range; 
 }
 
-
-/**
-* Start sending out an ultrasonic pulse from PING
-*/
-void doPulse(){
-  pinMode(sensorPin, OUTPUT);
-  digitalWrite(sensorPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(sensorPin, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(sensorPin, LOW); 
-}  
-
-/**
-* Reading is done from same pin as the output pin, so change pinMode. a HIGH
-* pulse whose duration is the time (in microseconds) from the sending
-* of the ping to the reception of its echo off an object.
-*/
-long readPulse(){   
-  pinMode(sensorPin, INPUT);
-  return pulseIn(sensorPin, HIGH); 
-}
-
-/**
-* Convert measured time to distance;
-*/
-long microsecondsToMilimeters(long microseconds)
-{ 
-  //speed of sound = 343.2 metres per second. Or 2.913752914 µs per mm. 
-   return microseconds / 2.913 / 2; 
-}
-
-/**
-* True if at least one sensor is active
-*/
-boolean active()
+void bumperHit()
 {
-  return (activationState[0] | activationState[1] | activationState[2] | activationState[3] | 
-          activationState[4] | activationState[5] | activationState[6]);
+  digitalWrite(13, HIGH);
+  if (digitalRead(bumperFrontPin) == 1)
+    bump_msg.data = BUMPER_FRONT;
+  else if (digitalRead(bumperRearPin) == 1)
+    bump_msg.data = BUMPER_REAR;
+  else if (digitalRead(bumperLeftPin) == 1)
+    bump_msg.data = BUMPER_REAR_LEFT;
+  else if (digitalRead(bumperRightPin) == 1)
+    bump_msg.data = BUMPER_REAR_RIGHT;
+  else
+    bump_msg.data = BUMPER_UNKNOWN;
+    
+  bumper_pub.publish(&bump_msg);
+  digitalWrite(13, LOW);
 }
 
+/*
+*  Returns the measured range in cm of the SRF02 sensor at the given address
+
+void getTwoRanges(int address1, int address2)
+{
+    doSRF02Pulse(address1);
+    doSRF02Pulse(address2);
+    delay(65);
+    data[address2]
+}
+*/
