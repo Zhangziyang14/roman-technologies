@@ -8,28 +8,23 @@
 #include <BaseController.h>
 
 /**
- * Checks motor connections for availability.
- */
-/*void BaseController::checkConnections()
-{
-		if(mSpeed_sub.getNumPublishers() == 0)
-		{
-//			command("shell");
-		}
-			ROS_INFO("%s has died.", mSpeed_sub.getTopic().c_str());
-		else if(mKey_sub.getNumPublishers() == 0)
-		{
-			ROS_INFO("%s has  died",mKey_sub.getTopic().c_str());
-
-		}
-}*/
-
-/**
  * Reads the speed feedback from MotorHandler
  */
 void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
 {
 	mCurrentSpeed = msg;
+	std_msgs::UInt8 ultrasone_msg;
+
+	if(msg.linear.x > 0)
+		ultrasone_msg.data = ULTRASONE_FRONT;
+
+	if(msg.linear.x < 0)
+		ultrasone_msg.data = ULTRASONE_REAR;
+
+	if(msg.angular.z && msg.linear.x == 0)
+			ultrasone_msg.data = ULTRASONE_ALL;
+
+		mUltrasone_pub.publish(ultrasone_msg);
 }
 
 /**
@@ -44,6 +39,7 @@ void BaseController::init()
 	// initialise publishers
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
+	mUltrasone_pub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
 
 	ROS_INFO("BaseController initialised");
 }

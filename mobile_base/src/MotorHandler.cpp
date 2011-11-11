@@ -1,17 +1,4 @@
 #include <MotorHandler.h>
-/*
-void MotorHandler::checkConnections()
-{
-	if(mTweakPIDSub.getNumPublishers() == 0 || mTwistSub.getNumPublishers() == 0)
-	{
-		if(mTweakPIDSub.getNumPublishers() == 0)
-			ROS_INFO("%s has died", mTweakPIDSub.getTopic().c_str());
-		else
-			ROS_INFO("%s has died", mTwistSub.getTopic().c_str());
-
-		mController.killNode();
-8	}
- */
 
 /**
  * Publishes the linear and angular speed of the robot
@@ -26,22 +13,6 @@ void MotorHandler::publishRobotSpeed()
 	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * WHEEL_RADIUS / 0.25 /2.0; //* getBaseRadius();
 
 	mSpeedPub.publish(mCurrentSpeed);
-}
-
-/**
- * Check whether the Motors are still alive and re-initialise them if not
- */
-void MotorHandler::checkMotorConnections(char* path)
-{
-	if(mLeftMotor.checkPort())
-	{
-		mLeftMotor.init(path);
-	}
-
-	if(mRightMotor.checkPort())
-	{
-		mRightMotor.init(path);
-	}
 }
 
 /**

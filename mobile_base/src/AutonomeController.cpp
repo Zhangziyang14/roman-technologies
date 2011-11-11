@@ -7,12 +7,14 @@
 
 #include "AutonomeController.h"
 
+mobile_base::BaseMotorControl bmc_msg;
+mobile_base::DisableMotor disable_msg;
+
 /**
  * Receives data from ultrasone sensors and determines if forward or backward motion should be disabled.
  */
 void AutonomeController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg)
 {
-	mobile_base::DisableMotor disable_msg;
 
 	// did the sensors on the front detect anything dangerously close?
 	disable_msg.disableForward = (msg.frontCenter > 0 && msg.frontCenter < EMERGENCY_STOP_DISTANCE) ||
@@ -30,6 +32,28 @@ void AutonomeController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &
 	mDisableMotor_pub.publish(disable_msg);
 }
 
+void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
+{
+
+	// did the robot collide with something in the front?
+	disable_msg.disableForward = msg.data == BUMPER_FRONT;
+
+	// did the robot collide with something in the back?
+	disable_msg.disableBackward = (msg.data == BUMPER_REAR) ||  (msg.data == BUMPER_REAR_LEFT)
+											|| (msg.data == BUMPER_REAR_RIGHT);
+
+	mDisableMotor_pub.publish(disable_msg);
+
+	if(disable_msg.disableForward)
+		bmc_msg.twist.linear.x = -0.5;
+	else
+		bmc_msg.twist.linear.x = 0.5;
+
+	mMovement_pub.publish(bmc_msg);
+}
+
+
+
 /**
  * Initialises this controller.
  */
@@ -37,9 +61,11 @@ void AutonomeController::init()
 {
 	// initialise subscribers
 	mSensorFeedback_sub = mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &AutonomeController::ultrasoneFeedbackCB, this);
+	mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &AutonomeController::bumperFeedbackCB, this);
 
 	// initialise publishers
 	mDisableMotor_pub = mNodeHandle.advertise<mobile_base::DisableMotor>("/disableMotorTopic", 10);
+	mMovement_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 
 	ROS_INFO("AutonomeController initialised");
 }
