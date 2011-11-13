@@ -150,3 +150,19 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image)
 	}
 	return output;
 }
+
+/**
+ * Converts IplImage's to sensor_msgs::PointCloud2Ptr
+ */
+sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image)
+{
+	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
+	output->header.stamp = ros::Time::now();
+	output->width = image->width;
+	output->height = image->height;
+	output->is_dense = false;
+	//output->
+
+	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
+	return output;
+}

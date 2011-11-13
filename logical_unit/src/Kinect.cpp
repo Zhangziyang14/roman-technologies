@@ -9,6 +9,7 @@ sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
 sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
 IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image);
+sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image);
 
 /**
  * Processes the pointcloud and display feedback on the RGB image.
@@ -79,9 +80,11 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 	image_transport::ImageTransport it(*n);
 	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
 	image_transport::Publisher image_pub = it.advertise("image", 1);
+	ros::Publisher cloud_pub = n->advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
 
 	long unsigned int laserTime = ros::Time::now().toNSec();
 	bool captureRGB = false;
+	bool captureCloud = false;
 
 	while (quit == false && ros::ok())
 	{
@@ -90,6 +93,8 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 
 		// is it required to capture RGB images ?
 		captureRGB = image_pub.getNumSubscribers() != 0;
+		// is it required to convert to point clouds and publish ?
+		captureCloud = cloud_pub.getNumSubscribers() != 0;
 
 		if (capture->grab() == false)
 		{
@@ -122,6 +127,12 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 			{
 				sensor_msgs::ImagePtr imageMsg = iplImageToImage(&rgb);
 				image_pub.publish(imageMsg);
+			}
+
+			if (captureCloud)
+			{
+				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToPointCloud2(&pc);
+				cloud_pub.publish(cloudMsg);
 			}
 		}
 

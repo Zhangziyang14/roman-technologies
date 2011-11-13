@@ -24,12 +24,13 @@ rosbuild_genmsg()
 rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
 rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
 rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
+rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
 
 link_directories(/usr/local/lib )
 include_directories(/usr/local/include)
 target_link_libraries(Kinect opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
-#target_link_libraries(PGMToObj opencv_core opencv_imgproc opencv_highgui)
+target_link_libraries(PGMToObj opencv_core opencv_imgproc opencv_highgui)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

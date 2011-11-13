@@ -3,6 +3,7 @@
 
 #include "sensor_msgs/LaserScan.h"
 #include "sensor_msgs/Image.h"
+#include "sensor_msgs/PointCloud2.h"
 
 #include "opencv/cxcore.h"  
 #include "opencv/cvwimage.h"
