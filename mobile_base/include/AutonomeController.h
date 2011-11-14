@@ -14,7 +14,7 @@
 #include <std_msgs/Float64.h>
 #include "BaseController.h"
 
-#define EMERGENCY_STOP_DISTANCE 80
+#define EMERGENCY_STOP_DISTANCE 60
 
 enum BumperState
 {

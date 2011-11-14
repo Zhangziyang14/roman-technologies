@@ -23,8 +23,9 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	mRightMotor.setPosition(msg.data);
-	mLeftMotor.setPosition(msg.data);
+	ROS_INFO("right: %f left: %f", mRightMotor.getPosition(), mLeftMotor.getPosition());
+	mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
+	mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
 }
 
 /**
@@ -58,7 +59,10 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 	}
 
 	mRightMotor.setSpeed(right_vel);
+	mRightMotor.updatePosition();
+
 	mLeftMotor.setSpeed(left_vel);
+	mLeftMotor.updatePosition();
 }
 
 /**

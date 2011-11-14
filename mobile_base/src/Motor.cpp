@@ -78,8 +78,18 @@ void Motor::setPosition(double position)
         setMode(CM_POSITION_MODE);
 	}
 
-	double current_position = motor_->getLinearPos();
-    motor_->setLinearPos(current_position + position, false);
+	motor_->setLinearPos(position, 1, 2, false);
+}
+
+void Motor::updatePosition()
+{
+motor_->getLinearPos();
+mPosition = motor_->presentLinearPos()*100;
+}
+
+double Motor::getPosition()
+{
+	return mPosition;
 }
 
 /**

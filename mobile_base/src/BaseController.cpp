@@ -21,7 +21,7 @@ void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
 	if(msg.linear.x < 0)
 		ultrasone_msg.data = ULTRASONE_REAR;
 
-	if(msg.angular.z && msg.linear.x == 0)
+	if(msg.angular.z || msg.linear.x == 0)
 			ultrasone_msg.data = ULTRASONE_ALL;
 
 		mUltrasone_pub.publish(ultrasone_msg);
@@ -107,7 +107,8 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 
 			//Accelerate when X button is pressed and reverse when square button is pressed
 			float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
-			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];
+			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];	
+
 			sendMsg = true;
 			break;
 		}
@@ -181,6 +182,7 @@ int main(int argc, char **argv)
 {
 	// init ros and controller
 	ros::init(argc, argv, "controller");
+
 	BaseController base_controller;
 
 	char *path = NULL;
@@ -189,6 +191,5 @@ int main(int argc, char **argv)
 
 	base_controller.init();
 	ros::spin();
-
 	return 0;
 }
