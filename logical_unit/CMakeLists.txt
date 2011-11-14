@@ -24,6 +24,7 @@ rosbuild_genmsg()
 rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
 rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
 rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
+rosbuild_add_executable(PathFinder src/PathFinder.cpp)
 rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
 
 link_directories(/usr/local/lib )
