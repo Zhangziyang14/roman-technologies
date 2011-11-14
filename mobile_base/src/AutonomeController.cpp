@@ -53,7 +53,7 @@ void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 		position_msg.data = -0.5;
 	}
 
-	if(mBumperState != BUMPER_REAR && disable_msg.disable)
+	if(mBumperState != BUMPER_REAR && disable_msg.disableBackward)
 	{
 		mBumperState = BUMPER_REAR;
 		position_msg.data = 0.5;
