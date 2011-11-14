@@ -64,7 +64,6 @@ protected:
     CDxlGeneric *motor_;    /// Motor interface
     LxSerial serial_port_;  /// Serial port interface
     ControlMode cmode;      /// Keeps track of what ControlMode the motor is in at the moment 
-    double mPosition;
 
 public:
     /// Constructor
@@ -88,7 +87,6 @@ public:
     void setSpeed(double speed);
     void setPosition(double position);
     void setAcceleration(double aceleration);
-    void updatePosition();
     void updatePID();
     void printPID();
     double getPosition();

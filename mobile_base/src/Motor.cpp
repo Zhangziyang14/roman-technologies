@@ -81,15 +81,13 @@ void Motor::setPosition(double position)
 	motor_->setLinearPos(position, 1, 2, false);
 }
 
-void Motor::updatePosition()
-{
-motor_->getLinearPos();
-mPosition = motor_->presentLinearPos()*100;
-}
-
+/**
+ * Returns position of motor in meters
+ */
 double Motor::getPosition()
 {
-	return mPosition;
+	motor_->getLinearPos();
+	return motor_->presentLinearPos()*100;
 }
 
 /**

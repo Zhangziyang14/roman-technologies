@@ -47,12 +47,19 @@ void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 
 	mDisableMotor_pub.publish(disable_msg);
 
-	if(disable_msg.disableForward)
+	if(mBumperState != BUMPER_FRONT && disable_msg.disableForward)
+	{
+		mBumperState = BUMPER_FRONT;
 		position_msg.data = -0.5;
-	else
-		position_msg.data = 0.5;
+	}
 
+	if(mBumperState != BUMPER_REAR && disable_msg.disable)
+	{
+		mBumperState = BUMPER_REAR;
+		position_msg.data = 0.5;
+	}
 	mMovement_pub.publish(position_msg);
+	mBumperState = BUMPER_NONE;
 }
 
 /**
@@ -85,3 +92,4 @@ int main(int argc, char **argv)
 	ros::spin();
 	return 0;
 }
+

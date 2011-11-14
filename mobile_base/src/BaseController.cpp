@@ -109,6 +109,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 			float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
 			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];	
 
+
 			sendMsg = true;
 			break;
 		}

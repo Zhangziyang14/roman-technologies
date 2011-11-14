@@ -18,11 +18,11 @@
 
 enum BumperState
 {
-	BUMPER_UNKNOWN = 0,
-			BUMPER_FRONT,
-			BUMPER_REAR,
-			BUMPER_REAR_LEFT,
-			BUMPER_REAR_RIGHT
+	BUMPER_NONE,
+	BUMPER_FRONT,
+	BUMPER_REAR,
+	BUMPER_REAR_LEFT,
+	BUMPER_REAR_RIGHT
 };
 
 /// Controller for autonomous control.
@@ -34,9 +34,10 @@ private:
 	ros::Subscriber mBumperFeedback_sub;	/// Subcriber to arduino Bumper sensor feedback
 	ros::Publisher	mDisableMotor_pub;		/// Publisher for disabling forward/backward movement
 	ros::Publisher  mMovement_pub;			/// Publisher to control the motors
+	BumperState mBumperState;
 
 public:
-	AutonomeController() {};
+	AutonomeController() :  mBumperState(BUMPER_NONE) {};
 
 	void init();
 	void ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg);
