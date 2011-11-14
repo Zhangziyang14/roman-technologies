@@ -21,9 +21,9 @@
 enum UltrasoneActivate
 {
 	NOTHING,
-	ULTRASONE_ALL,
 	ULTRASONE_FRONT,
 	ULTRASONE_REAR,
+	ULTRASONE_ALL,
 };
 
 enum PS3Key

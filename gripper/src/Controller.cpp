@@ -61,7 +61,7 @@ void Controller::init()
     msg.data = mSensorActive;
     mSensor_pub.publish(msg);
 
-    ROS_INFO("Controller initialized");
+    ROS_INFO("Controller initialised");
 }
 
 /**

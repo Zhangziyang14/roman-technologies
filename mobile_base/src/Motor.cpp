@@ -77,7 +77,9 @@ void Motor::setPosition(double position)
         std::cout << "Motor not in POSITON mode, setting it now." << std::endl;
         setMode(CM_POSITION_MODE);
 	}
-    motor_->setLinearPos(position, false);
+
+	double current_position = motor_->getLinearPos();
+    motor_->setLinearPos(current_position + position, false);
 }
 
 /**

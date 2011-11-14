@@ -16,7 +16,7 @@ void MotorHandler::publishRobotSpeed()
 }
 
 /**
- * Controls the speed of the motors based on the received twist message.
+ * Controls the motors based on the received position.
  */
 void MotorHandler::positionCB(const std_msgs::Float64& msg)
 {

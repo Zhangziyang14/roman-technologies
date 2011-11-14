@@ -32,6 +32,10 @@ void AutonomeController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &
 	mDisableMotor_pub.publish(disable_msg);
 }
 
+/**
+ * Checks whether robot collided with something and determines if forward or backward motion should be disabled
+ * Also moves the robot 0.5 [m] (if possible) from the object.
+ */
 void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 {
 
