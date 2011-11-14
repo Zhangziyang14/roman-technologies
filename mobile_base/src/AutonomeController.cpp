@@ -43,8 +43,7 @@ void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 	disable_msg.disableForward = msg.data == BUMPER_FRONT;
 
 	// did the robot collide with something in the back?
-	disable_msg.disableBackward = (msg.data == BUMPER_REAR) ||  (msg.data == BUMPER_REAR_LEFT)
-											|| (msg.data == BUMPER_REAR_RIGHT);
+	disable_msg.disableBackward = (msg.data == BUMPER_REAR);
 
 	mDisableMotor_pub.publish(disable_msg);
 
