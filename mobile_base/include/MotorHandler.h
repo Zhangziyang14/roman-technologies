@@ -7,6 +7,7 @@
 #include <sensor_msgs/Joy.h>
 #include <mobile_base/tweak.h>
 #include <mobile_base/DisableMotor.h>
+#include <mobile_base/BumperDisableMotor.h>
 #include <BaseController.h>
 #include <std_msgs/Float64.h>
 #include <boost/thread.hpp>
@@ -21,6 +22,7 @@ class MotorHandler
 protected:
     ros::NodeHandle mNodeHandle;		/// ROS node handle
 
+   ros::Subscriber mBumperDisableSub;		// Listens to messages send by the bumpersensors that disables the movement
     ros::Subscriber mDisableSub;		/// Listens to messages that disables the movement
     ros::Subscriber mTwistSub;			/// Listens to Twist messages for movement
     ros::Subscriber mPositionSub;		/// Listens to integer messages for positioning
@@ -30,7 +32,7 @@ protected:
 
     geometry_msgs::Twist mCurrentSpeed;	/// Twist message containing the current speed of the robot
     double mLeftMotorSpeed;				/// Current speeds for left wheel in rad/s
-    double mRightMotorSpeed;			/// Current speeds for right wheel in rad/s
+    double mRightMotorSpeed;				/// Current speeds for right wheel in rad/s
 
     Motor mLeftMotor;					/// Motor for left wheel
     Motor mRightMotor;					/// Motor for right wheel
@@ -38,13 +40,16 @@ protected:
     MotorId mMotorId;					/// Id of the motor that is currently being controlled
     PIDParameter mPIDFocus;				/// One of the PID parameters that is to be changed on button events
 
-    bool mDisableForwardMotion;			/// If true, forward motions are disabled
-    bool mDisableBackwardMotion;		/// If true, backward motions are disabled
+    bool mDisableForwardMotion;				/// If true, forward motions are disabled by ultrasone
+    bool mDisableBackwardMotion;			/// If true, backward motions are disabled by ultrasone
+
+    bool mBumperDisableForwardMotion;			/// If true, forward motions are disabled by bumpers
+    bool mBumperDisableBackwardMotion;			/// If true, backward motions are disabled by bumpers
 
 public:
     /// Constructor
     MotorHandler() : mNodeHandle("~"), mLeftMotor(MID_LEFT), mRightMotor(MID_RIGHT), mMotorId(MID_LEFT), mPIDFocus(PID_PARAM_I),
-		mDisableForwardMotion(false), mDisableBackwardMotion(false) { }
+		mDisableForwardMotion(false), mDisableBackwardMotion(false), mBumperDisableForwardMotion(false), mBumperDisableBackwardMotion(false) { }
     
     /// Destructor
     /** Delete motor interface, close serial port, and shut down node handle */
@@ -69,6 +74,8 @@ public:
     	return BASE_RADIUS * 2 * std::max(abs(mLeftMotorSpeed), abs(mRightMotorSpeed)) / (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed));
     };
 
+    void stopMotor();
+    void disableMotorBumperCB(const mobile_base::BumperDisableMotor &msg);
     void disableMotorCB(const mobile_base::DisableMotor &msg);
 };    
 

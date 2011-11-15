@@ -9,6 +9,7 @@
 
 std_msgs::Float64 position_msg;
 mobile_base::DisableMotor disable_msg;
+mobile_base::BumperDisableMotor disableBumper_msg;
 
 /**
  * Receives data from ultrasone sensors and determines if forward or backward motion should be disabled.
@@ -40,26 +41,35 @@ void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 {
 
 	// did the robot collide with something in the front?
-	disable_msg.disableForward = msg.data == BUMPER_FRONT;
+	disableBumper_msg.disableForward = msg.data == BUMPER_FRONT;
 
 	// did the robot collide with something in the back?
-	disable_msg.disableBackward = (msg.data == BUMPER_REAR);
+	disableBumper_msg.disableBackward = (msg.data == BUMPER_REAR);
 
-	mDisableMotor_pub.publish(disable_msg);
+	mDisableMotor_pub.publish(disableBumper_msg);
 
-	if(mBumperState != BUMPER_FRONT && disable_msg.disableForward)
+	if(mBumperState != BUMPER_FRONT && disableBumper_msg.disableForward)
 	{
 		mBumperState = BUMPER_FRONT;
 		position_msg.data = -0.5;
 	}
 
-	if(mBumperState != BUMPER_REAR && disable_msg.disableBackward)
+	if(mBumperState != BUMPER_REAR && disableBumper_msg.disableBackward)
 	{
 		mBumperState = BUMPER_REAR;
 		position_msg.data = 0.5;
 	}
+
+	usleep(1000000);
 	mMovement_pub.publish(position_msg);
+	usleep(1000000);
+
+	disableBumper_msg.disableForward = false;
+	disableBumper_msg.disableBackward = false;
+
 	mBumperState = BUMPER_NONE;
+
+	mBumperDisableMotor_pub.publish(disableBumper_msg);
 }
 
 /**
@@ -73,6 +83,7 @@ void AutonomeController::init()
 
 	// initialise publishers
 	mDisableMotor_pub = mNodeHandle.advertise<mobile_base::DisableMotor>("/disableMotorTopic", 10);
+	mBumperDisableMotor_pub = mNodeHandle.advertise<mobile_base::BumperDisableMotor>("/bumperDisableMotorTopic", 10);
 	mMovement_pub = mNodeHandle.advertise<std_msgs::Float64>("/positionTopic", 1);
 
 	ROS_INFO("AutonomeController initialised");
