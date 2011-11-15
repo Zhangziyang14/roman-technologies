@@ -23,7 +23,13 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	if(!(mDisableForwardMotion || mDisableBackwardMotion) || !(mBumperDisableForwardMotion || mBumperDisableBackwardMotion))
+	if(!(mDisableBackwardMotion && mBumperDisableBackwardMotion) && msg.data < 0)
+	{
+		mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
+		mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
+	}
+
+	if(!(mDisableForwardMotion &&  mBumperDisableForwardMotion) && msg.data > 0)
 	{	
 		mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
 		mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
