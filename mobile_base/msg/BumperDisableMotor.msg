@@ -1,0 +1,2 @@
+bool disableForward
+bool disableBackward
