@@ -76,14 +76,26 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 	switch (mControlMode)
 	{
 	case PS3_CONTROL_GAME:
+		// only send stop messages once
+		if (mPrevAngular == 0.f && msg.axes[PS3_AXIS_LEFT_HORIZONTAL] == 0.f)
+			break;
+
 		//Turn at current position
-		bmc_msg.twist.angular.z = calcRobotAngularSpeed() * float(msg.axes[PS3_AXIS_LEFT_HORIZONTAL]);
+		bmc_msg.twist.angular.z = calcRobotAngularSpeed() * msg.axes[PS3_AXIS_LEFT_HORIZONTAL];
+		mPrevAngular = bmc_msg.twist.angular.z;
 		sendMsg = true;
 		break;
 	case PS3_CONTROL_REMOTE_CONTROL:
+		// only send stop messages once
+		if (mPrevLeftSpeed == 0.f && mPrevRightSpeed == 0.f && msg.axes[PS3_AXIS_LEFT_VERTICAL] == 0.f &&
+			msg.axes[PS3_AXIS_RIGHT_VERTICAL])
+			break;
+
 		// scale between 0 and MAX_LINEAR_SPEED.
 		bmc_msg.left_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_LEFT_VERTICAL];
 		bmc_msg.right_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_RIGHT_VERTICAL];
+		mPrevLeftSpeed = bmc_msg.left_motor_speed;
+		mPrevRightSpeed = bmc_msg.right_motor_speed;
 		sendMsg = true;
 		break;
 	default:

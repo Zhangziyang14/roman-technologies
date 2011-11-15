@@ -81,9 +81,14 @@ protected:
 	geometry_msgs::Twist mCurrentSpeed;		/// Holds current speed of the robot
 
 	PS3ControlMode mControlMode;			/// Type of control mode for the PS3 controller. Default is PS3_CONTROL_GAME.
+
+	float mPrevAngular;
+	float mPrevLeftSpeed;
+	float mPrevRightSpeed;
 public:
 	/// Constructor
-	BaseController() : mNodeHandle(""), mControlMode(PS3_CONTROL_GAME) { }
+	BaseController() : mNodeHandle(""), mControlMode(PS3_CONTROL_GAME),
+		mPrevAngular(0.f), mPrevLeftSpeed(0.f), mPrevRightSpeed(0.f) { }
 
 	/// Destructor
 	~BaseController()
