@@ -71,7 +71,12 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 
 	//No button is pressed, so sum of vector is zero
 	if (std::accumulate(msg.buttons.begin(), msg.buttons.end(), 0) == 0)
+	{
+		// stop after releasing a key
+		if (mKeyPressed != PS3_NONE)
+			sendMsg = true;
 		mKeyPressed = PS3_NONE;
+	}
 
 	switch (mControlMode)
 	{
