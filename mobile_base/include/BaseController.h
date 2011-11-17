@@ -13,6 +13,7 @@
 #include <math.h>
 #include <iostream>
 #include <std_msgs/Empty.h>
+#include <mobile_base/BumperDisableMotor.h>
 
 #define MAX_ANGULAR_AT_TOP_SPEED	0.5  // m/s
 #define MAX_ANGULAR_AT_LOW_SPEED	1.5  // m/s
@@ -69,6 +70,7 @@ class BaseController
 protected:
 	ros::NodeHandle mNodeHandle;     		/// ROS node handle
 
+    ros::Subscriber mBumperDisableSub;		/// Listens to messages send by the bumpersensors that disables the movement
 	ros::Subscriber mSpeed_sub;		 		/// Listens to Twist messages as feedback for robot's current speed
 	ros::Subscriber mKey_sub;        		/// Key input subscriber, reads key input data
 
@@ -76,6 +78,8 @@ protected:
 	ros::Publisher mTweak_pub;       		/// Integer message publisher, publishes integers for the DPAD buttons
 	ros::Publisher mUltrasone_pub;       	/// Integer message publisher, publishes integers to activate ultrasone sensors
 
+    bool mBumperDisableForwardMotion;		/// If true, forward motions are disabled by bumpers
+    bool mBumperDisableBackwardMotion;		/// If true, backward motions are disabled by bumpers
 
 	PS3Key mKeyPressed;  					/// Remembers the last pressed button
 	geometry_msgs::Twist mCurrentSpeed;		/// Holds current speed of the robot
@@ -85,10 +89,10 @@ protected:
 	float mPrevAngular;
 	float mPrevLeftSpeed;
 	float mPrevRightSpeed;
+
 public:
 	/// Constructor
-	BaseController() : mNodeHandle(""), mControlMode(PS3_CONTROL_GAME),
-		mPrevAngular(0.f), mPrevLeftSpeed(0.f), mPrevRightSpeed(0.f) { }
+	BaseController() : mNodeHandle(""), mControlMode(PS3_CONTROL_GAME), mPrevAngular(0.f), mPrevLeftSpeed(0.f), mPrevRightSpeed(0.f) { }
 
 	/// Destructor
 	~BaseController()
@@ -103,6 +107,7 @@ public:
 	/// Listen to PS3 controller
 	void keyCB(const sensor_msgs::Joy& msg);
 	void readCurrentSpeed(const geometry_msgs::Twist& msg);
+	void bumperDisableInputCB(const mobile_base::BumperDisableMotor &msg);
 	void checkConnections();
 
 	inline void killNode(){ mNodeHandle.shutdown(); };

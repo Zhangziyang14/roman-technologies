@@ -28,6 +28,15 @@ void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
 }
 
 /**
+ * Disables input when bumper sensors are activated
+ */
+void BaseController::bumperDisableInputCB(const mobile_base::BumperDisableMotor &msg)
+{
+	mBumperDisableBackwardMotion = msg.disableBackward;
+	mBumperDisableForwardMotion = msg.disableForward;
+}
+
+/**
  * Initialise the attributes of the controller
  */
 void BaseController::init()
@@ -40,7 +49,8 @@ void BaseController::init()
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
 	mUltrasone_pub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
-
+	mBumperDisableBackwardMotion = false;
+	mBumperDisableForwardMotion = false;
 	ROS_INFO("BaseController initialised");
 }
 
@@ -193,7 +203,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 		    }
 	    }
 
-	if (sendMsg)
+	if (sendMsg && !mBumperDisableBackwardMotion && !mBumperDisableForwardMotion)
 		mMotorControl_pub.publish(bmc_msg);
 }
 
