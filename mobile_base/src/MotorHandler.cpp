@@ -23,22 +23,8 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	if(!(mDisableBackwardMotion && mBumperDisableBackwardMotion) && msg.data < 0)
-	{
-		mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
-		mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
-	}
-
-	if(!(mDisableForwardMotion &&  mBumperDisableForwardMotion) && msg.data > 0)
-	{	
-		mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
-		mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
-	}
-	else
-	{	
-		mRightMotor.setPosition(mRightMotor.getPosition());
-		mLeftMotor.setPosition(mLeftMotor.getPosition());
-	}
+	mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
+	mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
 }
 
 /**
@@ -49,35 +35,30 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 	double left_vel  = msg.left_motor_speed;
 	double right_vel = msg.right_motor_speed;
 
+	if (left_vel == 0.0 && right_vel == 0.0)
+	{
+		double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
+		double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
+
+		left_vel = vel_linear - vel_angular;
+		right_vel = vel_linear + vel_angular;
+	}
 
 	// disable positive speeds ?
-	if (mDisableForwardMotion || mBumperDisableForwardMotion)
+	if (mDisableForwardMotion)
 	{
 		left_vel = std::min(0.0, left_vel);
 		right_vel = std::min(0.0, right_vel);
 	}
 	// disable negative speeds ?
-	if (mDisableBackwardMotion || mBumperDisableBackwardMotion)
-
+	if (mDisableBackwardMotion)
 	{
 		left_vel = std::max(0.0, left_vel);
 		right_vel = std::max(0.0, right_vel);
 	}
 
-	if(!(mDisableForwardMotion || mDisableBackwardMotion) && !(mBumperDisableForwardMotion || mBumperDisableBackwardMotion))
-	{
-		if (left_vel == 0.0 && right_vel == 0.0)
-		{
-			double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
-			double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
-
-			left_vel = vel_linear - vel_angular;
-			right_vel = vel_linear + vel_angular;
-		}	
-
-		mRightMotor.setSpeed(right_vel);
-		mLeftMotor.setSpeed(left_vel);
-	}
+	mRightMotor.setSpeed(right_vel);
+	mLeftMotor.setSpeed(left_vel);
 }
 
 /**
@@ -120,41 +101,25 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 	}
 }
 
-void MotorHandler::stopMotor()
-{
-	// are we driving in a direction now forbidden ? Stop the robot.
-	if ((mCurrentSpeed.linear.x > 0 && mDisableForwardMotion) || (mCurrentSpeed.linear.x < 0 && mDisableBackwardMotion) || 
-		(mCurrentSpeed.linear.x > 0 && mBumperDisableForwardMotion) || (mCurrentSpeed.linear.x < 0 && mBumperDisableBackwardMotion)) 
-	{
-		mLeftMotor.setSpeed(0.0);
-		mRightMotor.setSpeed(0.0);
-	}
-}
-
 /**
- * Called when a forward/backward motion needs to be disabled/enabled by ultrasone sensors
+ * Called when a forward/backward motion needs to be disabled/enabled
  */
 void MotorHandler::disableMotorCB(const mobile_base::DisableMotor &msg)
 {
 	mDisableForwardMotion = msg.disableForward;
 	mDisableBackwardMotion = msg.disableBackward;
 
-	stopMotor();
+	// are we driving in a direction now forbidden ? Stop the robot.
+	if ((mCurrentSpeed.linear.x > 0 && mDisableForwardMotion) || (mCurrentSpeed.linear.x < 0 && mDisableBackwardMotion))
+	{
+		mLeftMotor.setSpeed(0.0);
+		mRightMotor.setSpeed(0.0);
+	}
+
 	/*if (mDisableForwardMotion)
 		ROS_INFO("Disable forward.");
 	if (mDisableBackwardMotion)
 		ROS_INFO("Disable backward.");*/
-}
-/**
- * Called when a forward/backward motion needs to be disabled/enabled by bumpers
- */
-void MotorHandler::disableMotorBumperCB(const mobile_base::BumperDisableMotor &msg)
-{
-	mBumperDisableForwardMotion = msg.disableForward;
-	mBumperDisableBackwardMotion = msg.disableBackward;
-
-	// are we driving in a direction now forbidden ? Stop the robot.
-	stopMotor();	
 }
 
 /**
@@ -168,7 +133,6 @@ void MotorHandler::init(char *path)
 	mTwistSub = mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
 	mPositionSub = mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mDisableSub = mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
-	mBumperDisableSub = mNodeHandle.subscribe("/bumperDisableMotorTopic", 10, &MotorHandler::disableMotorBumperCB, this);
 
 	mLeftMotor.init(path);
 	mRightMotor.init(path);

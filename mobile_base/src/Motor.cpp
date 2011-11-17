@@ -78,7 +78,7 @@ void Motor::setPosition(double position)
         setMode(CM_POSITION_MODE);
 	}
 
-	motor_->setLinearPos(position, 1, 2, false);
+	motor_->setLinearPos(position, 1, 0.5, false);
 }
 
 /**
