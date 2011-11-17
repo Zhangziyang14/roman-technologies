@@ -9,7 +9,7 @@
 #include <mobile_base/DisableMotor.h>
 #include <BaseController.h>
 #include <std_msgs/Float64.h>
-#include <boost/thread.hpp>
+//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
 #define WHEEL_RADIUS 0.1475
 #define BASE_RADIUS 0.25
@@ -37,6 +37,8 @@ protected:
 
     MotorId mMotorId;					/// Id of the motor that is currently being controlled
     PIDParameter mPIDFocus;				/// One of the PID parameters that is to be changed on button events
+
+    bool mLock;
 
     bool mDisableForwardMotion;			/// If true, forward motions are disabled by ultrasone
     bool mDisableBackwardMotion;		/// If true, backward motions are disabled by ultrasone
@@ -69,7 +71,6 @@ public:
     	return BASE_RADIUS * 2 * std::max(abs(mLeftMotorSpeed), abs(mRightMotorSpeed)) / (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed));
     };
 
-    void stopMotor();
     void disableMotorCB(const mobile_base::DisableMotor &msg);
 };
 

@@ -29,12 +29,12 @@ enum BumperState
 class AutonomeController
 {
 private:
-	ros::NodeHandle mNodeHandle;    		/// ROS node handle
+	ros::NodeHandle mNodeHandle;    			/// ROS node handle
 	ros::Subscriber mSensorFeedback_sub; 		/// Subscriber to arduino Ultrasone sensor feedback
 	ros::Subscriber mBumperFeedback_sub;		/// Subcriber to arduino Bumper sensor feedback
-	ros::Publisher	mDisableMotor_pub;		/// Publisher for disabling forward/backward movement, triggered by ultrasone sensors
+	ros::Publisher	mDisableMotor_pub;			/// Publisher for disabling forward/backward movement, triggered by ultrasone sensors
 	ros::Publisher	mBumperDisableMotor_pub;	/// Publisher for disabling forward/backward movement, triggered by bumper sensors
-	ros::Publisher  mMovement_pub;			/// Publisher to control the motors
+	ros::Publisher  mMovement_pub;				/// Publisher to control the motors
 	BumperState mBumperState;
 
 public:

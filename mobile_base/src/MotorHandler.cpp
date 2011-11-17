@@ -20,11 +20,13 @@ void MotorHandler::publishRobotSpeed()
  */
 void MotorHandler::positionCB(const std_msgs::Float64& msg)
 {
+	mLock = true;
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
 	mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
 	mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
+	mLock = false;
 }
 
 /**
@@ -32,33 +34,36 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
  */
 void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
-	double left_vel  = msg.left_motor_speed;
-	double right_vel = msg.right_motor_speed;
-
-	if (left_vel == 0.0 && right_vel == 0.0)
+	if(mLock == false)
 	{
-		double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
-		double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
+		double left_vel  = msg.left_motor_speed;
+		double right_vel = msg.right_motor_speed;
 
-		left_vel = vel_linear - vel_angular;
-		right_vel = vel_linear + vel_angular;
-	}
+		if (left_vel == 0.0 && right_vel == 0.0)
+		{
+			double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
+			double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
 
-	// disable positive speeds ?
-	if (mDisableForwardMotion)
-	{
-		left_vel = std::min(0.0, left_vel);
-		right_vel = std::min(0.0, right_vel);
-	}
-	// disable negative speeds ?
-	if (mDisableBackwardMotion)
-	{
-		left_vel = std::max(0.0, left_vel);
-		right_vel = std::max(0.0, right_vel);
-	}
+			left_vel = vel_linear - vel_angular;
+			right_vel = vel_linear + vel_angular;
+		}
 
-	mRightMotor.setSpeed(right_vel);
-	mLeftMotor.setSpeed(left_vel);
+		// disable positive speeds ?
+		if (mDisableForwardMotion)
+		{
+			left_vel = std::min(0.0, left_vel);
+			right_vel = std::min(0.0, right_vel);
+		}
+		// disable negative speeds ?
+		if (mDisableBackwardMotion)
+		{
+			left_vel = std::max(0.0, left_vel);
+			right_vel = std::max(0.0, right_vel);
+		}
+
+		mRightMotor.setSpeed(right_vel);
+		mLeftMotor.setSpeed(left_vel);
+	}
 }
 
 /**
@@ -134,6 +139,7 @@ void MotorHandler::init(char *path)
 	mPositionSub = mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mDisableSub = mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
 
+	mLock = false;
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
 
