@@ -11,15 +11,6 @@ std_msgs::Float64 position_msg;
 mobile_base::BumperDisableMotor disableBumper_msg;
 
 /**
- * Checks whether motors were already disabled by ultrasone sensors
- */
-void SafeKeeper::DisabledByUltrasoneCB(const mobile_base::DisableMotor &msg)
-{
-	mFrontDisabledByUltrasone = msg.disableBackward;
-	mRearDisabledByUltrasone = msg.disableForward;
-}
-
-/**
  * Checks whether robot collided with something and determines if forward or backward motion should be disabled
  * Also moves the robot 0.5 [m] (if possible) from the object.
  */
@@ -67,14 +58,10 @@ void SafeKeeper::init()
 {
 	// initialise subscribers
 	mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &SafeKeeper::bumperFeedbackCB, this);
-	mUltrasoneDisableMotor_sub = mNodeHandle.subscribe("disableMotorTopic", 10, &SafeKeeper::DisabledByUltrasoneCB, this);	
 
 	// initialise publishers
 	mBumperDisableMotor_pub = mNodeHandle.advertise<mobile_base::BumperDisableMotor>("/bumperDisableMotorTopic", 10);
 	mMovement_pub = mNodeHandle.advertise<std_msgs::Float64>("/positionTopic", 1);
-
-	mFrontDisabledByUltrasone = false;
-	mRearDisabledByUltrasone = false;
 
 	ROS_INFO("SafeKeeper initialised");
 }

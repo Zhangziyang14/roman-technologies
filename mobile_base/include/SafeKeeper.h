@@ -32,21 +32,17 @@ class SafeKeeper
 private:
 	ros::NodeHandle mNodeHandle;    			/// ROS node handle
 
-	ros::Subscriber mUltrasoneDisableMotor_sub;	/// Subscriber to DisableMotor topic from ultrasone sensors
-	ros::Subscriber mBumperFeedback_sub;		/// Subscriber to arduino Bumper sensor feedback
+	ros::Subscriber mBumperFeedback_sub;		/// Subscriber to arduino bumper sensor feedback
 
 	ros::Publisher	mBumperDisableMotor_pub;	/// Publisher for disabling forward/backward movement, triggered by bumper sensors
 	ros::Publisher  mMovement_pub;				/// Publisher to control the motors
 	BumperState 	mBumperState;
 
-	bool mFrontDisabledByUltrasone;				/// Checks whether motor is disabled by front ultrasone sensors
-	bool mRearDisabledByUltrasone;				/// Checks whether motor is disabled by rear ultrasone sensors
 public:
 	SafeKeeper() :  mBumperState(BUMPER_NONE) {};
 
 	void init();
 	void bumperFeedbackCB(const std_msgs::UInt8 &msg);
-	void DisabledByUltrasoneCB(const mobile_base::DisableMotor &msg);
 };
 
 #endif /* SAFEKEEPER_H_ */
