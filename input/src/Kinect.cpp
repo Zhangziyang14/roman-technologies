@@ -9,41 +9,42 @@ sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
 sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
 IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image);
-sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image);
+sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplImage *rgb);
 
 /**
  * Processes the pointcloud and display feedback on the RGB image.
  */
-void processImage(IplImage *rgb, IplImage *pc)
+void processImage(IplImage *rgb, pcl::PointCloud<pcl::PointXYZ>::Ptr pc)
 {
 	// flip the images, moving right in front of the screen will move right on the screen
 	//cvFlip(rgb, rgb, 1);
 	//cvFlip(pc, pc, 1);
 
-	// center of the image
-	cv::Point p = cvPoint(pc->width >> 1, pc->height >> 1);
-
 	// convert IplImage pointcloud to pcl::PointCloud for later algorithms
-	pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud = iplImageToPointCloud(pc);
-	if (pointcloud == NULL)
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud = iplImageToPointCloud(pc);
+	if (pc == NULL)
 	{
 		ROS_ERROR("Failed to make pcl::PointCloud.");
 		return;
 	}
 
+	// center of the image
+	cv::Point p = cvPoint(pc->width >> 1, pc->height >> 1);
+
 	// find indices in the picture that are 'of interest'
 	std::vector<int> indices;
-	for (int y = 0; y < pc->height; y++)
+	for (uint32 y = 0; y < pc->height; y++)
 	{
-		for (int x = 0; x < pc->width; x++)
+		for (uint32 x = 0; x < pc->width; x++)
 		{
-			int depth = getDepthFromCloud(x, y, pc);
+			pcl::PointXYZ p = pc->at(x, y);
+			int depth = getDepthFromPoint(p);
 			if (depth == 0)	//) || depth > 3000)
 				continue;
 
-			if (*getPixel<float>(x, y, pc, 0) > -ROBOT_RADIUS &&
-				*getPixel<float>(x, y, pc, 0) < ROBOT_RADIUS &&
-				*getPixel<float>(x, y, pc, 1) < 0.f)
+			if (p.x > -ROBOT_RADIUS &&
+				p.x < ROBOT_RADIUS &&
+				p.y < 0.f)
 			{
 				indices.push_back(pc->width * y + x);
 			}
@@ -57,12 +58,12 @@ void processImage(IplImage *rgb, IplImage *pc)
 		float curvature;
 
 		// try to fit a plane on these points
-		pcl::computePointNormal<pcl::PointXYZ>(*pointcloud, indices, plane, curvature);
+		pcl::computePointNormal<pcl::PointXYZ>(*pc, indices, plane, curvature);
 
 		// all points above this fitted plane are considered obstacles and are colored red
 		for (std::vector<int>::iterator it = indices.begin(); it != indices.end(); it++)
 		{
-			float distance = getDistanceFromPointToPlane(plane, pointcloud->at(*it));
+			float distance = getDistanceFromPointToPlane(plane, pc->at(*it));
 			if (rgb)
 				*getPixel<uint8>(*it, rgb, distance > 0.05f ? 2 : 0) = 255;
 		}
@@ -79,8 +80,11 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 	// this provides image compression
 	image_transport::ImageTransport it(*n);
 	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
-	image_transport::Publisher image_pub = it.advertise("image", 1);
+	//image_transport::Publisher image_pub = it.advertise("image", 1);
+	ros::Publisher image_pub = n->advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
 	ros::Publisher cloud_pub = n->advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
+	pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
+
 
 	long unsigned int laserTime = ros::Time::now().toNSec();
 	bool captureRGB = false;
@@ -91,10 +95,10 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 		cv::Mat image, pointCloud;
 		//IplImage iplImage;
 
-		// is it required to capture RGB images ?
-		captureRGB = image_pub.getNumSubscribers() != 0;
 		// is it required to convert to point clouds and publish ?
 		captureCloud = cloud_pub.getNumSubscribers() != 0;
+		// is it required to capture RGB images ?
+		captureRGB = captureCloud || image_pub.getNumSubscribers() != 0;
 
 		if (capture->grab() == false)
 		{
@@ -111,7 +115,8 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 				rgb = image;
 			IplImage pc = pointCloud;
 
-			//processImage(captureRGB ? &rgb : NULL, &pc);
+			//pcl::PointCloud<pcl::PointXYZ>::Ptr pclpc = iplImageToPointCloud(&pc);
+			//processImage(captureRGB ? &rgb : NULL, pclpc);
 
 			// SLAM
 			if (laser_pub.getNumSubscribers() && ros::Time::now().toNSec() >= laserTime)
@@ -131,7 +136,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 
 			if (captureCloud)
 			{
-				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToPointCloud2(&pc);
+				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToRegisteredPointCloud2(&pc, &rgb);
 				cloud_pub.publish(cloudMsg);
 			}
 		}

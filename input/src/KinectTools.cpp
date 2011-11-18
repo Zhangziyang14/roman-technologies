@@ -154,15 +154,52 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image)
 /**
  * Converts IplImage's to sensor_msgs::PointCloud2Ptr
  */
-sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image)
+sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplImage *rgb)
 {
 	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
 	output->header.stamp = ros::Time::now();
-	output->width = image->width;
-	output->height = image->height;
+	output->width = pc->width;
+	output->height = pc->height;
 	output->is_dense = false;
-	//output->
+	output->point_step = 8*sizeof(float);
+	output->row_step = output->width * output->point_step;
+	sensor_msgs::PointField pf;
+	pf.name = "x";
+	pf.offset = 0;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "y";
+	pf.offset = 4;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "z";
+	pf.offset = 8;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "rgb";
+	pf.offset = 16;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
 
-	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
+	output->data.resize(size_t(pc->width * pc->height * output->point_step));
+	//output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
+	for (int y = 0; y < pc->height; y++)
+	{
+		for (int x = 0; x < pc->width; x++)
+		{
+			pcl::PointXYZRGB p;
+			p.x = *getPixel<float>(x, y, pc, 0);
+			p.y = *getPixel<float>(x, y, pc, 1);
+			p.z = *getPixel<float>(x, y, pc, 2);
+			p.r = *getPixel<uint8>(x, y, rgb, 2);
+			p.g = *getPixel<uint8>(x, y, rgb, 1);
+			p.b = *getPixel<uint8>(x, y, rgb, 0);
+			memcpy(&output->data[(y*pc->width + x) * output->point_step], &p, sizeof(pcl::PointXYZRGB));
+		}
+	}
 	return output;
 }

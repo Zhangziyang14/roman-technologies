@@ -22,8 +22,10 @@ rosbuild_genmsg()
 #rosbuild_gensrv()
 
 rosbuild_add_executable(sixpair sixpair.c)
-rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
+rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp) # src/slam_main.cpp src/recognitionmodel.cpp)
 rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
+
+#rosbuild_link_boost(Kinect filesystem)
 
 link_directories(/usr/local/lib )
 include_directories(/usr/local/include)
