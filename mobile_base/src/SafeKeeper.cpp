@@ -46,10 +46,10 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 		position_msg.data = SAFE_DISTANCE;
 	}
 
-	if(mFrontDisabledByUltrasone && mBumperState == BUMPER_REAR)
+	if(mBumperState == BUMPER_REAR)
 		mMovement_pub.publish(position_msg);
 
-	else if(mRearDisabledByUltrasone && mBumperState == BUMPER_FRONT)
+	else if(mBumperState == BUMPER_FRONT)
 		mMovement_pub.publish(position_msg);
 
 	disableBumper_msg.disableForward = false;
@@ -67,6 +67,7 @@ void SafeKeeper::init()
 {
 	// initialise subscribers
 	mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &SafeKeeper::bumperFeedbackCB, this);
+	mUltrasoneDisableMotor_sub = mNodeHandle.subscribe("disableMotorTopic", 10, &SafeKeeper::DisabledByUltrasoneCB, this);	
 
 	// initialise publishers
 	mBumperDisableMotor_pub = mNodeHandle.advertise<mobile_base::BumperDisableMotor>("/bumperDisableMotorTopic", 10);

@@ -61,7 +61,7 @@ void BaseController::init()
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
 	mUltrasone_pub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
-	mDisableMotor_pub = mNodeHandle.advertise<std_msgs::UInt8>("DisableMotorTopic", 10);
+	mDisableMotor_pub = mNodeHandle.advertise<mobile_base::DisableMotor>("disableMotorTopic", 10);
 
 	ROS_INFO("BaseController initialised");
 }
