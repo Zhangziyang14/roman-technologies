@@ -60,8 +60,12 @@ void AutonomeController::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 		position_msg.data = 0.5;
 	}
 
-	mMovement_pub.publish(position_msg);
-
+	if(!disable_msg.disableForward && mBumperState == BUMPER_REAR) 
+		mMovement_pub.publish(position_msg);
+	
+	else if(!disable_msg.disableBackward && mBumperState == BUMPER_FRONT) 
+		mMovement_pub.publish(position_msg);
+	
 	disableBumper_msg.disableForward = false;
 	disableBumper_msg.disableBackward = false;
 

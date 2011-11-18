@@ -44,11 +44,12 @@ void BaseController::init()
 	//initialise subscribers
 	mKey_sub = mNodeHandle.subscribe("joy", 1, &BaseController::keyCB, this);
 	mSpeed_sub = mNodeHandle.subscribe("speedFeedbackTopic", 1, &BaseController::readCurrentSpeed, this);
-
+	mBumperDisableSub = mNodeHandle.subscribe("bumperDisableMotorTopic", 1, &BaseController::bumperDisableInputCB, this);
 	// initialise publishers
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
 	mUltrasone_pub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
+	
 	mBumperDisableBackwardMotion = false;
 	mBumperDisableForwardMotion = false;
 	ROS_INFO("BaseController initialised");
@@ -63,11 +64,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 	mobile_base::BaseMotorControl bmc_msg;
 	mobile_base::tweak tweak_msg;
 
-    // initialise values (or are they by default 0?)
-    bmc_msg.twist.linear.x = 0;
-    bmc_msg.twist.angular.z = 0;
-    bmc_msg.left_motor_speed = 0.f;
-    bmc_msg.right_motor_speed = 0.f;
+       // initialise values (or are they by default 0?)
+       bmc_msg.twist.linear.x = 0;
+       bmc_msg.twist.angular.z = 0;
+       bmc_msg.left_motor_speed = 0.f;
+       bmc_msg.right_motor_speed = 0.f;
 
 	// initialise tweak values
 	tweak_msg.scaleUp = false;
@@ -203,7 +204,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 		    }
 	    }
 
-	if (sendMsg && !mBumperDisableBackwardMotion && !mBumperDisableForwardMotion)
+	if (sendMsg)
 		mMotorControl_pub.publish(bmc_msg);
 }
 

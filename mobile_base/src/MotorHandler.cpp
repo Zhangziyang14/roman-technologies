@@ -20,13 +20,23 @@ void MotorHandler::publishRobotSpeed()
  */
 void MotorHandler::positionCB(const std_msgs::Float64& msg)
 {
+double currentRightPosition = mRightMotor.getPosition();
+double currentLeftPosition = mLeftMotor.getPosition();
+//double newRightPosition, newLeftPosition;
+
 	mLock = true;
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	mRightMotor.setPosition(mRightMotor.getPosition() + msg.data);
-	mLeftMotor.setPosition(mLeftMotor.getPosition() + msg.data);
-	mLock = false;
+	mRightMotor.setPosition(currentRightPosition + msg.data);
+	mLeftMotor.setPosition(currentLeftPosition + msg.data);
+	
+	//newRightPosition = mRightMotor.getPosition();
+	//newLeftPosition = mLeftMotor.getPosition();
+	
+//	if(((newRightPosition = currentRightPosition + msg.data - 0.1) && (newLeftPosition == currentLeftPosition + msg.data-0.1)) || (mDisableForwardMotion && msg.data > 0) ||  (mDisableBackwardMotion  && msg.data > 0))
+
+	//if(newRightPosition ==  currentRightPosition + msg.data &&  newLeftPosition == currentLeftPosition + msg.data)
 }
 
 /**
@@ -34,6 +44,12 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
  */
 void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
+	if(mCurrentSpeed.linear.x == 0)
+	{
+		ROS_INFO("CALLED!");
+		mLock = false;
+	}
+
 	if(mLock == false)
 	{
 		double left_vel  = msg.left_motor_speed;
