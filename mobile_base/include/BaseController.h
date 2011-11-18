@@ -5,6 +5,8 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/UInt8.h>
 #include <sensor_msgs/Joy.h>
+#include <mobile_base/sensorFeedback.h>
+#include <mobile_base/DisableMotor.h>
 #include <mobile_base/BaseMotorControl.h>
 #include <mobile_base/tweak.h>
 #include <MotorHandler.h>
@@ -13,11 +15,11 @@
 #include <math.h>
 #include <iostream>
 #include <std_msgs/Empty.h>
-#include <mobile_base/BumperDisableMotor.h>
 
-#define MAX_ANGULAR_AT_TOP_SPEED	0.5  // m/s
-#define MAX_ANGULAR_AT_LOW_SPEED	1.5  // m/s
-#define MAX_LINEAR_SPEED		0.5 // m/s
+#define EMERGENCY_STOP_DISTANCE 	60	//cm
+#define MAX_ANGULAR_AT_TOP_SPEED	0.5 // m/s
+#define MAX_ANGULAR_AT_LOW_SPEED	1.5 // m/s
+#define MAX_LINEAR_SPEED			0.5 // m/s
 
 enum UltrasoneActivate
 {
@@ -70,16 +72,14 @@ class BaseController
 protected:
 	ros::NodeHandle mNodeHandle;     		/// ROS node handle
 
-    ros::Subscriber mBumperDisableSub;		/// Listens to messages send by the bumpersensors that disables the movement
+	ros::Subscriber mUltrasone_sub;			/// Listens to distances from ultrasone sensors
 	ros::Subscriber mSpeed_sub;		 		/// Listens to Twist messages as feedback for robot's current speed
 	ros::Subscriber mKey_sub;        		/// Key input subscriber, reads key input data
 
+	ros::Publisher mDisableMotor_pub;		/// DisableMotor publisher, publishes disable messages to stop motor
 	ros::Publisher mMotorControl_pub;       /// Twist message publisher, publishes movement data for engines
 	ros::Publisher mTweak_pub;       		/// Integer message publisher, publishes integers for the DPAD buttons
 	ros::Publisher mUltrasone_pub;       	/// Integer message publisher, publishes integers to activate ultrasone sensors
-
-    bool mBumperDisableForwardMotion;		/// If true, forward motions are disabled by bumpers
-    bool mBumperDisableBackwardMotion;		/// If true, backward motions are disabled by bumpers
 
 	PS3Key mKeyPressed;  					/// Remembers the last pressed button
 	geometry_msgs::Twist mCurrentSpeed;		/// Holds current speed of the robot
@@ -106,11 +106,12 @@ public:
 
 	/// Listen to PS3 controller
 	void keyCB(const sensor_msgs::Joy& msg);
-	void readCurrentSpeed(const geometry_msgs::Twist& msg);
-	void bumperDisableInputCB(const mobile_base::BumperDisableMotor &msg);
-	void checkConnections();
 
-	inline void killNode(){ mNodeHandle.shutdown(); };
+	/// Read current speed for feedback control
+	void readCurrentSpeed(const geometry_msgs::Twist& msg);
+
+	/// Listen to ultrasone sensors to disable motors when needed
+	void ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg);
 
 	//inline double calcRobotAngularSpeed() { if (mCurrentSpeed.linear.x) return (1.0/mCurrentSpeed.linear.x*10.0) * SPEED_CONST;  else return 0.f; };
 	inline double calcRobotAngularSpeed() { return MAX_ANGULAR_AT_LOW_SPEED - ((MAX_ANGULAR_AT_LOW_SPEED - MAX_ANGULAR_AT_TOP_SPEED) * mCurrentSpeed.linear.x) / MAX_LINEAR_SPEED; };

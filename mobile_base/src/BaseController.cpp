@@ -8,6 +8,26 @@
 #include <BaseController.h>
 
 /**
+ * Receives data from ultrasone sensors and determines if forward or backward motion should be disabled.
+ */
+void BaseController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg)
+{
+	mobile_base::DisableMotor disable_msg;
+
+	// did the sensors on the front detect anything dangerously close?
+	disable_msg.disableForward = (msg.frontCenter > 0 && msg.frontCenter < EMERGENCY_STOP_DISTANCE) ||
+			(msg.frontLeft > 0 && msg.frontLeft < EMERGENCY_STOP_DISTANCE) ||
+			(msg.frontRight> 0 && msg.frontRight < EMERGENCY_STOP_DISTANCE);
+
+	// did the sensors on the back detect anything dangerously close?
+	disable_msg.disableBackward = (msg.rearCenter > 0 && msg.rearCenter < EMERGENCY_STOP_DISTANCE) ||
+			(msg.rearLeft > 0 && msg.rearLeft < EMERGENCY_STOP_DISTANCE) ||
+			(msg.rearRight> 0 && msg.rearRight < EMERGENCY_STOP_DISTANCE);
+
+	mDisableMotor_pub.publish(disable_msg);
+}
+
+/**
  * Reads the speed feedback from MotorHandler
  */
 void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
@@ -22,18 +42,9 @@ void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
 		ultrasone_msg.data = ULTRASONE_REAR;
 
 	if(msg.angular.z || msg.linear.x == 0)
-			ultrasone_msg.data = ULTRASONE_ALL;
+		ultrasone_msg.data = ULTRASONE_ALL;
 
-		mUltrasone_pub.publish(ultrasone_msg);
-}
-
-/**
- * Disables input when bumper sensors are activated
- */
-void BaseController::bumperDisableInputCB(const mobile_base::BumperDisableMotor &msg)
-{
-	mBumperDisableBackwardMotion = msg.disableBackward;
-	mBumperDisableForwardMotion = msg.disableForward;
+	mUltrasone_pub.publish(ultrasone_msg);
 }
 
 /**
@@ -44,14 +55,14 @@ void BaseController::init()
 	//initialise subscribers
 	mKey_sub = mNodeHandle.subscribe("joy", 1, &BaseController::keyCB, this);
 	mSpeed_sub = mNodeHandle.subscribe("speedFeedbackTopic", 1, &BaseController::readCurrentSpeed, this);
-	mBumperDisableSub = mNodeHandle.subscribe("bumperDisableMotorTopic", 1, &BaseController::bumperDisableInputCB, this);
+	mUltrasone_sub = mNodeHandle.subscribe("sensorFeedbackTopic", 1, &BaseController::ultrasoneFeedbackCB, this);
+
 	// initialise publishers
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
 	mUltrasone_pub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
-	
-	mBumperDisableBackwardMotion = false;
-	mBumperDisableForwardMotion = false;
+	mDisableMotor_pub = mNodeHandle.advertise<std_msgs::UInt8>("DisableMotorTopic", 10);
+
 	ROS_INFO("BaseController initialised");
 }
 
@@ -64,11 +75,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 	mobile_base::BaseMotorControl bmc_msg;
 	mobile_base::tweak tweak_msg;
 
-       // initialise values (or are they by default 0?)
-       bmc_msg.twist.linear.x = 0;
-       bmc_msg.twist.angular.z = 0;
-       bmc_msg.left_motor_speed = 0.f;
-       bmc_msg.right_motor_speed = 0.f;
+	// initialise values (or are they by default 0?)
+	bmc_msg.twist.linear.x = 0;
+	bmc_msg.twist.angular.z = 0;
+	bmc_msg.left_motor_speed = 0.f;
+	bmc_msg.right_motor_speed = 0.f;
 
 	// initialise tweak values
 	tweak_msg.scaleUp = false;
@@ -85,124 +96,124 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 	{
 		//stop after releasing a key
 		if (mKeyPressed == PS3_X || mKeyPressed == PS3_S)
-           sendMsg = true;
-      
-        mKeyPressed = PS3_NONE;    
-    }
+			sendMsg = true;
 
-	    switch (mControlMode)
-	    {
-	    case PS3_CONTROL_GAME:
-		    // only send stop messages once
-		    if (mPrevAngular == 0.f && msg.axes[PS3_AXIS_LEFT_HORIZONTAL] == 0.f)
-			    break;
+		mKeyPressed = PS3_NONE;
+	}
 
-		    //Turn at current position
-		    bmc_msg.twist.angular.z = calcRobotAngularSpeed() * msg.axes[PS3_AXIS_LEFT_HORIZONTAL];
-		    mPrevAngular = bmc_msg.twist.angular.z;
-		    sendMsg = true;
-		    break;
-	    case PS3_CONTROL_REMOTE_CONTROL:
-		    // only send stop messages once
-		    if (mPrevLeftSpeed == 0.f && mPrevRightSpeed == 0.f && msg.axes[PS3_AXIS_LEFT_VERTICAL] == 0.f &&
-			    msg.axes[PS3_AXIS_RIGHT_VERTICAL])
-			    break;
+	switch (mControlMode)
+	{
+	case PS3_CONTROL_GAME:
+		// only send stop messages once
+		if (mPrevAngular == 0.f && msg.axes[PS3_AXIS_LEFT_HORIZONTAL] == 0.f)
+			break;
 
-		    // scale between 0 and MAX_LINEAR_SPEED.
-		    bmc_msg.left_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_LEFT_VERTICAL];
-		    bmc_msg.right_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_RIGHT_VERTICAL];
-		    mPrevLeftSpeed = bmc_msg.left_motor_speed;
-		    mPrevRightSpeed = bmc_msg.right_motor_speed;
-		    sendMsg = true;
-		    break;
-	    default:
-		    break;
-	    }
+		//Turn at current position
+		bmc_msg.twist.angular.z = calcRobotAngularSpeed() * msg.axes[PS3_AXIS_LEFT_HORIZONTAL];
+		mPrevAngular = bmc_msg.twist.angular.z;
+		sendMsg = true;
+		break;
+	case PS3_CONTROL_REMOTE_CONTROL:
+		// only send stop messages once
+		if (mPrevLeftSpeed == 0.f && mPrevRightSpeed == 0.f && msg.axes[PS3_AXIS_LEFT_VERTICAL] == 0.f &&
+				msg.axes[PS3_AXIS_RIGHT_VERTICAL])
+			break;
 
-	    // iterate all buttons
-	    for (size_t i = 0; i < msg.buttons.size(); i++)
-	    {
-		    // is this button pressed?
-		    if(msg.buttons[i] == 0)
-			    continue;
+		// scale between 0 and MAX_LINEAR_SPEED.
+		bmc_msg.left_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_LEFT_VERTICAL];
+		bmc_msg.right_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_RIGHT_VERTICAL];
+		mPrevLeftSpeed = bmc_msg.left_motor_speed;
+		mPrevRightSpeed = bmc_msg.right_motor_speed;
+		sendMsg = true;
+		break;
+	default:
+		break;
+	}
 
-		    switch(i)
-		    {
-		    case PS3_X: // forward motion
-		    case PS3_S: // backward motion
-		    {
-			    if (mControlMode != PS3_CONTROL_GAME)
-				    break;
+	// iterate all buttons
+	for (size_t i = 0; i < msg.buttons.size(); i++)
+	{
+		// is this button pressed?
+		if(msg.buttons[i] == 0)
+			continue;
 
-			    //Accelerate when X button is pressed and reverse when square button is pressed
-			    float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
-			    bmc_msg.twist.linear.x = lin_speed * msg.axes[i];	
-                
-                mKeyPressed = i == PS3_X ? PS3_X : PS3_S;
-        	    sendMsg = true;
-			    break;
-		    }
+		switch(i)
+		{
+		case PS3_X: // forward motion
+		case PS3_S: // backward motion
+		{
+			if (mControlMode != PS3_CONTROL_GAME)
+				break;
 
-		    //Brake if O button has been pressed
-		    case PS3_O:
-			    bmc_msg.twist.linear.x = 0;
-			    bmc_msg.twist.angular.z = 0;
-			    sendMsg = true;
-			    break;
+			//Accelerate when X button is pressed and reverse when square button is pressed
+			float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
+			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];
 
-		    // scale up/down current P-I-D value
-		    case PS3_UP:
-		    case PS3_DOWN:
-			    if(mKeyPressed != PS3_NONE)
-				    break;
+			mKeyPressed = i == PS3_X ? PS3_X : PS3_S;
+			sendMsg = true;
+			break;
+		}
 
-			    if (i == PS3_UP)
-				    tweak_msg.scaleUp = true;
-			    if (i == PS3_DOWN)
-				    tweak_msg.scaleDown = true;
-			    mTweak_pub.publish(tweak_msg);
-			    mKeyPressed = PS3Key(i);
-			    break;
+		//Brake if O button has been pressed
+		case PS3_O:
+			bmc_msg.twist.linear.x = 0;
+			bmc_msg.twist.angular.z = 0;
+			sendMsg = true;
+			break;
 
-		    // toggle through P-I-D focus
-		    case PS3_RIGHT:
-		    case PS3_LEFT:
-			    if(mKeyPressed != PS3_NONE)
-				    break;
+			// scale up/down current P-I-D value
+		case PS3_UP:
+		case PS3_DOWN:
+			if(mKeyPressed != PS3_NONE)
+				break;
 
-			    if (i == PS3_LEFT)
-				    tweak_msg.toggleForward = true;
-			    if (i == PS3_RIGHT)
-				    tweak_msg.toggleBackward = true;
-			    mTweak_pub.publish(tweak_msg);
-			    mKeyPressed = PS3Key(i);
-			    break;
+			if (i == PS3_UP)
+				tweak_msg.scaleUp = true;
+			if (i == PS3_DOWN)
+				tweak_msg.scaleDown = true;
+			mTweak_pub.publish(tweak_msg);
+			mKeyPressed = PS3Key(i);
+			break;
 
-		    // select a motor
-		    case PS3_L1:
-		    case PS3_R1:
-			    if(mKeyPressed != PS3_NONE)
-				    break;
+			// toggle through P-I-D focus
+		case PS3_RIGHT:
+		case PS3_LEFT:
+			if(mKeyPressed != PS3_NONE)
+				break;
 
-			    tweak_msg.motorID = i == PS3_L1 ? MID_LEFT : MID_RIGHT;
-			    mTweak_pub.publish(tweak_msg);
-			    mKeyPressed = PS3Key(i);
-			    break;
+			if (i == PS3_LEFT)
+				tweak_msg.toggleForward = true;
+			if (i == PS3_RIGHT)
+				tweak_msg.toggleBackward = true;
+			mTweak_pub.publish(tweak_msg);
+			mKeyPressed = PS3Key(i);
+			break;
 
-		    // toggle control mode
-		    case PS3_SELECT:
-			    if (mKeyPressed != PS3_NONE)
-				    break;
+			// select a motor
+		case PS3_L1:
+		case PS3_R1:
+			if(mKeyPressed != PS3_NONE)
+				break;
 
-			    mControlMode = PS3ControlMode((mControlMode + 1) % PS3_CONTROL_TOTAL);
-			    ROS_INFO("Switched control mode to %s.", mControlMode == PS3_CONTROL_GAME ? "Game" : "Remote Control");
-			    mKeyPressed = PS3_SELECT;
-			    break;
+			tweak_msg.motorID = i == PS3_L1 ? MID_LEFT : MID_RIGHT;
+			mTweak_pub.publish(tweak_msg);
+			mKeyPressed = PS3Key(i);
+			break;
 
-		    default:
-			    break;
-		    }
-	    }
+			// toggle control mode
+		case PS3_SELECT:
+			if (mKeyPressed != PS3_NONE)
+				break;
+
+			mControlMode = PS3ControlMode((mControlMode + 1) % PS3_CONTROL_TOTAL);
+			ROS_INFO("Switched control mode to %s.", mControlMode == PS3_CONTROL_GAME ? "Game" : "Remote Control");
+			mKeyPressed = PS3_SELECT;
+			break;
+
+		default:
+			break;
+		}
+	}
 
 	if (sendMsg)
 		mMotorControl_pub.publish(bmc_msg);

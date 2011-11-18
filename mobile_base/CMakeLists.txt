@@ -23,7 +23,7 @@ rosbuild_genmsg()
 
 rosbuild_add_executable(BaseController src/BaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
-rosbuild_add_executable(AutonomeController src/AutonomeController.cpp)
+rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

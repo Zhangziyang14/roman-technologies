@@ -30,13 +30,6 @@ double currentLeftPosition = mLeftMotor.getPosition();
 
 	mRightMotor.setPosition(currentRightPosition + msg.data);
 	mLeftMotor.setPosition(currentLeftPosition + msg.data);
-	
-	//newRightPosition = mRightMotor.getPosition();
-	//newLeftPosition = mLeftMotor.getPosition();
-	
-//	if(((newRightPosition = currentRightPosition + msg.data - 0.1) && (newLeftPosition == currentLeftPosition + msg.data-0.1)) || (mDisableForwardMotion && msg.data > 0) ||  (mDisableBackwardMotion  && msg.data > 0))
-
-	//if(newRightPosition ==  currentRightPosition + msg.data &&  newLeftPosition == currentLeftPosition + msg.data)
 }
 
 /**
@@ -44,11 +37,9 @@ double currentLeftPosition = mLeftMotor.getPosition();
  */
 void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
+	//Checks whether the robot was not already moving
 	if(mCurrentSpeed.linear.x == 0)
-	{
-		ROS_INFO("CALLED!");
 		mLock = false;
-	}
 
 	if(mLock == false)
 	{
