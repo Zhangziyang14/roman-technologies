@@ -20,9 +20,9 @@ void MotorHandler::publishRobotSpeed()
  */
 void MotorHandler::positionCB(const std_msgs::Float64& msg)
 {
-double currentRightPosition = mRightMotor.getPosition();
-double currentLeftPosition = mLeftMotor.getPosition();
-//double newRightPosition, newLeftPosition;
+	double currentRightPosition = mRightMotor.getPosition();
+	double currentLeftPosition = mLeftMotor.getPosition();
+	//double newRightPosition, newLeftPosition;
 
 	mLock = true;
 	mRightMotor.setMode(CM_POSITION_MODE);
@@ -146,10 +146,10 @@ void MotorHandler::init(char *path)
 	mPositionSub = mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mDisableSub = mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
 
-	mLock = false;
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
 
+	mLock = false;
 	ROS_INFO("Initialising completed.");
 }
 

@@ -9,11 +9,26 @@
 #include <mobile_base/DisableMotor.h>
 #include <BaseController.h>
 #include <std_msgs/Float64.h>
-//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
 #define WHEEL_RADIUS 0.1475
 #define BASE_RADIUS 0.25
 #define PID_TWEAK_STEP 0.01
+
+#define AUTOSPEED	0.5
+
+#define SPEED_AT_75P mCurrentSpeed.linear.x*0.75
+#define SPEED_AT_125P mCurrentSpeed.linear.x*1.25
+
+enum AutoCommand
+{
+	MOVE_FORWARD,
+	MOVE_BACKWARD,
+	TURN_LEFT,
+	TURN_RIGHT,
+	STOP,
+	NUDGE_LEFT,
+	NUDGE_RIGHT,
+};
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
@@ -25,6 +40,7 @@ protected:
     ros::Subscriber mTwistSub;			/// Listens to Twist messages for movement
     ros::Subscriber mPositionSub;		/// Listens to integer messages for positioning
     ros::Subscriber mTweakPIDSub;		/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
+    ros::Subscriber mAutonomeSub;		/// Listens to movement commands from autonome controller
 
     ros::Publisher mSpeedPub;			/// Publishes robot's speed
 
@@ -62,7 +78,6 @@ public:
     void moveCB(const mobile_base::BaseMotorControl& msg);
     void positionCB(const std_msgs::Float64& msg);
     void tweakCB(const mobile_base::tweak msg);
-    void checkMotorConnections(char* path);
 
     inline double getBaseRadius()
     {

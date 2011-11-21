@@ -105,7 +105,6 @@ ros::Subscriber<std_msgs::UInt8> activate_sub("/sensorActivateTopic", &activateS
 //topic that issues a warning when bumper hits something
 ros::Publisher bumper_pub("/bumperFeedbackTopic", &bump_msg);
 
-
 void setup()
 {
   //attach interrupt 0(= pin 2) 
@@ -128,9 +127,6 @@ void setup()
   nh.subscribe(activate_sub);
   nh.advertise(bumper_pub);
 };
-
-
-
 
 void loop()
 {

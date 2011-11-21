@@ -2,7 +2,7 @@
  * SafeKeeper.cpp
  *
  *  Created on: Oct 20, 2011
- *      Author: hans
+ *      Author: wilson
  */
 
 #include "SafeKeeper.h"
@@ -80,4 +80,3 @@ int main(int argc, char **argv)
 	ros::spin();
 	return 0;
 }
-
