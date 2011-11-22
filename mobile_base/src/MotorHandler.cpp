@@ -74,9 +74,42 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 }
 
 /**
+ * Speed control for autonome control
+ */
+void MotorHandler::autoMoveCB(const mobile_base::AutoMotorControl& msg)
+{
+	switch(msg.command)
+	{
+	case NUDGE_LEFT:
+		nudgeToLeft(msg.speed);
+		break;
+	case NUDGE_RIGHT:
+		nudgeToRight(msg.speed);
+		break;
+	case MOVE_FORWARD:
+		moveForward(msg.speed);
+		break;
+	case MOVE_BACKWARD:
+		moveBackward(msg.speed);
+		break;
+	case TURN_LEFT:
+		turnLeft(msg.speed);
+		break;
+	case TURN_RIGHT:
+		turnRight(msg.speed);
+		break;
+	case STOP:
+		stop();
+		break;
+	default:
+		break;
+	}
+}
+
+/**
  * Called when a Twist message is received over the motor topic.
  */
-void MotorHandler::tweakCB(const mobile_base::tweak msg)
+void MotorHandler::tweakCB(const mobile_base::tweak& msg)
 {
 	Motor *motor = mMotorId == MID_LEFT ? &mLeftMotor : &mRightMotor;
 
@@ -141,10 +174,11 @@ void MotorHandler::init(char *path)
 {
 	mSpeedPub = mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
 
-	mTweakPIDSub = mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
-	mTwistSub = mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
-	mPositionSub = mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
-	mDisableSub = mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
+	mTweakPIDSub 	= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
+	mTwistSub		= mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
+	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
+	mDisableSub 	= mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
+	mAutonomeSub 	= mNodeHandle.subscribe("/autoMovementTopic", 10, &MotorHandler::autoMoveCB, this);
 
 	mLeftMotor.init(path);
 	mRightMotor.init(path);

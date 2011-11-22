@@ -9,15 +9,13 @@
 #include <mobile_base/DisableMotor.h>
 #include <BaseController.h>
 #include <std_msgs/Float64.h>
+#include <mobile_base/AutoMotorControl.h>
 
-#define WHEEL_RADIUS 0.1475
-#define BASE_RADIUS 0.25
-#define PID_TWEAK_STEP 0.01
+#define WHEEL_RADIUS 	0.1475
+#define BASE_RADIUS 	0.25
+#define PID_TWEAK_STEP 	0.01
 
-#define AUTOSPEED	0.5
-
-#define SPEED_AT_75P mCurrentSpeed.linear.x*0.75
-#define SPEED_AT_125P mCurrentSpeed.linear.x*1.25
+#define AUTOSPEED		0.5
 
 enum AutoCommand
 {
@@ -75,9 +73,10 @@ public:
     void init(char *path);
 
     void publishRobotSpeed();
+    void autoMoveCB(const mobile_base::AutoMotorControl& msg);
     void moveCB(const mobile_base::BaseMotorControl& msg);
     void positionCB(const std_msgs::Float64& msg);
-    void tweakCB(const mobile_base::tweak msg);
+    void tweakCB(const mobile_base::tweak& msg);
 
     inline double getBaseRadius()
     {
@@ -87,6 +86,34 @@ public:
     };
 
     void disableMotorCB(const mobile_base::DisableMotor &msg);
+
+    /**
+     * Movement for reactive object avoidance
+     */
+
+    //Nudge the robot a bit to the left
+    //standard speed or current speed?
+    inline void nudgeToLeft(double speed){ mRightMotor.setLSpeed(0.75* speed); mLeftMotor.setLSpeed(speed); };
+
+    //Nudge the robot a bit to the right
+    //standard speed or current speed?
+    inline void nudgeToRight(double speed){ mRightMotor.setLSpeed(speed); mLeftMotor.setLSpeed(0.75*speed); };
+
+    //Moves the robot forward
+    inline void moveForward(double speed){ mRightMotor.setLSpeed(speed); mLeftMotor.setLSpeed(speed); };
+
+    //Moves the robot backwards
+    inline void moveBackward(double speed){ mRightMotor.setLSpeed(-speed); mLeftMotor.setLSpeed(-speed); };
+
+    //Stops the robot
+    inline void stop(){ mRightMotor.setLSpeed(0); mLeftMotor.setLSpeed(0); };
+
+    //Turns the robot to the left
+    inline void turnLeft(double speed){ mRightMotor.setLSpeed(speed); mLeftMotor.setLSpeed(-speed); };
+
+    //Turns the robot to the right
+    inline void turnRight(double speed){ mRightMotor.setLSpeed(-speed); mLeftMotor.setLSpeed(speed); };
 };
+
 
 #endif /* __MOTORHANDLER_H */

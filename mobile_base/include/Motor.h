@@ -84,6 +84,7 @@ public:
     void init(char *path);
 
     void setMode(ControlMode mode);
+    void setLSpeed(double speed);
     void setSpeed(double speed);
     void setPosition(double position);
     void setAcceleration(double aceleration);

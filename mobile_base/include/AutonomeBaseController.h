@@ -12,12 +12,24 @@
 #include <mobile_base/sensorFeedback.h>
 #include <mobile_base/activateSensors.h>
 #include <mobile_base/BaseMotorControl.h>
+#include <mobile_base/AutoMotorControl.h>
 #include <std_msgs/UInt8.h>
 #include <geometry_msgs/Twist.h>
 
 #define STANDARD_SPEED 						0.5			// [m/s]
 #define STANDARD_ANGULAR_SPEED 				0.5			// [m/s]
 #define OBJECT_AVOIDANCE_DISTANCE			30			// [cm]
+
+enum AutoCommand
+{
+	MOVE_FORWARD,
+	MOVE_BACKWARD,
+	TURN_LEFT,
+	TURN_RIGHT,
+	STOP,
+	NUDGE_LEFT,
+	NUDGE_RIGHT,
+};
 
 enum UltrasoneActivate
 {
@@ -41,19 +53,19 @@ enum State
 class AutonomeBaseController
 {
 private:
-	ros::NodeHandle mNodeHandle;			/// ROS node handle
-	ros::Publisher mAutoCommand_pub;		/// Publishes auto movement commands
+	ros::NodeHandle mNodeHandle;				/// ROS node handle
+	ros::Publisher mAutoCommand_pub;			/// Publishes auto movement commands
 	ros::Publisher mCommand_pub;				/// Publishes twist messages to movementTopic
-	ros::Publisher mSensorActivate_pub;		/// Activates ultrasone sensors on arduino
+	ros::Publisher mSensorActivate_pub;			/// Activates ultrasone sensors on arduino
 
-	ros::Subscriber mNavigation_sub;		/// Listens to twist messages from ros navigation stack
-	ros::Subscriber mUltrasone_sub;			/// Listens to distances from ultrasone sensors
-	geometry_msgs::Twist mTwist; 			/// Twist message to be published over movementTopic
-	mobile_base::BaseMotorControl mCommand;	/// Motor command containing twist message
+	ros::Subscriber mNavigation_sub;			/// Listens to twist messages from ros navigation stack
+	ros::Subscriber mUltrasone_sub;				/// Listens to distances from ultrasone sensors
+	geometry_msgs::Twist mTwist; 				/// Twist message to be published over movementTopic
+	mobile_base::BaseMotorControl mCommand;		/// Motor command containing twist message
 
-	State mCurrentState;					/// Keeps track of the current state for reactive object avoidance
-	double *mDistance;						/// Distance to object (if any) in the direction of the robot's movement
-	bool mLock;								/// Blocks any publishes to movementTopic except for course correction
+	State mCurrentState;						/// Keeps track of the current state for reactive object avoidance
+	double *mDistance;							/// Distance to object (if any) in the direction of the robot's movement
+	bool mLock;									/// Blocks any publishes to movementTopic except for course correction
 
 	double mFront, mFrontLeft, mFrontRight, mLeft, mRight, mRear, mRearLeft, mRearRight;
 
@@ -105,31 +117,72 @@ public:
 	 * Movement for reactive object avoidance
 	 */
 
+	mobile_base::AutoMotorControl autoCommand;
+
 	//Nudge the robot a bit to the left
 	//standard speed or current speed?
-	inline void nudgeToLeft(double speed){ mCommand.left_motor_speed = 0.75*speed; mCommand.right_motor_speed = speed; mCommand_pub.publish(mCommand);};
+	inline void nudgeToLeft(double speed)
+	{
+		autoCommand.command = NUDGE_LEFT;
+		autoCommand.speed 	= speed;
+
+		mAutoCommand_pub.publish(autoCommand);
+	};
 
 	//Nudge the robot a bit to the right
 	//standard speed or current speed?
-	inline void nudgeToRight(double speed){mCommand.left_motor_speed = speed; mCommand.right_motor_speed = 0.75*speed; mCommand_pub.publish(mCommand);};
+	inline void nudgeToRight(double speed)
+	{
+		autoCommand.command = NUDGE_RIGHT;
+		autoCommand.speed 	= speed;
+
+		mAutoCommand_pub.publish(autoCommand);
+	};
 
 	//Moves the robot forward
-	inline void moveForward(double speed){ mCommand.left_motor_speed = speed; mCommand.right_motor_speed = speed; mCommand_pub.publish(mCommand);};
+	inline void moveForward(double speed)
+	{
+		autoCommand.command = MOVE_FORWARD;
+		autoCommand.speed 	= speed;
+
+		mAutoCommand_pub.publish(autoCommand);
+	};
 
 	//Moves the robot backwards
-	inline void moveBackward(double speed){ mCommand.left_motor_speed = -speed; mCommand.right_motor_speed = -speed; mCommand_pub.publish(mCommand);};
+	inline void moveBackward(double speed)
+	{
+		autoCommand.command = MOVE_BACKWARD;
+		autoCommand.speed 	= speed;
+
+		mAutoCommand_pub.publish(autoCommand);
+	};
 
 	//Stops the robot
-	inline void stop(){ mCommand.left_motor_speed = 0; mCommand.right_motor_speed = 0; mCommand_pub.publish(mCommand); };
+	inline void stop()
+	{
+		autoCommand.command = STOP;
+		autoCommand.speed 	= 0;
+
+		mAutoCommand_pub.publish(autoCommand);
+	};
 
 	//Turns the robot to the left
-	inline void turnLeft(double speed){ stop(); mCommand.left_motor_speed = -speed; mCommand.right_motor_speed = speed; mCommand_pub.publish(mCommand); };
+	inline void turnLeft(double speed)
+	{
+		autoCommand.command = TURN_LEFT;
+		autoCommand.speed 	= speed;
+
+		mAutoCommand_pub.publish(autoCommand);
+	};
 
 	//Turns the robot to the right
-	inline void turnRight(double speed){ stop(); mCommand.left_motor_speed = speed; mCommand.right_motor_speed = -speed; mCommand_pub.publish(mCommand); };
+	inline void turnRight(double speed)
+	{
+		autoCommand.command = TURN_RIGHT;
+		autoCommand.speed 	= speed;
 
-
-
+		mAutoCommand_pub.publish(autoCommand);
+	};
 };
 
 #endif /* AUTONOMEBASECONTROLLER_H_ */

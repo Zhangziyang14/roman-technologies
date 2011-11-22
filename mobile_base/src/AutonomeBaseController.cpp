@@ -297,7 +297,7 @@ State AutonomeBaseController::backtrack()
 void AutonomeBaseController::init()
 {
 	//initialise publishers
-	mAutoCommand_pub 	= mNodeHandle.advertise<std_msgs::UInt8>("/autoMovementTopic", 1);
+	mAutoCommand_pub 	= mNodeHandle.advertise<mobile_base::AutoMotorControl>("/autoMovementTopic", 1);
 	mCommand_pub 		= mNodeHandle.advertise<mobile_base::BaseMotorControl>("/movementTopic", 10);
 	mSensorActivate_pub = mNodeHandle.advertise<mobile_base::activateSensors>("/sensorActivateTopic", 1);
 
