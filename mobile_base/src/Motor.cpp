@@ -68,22 +68,6 @@ void Motor::setSpeed(double speed)
 }
 
 /**
-  * Sets speed of the motor when in SPEED_MODE
- */
-void Motor::setLSpeed(double speed)
-{
-	if (cmode != CM_SPEED_MODE)
-	{
-        std::cout << "Motor not in speed mode, setting it now." << std::endl;
-        setMode(CM_SPEED_MODE);
-
-		setAcceleration(DEFAULT_ACCELERATION);
-	}
-
-    motor_->setLinearSpeed(speed);
-}
-
-/**
   * Sets position of the motor when in POSITION_MODE
  */
 void Motor::setPosition(double position)

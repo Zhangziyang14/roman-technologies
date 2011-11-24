@@ -2,7 +2,7 @@
  * SafeKeeper.h
  *
  *  Created on: Oct 20, 2011
- *      Author: wilson
+ *      Author: hans
  */
 
 #ifndef SAFEKEEPER_H_

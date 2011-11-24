@@ -22,7 +22,6 @@ rosbuild_genmsg()
 #rosbuild_gensrv()
 
 rosbuild_add_executable(BaseController src/BaseController.cpp)
-rosbuild_add_executable(AutonomeBaseController src/AutonomeBaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
 rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
 

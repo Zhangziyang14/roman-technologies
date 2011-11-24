@@ -14,7 +14,6 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
-#include <std_msgs/Empty.h>
 
 #define EMERGENCY_STOP_DISTANCE 	60	// [cm]
 #define MAX_ANGULAR_AT_TOP_SPEED	0.5 // [m/s]
