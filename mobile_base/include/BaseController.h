@@ -3,7 +3,6 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Int32.h>
-#include <std_msgs/UInt8.h>
 #include <sensor_msgs/Joy.h>
 #include <mobile_base/sensorFeedback.h>
 #include <mobile_base/DisableMotor.h>
@@ -20,21 +19,13 @@
 #define MAX_ANGULAR_AT_LOW_SPEED	1.5 // [m/s]
 #define MAX_LINEAR_SPEED			0.5 // [m/s]
 
-enum UltrasoneActivate
-{
-	NOTHING,
-	ULTRASONE_FRONT,
-	ULTRASONE_REAR,
-	ULTRASONE_ALL,
-};
-
 enum PS3Key
 {
 	PS3_NONE                = -1,
-	PS3_SELECT				= 0,
-	PS3_LEFT_JOYSTICK		= 1,
-	PS3_RIGHT_JOYSTICK		= 2,
-	PS3_START				= 3,
+	PS3_SELECT		= 0,
+	PS3_LEFT_JOYSTICK	= 1,
+	PS3_RIGHT_JOYSTICK	= 2,
+	PS3_START		= 3,
 	PS3_UP                  = 4,
 	PS3_RIGHT               = 5,
 	PS3_DOWN                = 6,
@@ -78,7 +69,6 @@ protected:
 	ros::Publisher mDisableMotor_pub;		/// DisableMotor publisher, publishes disable messages to stop motor
 	ros::Publisher mMotorControl_pub;       /// Twist message publisher, publishes movement data for engines
 	ros::Publisher mTweak_pub;       		/// Integer message publisher, publishes integers for the DPAD buttons
-	ros::Publisher mUltrasone_pub;       	/// Integer message publisher, publishes integers to activate ultrasone sensors
 
 	PS3Key mKeyPressed;  					/// Remembers the last pressed button
 	geometry_msgs::Twist mCurrentSpeed;		/// Holds current speed of the robot

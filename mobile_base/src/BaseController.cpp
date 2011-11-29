@@ -15,9 +15,10 @@ void BaseController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg)
 	mobile_base::DisableMotor disable_msg;
 
 	// did the sensors on the front detect anything dangerously close?
-	disable_msg.disableForward = (msg.frontCenter > 0 && msg.frontCenter < EMERGENCY_STOP_DISTANCE) ||
-			(msg.frontLeft > 0 && msg.frontLeft < EMERGENCY_STOP_DISTANCE) ||
-			(msg.frontRight> 0 && msg.frontRight < EMERGENCY_STOP_DISTANCE);
+	disable_msg.disableForward = (msg.frontLeftCenter > 0 && msg.frontLeftCenter < EMERGENCY_STOP_DISTANCE) || 
+				    (msg.frontRightCenter > 0 && msg.frontRightCenter < EMERGENCY_STOP_DISTANCE) ||
+				    (msg.frontLeft > 0 && msg.frontLeft < EMERGENCY_STOP_DISTANCE) ||
+				    (msg.frontRight> 0 && msg.frontRight < EMERGENCY_STOP_DISTANCE);
 
 	// did the sensors on the back detect anything dangerously close?
 	disable_msg.disableBackward = (msg.rearCenter > 0 && msg.rearCenter < EMERGENCY_STOP_DISTANCE) ||
@@ -33,18 +34,6 @@ void BaseController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg)
 void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
 {
 	mCurrentSpeed = msg;
-	std_msgs::UInt8 ultrasone_msg;
-
-	if(msg.linear.x > 0)
-		ultrasone_msg.data = ULTRASONE_FRONT;
-
-	if(msg.linear.x < 0)
-		ultrasone_msg.data = ULTRASONE_REAR;
-
-	if(msg.angular.z || msg.linear.x == 0)
-		ultrasone_msg.data = ULTRASONE_ALL;
-
-	mUltrasone_pub.publish(ultrasone_msg);
 }
 
 /**
@@ -60,7 +49,6 @@ void BaseController::init()
 	// initialise publishers
 	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
-	mUltrasone_pub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
 	mDisableMotor_pub = mNodeHandle.advertise<mobile_base::DisableMotor>("disableMotorTopic", 10);
 
 	ROS_INFO("BaseController initialised");

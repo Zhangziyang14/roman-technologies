@@ -9,7 +9,7 @@
 #include <mobile_base/DisableMotor.h>
 #include <BaseController.h>
 #include <std_msgs/Float64.h>
-#include <std_msgs/UInt8.h>
+#include <std_msgs/Bool.h>
 #include <mobile_base/sensorFeedback.h>
 #include <limits>
 
@@ -18,6 +18,9 @@
 #define WHEEL_RADIUS 	0.1475
 #define BASE_RADIUS 	0.25
 #define PID_TWEAK_STEP 	0.01
+#define ULTRASONE_ALL	true
+#define ULTRASONE_NONE	false
+
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
 {
@@ -31,24 +34,24 @@ protected:
     ros::Subscriber mTweakPIDSub;		/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
     ros::Subscriber mDummySub;			/// Listens to dummy velocity commands
 
-    ros::Publisher mSpeedPub;			 /// Publishes robot's speed
-    ros::Publisher mUltrasoneActivatePub; /// Publishes messages to activate ultrasone sensors
+    ros::Publisher mSpeedPub;			/// Publishes robot's speed
+    ros::Publisher mUltrasoneActivatePub; 	/// Publishes messages to activate ultrasone sensors
 
-    geometry_msgs::Twist mCurrentSpeed;	 /// Twist message containing the current speed of the robot
-    double mLeftMotorSpeed;				 /// Current speeds for left wheel in rad/s
-    double mRightMotorSpeed;			 /// Current speeds for right wheel in rad/s
+    geometry_msgs::Twist mCurrentSpeed;	 	/// Twist message containing the current speed of the robot
+    double mLeftMotorSpeed;			/// Current speeds for left wheel in rad/s
+    double mRightMotorSpeed;			/// Current speeds for right wheel in rad/s
 
-    Motor mLeftMotor;					/// Motor for left wheel
-    Motor mRightMotor;					/// Motor for right wheel
+    Motor mLeftMotor;				/// Motor for left wheel
+    Motor mRightMotor;				/// Motor for right wheel
 
-    MotorId mMotorId;					/// Id of the motor that is currently being controlled
-    PIDParameter mPIDFocus;				/// One of the PID parameters that is to be changed on button events
+    MotorId mMotorId;				/// Id of the motor that is currently being controlled
+    PIDParameter mPIDFocus;			/// One of the PID parameters that is to be changed on button events
 
     bool mLock;
 
-   // bool mDisableForwardMotion;			/// If true, forward motions are disabled by ultrasone
-   // bool mDisableBackwardMotion;		/// If true, backward motions are disabled by ultrasone
-    int mFront, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
+    bool mDisableForwardMotion;		/// If true, forward motions are disabled by ultrasone
+    bool mDisableBackwardMotion;		/// If true, backward motions are disabled by ultrasone
+    int mFrontLeftCenter, mFrontRightCenter, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
 
 public:
     /// Constructor
@@ -80,7 +83,7 @@ public:
     	return BASE_RADIUS * 2 * std::max(abs(mLeftMotorSpeed), abs(mRightMotorSpeed)) / (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed));
     };
 
-    //void disableMotorCB(const mobile_base::DisableMotor &msg);
+   void disableMotorCB(const mobile_base::DisableMotor &msg);
 
 };
 

@@ -73,63 +73,36 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 	}
 }
 
+double left_speed, right_speed;
 void MotorHandler::dummyCB(const std_msgs::Float64& msg)
 {
+	left_speed 	= std::min(msg.data-msg.data*(100.0-mFrontRight)/100.0,msg.data);
+	right_speed  	= std::min(msg.data-msg.data*(100.0-mFrontLeft)/100.0,msg.data);
 
-	/*
-		// disable positive speeds ?
-		if (mDisableForwardMotion)
-		{
-			left_vel = std::min(0.0, left_vel);
-			right_vel = std::min(0.0, right_vel);
-		}
-		// disable negative speeds ?
-		if (mDisableBackwardMotion)
-		{
-			left_vel = std::max(0.0, left_vel);
-			right_vel = std::max(0.0, right_vel);
-		}
-	 */
-
-	while(true)
-	{
-		double left_speed = msg.data, right_speed = msg.data;
-
-		//if(msg.data > 0)
-		//{
-		//	if(mFrontRight < 100)
-				left_speed  = std::min(msg.data-msg.data*((100.0-mFrontRight)/100.0),msg.data);
-
-		//	if(mFront < 100)
-			//	right_speed = std::min(msg.data-msg.data*((100.0-mFront)/100.0),msg.data);
-
-//			if(mFrontLeft < 100)
-				right_speed = std::min(msg.data-msg.data*((100.0-mFrontLeft)/100.0),msg.data);
-	//	}
-/*
-		if(msg.data < 0)
-		{
-			right_speed = std::min(msg.data-msg.data*((100.0-mRearRight)/100.0),msg.data);
-			left_speed  = std::min(msg.data-msg.data*((100.0-mRearLeft)/100.0),msg.data);
-		}*/
-
-		/*if(mFrontLeft < 5+
-		 * 0 && mFrontLeft > 0)
-		{
-			right_speed = 0;
-		}
-
-		if(mFrontRight < 50 && mFrontRight > 0)
-		{
-			left_speed = 0;
-		}*/
-
-		mRightMotor.setSpeed(right_speed);
-		mLeftMotor.setSpeed(left_speed);
-		ros::spinOnce();
+	//check right and left side for walls
+	if(!(mLeft < 25 && mRight < 25))
+	{	
+		left_speed	= std::min(left_speed-left_speed*(30.0-mRight)/45.0, left_speed);
+		right_speed	= std::min(right_speed-right_speed*(30.0-mLeft)/45.0, right_speed);
 	}
-}
+	if(mFrontLeftCenter < 120)
+	{
+		if(mFrontLeft < 100)
+			right_speed = std::min(right_speed, right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0);
+		
+		else if(mFrontRight < 100)
+			left_speed = std::min(left_speed, left_speed-left_speed*(120.0-mFrontLeftCenter)/60.0);
+		else if(mFrontRight < 100 && mFrontLeft < 100)
+			right_speed = std::min(right_speed, right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0);
+		else
+			right_speed = std::min(right_speed, right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0);
+	}		
 
+	ROS_INFO("left_speed: %f, right_speed %f ",left_speed,right_speed);
+
+	mRightMotor.setSpeed(right_speed);
+	mLeftMotor.setSpeed(left_speed);
+}
 
 /**
  * Called when a Twist message is received over the motor topic.
@@ -173,7 +146,7 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 
 /**
  * Called when a forward/backward motion needs to be disabled/enabled
-
+*/
 void MotorHandler::disableMotorCB(const mobile_base::DisableMotor &msg)
 {
 	mDisableForwardMotion = msg.disableForward;
@@ -190,23 +163,23 @@ void MotorHandler::disableMotorCB(const mobile_base::DisableMotor &msg)
 		ROS_INFO("Disable forward.");
 	if (mDisableBackwardMotion)
 		ROS_INFO("Disable backward.");
-}*/
+}
 
 /**
  *	Reads distances from ultrasone sensors
  */
 void MotorHandler::ultrasoneCB(const mobile_base::sensorFeedback& msg)
 {
-	mFront	 	= msg.frontCenter;
-	mFrontLeft 	= msg.frontLeft;
-	mFrontRight	= msg.frontRight;
+	mFrontLeftCenter	= msg.frontLeftCenter;
+	mFrontRightCenter	= msg.frontRightCenter;
+	mFrontLeft 		= msg.frontLeft;
+	mFrontRight		= msg.frontRight;
 
-	mRear		= msg.rearCenter;
-	mRearLeft	= msg.rearLeft;
-	mRearRight	= msg.rearRight;
+	mRearLeft		= msg.rearLeft;
+	mRearRight		= msg.rearRight;
 
-	mLeft		= msg.left;
-	mRight		= msg.right;
+	mLeft			= msg.left;
+	mRight			= msg.right;
 }
 
 /**
@@ -216,11 +189,11 @@ void MotorHandler::init(char *path)
 {
 	//Initialise publishers
 	mSpeedPub = mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
-	mUltrasoneActivatePub = mNodeHandle.advertise<std_msgs::UInt8>("/sensorActivateTopic", 10);
+	mUltrasoneActivatePub = mNodeHandle.advertise<std_msgs::Bool>("/sensorActivateTopic", 10);
 
 	//Initialise subscribers
 	mTweakPIDSub 	= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
-	mTwistSub 		= mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
+	mTwistSub 	= mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
 	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub 	= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 	mDummySub		= mNodeHandle.subscribe("/dummyTopic", 10, &MotorHandler::dummyCB, this);
@@ -231,8 +204,8 @@ void MotorHandler::init(char *path)
 	mRightMotor.init(path);
 
 	//Initialise distances from ultrasone sensors
-	mRear = std::numeric_limits<int>::infinity();
-	mFront = std::numeric_limits<int>::infinity();
+	mFrontLeftCenter = std::numeric_limits<int>::infinity();
+	mFrontRightCenter = std::numeric_limits<int>::infinity();
 	mRearLeft = std::numeric_limits<int>::infinity();
 	mFrontLeft = std::numeric_limits<int>::infinity();
 	mRearRight = std::numeric_limits<int>::infinity();
@@ -241,7 +214,7 @@ void MotorHandler::init(char *path)
 	mLeft = std::numeric_limits<int>::infinity();
 
 	//Activate all ultrasone sensors
-	std_msgs::UInt8 activate_msg;
+	std_msgs::Bool activate_msg;
 	activate_msg.data = ULTRASONE_ALL;
 	mUltrasoneActivatePub.publish(activate_msg);
 
