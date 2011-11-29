@@ -21,8 +21,7 @@ void BaseController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg)
 				    (msg.frontRight> 0 && msg.frontRight < EMERGENCY_STOP_DISTANCE);
 
 	// did the sensors on the back detect anything dangerously close?
-	disable_msg.disableBackward = (msg.rearCenter > 0 && msg.rearCenter < EMERGENCY_STOP_DISTANCE) ||
-			(msg.rearLeft > 0 && msg.rearLeft < EMERGENCY_STOP_DISTANCE) ||
+	disable_msg.disableBackward = (msg.rearLeft > 0 && msg.rearLeft < EMERGENCY_STOP_DISTANCE) ||
 			(msg.rearRight> 0 && msg.rearRight < EMERGENCY_STOP_DISTANCE);
 
 	mDisableMotor_pub.publish(disable_msg);
