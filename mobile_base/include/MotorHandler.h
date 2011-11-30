@@ -27,7 +27,6 @@ class MotorHandler
 protected:
     ros::NodeHandle mNodeHandle;		/// ROS node handle
 
- // ros::Subscriber mDisableSub;		/// Listens to messages that disables the movement
     ros::Subscriber mTwistSub;			/// Listens to Twist messages for movement
     ros::Subscriber mPositionSub;		/// Listens to integer messages for positioning
     ros::Subscriber mUltrasoneSub;		/// Listens to distance from ultrasone sensors
@@ -49,15 +48,12 @@ protected:
 
     bool mLock;
 
-    bool mDisableForwardMotion;		/// If true, forward motions are disabled by ultrasone
-    bool mDisableBackwardMotion;		/// If true, backward motions are disabled by ultrasone
     int mFrontLeftCenter, mFrontRightCenter, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
 
 public:
     /// Constructor
     MotorHandler() : mNodeHandle("~"), mLeftMotor(MID_LEFT), mRightMotor(MID_RIGHT), mMotorId(MID_LEFT), mPIDFocus(PID_PARAM_I) { }
-		//mDisableForwardMotion(false), mDisableBackwardMotion(false) { }
-    
+		    
     /// Destructor
     /** Delete motor interface, close serial port, and shut down node handle */
     ~MotorHandler()
@@ -74,7 +70,6 @@ public:
     void dummyCB(const std_msgs::Float64& msg);
     void ultrasoneCB(const mobile_base::sensorFeedback& msg);
     void tweakCB(const mobile_base::tweak msg);
-    void checkMotorConnections(char* path);
 
     inline double getBaseRadius()
     {
@@ -82,9 +77,6 @@ public:
     		return 0.0;
     	return BASE_RADIUS * 2 * std::max(abs(mLeftMotorSpeed), abs(mRightMotorSpeed)) / (abs(mLeftMotorSpeed) + abs(mRightMotorSpeed));
     };
-
-   void disableMotorCB(const mobile_base::DisableMotor &msg);
-
 };
 
 #endif /* __MOTORHANDLER_H */

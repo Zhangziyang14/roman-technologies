@@ -28,8 +28,11 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	mRightMotor.setPosition(currentRightPosition + msg.data);
-	mLeftMotor.setPosition(currentLeftPosition + msg.data);
+	if((msg.data > 0 && mFrontLeftCenter > msg.data*100 && mFrontRightCenter > msg.data*100) || (msg.data < 0 && mRearLeft > std::abs(msg.data*100) && mRearRight > std::abs(msg.data*100)))
+	{
+		mRightMotor.setPosition(currentRightPosition + msg.data);
+		mLeftMotor.setPosition(currentLeftPosition + msg.data);
+	}
 }
 
 /**
@@ -76,32 +79,71 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 double left_speed, right_speed;
 void MotorHandler::dummyCB(const std_msgs::Float64& msg)
 {
-	left_speed 	= std::min(msg.data-msg.data*(100.0-mFrontRight)/100.0,msg.data);
-	right_speed  	= std::min(msg.data-msg.data*(100.0-mFrontLeft)/100.0,msg.data);
-
-	//check right and left side for walls
-	if(!(mLeft < 25 && mRight < 25))
-	{	
-		left_speed	= std::min(left_speed-left_speed*(30.0-mRight)/45.0, left_speed);
-		right_speed	= std::min(right_speed-right_speed*(30.0-mLeft)/45.0, right_speed);
-	}
-	if(mFrontLeftCenter < 120)
+	if(mLeft < 50 && mRight < 50 && mFrontLeftCenter < 80 && mFrontRightCenter < 80)
+		mLock = true;	
+	else 
+		if(mCurrentSpeed.linear.x == 0) 
+			mLock = false;	
+	
+	if(mLock)
 	{
-		if(mFrontLeft < 100)
-			right_speed = std::min(right_speed, right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0);
+		//Safe positioning while bumping
+		if((mCurrentSpeed.linear.x > 0 && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < 0 && (mRearLeft < 50 || mRearRight < 50)))
+		{
+			mRightMotor.brake();
+			mLeftMotor.brake();
+			left_speed = 0.0;
+			right_speed = 0.0;
+		}
 		
-		else if(mFrontRight < 100)
-			left_speed = std::min(left_speed, left_speed-left_speed*(120.0-mFrontLeftCenter)/60.0);
-		else if(mFrontRight < 100 && mFrontLeft < 100)
-			right_speed = std::min(right_speed, right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0);
-		else
-			right_speed = std::min(right_speed, right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0);
-	}		
+	}
+	else
+	{
 
-	ROS_INFO("left_speed: %f, right_speed %f ",left_speed,right_speed);
+		left_speed 	= std::min(msg.data-msg.data*(120.0-mFrontRight)/175.0,msg.data);
+		right_speed  	= std::min(msg.data-msg.data*(120.0-mFrontLeft)/175.0,msg.data);
+		//check right and left side for walls
+		if(!(mLeft < 60 && mRight < 60))
+		{
+			left_speed	= std::min(left_speed-left_speed*(60.0-mRight)/75.0, left_speed);
+			right_speed	= std::min(right_speed-right_speed*(60.0-mLeft)/75.0, right_speed);
+		}
+		if(mFrontLeftCenter < 150 || mFrontRightCenter < 150)
+		{
 
-	mRightMotor.setSpeed(right_speed);
-	mLeftMotor.setSpeed(left_speed);
+			if(mLeft > mRight && mRight < 75)
+			{
+				left_speed = std::min(left_speed, std::min(left_speed-left_speed*(150.0-mFrontLeftCenter)/100.0, left_speed-left_speed*(150.0-mFrontRightCenter)/100.0));
+			}
+			else if(mLeft < mRight && mLeft < 75)
+			{	
+				right_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/100.0, right_speed-right_speed*(150.0-mFrontRightCenter)/100.0));
+			}
+
+			else if(mFrontLeft < 150)
+			{
+				right_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/100.0, right_speed-right_speed*(150.0-mFrontRightCenter)/100.0));
+			}
+			else if(mFrontRight < 150)
+			{
+				left_speed = std::min(left_speed, std::min(left_speed-left_speed*(150.0-mFrontLeftCenter)/100.0, left_speed-left_speed*(150.0-mFrontRightCenter)/100.0));	
+			}
+			else if(mFrontRight < 100 && mFrontLeft < 100)
+				right_speed = std::min(right_speed, std::min(right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0, right_speed-right_speed*(120.0-mFrontRightCenter)/60.0));
+	
+			else
+			{
+				if(mFrontRight > 150)
+					right_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/120.0, right_speed-right_speed*(150.0-mFrontRightCenter)/120.0));
+				else
+					left_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/120.0, right_speed-right_speed*(150.0-mFrontRightCenter)/120.0));
+			}
+		}
+
+		ROS_INFO("left %f right %f", left_speed, right_speed);
+		mRightMotor.setSpeed(right_speed);
+		mLeftMotor.setSpeed(left_speed);
+	}
 }
 
 /**
@@ -145,27 +187,6 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 }
 
 /**
- * Called when a forward/backward motion needs to be disabled/enabled
-*/
-void MotorHandler::disableMotorCB(const mobile_base::DisableMotor &msg)
-{
-	mDisableForwardMotion = msg.disableForward;
-	mDisableBackwardMotion = msg.disableBackward;
-
-	// are we driving in a direction now forbidden ? Stop the robot.
-	if ((mCurrentSpeed.linear.x > 0 && mDisableForwardMotion) || (mCurrentSpeed.linear.x < 0 && mDisableBackwardMotion))
-	{
-		mLeftMotor.setSpeed(0.0);
-		mRightMotor.setSpeed(0.0);
-	}
-
-	if (mDisableForwardMotion)
-		ROS_INFO("Disable forward.");
-	if (mDisableBackwardMotion)
-		ROS_INFO("Disable backward.");
-}
-
-/**
  *	Reads distances from ultrasone sensors
  */
 void MotorHandler::ultrasoneCB(const mobile_base::sensorFeedback& msg)
@@ -197,7 +218,6 @@ void MotorHandler::init(char *path)
 	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub 	= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 	mDummySub		= mNodeHandle.subscribe("/dummyTopic", 10, &MotorHandler::dummyCB, this);
-	//mDisableSub = mNodeHandle.subscribe("/disableMotorTopic", 10, &MotorHandler::disableMotorCB, this);
 
 	mLock = false;
 	mLeftMotor.init(path);
@@ -240,3 +260,4 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+

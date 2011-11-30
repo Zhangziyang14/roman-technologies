@@ -9,6 +9,7 @@
 #define DEFAULT_D 0.0
 
 #define DEFAULT_ACCELERATION 5
+#define SAFE_BRAKING_DECCELERATION 0.5
 
 enum ControlMode
 {
@@ -85,6 +86,8 @@ public:
 
     void setMode(ControlMode mode);
     void setSpeed(double speed);
+    void brake();
+    void setLSpeed(double speed, double acceleration);
     void setPosition(double position);
     void setAcceleration(double aceleration);
     void updatePID();

@@ -54,6 +54,20 @@ void Motor::setAcceleration(double acceleration)
 /**
   * Sets speed of the motor when in SPEED_MODE
  */
+void Motor::setLSpeed(double speed, double acceleration)
+{
+	if (cmode != CM_SPEED_MODE)
+	{
+       		 std::cout << "Motor not in speed mode, setting it now." << std::endl;
+	        setMode(CM_SPEED_MODE);
+	}
+
+    motor_->setLinearSpeed(speed, acceleration);
+}
+
+/**
+  * Sets speed of the motor when in SPEED_MODE
+ */
 void Motor::setSpeed(double speed)
 {
 	if (cmode != CM_SPEED_MODE)
@@ -64,7 +78,26 @@ void Motor::setSpeed(double speed)
 		setAcceleration(DEFAULT_ACCELERATION);
 	}
 
+    if(speed == 0.0)
+	brake();
+    else
     motor_->setSpeed(speed);
+}
+
+/**
+  * Sets speed of the motor when in SPEED_MODE
+ */
+void Motor::brake()
+{
+	if (cmode != CM_SPEED_MODE)
+	{
+        std::cout << "Motor not in speed mode, setting it now." << std::endl;
+        setMode(CM_SPEED_MODE);
+
+		setAcceleration(SAFE_BRAKING_DECCELERATION);
+	}
+
+    motor_->setSpeed(0);
 }
 
 /**
