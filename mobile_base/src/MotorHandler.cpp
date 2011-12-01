@@ -42,15 +42,21 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 {
 	if(mLeft < 50 && mRight < 50 && mFrontLeftCenter < 80 && mFrontRightCenter < 80)
 		mLock = true;
-	else
-		if(mCurrentSpeed.linear.x == 0)
-			mLock = false;
+	else if(mCurrentSpeed.linear.x == 0)
+		mLock = false;
+	
+	double converted_right = 0, converted_left = 0;
+	double left_speed  	= msg.left_motor_speed;
+	double right_speed 	= msg.right_motor_speed;
 
-	double left_speed  = msg.left_motor_speed;
-	double right_speed = msg.right_motor_speed;
-	left_speed 		= std::min(left_speed-left_speed*(120.0-mFrontRight)/175.0,left_speed);
-	right_speed  	= std::min(right_speed-right_speed*(120.0-mFrontLeft)/175.0,right_speed);
+	if (left_speed == 0.0 && right_speed == 0.0)
+	{
+		double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
+		double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
 
+		converted_left  = vel_linear - vel_angular;
+		converted_right = vel_linear + vel_angular;
+	}
 	if(mLock)
 	{
 		//Safe positioning while bumping
@@ -61,19 +67,14 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 			left_speed = 0.0;
 			right_speed = 0.0;
 		}
-
 	}
 	else
 	{
+	left_speed = std::abs(converted_left);
+	right_speed = std::abs(converted_right);
 
-		if (left_speed == 0.0 && right_speed == 0.0)
-		{
-			double vel_linear = msg.twist.linear.x / WHEEL_RADIUS;
-			double vel_angular = msg.twist.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
-
-			left_speed = vel_linear - vel_angular;
-			right_speed = vel_linear + vel_angular;
-		}
+	left_speed      	= std::min(left_speed-left_speed*(120.0-mFrontRight)/175.0,left_speed);
+	right_speed  	        = std::min(right_speed-right_speed*(120.0-mFrontLeft)/175.0,right_speed);
 
 		//check right and left side for walls
 		if(!(mLeft < 60 && mRight < 60))
@@ -108,82 +109,15 @@ void MotorHandler::moveCB(const mobile_base::BaseMotorControl& msg)
 			}
 		}
 
+		left_speed = converted_left < 0 ? -left_speed : left_speed;
+		right_speed = converted_right < 0 ? -right_speed : right_speed;
+		
 		ROS_INFO("left %f right %f", left_speed, right_speed);
+
 		mRightMotor.setSpeed(right_speed);
 		mLeftMotor.setSpeed(left_speed);
 	}
 }
-
-/*
-double left_speed, right_speed;
-void MotorHandler::dummyCB(const std_msgs::Float64& msg)
-{
-	if(mLeft < 50 && mRight < 50 && mFrontLeftCenter < 80 && mFrontRightCenter < 80)
-		mLock = true;	
-	else 
-		if(mCurrentSpeed.linear.x == 0) 
-			mLock = false;	
-
-	if(mLock)
-	{
-		//Safe positioning while bumping
-		if((mCurrentSpeed.linear.x > 0 && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < 0 && (mRearLeft < 50 || mRearRight < 50)))
-		{
-			mRightMotor.brake();
-			mLeftMotor.brake();
-			left_speed = 0.0;
-			right_speed = 0.0;
-		}
-
-	}
-	else
-	{
-
-		left_speed 	= std::min(msg.data-msg.data*(120.0-mFrontRight)/175.0,msg.data);
-		right_speed  	= std::min(msg.data-msg.data*(120.0-mFrontLeft)/175.0,msg.data);
-		//check right and left side for walls
-		if(!(mLeft < 60 && mRight < 60))
-		{
-			left_speed	= std::min(left_speed-left_speed*(60.0-mRight)/75.0, left_speed);
-			right_speed	= std::min(right_speed-right_speed*(60.0-mLeft)/75.0, right_speed);
-		}
-		if(mFrontLeftCenter < 150 || mFrontRightCenter < 150)
-		{
-
-			if(mLeft > mRight && mRight < 75)
-			{
-				left_speed = std::min(left_speed, std::min(left_speed-left_speed*(150.0-mFrontLeftCenter)/100.0, left_speed-left_speed*(150.0-mFrontRightCenter)/100.0));
-			}
-			else if(mLeft < mRight && mLeft < 75)
-			{	
-				right_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/100.0, right_speed-right_speed*(150.0-mFrontRightCenter)/100.0));
-			}
-
-			else if(mFrontLeft < 150)
-			{
-				right_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/100.0, right_speed-right_speed*(150.0-mFrontRightCenter)/100.0));
-			}
-			else if(mFrontRight < 150)
-			{
-				left_speed = std::min(left_speed, std::min(left_speed-left_speed*(150.0-mFrontLeftCenter)/100.0, left_speed-left_speed*(150.0-mFrontRightCenter)/100.0));	
-			}
-			else if(mFrontRight < 100 && mFrontLeft < 100)
-				right_speed = std::min(right_speed, std::min(right_speed-right_speed*(120.0-mFrontLeftCenter)/60.0, right_speed-right_speed*(120.0-mFrontRightCenter)/60.0));
-
-			else
-			{
-				if(mFrontRight > 150)
-					right_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/120.0, right_speed-right_speed*(150.0-mFrontRightCenter)/120.0));
-				else
-					left_speed = std::min(right_speed, std::min(right_speed-right_speed*(150.0-mFrontLeftCenter)/120.0, right_speed-right_speed*(150.0-mFrontRightCenter)/120.0));
-			}
-		}
-
-		ROS_INFO("left %f right %f", left_speed, right_speed);
-		mRightMotor.setSpeed(right_speed);
-		mLeftMotor.setSpeed(left_speed);
-	}
-}*/
 
 /**
  * Called when a Twist message is received over the motor topic.
@@ -256,21 +190,20 @@ void MotorHandler::init(char *path)
 	mTwistSub 	= mNodeHandle.subscribe("/movementTopic", 10, &MotorHandler::moveCB, this);
 	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub 	= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
-	//mDummySub		= mNodeHandle.subscribe("/dummyTopic", 10, &MotorHandler::dummyCB, this);
 
 	mLock = false;
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
 
 	//Initialise distances from ultrasone sensors
-	mFrontLeftCenter = std::numeric_limits<int>::infinity();
-	mFrontRightCenter = std::numeric_limits<int>::infinity();
-	mRearLeft = std::numeric_limits<int>::infinity();
-	mFrontLeft = std::numeric_limits<int>::infinity();
-	mRearRight = std::numeric_limits<int>::infinity();
-	mFrontRight = std::numeric_limits<int>::infinity();
-	mRight = std::numeric_limits<int>::infinity();
-	mLeft = std::numeric_limits<int>::infinity();
+	mFrontLeftCenter = ULTRASONE_MAX_RANGE; 
+	mFrontRightCenter = ULTRASONE_MAX_RANGE;
+	mRearLeft = ULTRASONE_MAX_RANGE;
+	mFrontLeft = ULTRASONE_MAX_RANGE;
+	mRearRight = ULTRASONE_MAX_RANGE;
+	mFrontRight = ULTRASONE_MAX_RANGE;
+	mRight = ULTRASONE_MAX_RANGE;
+	mLeft = ULTRASONE_MAX_RANGE;
 
 	//Activate all ultrasone sensors
 	std_msgs::Bool activate_msg;

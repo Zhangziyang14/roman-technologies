@@ -11,15 +11,13 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <mobile_base/sensorFeedback.h>
-#include <limits>
 
-//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
-
-#define WHEEL_RADIUS 	0.1475
-#define BASE_RADIUS 	0.25
-#define PID_TWEAK_STEP 	0.01
-#define ULTRASONE_ALL	true
-#define ULTRASONE_NONE	false
+#define WHEEL_RADIUS 		0.1475
+#define BASE_RADIUS 		0.25
+#define PID_TWEAK_STEP 		0.01
+#define ULTRASONE_ALL		true
+#define ULTRASONE_NONE		false
+#define ULTRASONE_MAX_RANGE	600
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
@@ -31,7 +29,6 @@ protected:
     ros::Subscriber mPositionSub;		/// Listens to integer messages for positioning
     ros::Subscriber mUltrasoneSub;		/// Listens to distance from ultrasone sensors
     ros::Subscriber mTweakPIDSub;		/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
-    //ros::Subscriber mDummySub;			/// Listens to dummy velocity commands
 
     ros::Publisher mSpeedPub;			/// Publishes robot's speed
     ros::Publisher mUltrasoneActivatePub; 	/// Publishes messages to activate ultrasone sensors
@@ -67,7 +64,6 @@ public:
     void publishRobotSpeed();
     void moveCB(const mobile_base::BaseMotorControl& msg);
     void positionCB(const std_msgs::Float64& msg);
-   //void dummyCB(const std_msgs::Float64& msg);
     void ultrasoneCB(const mobile_base::sensorFeedback& msg);
     void tweakCB(const mobile_base::tweak msg);
 
