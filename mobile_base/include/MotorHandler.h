@@ -31,7 +31,7 @@ protected:
     ros::Subscriber mPositionSub;		/// Listens to integer messages for positioning
     ros::Subscriber mUltrasoneSub;		/// Listens to distance from ultrasone sensors
     ros::Subscriber mTweakPIDSub;		/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
-    ros::Subscriber mDummySub;			/// Listens to dummy velocity commands
+    //ros::Subscriber mDummySub;			/// Listens to dummy velocity commands
 
     ros::Publisher mSpeedPub;			/// Publishes robot's speed
     ros::Publisher mUltrasoneActivatePub; 	/// Publishes messages to activate ultrasone sensors
@@ -67,7 +67,7 @@ public:
     void publishRobotSpeed();
     void moveCB(const mobile_base::BaseMotorControl& msg);
     void positionCB(const std_msgs::Float64& msg);
-    void dummyCB(const std_msgs::Float64& msg);
+   //void dummyCB(const std_msgs::Float64& msg);
     void ultrasoneCB(const mobile_base::sensorFeedback& msg);
     void tweakCB(const mobile_base::tweak msg);
 

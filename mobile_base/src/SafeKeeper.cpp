@@ -21,7 +21,7 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 	disableBumper_msg.disableForward = msg.data == BUMPER_FRONT;
 
 	// did the robot collide with something in the back?
-	disableBumper_msg.disableBackward = (msg.data == BUMPER_REAR);
+	disableBumper_msg.disableBackward = msg.data == BUMPER_REAR;
 
 	mBumperDisableMotor_pub.publish(disableBumper_msg);
 
