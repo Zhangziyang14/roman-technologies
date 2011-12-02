@@ -1,0 +1,9 @@
+<launch>
+	<arg name="map_file" default="$(find logical_unit)/map/map.yaml" />
+	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+	
+	<node pkg="input" type="Kinect" name="Kinect"/>
+        <node pkg="logical_unit" type="MovementSimulator" name="MovementSimulator"/>
+
+	<node pkg="amcl" type="amcl" name="amcl" args="scan:=/scan" />
+</launch>
