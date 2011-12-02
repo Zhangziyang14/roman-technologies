@@ -2,8 +2,6 @@
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
 
-#define PUSH_LASERSCAN_TIME (500*1000)
-
 // forward declarations of some needed functions
 sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
 sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
@@ -83,10 +81,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 	//image_transport::Publisher image_pub = it.advertise("image", 1);
 	ros::Publisher image_pub = n->advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
 	ros::Publisher cloud_pub = n->advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
-	pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
 
-
-	long unsigned int laserTime = ros::Time::now().toNSec();
 	bool captureRGB = false;
 	bool captureCloud = false;
 
@@ -119,12 +114,11 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 			//processImage(captureRGB ? &rgb : NULL, pclpc);
 
 			// SLAM
-			if (laser_pub.getNumSubscribers() && ros::Time::now().toNSec() >= laserTime)
+			if (laser_pub.getNumSubscribers())
 			{
 				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
 				if (laserscan)
 					laser_pub.publish(laserscan);
-				laserTime = ros::Time::now().toNSec() + PUSH_LASERSCAN_TIME;
 			}
 
 			// do we have a listener to the RGB output ?
