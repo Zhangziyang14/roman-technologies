@@ -5,8 +5,6 @@
 #include <std_msgs/Int32.h>
 #include <sensor_msgs/Joy.h>
 #include <mobile_base/sensorFeedback.h>
-#include <mobile_base/DisableMotor.h>
-#include <mobile_base/BaseMotorControl.h>
 #include <mobile_base/tweak.h>
 #include <MotorHandler.h>
 #include <numeric>
@@ -24,10 +22,10 @@
 enum PS3Key
 {
 	PS3_NONE                = -1,
-	PS3_SELECT		= 0,
-	PS3_LEFT_JOYSTICK	= 1,
-	PS3_RIGHT_JOYSTICK	= 2,
-	PS3_START		= 3,
+	PS3_SELECT				= 0,
+	PS3_LEFT_JOYSTICK		= 1,
+	PS3_RIGHT_JOYSTICK		= 2,
+	PS3_START				= 3,
 	PS3_UP                  = 4,
 	PS3_RIGHT               = 5,
 	PS3_DOWN                = 6,
@@ -64,11 +62,9 @@ class BaseController
 protected:
 	ros::NodeHandle mNodeHandle;     		/// ROS node handle
 
-	ros::Subscriber mUltrasone_sub;			/// Listens to distances from ultrasone sensors
 	ros::Subscriber mSpeed_sub;		 		/// Listens to Twist messages as feedback for robot's current speed
 	ros::Subscriber mKey_sub;        		/// Key input subscriber, reads key input data
 
-	ros::Publisher mDisableMotor_pub;		/// DisableMotor publisher, publishes disable messages to stop motor
 	ros::Publisher mMotorControl_pub;       /// Twist message publisher, publishes movement data for engines
 	ros::Publisher mTweak_pub;       		/// Integer message publisher, publishes integers for the DPAD buttons
 
@@ -100,9 +96,6 @@ public:
 
 	/// Read current speed for feedback control
 	void readCurrentSpeed(const geometry_msgs::Twist& msg);
-
-	/// Listen to ultrasone sensors to disable motors when needed
-	void ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg);
 
 	//inline double calcRobotAngularSpeed() { if (mCurrentSpeed.linear.x) return (1.0/mCurrentSpeed.linear.x*10.0) * SPEED_CONST;  else return 0.f; };
 	inline double calcRobotAngularSpeed() { return MAX_ANGULAR_AT_LOW_SPEED - ((MAX_ANGULAR_AT_LOW_SPEED - MAX_ANGULAR_AT_TOP_SPEED) * mCurrentSpeed.linear.x) / MAX_LINEAR_SPEED; };

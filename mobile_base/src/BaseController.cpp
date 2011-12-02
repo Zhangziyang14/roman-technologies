@@ -8,26 +8,6 @@
 #include <BaseController.h>
 
 /**
- * Receives data from ultrasone sensors and determines if forward or backward motion should be disabled.
- */
-void BaseController::ultrasoneFeedbackCB(const mobile_base::sensorFeedback &msg)
-{
-	mobile_base::DisableMotor disable_msg;
-
-	// did the sensors on the front detect anything dangerously close?
-	disable_msg.disableForward = (msg.frontLeftCenter > 0 && msg.frontLeftCenter < EMERGENCY_STOP_DISTANCE) || 
-				    (msg.frontRightCenter > 0 && msg.frontRightCenter < EMERGENCY_STOP_DISTANCE) ||
-				    (msg.frontLeft > 0 && msg.frontLeft < EMERGENCY_STOP_DISTANCE) ||
-				    (msg.frontRight> 0 && msg.frontRight < EMERGENCY_STOP_DISTANCE);
-
-	// did the sensors on the back detect anything dangerously close?
-	disable_msg.disableBackward = (msg.rearLeft > 0 && msg.rearLeft < EMERGENCY_STOP_DISTANCE) ||
-			(msg.rearRight> 0 && msg.rearRight < EMERGENCY_STOP_DISTANCE);
-
-	mDisableMotor_pub.publish(disable_msg);
-}
-
-/**
  * Reads the speed feedback from MotorHandler
  */
 void BaseController::readCurrentSpeed(const geometry_msgs::Twist &msg)
@@ -43,12 +23,10 @@ void BaseController::init()
 	//initialise subscribers
 	mKey_sub = mNodeHandle.subscribe("joy", 1, &BaseController::keyCB, this);
 	mSpeed_sub = mNodeHandle.subscribe("speedFeedbackTopic", 1, &BaseController::readCurrentSpeed, this);
-	mUltrasone_sub = mNodeHandle.subscribe("sensorFeedbackTopic", 1, &BaseController::ultrasoneFeedbackCB, this);
 
 	// initialise publishers
-	mMotorControl_pub = mNodeHandle.advertise<mobile_base::BaseMotorControl>("movementTopic", 1);
+	mMotorControl_pub = mNodeHandle.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 	mTweak_pub = mNodeHandle.advertise<mobile_base::tweak>("tweakTopic", 10);
-	mDisableMotor_pub = mNodeHandle.advertise<mobile_base::DisableMotor>("disableMotorTopic", 10);
 
 	ROS_INFO("BaseController initialised");
 }
@@ -59,14 +37,12 @@ void BaseController::init()
 void BaseController::keyCB(const sensor_msgs::Joy& msg)
 {
 	// make messages
-	mobile_base::BaseMotorControl bmc_msg;
+	geometry_msgs::Twist bmc_msg;
 	mobile_base::tweak tweak_msg;
 
 	// initialise values (or are they by default 0?)
-	bmc_msg.twist.linear.x = 0;
-	bmc_msg.twist.angular.z = 0;
-	bmc_msg.left_motor_speed = 0.f;
-	bmc_msg.right_motor_speed = 0.f;
+	bmc_msg.linear.x = 0;
+	bmc_msg.angular.z = 0;
 
 	// initialise tweak values
 	tweak_msg.scaleUp = false;
@@ -96,23 +72,11 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 			break;
 
 		//Turn at current position
-		bmc_msg.twist.angular.z = calcRobotAngularSpeed() * msg.axes[PS3_AXIS_LEFT_HORIZONTAL];
-		mPrevAngular = bmc_msg.twist.angular.z;
+		bmc_msg.angular.z = calcRobotAngularSpeed() * msg.axes[PS3_AXIS_LEFT_HORIZONTAL];
+		mPrevAngular = bmc_msg.angular.z;
 		sendMsg = true;
 		break;
-	case PS3_CONTROL_REMOTE_CONTROL:
-		// only send stop messages once
-		if (mPrevLeftSpeed == 0.f && mPrevRightSpeed == 0.f && msg.axes[PS3_AXIS_LEFT_VERTICAL] == 0.f &&
-				msg.axes[PS3_AXIS_RIGHT_VERTICAL])
-			break;
 
-		// scale between 0 and MAX_LINEAR_SPEED.
-		bmc_msg.left_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_LEFT_VERTICAL];
-		bmc_msg.right_motor_speed = MAX_LINEAR_SPEED * msg.axes[PS3_AXIS_RIGHT_VERTICAL];
-		mPrevLeftSpeed = bmc_msg.left_motor_speed;
-		mPrevRightSpeed = bmc_msg.right_motor_speed;
-		sendMsg = true;
-		break;
 	default:
 		break;
 	}
@@ -134,7 +98,7 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 
 			//Accelerate when X button is pressed and reverse when square button is pressed
 			float lin_speed = i == PS3_X ? -MAX_LINEAR_SPEED : MAX_LINEAR_SPEED;
-			bmc_msg.twist.linear.x = lin_speed * msg.axes[i];
+			bmc_msg.linear.x = lin_speed * msg.axes[i];
 
 			mKeyPressed = i == PS3_X ? PS3_X : PS3_S;
 			sendMsg = true;
@@ -143,8 +107,8 @@ void BaseController::keyCB(const sensor_msgs::Joy& msg)
 
 		//Brake if O button has been pressed
 		case PS3_O:
-			bmc_msg.twist.linear.x = 0;
-			bmc_msg.twist.angular.z = 0;
+			bmc_msg.linear.x = 0;
+			bmc_msg.angular.z = 0;
 			sendMsg = true;
 			break;
 
