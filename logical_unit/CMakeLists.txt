@@ -24,7 +24,8 @@ rosbuild_genmsg()
 rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
 rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
 rosbuild_add_executable(PathFinder src/PathFinder.cpp)
-
+rosbuild_add_executable(InitPosition src/InitPosition.cpp
+)
 link_directories(/usr/local/lib )
 include_directories(/usr/local/include)
 target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
