@@ -6,6 +6,7 @@
 #ifndef Emotion_h
 #define Emotion_h
 
+#include <iostream>
 
 class Emotion
 {

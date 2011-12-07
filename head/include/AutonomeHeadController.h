@@ -2,10 +2,11 @@
 #define __AUTONOMECONTROLLER_H
 
 #include <ros/ros.h>
+#include <std_msgs/ColorRGBA.h>
 #include <std_msgs/UInt8.h>
 #include <iostream>
 #include "Emotion.h"
-#include <head/rgb.h>
+
 
 enum Emotions
 {
@@ -16,12 +17,13 @@ enum Emotions
   ERROR  
 };
 
-class autonomeHeadController
+class AutonomeHeadController
 {
 protected:
 	ros::NodeHandle mNodeHandle;
 
-	ros:Publisher mRGB_pub;
+	ros::Publisher mRGB_pub;
+	ros::Subscriber mEmotion_sub;
 
 	Emotion mNeutral;
 	Emotion mHappy;
@@ -35,10 +37,12 @@ protected:
 
 public:
 	//Constructor
-	autonomeHeadController() : mNodeHandle("") , neutral(255,255,255) , happy(255,255,0) , sad(255,0,255) , surprised(0,120,255) , error(0,255,255) { }
+	AutonomeHeadController() : mNodeHandle("") , mNeutral(0,0,0) , mHappy(0,255,0) , mSad(0,150,255) , mSurprised(250,40,0) , mError(255,0,0) { 
+		ROS_INFO("AutonomeHeadController constructor");
+	}
 
 	/// Destructor
-	~autonomeHeadController()
+	~AutonomeHeadController()
 	{
 
 		mNodeHandle.shutdown();
@@ -46,7 +50,8 @@ public:
 
 
 
-	void expressEmotion(const std_msgs::UInt8 &msg);
+	void expressEmotionCB(const std_msgs::UInt8 &msg);
+	void init();
 
 
 

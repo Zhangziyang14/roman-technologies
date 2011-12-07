@@ -3,11 +3,10 @@
 */
 
 #include "Emotion.h"
-#include "WProgram.h"
-
 
 Emotion::Emotion(int r, int g, int b)
 {
+	std::cout << "EMOTION" << std::endl; 
 	_red = r;
 	_green = g;
 	_blue = b;
