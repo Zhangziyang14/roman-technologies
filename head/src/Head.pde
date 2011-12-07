@@ -1,119 +1,103 @@
-// Head.pd
-// Controls colors and movement of the eyebrows and head
-// Author: Ingmar Jager, EEMCS, Delft University of Technology
+/*
+ * rosserial Publisher Example
+ * Prints "hello world!"
+ */
 
+#include <ros.h>
+#include <std_msgs/ColorRGBA.h>
 
-#include "ros.h"
-#include "std_msgs/UInt8.h"
-#include "Emotion.h"
-
-ros::NodeHandle nh;
-
-
-//RGB pins
-int redPin = 3;
-int greenPin = 5;
-int bluePin = 6;
-
-// Available emotions/states
-enum Emo
+enum rgb
 {
-  NEUTRAL = 0,
-  HAPPY,
-  SAD,
-  SURPRISED,
-  ERROR  
+  RED,
+  GREEN,
+  BLUE,
 };
 
-//RGB Values for NEURTRAL(r,g,b)
-const Emotion neutral(255,255,255);
-//RGB Values for Happy
-const Emotion happy(255,0,255);
-//RGB Values for SAD
-const Emotion sad(120,255,0);
-//RGB Values for SURPRISED
-const Emotion surprised(0,127,255);
-//RGB Values for ERROR
-const Emotion error(0,255,255);
+const int redPin = 9;
+const int greenPin = 10;
+const int bluePin = 11;
+int red, green, blue;
+ros::NodeHandle  nh;
 
-Emotion currentEmotion(0,0,0);
-
-void expressEmotion(const std_msgs::UInt8 &msg)
+void transition(int nextRed, int nextGreen, int nextBlue)
+{
+ float dR,dG,dB;
+ dR = (nextRed - red) / 50;
+ dG = (nextGreen - green) / 50;
+ dB = (nextBlue - blue) / 50;
+ 
+ for (int i = 0; i < 50; i++)
  {
- switch(msg.data)
- {
-   case NEUTRAL:
-     {
-       transition(neutral);
-     }
-   case HAPPY:
-     {
-       transition(happy);
-     }
-   case SAD:
-     {
-       transition(sad);
-     }
-   case SURPRISED:
-     {
-       transition(surprised);
-     }
-   case ERROR:
-     {
-       transition(error); 
-     }
-   default:
-     {
-       transition(neutral);
-     }
+   red += dR; 
+   green += dG;
+   blue += dB;
+   analogWrite(greenPin, green);
+   analogWrite(redPin, red);
+   analogWrite(bluePin, blue);
+   delay(20);
  }
  
+  
 }
 
-//subscribe to emotionTopic
-ros::Subscriber<std_msgs::UInt8> emotion_sub("/emotionTopic", &expressEmotion);
+void setRGB(const std_msgs::ColorRGBA &msg)
+{
+  transition(msg.r, msg.g, msg.b);
+}
 
+
+
+
+ros::Subscriber<std_msgs::ColorRGBA> rgb_sub("/rgbTopic", &setRGB);
 
 void setup()
 {
   nh.initNode();
-  nh.subscribe(emotion_sub);
+  nh.subscribe(rgb_sub);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  red = 0;
+  green = 0;
+  blue = 0;
   
-  //currentEmotion = neutral;
-  transition(neutral);
-  transition(happy);
-  transition(surprised);
-  transition(neutral);
+
+  //nh.advertise(chatter);
 }
+
+
+
+
+//std_msgs::String str_msg;
+//ros::Publisher chatter("chatter", &str_msg);
 
 
 void loop()
 {
-  nh.spinOnce();
-}
-
-void transition(Emotion nextEmotion)
-{
-//calculate transition values
-  int r = nextEmotion.red() - currentEmotion.red(); 
-  int g = nextEmotion.green() - currentEmotion.green(); 
-  int b = nextEmotion.blue() - currentEmotion.blue(); 
-//transition colors to next state
-  double rStep = r/50.0;
-  double gStep = g/50.0;
-  double bStep = b/50.0;
-
-  for (int i = 0; i<50; i++)
-  {
-    analogWrite(redPin, currentEmotion.red()+rStep);
-    analogWrite(greenPin, currentEmotion.green()+gStep);
-    analogWrite(bluePin, currentEmotion.blue()+bStep);
   
-    delay(40);  
-  }
-//set new currentEmotion
-  currentEmotion = nextEmotion;
+  for (float i = 1.0; i > 0.5; i = i - 0.01)
+  {
 
+   analogWrite(greenPin, green*i);
+   analogWrite(redPin, red*i);
+   analogWrite(bluePin, blue*i);
+   nh.spinOnce();
+   delay(20);
+  }
+  delay(800);
+  for (float i = 0.5; i < 1.0; i = i + 0.01)
+  {
+
+   analogWrite(greenPin, green*i);
+   analogWrite(redPin, red*i);
+   analogWrite(bluePin, blue*i);
+   nh.spinOnce();
+   delay(20);
+  }
+  delay(1500); 
+//  chatter.publish( &str_msg );
+  nh.spinOnce();
+  delay(10);
 }
 
 
