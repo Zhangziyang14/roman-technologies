@@ -6,7 +6,6 @@
 #ifndef Emotion_h
 #define Emotion_h
 
-#include "WProgram.h"
 
 class Emotion
 {
