@@ -2,7 +2,7 @@
    V0.1 Created by Ingmar Jager, November 20, 2011.
 */
 
-#include "Emotion.h"
+#include "head/Emotion.h"
 
 Emotion::Emotion(int r, int g, int b)
 {

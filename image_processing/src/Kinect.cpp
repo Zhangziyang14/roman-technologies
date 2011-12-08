@@ -1,4 +1,4 @@
-#include "Util.h"
+#include "image_processing/Util.h"
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
 #include <re_vision/SearchFor.h>
@@ -92,9 +92,9 @@ void requestObjectDetection(sensor_msgs::ImageConstPtr rgb, ros::ServiceClient &
         return;
 
     //ROS_INFO("Detected %d objects!", resp.Detections.size());
-    for (int i = 0; i < resp.Detections.size(); i++)
+    /*for (int i = 0; i < resp.Detections.size(); i++)
     {
-    }
+    }*/
 }
 
 void publishModelPaths(ros::Publisher &p)

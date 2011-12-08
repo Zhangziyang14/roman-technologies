@@ -5,7 +5,7 @@
  *      Author: hans
  */
 
-#include "SafeKeeper.h"
+#include "mobile_base/SafeKeeper.h"
 
 std_msgs::Float64 position_msg;
 mobile_base::BumperDisableMotor disableBumper_msg;

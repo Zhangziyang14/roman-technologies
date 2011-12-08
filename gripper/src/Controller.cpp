@@ -1,4 +1,4 @@
-#include "Controller.h"
+#include "gripper/Controller.h"
 
 #define JOINT_COUNT 7
 

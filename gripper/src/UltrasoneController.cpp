@@ -5,7 +5,7 @@
  *      Author: hans
  */
 
-#include "UltrasoneController.h"
+#include "gripper/UltrasoneController.h"
 
 void UltrasoneController::init()
 {

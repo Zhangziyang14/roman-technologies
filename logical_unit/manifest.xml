@@ -7,13 +7,6 @@
   <author>Hans Gaiser</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <depend package="threemxl"/>
-  <depend package="std_msgs"/>
-  <depend package="sensor_msgs"/>
-  <depend package="nav_msgs"/>
- 
-  <depend package="image_transport"/>
-  <depend package="pcl"/>
   <depend package="tf"/>]
   <export>
         <rosdoc config="rosdoc.yaml" />

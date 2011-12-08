@@ -1,0 +1,23 @@
+<package>
+  <description brief="image_processing">
+
+     image_processing
+
+  </description>
+  <author>Hans</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/image_processing</url>
+
+  <depend package="threemxl"/>
+  <depend package="std_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="re_vision"/>
+ 
+  <depend package="image_transport"/>
+  <depend package="pcl"/>
+
+</package>
+
+

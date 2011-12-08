@@ -24,8 +24,6 @@ link_directories(/usr/local/lib )
 include_directories(/usr/local/include)
 
 rosbuild_add_executable(AutonomeHeadController src/AutonomeHeadController.cpp src/Emotion.cpp)
-rosbuild_add_executable(FaceFocus src/FocusFace.cpp)
-target_link_libraries(FaceFocus opencv_core opencv_imgproc opencv_highgui)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

@@ -5,7 +5,7 @@
  *      Author: hans
  */
 
-#include "PS3Controller.h"
+#include "gripper/PS3Controller.h"
 
 void PS3Controller::init()
 {
