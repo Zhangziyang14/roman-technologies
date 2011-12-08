@@ -158,7 +158,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 
 	bool captureRGB = false;
 	bool captureCloud = false;
-	bool objectDetection = true;
+	bool objectDetection = false;
 
 	sensor_msgs::ImagePtr imageMsg;
 	gModelNames.push_back("videogames.kinectadventures");
@@ -215,7 +215,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 			if (captureCloud)
 			{
 				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToRegisteredPointCloud2(&pc, &rgb);
-				//cloud_pub.publish(cloudMsg);
+				cloud_pub.publish(cloudMsg);
 				//roscom.processPointcloud(cloudMsg);
 			}
 		}

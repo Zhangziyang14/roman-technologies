@@ -42,6 +42,7 @@ inline uint16 getDepthFromPoint(float x, float y, float z)
 }
 inline uint16 getDepthFromPoint(cv::Point3f p) { return getDepthFromPoint(p.x, p.y, p.z); }
 inline uint16 getDepthFromPoint(pcl::PointXYZ p) { return getDepthFromPoint(p.x, p.y, p.z); }
+inline uint16 getDepthFromPoint(pcl::PointXYZRGB p) { return getDepthFromPoint(p.x, p.y, p.z); }
 
 /// Returns a point from a pointcloud
 inline cv::Point3f getPointFromCloud(int x, int y, IplImage *image)
@@ -60,6 +61,8 @@ inline uint16 getDepthFromCloud(int x, int y, IplImage *image)
 }
 inline uint16 getDepthFromCloud(cv::Point p, IplImage *image) { return getDepthFromCloud(p.x, p.y, image); };
 inline uint16 getDepthFromCloud(int x, int y, pcl::PointCloud<pcl::PointXYZ>::Ptr pc) { return getDepthFromPoint(pc->at(x, y)); };
+inline uint16 getDepthFromCloud(int x, int y, pcl::PointCloud<pcl::PointXYZRGB> *pc) { return getDepthFromPoint(pc->at(x, y)); };
+inline uint16 getDepthFromCloud(cv::Point p, pcl::PointCloud<pcl::PointXYZRGB> *pc) { return getDepthFromPoint(pc->at(p.x, p.y)); };
 
 /// Calculates the distance from point p to plane with the form of plane(0)*x + plane(1)*y + plane(2)*z + plane(3) = 0
 inline float getDistanceFromPointToPlane(Eigen::Vector4f plane, pcl::PointXYZ p)

@@ -212,9 +212,9 @@ sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplIma
 			memcpy(&data[4], &p.y, sizeof(float));
 			memcpy(&data[8], &p.z, sizeof(float));
 
-			data[16] = *getPixel<uint8>(x, y, rgb, 2);
+			data[16] = *getPixel<uint8>(x, y, rgb, 0);
 			data[17] = *getPixel<uint8>(x, y, rgb, 1);
-			data[18] = *getPixel<uint8>(x, y, rgb, 0);
+			data[18] = *getPixel<uint8>(x, y, rgb, 2);
 			memcpy(&output->data[(y*pc->width + x) * output->point_step], data, output->point_step);
 		}
 	}
