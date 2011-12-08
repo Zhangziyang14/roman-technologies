@@ -179,10 +179,20 @@ sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplIma
 	pf.count = 1;
 	pf.datatype = sensor_msgs::PointField::FLOAT32;
 	output->fields.push_back(pf);
+	pf.name = "_";
+	pf.offset = 12;
+	pf.count = 4;
+	pf.datatype = sensor_msgs::PointField::UINT8;
+	output->fields.push_back(pf);
 	pf.name = "rgb";
 	pf.offset = 16;
 	pf.count = 1;
 	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "_";
+	pf.offset = 20;
+	pf.count = 12;
+	pf.datatype = sensor_msgs::PointField::UINT8;
 	output->fields.push_back(pf);
 
 	output->data.resize(size_t(pc->width * pc->height * output->point_step));
@@ -191,14 +201,21 @@ sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplIma
 	{
 		for (int x = 0; x < pc->width; x++)
 		{
-			pcl::PointXYZRGB p;
+			uint8 data[32];
+			pcl::PointXYZ p;
 			p.x = *getPixel<float>(x, y, pc, 0);
 			p.y = *getPixel<float>(x, y, pc, 1);
 			p.z = *getPixel<float>(x, y, pc, 2);
-			p.r = *getPixel<uint8>(x, y, rgb, 2);
-			p.g = *getPixel<uint8>(x, y, rgb, 1);
-			p.b = *getPixel<uint8>(x, y, rgb, 0);
-			memcpy(&output->data[(y*pc->width + x) * output->point_step], &p, sizeof(pcl::PointXYZRGB));
+			if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0)
+				p.x = p.y = p.z = std::numeric_limits<float>::quiet_NaN();
+			memcpy(&data[0], &p.x, sizeof(float));
+			memcpy(&data[4], &p.y, sizeof(float));
+			memcpy(&data[8], &p.z, sizeof(float));
+
+			data[16] = *getPixel<uint8>(x, y, rgb, 2);
+			data[17] = *getPixel<uint8>(x, y, rgb, 1);
+			data[18] = *getPixel<uint8>(x, y, rgb, 0);
+			memcpy(&output->data[(y*pc->width + x) * output->point_step], data, output->point_step);
 		}
 	}
 	return output;

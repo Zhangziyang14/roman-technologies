@@ -1,6 +1,9 @@
 #include "Util.h"
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
+#include <re_vision/SearchFor.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/distortion_models.h>
 
 // forward declarations of some needed functions
 sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
@@ -8,6 +11,8 @@ sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
 IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image);
 sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplImage *rgb);
+
+std::vector<std::string> gModelNames;
 
 /**
  * Processes the pointcloud and display feedback on the RGB image.
@@ -68,32 +73,108 @@ void processImage(IplImage *rgb, pcl::PointCloud<pcl::PointXYZ>::Ptr pc)
 	}
 }
 
+void requestObjectDetection(sensor_msgs::ImageConstPtr rgb, ros::ServiceClient &zaragoza_client)
+{
+    if (gModelNames.empty())
+        return;
+
+    re_vision::SearchForRequest req;
+    req.Image = *rgb;
+    req.Objects = gModelNames;
+    req.MaxPointsPerObject = -1;
+
+    re_vision::SearchForResponse resp;
+    zaragoza_client.call(req, resp);
+
+    ROS_INFO("Finished detection");
+
+    if (resp.Detections.size() == 0)
+        return;
+
+    //ROS_INFO("Detected %d objects!", resp.Detections.size());
+    for (int i = 0; i < resp.Detections.size(); i++)
+    {
+    }
+}
+
+void publishModelPaths(ros::Publisher &p)
+{
+	std_msgs::String msg;
+	msg.data = "/home/hans/2d_kinect_adventures/";
+	p.publish(msg);
+}
+
+void publishCameraInfo(ros::Publisher &p)
+{
+	sensor_msgs::CameraInfo msg;
+	msg.header.stamp = ros::Time::now();
+	msg.height = 480;
+	msg.width = 640;
+	msg.distortion_model = "plumb_bob";
+
+	// No distortion
+	msg.D.resize(5, 0.0);
+	msg.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
+
+	// Simple camera matrix: square pixels (fx = fy), principal point at center
+	msg.K.assign(0.0);
+	msg.K[0] = msg.K[4] = 525.0;
+	msg.K[2] = (msg.width / 2) - 0.5;
+	// Aspect ratio for the camera center on Kinect (and other devices?) is 4/3
+	// This formula keeps the principal point the same in VGA and SXGA modes
+	msg.K[5] = (msg.width * (3./8.)) - 0.5;
+	msg.K[8] = 1.0;
+
+	// No separate rectified image plane, so R = I
+	msg.R.assign(0.0);
+	msg.R[0] = msg.R[4] = msg.R[8] = 1.0;
+
+	// Then P=K(I|0) = (K|0)
+	msg.P.assign(0.0);
+	msg.P[0]  = msg.P[5] = 525.0; // fx, fy
+	msg.P[2]  = msg.K[2];     // cx
+	msg.P[6]  = msg.K[5];     // cy
+	msg.P[10] = 1.0;
+
+	p.publish(msg);
+}
+
 /**
  * Constantly grabs images from the Kinect and performs operations on these images if necessary.
  */
-void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
+void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 {
 	bool quit = false;
 
 	// this provides image compression
-	image_transport::ImageTransport it(*n);
-	ros::Publisher laser_pub = n->advertise<sensor_msgs::LaserScan>("scan", 1);
+	image_transport::ImageTransport it(nh);
+	ros::Publisher laser_pub = nh.advertise<sensor_msgs::LaserScan>("/scan", 1);
 	//image_transport::Publisher image_pub = it.advertise("image", 1);
-	ros::Publisher image_pub = n->advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
-	ros::Publisher cloud_pub = n->advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
+	ros::Publisher image_pub = nh.advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
+	ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
+	ros::ServiceClient zaragoza_client = nh.serviceClient<re_vision::SearchFor>("/re_vision/search_for");
+	ros::Publisher cameraInfoPub = nh.advertise<sensor_msgs::CameraInfo>("/camera/rgb/camera_info", 1);
+	ros::Publisher modelDirPub = nh.advertise<std_msgs::String>("/re_vslam/new_model", 1);
 
 	bool captureRGB = false;
 	bool captureCloud = false;
+	bool objectDetection = true;
+
+	sensor_msgs::ImagePtr imageMsg;
+	gModelNames.push_back("videogames.kinectadventures");
 
 	while (quit == false && ros::ok())
 	{
+		publishCameraInfo(cameraInfoPub);
+		publishModelPaths(modelDirPub);
+
 		cv::Mat image, pointCloud;
 		//IplImage iplImage;
 
 		// is it required to convert to point clouds and publish ?
 		captureCloud = cloud_pub.getNumSubscribers() != 0;
 		// is it required to capture RGB images ?
-		captureRGB = captureCloud || image_pub.getNumSubscribers() != 0;
+		captureRGB = objectDetection || captureCloud || image_pub.getNumSubscribers() != 0;
 
 		if (capture->grab() == false)
 		{
@@ -121,17 +202,21 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 					laser_pub.publish(laserscan);
 			}
 
+			if (captureRGB || objectDetection)
+				imageMsg = iplImageToImage(&rgb);
+
 			// do we have a listener to the RGB output ?
 			if (captureRGB)
-			{
-				sensor_msgs::ImagePtr imageMsg = iplImageToImage(&rgb);
 				image_pub.publish(imageMsg);
-			}
+
+			if (objectDetection)
+				requestObjectDetection(imageMsg, zaragoza_client);
 
 			if (captureCloud)
 			{
 				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToRegisteredPointCloud2(&pc, &rgb);
-				cloud_pub.publish(cloudMsg);
+				//cloud_pub.publish(cloudMsg);
+				//roscom.processPointcloud(cloudMsg);
 			}
 		}
 
@@ -146,6 +231,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle *n)
 		default:
 			break;
 		}
+		ros::spinOnce();
 	}
 }
 
@@ -179,6 +265,6 @@ int main(int argc, char* argv[])
 			"FRAME_HEIGHT\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FRAME_HEIGHT) << std::endl <<
 			"FPS\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FPS) << std::endl;
 
-	kinectLoop(&capture, &n);
+	kinectLoop(&capture, n);
 	return 0;
 }

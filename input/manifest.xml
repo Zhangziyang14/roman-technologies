@@ -24,6 +24,10 @@
   <depend package="logical_unit"/>
   <depend package="image_transport"/>
   <depend package="pcl"/>
+  <depend package="cv_bridge"/>
+  <depend package="pcl_visualization"/>
+  <depend package="re_vision"/>
+  <depend package="tinyxml"/>
 
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
