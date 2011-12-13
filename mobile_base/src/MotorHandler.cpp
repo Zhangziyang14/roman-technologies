@@ -20,18 +20,18 @@ void MotorHandler::publishRobotSpeed()
  */
 void MotorHandler::positionCB(const std_msgs::Float64& msg)
 {
-	//double currentRightPosition = mRightMotor.getPosition();
-	//double currentLeftPosition = mLeftMotor.getPosition();
+	double currentRightPosition = mRightMotor.getPosition();
+	double currentLeftPosition = mLeftMotor.getPosition();
 
-	//mLock = true;
+	mLock = true;
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	/*if((msg.data > 0 && mFrontLeftCenter > msg.data*100 && mFrontRightCenter > msg.data*100) || (msg.data < 0 && mRearLeft > std::abs(msg.data*100) && mRearRight > std::abs(msg.data*100)))
+	if((msg.data > 0 && mFrontLeftCenter > msg.data*100 && mFrontRightCenter > msg.data*100) || (msg.data < 0 && mRearLeft > std::abs(msg.data*100) && mRearRight > std::abs(msg.data*100)))
 	{
 		mRightMotor.setPosition(currentRightPosition + msg.data);
 		mLeftMotor.setPosition(currentLeftPosition + msg.data);
-	}*/
+	}
 }
 
 /**
@@ -39,15 +39,27 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
  */
 void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 {
+	//Robot is boxed, so block the robot
+	if(mLeft < 50 && mRight < 50 && mFrontLeftCenter < 80 && mFrontRightCenter < 80)
+		mLock = true;
+	//Unblock the robot
+	else if(mCurrentSpeed.linear.x == 0)
+		mLock = false;
+
 	double converted_right 	= ZERO_SPEED, converted_left = ZERO_SPEED;
+	double left_speed 	 	= ZERO_SPEED;
+	double right_speed 		= ZERO_SPEED;
 
 	//Convert linear speed to motor speeds in [rad/s]
-	double vel_linear = msg.linear.x / WHEEL_RADIUS;
-	double vel_angular = msg.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
+	if (left_speed == ZERO_SPEED && right_speed == ZERO_SPEED)
+	{
+		double vel_linear = msg.linear.x / WHEEL_RADIUS;
+		double vel_angular = msg.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
 
-	converted_left  = vel_linear - vel_angular;
-	converted_right = vel_linear + vel_angular;
-	/*if(mLock)
+		converted_left  = vel_linear - vel_angular;
+		converted_right = vel_linear + vel_angular;
+	}
+	if(mLock)
 	{
 		//Disable motors when boxed or when in position mode
 		if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
@@ -59,11 +71,63 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 			right_speed	= ZERO_SPEED;
 		}
 	}
-	else*/
+	else
 	{
+		//Calculations are in positive numbers because the minimum between speed and scaled speed is used
+		left_speed 	= std::abs(converted_left);
+		right_speed = std::abs(converted_right);
 
-		mRightMotor.setSpeed(converted_right);
-		mLeftMotor.setSpeed(converted_left);
+		left_speed      = scaleSpeed(left_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontRight);
+		right_speed		= scaleSpeed(right_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontLeft);
+
+		//Check right and left side for walls and avoid them when needed.
+		//Don't avoid the walls when distance to both sides are close to the robot
+		if(!(mLeft < SIDES_AVOIDANCE_DISTANCE && mRight < SIDES_AVOIDANCE_DISTANCE))
+		{
+			left_speed	= scaleSpeed(left_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mRight);
+			right_speed	= scaleSpeed(right_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mLeft);
+		}
+		//Avoidance rules when object is in front of robot
+		if(mFrontLeftCenter < FRONT_AVOIDANCE_DISTANCE || mFrontRightCenter < FRONT_AVOIDANCE_DISTANCE)
+		{
+			//Turn to left when left side has more space than right side
+			if(mLeft > mRight && mRight < SIDES_AVOIDANCE_DISTANCE)
+				left_speed = scaleSpeed(left_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+
+			//Turn to right when right side has more space than left side
+			else if(mLeft < mRight && mLeft < SIDES_AVOIDANCE_DISTANCE)
+				right_speed = scaleSpeed(right_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+
+			//Turn right when object is more to the left of the robot
+			else if(mFrontLeft < FRONT_AVOIDANCE_DISTANCE)
+				right_speed = scaleSpeed(right_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+
+			//Turn left when object is more to the right of the robot
+			else if(mFrontRight < FRONT_AVOIDANCE_DISTANCE)
+				left_speed = scaleSpeed(left_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+
+			//Turn right when robot is driving straight to a wall
+			else if(mFrontRight < FRONT_SIDES_AVOIDANCE_DISTANCE-20 && mFrontLeft < FRONT_SIDES_AVOIDANCE_DISTANCE-20)
+				right_speed = scaleSpeed(right_speed, 0.5*FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+
+			else
+			{
+				//If there is space front right of the robot, then turn to that side. Otherwise, turn to the other side.
+				if(mFrontRight > FRONT_AVOIDANCE_DISTANCE)
+					right_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+				else
+					left_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+			}
+		}
+
+		//Restore the direction of the speeds when all calculations are done
+		left_speed = converted_left < ZERO_SPEED ? -left_speed : left_speed;
+		right_speed = converted_right < ZERO_SPEED ? -right_speed : right_speed;
+
+		ROS_INFO("left %f right %f", left_speed, right_speed);
+
+		mRightMotor.setSpeed(right_speed);
+		mLeftMotor.setSpeed(left_speed);
 	}
 }
 
@@ -108,6 +172,23 @@ void MotorHandler::tweakCB(const mobile_base::tweak msg)
 }
 
 /**
+ *	Reads distances from ultrasone sensors
+ */
+void MotorHandler::ultrasoneCB(const mobile_base::sensorFeedback& msg)
+{
+	mFrontLeftCenter	= msg.frontLeftCenter;
+	mFrontRightCenter	= msg.frontRightCenter;
+	mFrontLeft 			= msg.frontLeft;
+	mFrontRight			= msg.frontRight;
+
+	mRearLeft			= msg.rearLeft;
+	mRearRight			= msg.rearRight;
+
+	mLeft				= msg.left;
+	mRight				= msg.right;
+}
+
+/**
  * Initialise MotorHandler and its attributes.
  */
 void MotorHandler::init(char *path)
@@ -120,10 +201,21 @@ void MotorHandler::init(char *path)
 	mTweakPIDSub 	= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
 	mTwistSub 		= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
 	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
+	mUltrasoneSub 	= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 
 	mLock = false;
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
+
+	//Initialise distances from ultrasone sensors
+	mFrontLeftCenter = ULTRASONE_MAX_RANGE; 
+	mFrontRightCenter = ULTRASONE_MAX_RANGE;
+	mRearLeft = ULTRASONE_MAX_RANGE;
+	mFrontLeft = ULTRASONE_MAX_RANGE;
+	mRearRight = ULTRASONE_MAX_RANGE;
+	mFrontRight = ULTRASONE_MAX_RANGE;
+	mRight = ULTRASONE_MAX_RANGE;
+	mLeft = ULTRASONE_MAX_RANGE;
 
 	//Activate all ultrasone sensors
 	std_msgs::Bool activate_msg;

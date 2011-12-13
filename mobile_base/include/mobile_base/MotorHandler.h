@@ -20,6 +20,16 @@
 #define ULTRASONE_MAX_RANGE						600		//[cm]
 
 #define ZERO_SPEED								0.0		//[m/s]
+#define STANDARD_AVOIDANCE_IMPACT				175.0	//[cm]
+
+#define FRONT_AVOIDANCE_DISTANCE				150.0	//[cm]
+#define FRONT_AVOIDANCE_IMPACT					100.0	//[cm]
+
+#define SIDES_AVOIDANCE_IMPACT					75.0	//[cm]
+#define SIDES_AVOIDANCE_DISTANCE				60.0	//[cm]
+
+#define FRONT_SIDES_AVOIDANCE_DISTANCE 			120.0	//[cm]
+#define FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT	120.0	//[cm]
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
@@ -29,6 +39,7 @@ protected:
 
 	ros::Subscriber mTwistSub;				/// Listens to Twist messages for movement
 	ros::Subscriber mPositionSub;			/// Listens to integer messages for positioning
+	ros::Subscriber mUltrasoneSub;			/// Listens to distance from ultrasone sensors
 	ros::Subscriber mTweakPIDSub;			/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
 
 	ros::Publisher mSpeedPub;				/// Publishes robot's speed
@@ -45,6 +56,8 @@ protected:
 	PIDParameter mPIDFocus;					/// One of the PID parameters that is to be changed on button events
 
 	bool mLock;
+
+	int mFrontLeftCenter, mFrontRightCenter, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
 
 public:
 	/// Constructor
@@ -63,7 +76,20 @@ public:
 	void publishRobotSpeed();
 	void moveCB(const geometry_msgs::Twist& msg);
 	void positionCB(const std_msgs::Float64& msg);
+	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
 	void tweakCB(const mobile_base::tweak msg);
+
+	//Scale the speed of a motor based on the measured distance
+	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int measured_distance)
+	{
+		return std::min(speed, std::min(speed-speed*(avoidance_distance-measured_distance)/avoidance_impact, speed-speed*(avoidance_distance-measured_distance)/avoidance_impact));
+	};
+
+	//Scale the speed of a motor based on the measured distances
+	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int measured_distance1, int measured_distance2)
+	{
+		return std::min(speed, std::min(speed-speed*(avoidance_distance-measured_distance1)/avoidance_impact, speed-speed*(avoidance_distance-measured_distance2)/avoidance_impact));
+	};
 };
 
 #endif /* __MOTORHANDLER_H */
