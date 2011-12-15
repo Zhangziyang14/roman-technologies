@@ -11,8 +11,11 @@
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="nav_core"/>
+  <depend package="costmap_2d"/>
   <export>
-        <rosdoc config="rosdoc.yaml" />
+    <rosdoc config="rosdoc.yaml" />
+    <nav_core plugin="${prefix}/blp_plugin2.xml" />
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -llocal_planner" />
   </export>
 </package>
 

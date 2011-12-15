@@ -8,7 +8,9 @@
 #ifndef LOCALPLANNER_H_
 #define LOCALPLANNER_H_
 
-class LocalPlanner: public BaseLocalPlanner
+#include "nav_core/base_local_planner.h"
+
+class LocalPlanner: public nav_core::BaseLocalPlanner
 {
 public:
     virtual bool computeVelocityCommands(geometry_msgs::Twist& cmd_vel) { return false; };
