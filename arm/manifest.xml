@@ -7,6 +7,7 @@
   <author>Kelvin</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
+  <depend package="roscpp" /> 
   <url>http://ros.org/wiki/arm</url>
 
 </package>
