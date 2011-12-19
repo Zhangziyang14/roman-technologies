@@ -4,10 +4,11 @@
      arm
 
   </description>
-  <author>Kelvin</author>
+  <author>Fahrenheit</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <depend package="roscpp" /> 
+  <depend package="roscpp" />
+  <depend package="threemxl" />
   <url>http://ros.org/wiki/arm</url>
 
 </package>

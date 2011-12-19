@@ -39,8 +39,9 @@ enum MotorId
 	MID_NONE = -1,
 	MID_LEFT = 106,
 	MID_RIGHT = 107,
-	MID_ARM = 108,
 	MID_GRIPPER = 109,
+	MID_ARM_SHOULDER = 110,
+	MID_ARM_SIDEWAYS = 111,
 };
 
 /// Class that contains PID values and some perhaps limited functions
@@ -92,7 +93,7 @@ public:
     void setAcceleration(double aceleration);
     void updatePID();
     void printPID();
-    double getPosition();
+    double g etPosition();
 
     double getRotationSpeed();
     int getMode();
