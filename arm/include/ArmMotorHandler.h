@@ -8,14 +8,20 @@
 #ifndef ARMMOTORHANDLER_H_
 #define ARMMOTORHANDLER_H_
 
+#define SHOULDERMOTOR_CORRECTION_FACTOR (0.5625) // 27/48
+#define SHOULDERMOTOR_TRANSMISSION_RATIO (3.0)
+
 #include <ros/ros.h>
 #include <Motor.h>
 #include <std_msgs/Float64.h>
-
-
+#include <boost/thread.hpp>
 
 class ArmMotorHandler
 {
+
+private:
+	float angleOffset;
+
 protected:
 	ros::NodeHandle mNodeHandle;			/// ROS node handle
 
@@ -24,13 +30,17 @@ protected:
 	Motor mShoulderMotor;					/// Motor for left wheel
 	Motor mSideMotor;						/// Motor for right wheel
 
+	// initialize motor: find reference point
+	void init();
+
 
 public:
 	/// Constructor
-	ArmMotorHandler(char *path); //: mNodeHandle("~"), mShoulderMotor(MID_ARM_SHOULDER), mSideMotor(MID_ARM_SIDEWAYS)
+	ArmMotorHandler(char *path);
+
 
 	/// Destructor
-	/** Delete motor interface, close serial port, and shut down node handle */
+	/** shut down node handle, stop 'run' thread */
 	~ArmMotorHandler()
 	{
 		mNodeHandle.shutdown();
@@ -38,6 +48,7 @@ public:
 
 	/** Subscriber callbacks **/
 	void shoulderCB(const std_msgs::Float64& msg);
+	void Run();
 };
 
 
