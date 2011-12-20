@@ -8,8 +8,15 @@
 #ifndef ARMMOTORHANDLER_H_
 #define ARMMOTORHANDLER_H_
 
-#define SHOULDERMOTOR_CORRECTION_FACTOR (0.5625) // 27/48
-#define SHOULDERMOTOR_TRANSMISSION_RATIO (3.0)
+#define SHOULDERMOTOR_CORRECTION_FACTOR (0.5625) // old [DPR2] gear ratio: 27/48
+#define SHOULDERMOTOR_TRANSMISSION_RATIO (3.0)	 // current gear ratio
+
+#define EXT_INIT_MODE_TORQUE (-0.001)			 // torque required for ext_init mode
+
+#define SHOULDERMOTOR_MIN_ANGLE (0.0)
+#define SHOULDERMOTOR_MAX_ANGLE (2.25)
+
+
 
 #include <ros/ros.h>
 #include <Motor.h>
@@ -31,7 +38,7 @@ protected:
 	Motor mSideMotor;						/// Motor for right wheel
 
 	// initialize motor: find reference point
-	void init();
+	bool init();
 
 
 public:
