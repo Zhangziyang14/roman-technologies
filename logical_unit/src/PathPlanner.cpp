@@ -5,7 +5,7 @@
  *      Author: hans
  */
 
-#include "PathPlanner.h"
+#include "logical_unit/PathPlanner.h"
 
 PathPlanner::PathPlanner() :
 	mNodeHandle("~"),
@@ -21,6 +21,12 @@ PathPlanner::PathPlanner() :
 	// this is used for enabling swimming, climbing and what not ... our robot will not do this :)
 	mFilter.setIncludeFlags(0xffff ^ 0x10);
 	mFilter.setExcludeFlags(0);
+
+	std::string goalTopic, pathTopic;
+	mNodeHandle.param<std::string>("goal_topic", goalTopic, "/move_base_simple/goal");
+	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
+	mGoalSub = mNodeHandle.subscribe(goalTopic, 1, &PathPlanner::goalCb, this);
+	mPathPub = mNodeHandle.advertise<nav_msgs::Path>(pathTopic, 1);
 }
 
 PathPlanner::~PathPlanner()
@@ -92,7 +98,7 @@ void PathPlanner::loadNavmesh()
 	fclose(fp);
 }
 
-void PathPlanner::planPath(geometry_msgs::Point start, geometry_msgs::Point end, std::vector<geometry_msgs::Point> &path)
+void PathPlanner::planPath(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped end, nav_msgs::Path &path)
 {
 	if (mNavMesh == NULL)
 	{
@@ -114,9 +120,11 @@ void PathPlanner::planPath(geometry_msgs::Point start, geometry_msgs::Point end,
 	dtPolyRef straightPathPolys[MAX_POLYS];
 	float straightPath[MAX_POLYS*3];
 	unsigned char straightPathFlags[MAX_POLYS];
-	float spos[3] = { start.x, 0.f, start.y };
-	float epos[3] = { end.x, 0.f, end.y };
+	float spos[3] = { start.pose.position.x, 0.f, start.pose.position.y };
+	float epos[3] = { end.pose.position.x, 0.f, end.pose.position.y };
 	float polyPickExt[3] = { 2.f, 4.f, 2.f };
+
+	ROS_INFO("Calculating path from (%lf, %lf) to (%lf, %lf)", start.pose.position.x, start.pose.position.y, end.pose.position.x, end.pose.position.y);
 
 	mNavMeshQuery->findNearestPoly(spos, polyPickExt, &mFilter, &startRef, 0);
 	mNavMeshQuery->findNearestPoly(epos, polyPickExt, &mFilter, &endRef, 0);
@@ -139,12 +147,63 @@ void PathPlanner::planPath(geometry_msgs::Point start, geometry_msgs::Point end,
 		}
 	}
 
+	ROS_INFO("PathCount: %d", straightPathCount);
 	for (int i = 0; i < straightPathCount; i++)
 	{
-		geometry_msgs::Point p;
-		p.x = straightPath[i*3];
-		p.y = straightPath[i*3 + 2];
-		path.push_back(p);
+		geometry_msgs::PoseStamped p;
+		p.header.frame_id = "/odom";
+		p.header.stamp = ros::Time::now();
+		p.pose.position.x = straightPath[i*3];
+		p.pose.position.y = straightPath[i*3 + 2];
+		path.poses.push_back(p);
+	}
+
+	path.poses[straightPathCount - 1].pose.orientation = end.pose.orientation;
+}
+
+void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
+{
+	ROS_INFO("Received new goal.");
+
+	nav_msgs::Path path;
+	path.header.frame_id = "/odom";
+
+	geometry_msgs::PoseStamped start, end;
+	start.pose.position.x = mRobotPosition.getOrigin().getX();
+	start.pose.position.y = mRobotPosition.getOrigin().getY();
+	end.pose.position.x = goal.pose.position.x;
+	end.pose.position.y = goal.pose.position.y;
+	end.pose.orientation = goal.pose.orientation;
+
+	planPath(start, end, path);
+
+	ROS_INFO("Size: %d", path.poses.size());
+	for (size_t i = 0; i < path.poses.size(); i++)
+	{
+		path.poses[i].pose.position.x = path.poses[i].pose.position.x;
+		path.poses[i].pose.position.y = path.poses[i].pose.position.y;
+		std::cout << "Path[" << i << "]: x = " << path.poses[i].pose.position.x << ", y = " << path.poses[i].pose.position.y << std::endl;
+	}
+
+	path.header.stamp = ros::Time::now();
+	mPathPub.publish(path);
+}
+
+void PathPlanner::spin()
+{
+	tf::TransformListener transformListener;
+
+	while (ros::ok())
+	{
+		try
+		{
+			transformListener.lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
+		}
+		catch (tf::TransformException ex)
+		{
+			//ROS_ERROR("%s",ex.what());
+		}
+		ros::spinOnce();
 	}
 }
 
@@ -153,21 +212,12 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "PathPlanner");
 
 	PathPlanner pp;
-
-	geometry_msgs::Point p1;
-	geometry_msgs::Point p2;
+	pp.spin();
 
 	//52.752132 0.000002 61.427223  57.043953 -0.000002 42.184956
-	p1.x = 52.752132;
-	p1.y = 61.427223;
 
-	p2.x = 57.043953;
-	p2.y = 42.184956;
-
-	std::vector<geometry_msgs::Point> path;
-	pp.planPath(p1, p2, path);
-
-	for (size_t i = 0; i < path.size(); i++)
-		std::cout << "Path[" << i << "]: x = " << path[i].x << ", y = " << path[i].y << std::endl;
+	//geometry_msgs::Point p2;
+	//p2.x = 57.043953;
+	//p2.y = 42.184956;
 	return 0;
 }

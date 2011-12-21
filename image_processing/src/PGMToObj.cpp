@@ -1,10 +1,7 @@
 #include "ros/ros.h"
 #include "image_processing/Util.h"
 #include "fstream"
-
-#define RESOLUTION 0.05 // meters / pixel
-#define ORIGIN_X 0.0 // meters of leftmost pixel
-#define ORIGIN_Y 0.0 // meters of downmost pixel
+#include "yaml-cpp/yaml.h"
 
 void addVertices(std::ofstream *file, cv::Point2d p[], double z)
 {
@@ -22,7 +19,56 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "PGMToObj");
 	std::ofstream objFile("out.obj");
 
-	IplImage *image = cvLoadImage("map.pgm", -1);
+	std::ifstream fin("map.yaml");
+	if (fin.fail())
+	{
+		ROS_ERROR("Failed to open YAML file.");
+		return -1;
+	}
+
+	YAML::Parser parser(fin);
+	YAML::Node doc;
+	parser.GetNextDocument(doc);
+
+	double origin_x, origin_y;
+	origin_x = origin_y = 0.0;
+	double resolution = 0.0;
+	std::string mapname = "";
+
+	try
+	{
+		doc["resolution"] >> resolution;
+	} catch (YAML::InvalidScalar)
+	{
+		ROS_ERROR("No resolution found in YAML file.");
+		return -1;
+	}
+	try
+	{
+		doc["origin"][0] >> origin_x;
+	} catch (YAML::InvalidScalar)
+	{
+		ROS_ERROR("No origin.x found in YAML file.");
+		return -1;
+	}
+	try
+	{
+		doc["origin"][1] >> origin_y;
+	} catch (YAML::InvalidScalar)
+	{
+		ROS_ERROR("No origin.y found in YAML file.");
+		return -1;
+	}
+	try
+	{
+		doc["image"] >> mapname;
+	} catch (YAML::InvalidScalar)
+	{
+		ROS_ERROR("No image name found in YAML file.");
+		return -1;
+	}
+
+	IplImage *image = cvLoadImage(mapname.c_str(), -1);
 	if (image == NULL)
 	{
 		std::cout << "It failed.." << std::endl;
@@ -43,17 +89,17 @@ int main(int argc, char **argv)
 				if (buildingPolygon == false)
 				{
 					// if we are starting a line, fill the leftmost vertices
-					vertices[0].x = ORIGIN_X + x * RESOLUTION;
-					vertices[0].y = ORIGIN_Y + y * RESOLUTION;
-					vertices[1].x = ORIGIN_X + x * RESOLUTION;
-					vertices[1].y = ORIGIN_Y + y * RESOLUTION + RESOLUTION;
+					vertices[0].x = origin_x + x * resolution;
+					vertices[0].y = origin_y + (image->height - y - 1) * resolution;
+					vertices[1].x = origin_x + x * resolution;
+					vertices[1].y = origin_y + (image->height - y - 1) * resolution + resolution;
 				}
 
 				// fill the rightmost vertices regardless of extending or starting a new line
-				vertices[2].x = ORIGIN_X + x * RESOLUTION + RESOLUTION;
-				vertices[2].y = ORIGIN_Y + y * RESOLUTION + RESOLUTION;
-				vertices[3].x = ORIGIN_X + x * RESOLUTION + RESOLUTION;
-				vertices[3].y = ORIGIN_Y + y * RESOLUTION;
+				vertices[2].x = origin_x + x * resolution + resolution;
+				vertices[2].y = origin_y + (image->height - y - 1) * resolution + resolution;
+				vertices[3].x = origin_x + x * resolution + resolution;
+				vertices[3].y = origin_y + (image->height - y - 1) * resolution;
 
 				// we are now building a line polygon
 				buildingPolygon = true;
@@ -94,17 +140,17 @@ int main(int argc, char **argv)
 				if (buildingPolygon == false)
 				{
 					// if we are starting a line, fill the leftmost vertices
-					vertices[0].x = ORIGIN_X + x * RESOLUTION;
-					vertices[0].y = ORIGIN_Y + y * RESOLUTION;
-					vertices[1].x = ORIGIN_X + x * RESOLUTION;
-					vertices[1].y = ORIGIN_Y + y * RESOLUTION + RESOLUTION;
+					vertices[0].x = origin_x + x * resolution;
+					vertices[0].y = origin_y + (image->height - y - 1) * resolution;
+					vertices[1].x = origin_x + x * resolution;
+					vertices[1].y = origin_y + (image->height - y - 1) * resolution + resolution;
 				}
 
 				// fill the rightmost vertices regardless of extending or starting a new line
-				vertices[2].x = ORIGIN_X + x * RESOLUTION + RESOLUTION;
-				vertices[2].y = ORIGIN_Y + y * RESOLUTION + RESOLUTION;
-				vertices[3].x = ORIGIN_X + x * RESOLUTION + RESOLUTION;
-				vertices[3].y = ORIGIN_Y + y * RESOLUTION;
+				vertices[2].x = origin_x + x * resolution + resolution;
+				vertices[2].y = origin_y + (image->height - y - 1) * resolution + resolution;
+				vertices[3].x = origin_x + x * resolution + resolution;
+				vertices[3].y = origin_y + (image->height - y - 1) * resolution;
 
 				// we are now building a line polygon
 				buildingPolygon = true;

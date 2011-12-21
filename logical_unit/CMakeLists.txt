@@ -23,10 +23,12 @@ rosbuild_genmsg()
 
 rosbuild_add_executable(MovementSimulator src/MovementSimulator.cpp)
 #rosbuild_add_executable(PathFinder src/PathFinder.cpp)
+rosbuild_add_executable(PathPlanner src/PathPlanner.cpp)
+rosbuild_add_executable(PathFollower src/PathFollower.cpp)
 #rosbuild_add_executable(InitPosition src/InitPosition.cpp)
 #include_directories(/usr/local/include)
 #target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
-#target_link_libraries(PathPlanner -L${PROJECT_SOURCE_DIR}/lib Detour)
+target_link_libraries(PathPlanner -L${PROJECT_SOURCE_DIR}/lib Detour)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
