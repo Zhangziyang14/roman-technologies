@@ -47,11 +47,8 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 	mShoulderMotor.init(path);
 	mSideMotor.init(path);
 
-	mShoulderMotor.setMode(CM_POSITION_MODE);
-	mSideMotor.setMode(CM_POSITION_MODE);
-
 	// initialize motor to zero position
-	/*
+
 	if(init())
 		ROS_INFO("ArmMotorHandler successfully initialized");
 	else
@@ -59,9 +56,9 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		ROS_INFO("Error initializing ArmMotorHandler: failed to determine arm position");
 		return;
 	}
-	*/
-	ROS_INFO("Error initializing ArmMotorHandler: 3mxel prevents proper turning direction");
-
+	mShoulderMotor.setAngleLimits(-0.1, 9.0);
+	mShoulderMotor.setMode(CM_POSITION_MODE);
+	mSideMotor.setMode(CM_POSITION_MODE);
 	// thread to fix 3mxel setPos bug
 	boost::thread thread(&ArmMotorHandler::Run, this);
 }
@@ -71,8 +68,12 @@ bool ArmMotorHandler::init()
 {
 	ROS_INFO("Initializing arm to starting position...");
 
-	mShoulderMotor.setMode(CM_EXT_INIT_MODE);
-	mShoulderMotor.setTorque(EXT_INIT_MODE_TORQUE);					 //TODO set negative!
+	mShoulderMotor.setAngleLimits(-0.1, 9.0);
+
+	mShoulderMotor.setMode(CM_EXT_INIT_MODE);						//Set to external_init mode
+	mShoulderMotor.setAcceleration(EXT_INIT_MODE_ACCEL);			//Set acceleration for initialization
+	mShoulderMotor.setSpeed(EXT_INIT_MODE_SPEED);					//Set speed for initialization
+	mShoulderMotor.setTorque(EXT_INIT_MODE_TORQUE);					//Set torque to begin initialization
 
 	while(mShoulderMotor.getStatus()== M3XL_STATUS_INITIALIZE_BUSY); // wait untill initializing is done
 
@@ -105,8 +106,8 @@ void ArmMotorHandler::shoulderCB(const std_msgs::Float64& msg)
 	}
 
 
-	double motorPos = targetPos * SHOULDERMOTOR_CORRECTION_FACTOR;
-	motorPos = motorPos * SHOULDERMOTOR_TRANSMISSION_RATIO;
-	ROS_INFO("\t motor position is [%.4f]", motorPos);
-	mShoulderMotor.setAngle(motorPos, 0.5, 0.5);
+//	double motorPos = targetPos * SHOULDERMOTOR_CORRECTION_FACTOR;
+//	motorPos = motorPos * SHOULDERMOTOR_TRANSMISSION_RATIO;
+	ROS_INFO("\t motor position is [%.4f]", targetPos);
+	mShoulderMotor.setAngle(targetPos, 0.5, 0.5);
 }

@@ -11,7 +11,9 @@
 #define SHOULDERMOTOR_CORRECTION_FACTOR (0.5625) // old [DPR2] gear ratio: 27/48
 #define SHOULDERMOTOR_TRANSMISSION_RATIO (3.0)	 // current gear ratio
 
-#define EXT_INIT_MODE_TORQUE (-0.001)			 // torque required for ext_init mode
+#define EXT_INIT_MODE_TORQUE (0.001)			 // torque required for ext_init mode
+#define EXT_INIT_MODE_ACCEL	(0.5)				 // acceleration for ext_init
+#define EXT_INIT_MODE_SPEED	(-0.5)				 // negative speed for downwards angle initialization
 
 #define SHOULDERMOTOR_MIN_ANGLE (0.0)
 #define SHOULDERMOTOR_MAX_ANGLE (2.25)

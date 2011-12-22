@@ -108,6 +108,7 @@ public:
 
     // change turning direction
     void setPositiveDirection(bool clockwise);
+    void setAngleLimits(double lowerLimit, double upperLimit);
 
     double getRotationSpeed();
     int getMode();

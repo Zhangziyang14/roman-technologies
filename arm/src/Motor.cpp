@@ -57,12 +57,7 @@ void Motor::setAcceleration(double acceleration)
  */
 void Motor::setLSpeed(double speed, double acceleration)
 {
-	if (cmode != CM_SPEED_MODE)
-	{
-       		 std::cout << "Motor not in speed mode, setting it now." << std::endl;
-	        setMode(CM_SPEED_MODE);
-	}
-
+	assertMode(CM_SPEED_MODE);
     motor_->setLinearSpeed(speed, acceleration);
 }
 
@@ -71,18 +66,11 @@ void Motor::setLSpeed(double speed, double acceleration)
  */
 void Motor::setSpeed(double speed)
 {
-	if (cmode != CM_SPEED_MODE)
-	{
-        std::cout << "Motor not in speed mode, setting it now." << std::endl;
-        setMode(CM_SPEED_MODE);
-
-		setAcceleration(DEFAULT_ACCELERATION);
-	}
-
-    if(speed == 0.0)
-	brake();
+	assertMode(CM_SPEED_MODE);
+	if(speed == 0.0)
+		brake();
     else
-    motor_->setSpeed(speed);
+    	motor_->setSpeed(speed);
 }
 
 /**
@@ -90,28 +78,16 @@ void Motor::setSpeed(double speed)
  */
 void Motor::brake()
 {
-	if (cmode != CM_SPEED_MODE)
-	{
-        std::cout << "Motor not in speed mode, setting it now." << std::endl;
-        setMode(CM_SPEED_MODE);
-
-		setAcceleration(SAFE_BRAKING_DECCELERATION);
-	}
-
+	assertMode(CM_SPEED_MODE);
     motor_->setSpeed(0);
 }
 
 /**
-  * Sets position of the motor when in POSITION_MODE
+  * Sets linear position of the motor when in POSITION_MODE
  */
 void Motor::setPosition(double position)
 {
-	if (cmode != CM_POSITION_MODE)
-	{
-        std::cout << "Motor not in POSITON mode, setting it now." << std::endl;
-        setMode(CM_POSITION_MODE);
-	}
-	//motor_->setPos(position);
+	assertMode(CM_POSITION_MODE);
 	motor_->setLinearPos(position, 1, 0.5, false);
 }
 
@@ -140,9 +116,7 @@ double Motor::getAngle()
 
 void Motor::setTorque(double torque)
 {
-	if(cmode != CM_EXT_INIT_MODE)		// setTorque is also needed in ext_init mode
-		assertMode(CM_TORQUE_MODE);
-
+	assertMode(CM_TORQUE_MODE);
 	motor_->setTorque(torque);
 }
 
@@ -157,7 +131,7 @@ void Motor::setPositiveDirection(bool clockwise)
 // if not, the control mode is set and a warning is emitted
 void Motor::assertMode(ControlMode mode)
 {
-	if (cmode != mode)
+	if ((cmode != mode) && (cmode != CM_EXT_INIT_MODE))
 	{
 		std::cout << "Motor not in specified mode [" << mode << "], setting it now." << std::endl;
 		setMode(mode);
@@ -235,6 +209,13 @@ int Motor::getStatus()
 	return motor_->presentStatus();
 }
 
+
+void Motor::setAngleLimits(double lowerLimit, double upperLimit)
+{
+	motor_->setAngleLimits(lowerLimit, upperLimit);
+	motor_->setAngleUpperLimit(100);
+	motor_->setEncoderCountMotor(600);
+}
 
 
 /**
