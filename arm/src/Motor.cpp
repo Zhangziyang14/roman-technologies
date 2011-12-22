@@ -43,6 +43,12 @@ void Motor::setMode(ControlMode mode)
     std::cout << " mode." << std::endl;
 }
 
+void Motor::setEncoderCount(int resolution)
+{
+	ROS_INFO("Setting encoder count to [%i]", resolution);
+	motor_->setEncoderCountMotor(resolution);
+}
+
 
 /**
   * Sets acceleration of the motor when in SPEED_MODE
@@ -119,12 +125,6 @@ void Motor::setTorque(double torque)
 	assertMode(CM_TORQUE_MODE);
 	motor_->setTorque(torque);
 }
-
-void Motor::setPositiveDirection(bool clockwise)
-{
-	motor_->setPositiveDirection(clockwise);
-}
-
 
 
 // check if the motor is in the correct control mode.
@@ -210,14 +210,6 @@ int Motor::getStatus()
 }
 
 
-void Motor::setAngleLimits(double lowerLimit, double upperLimit)
-{
-	motor_->setAngleLimits(lowerLimit, upperLimit);
-	motor_->setAngleUpperLimit(100);
-	motor_->setEncoderCountMotor(600);
-}
-
-
 /**
  * Initalize Motor and its attributes.
 */
@@ -245,7 +237,7 @@ void Motor::init(char *path)
     motor_->setConfig(config->setID(mMotorId));
     motor_->init(false);
     setMode(CM_STOP_MODE);
-    motor_->setEncoderCountMotor(500); // hack until motor is flashed with correct number
+    setEncoderCount(DEFAULT_ENCODER_COUNT);		//NB: this overrides the 3mxel default
 
     delete config;
     std::cout << "Motor " << mMotorId << " initialising completed." << std::endl;

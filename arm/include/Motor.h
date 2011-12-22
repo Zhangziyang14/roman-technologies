@@ -8,8 +8,9 @@
 #define DEFAULT_I 0.0
 #define DEFAULT_D 0.0
 
-#define DEFAULT_ACCELERATION 5
-#define SAFE_BRAKING_DECCELERATION 0.5
+#define DEFAULT_ENCODER_COUNT		500
+#define DEFAULT_ACCELERATION		5
+#define SAFE_BRAKING_DECCELERATION	0.5
 
 enum ControlMode
 {
@@ -88,6 +89,7 @@ public:
     void init(char *path);
 
     void setMode(ControlMode mode);
+    void setEncoderCount(int resolution);
     void setSpeed(double speed);
     void brake();
     void setLSpeed(double speed, double acceleration);
@@ -105,10 +107,6 @@ public:
 
     // torque control
     void setTorque(double torque);
-
-    // change turning direction
-    void setPositiveDirection(bool clockwise);
-    void setAngleLimits(double lowerLimit, double upperLimit);
 
     double getRotationSpeed();
     int getMode();
