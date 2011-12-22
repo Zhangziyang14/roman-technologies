@@ -93,7 +93,7 @@ public:
     void setAcceleration(double aceleration);
     void updatePID();
     void printPID();
-    double g etPosition();
+    double getPosition();
 
     double getRotationSpeed();
     int getMode();
