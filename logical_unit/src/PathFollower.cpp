@@ -7,13 +7,13 @@
 
 #include "logical_unit/PathFollower.h"
 
-PathFollower::PathFollower() : mPathIndex(0), mFollowState(FOLLOW_STATE_IDLE), mAllowState(FOLLOW_STATE_IDLE)
+PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE), mAllowState(FOLLOW_STATE_IDLE)
 {
 	std::string pathTopic, speedFeedbackTopic;
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
 	mNodeHandle.param<std::string>("speed_feedback_topic", speedFeedbackTopic, "/speedFeedbackTopic");
 	mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
-	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.2);
+	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.1);
 	mNodeHandle.param<double>("angular_speed", mAngularSpeed, 0.2);
 	mNodeHandle.param<double>("linear_speed", mLinearSpeed, 0.2);
 	mNodeHandle.param<double>("disable_transition_threshold", mDisableTransitionThreshold, 0.05);
@@ -21,22 +21,56 @@ PathFollower::PathFollower() : mPathIndex(0), mFollowState(FOLLOW_STATE_IDLE), m
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 
 	mPathSub = mNodeHandle.subscribe(pathTopic, 1, &PathFollower::pathCb, this);
-	mSpeedFeedbackSub = mNodeHandle.subscribe(speedFeedbackTopic, 1, &PathFollower::pathCb, this);
+	mSpeedFeedbackSub = mNodeHandle.subscribe(speedFeedbackTopic, 1, &PathFollower::speedCb, this);
 	mCommandPub = mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+}
+
+double PathFollower::calculateFocusYaw()
+{
+	if (getPathSize() == 0)
+	{
+		//ROS_INFO("No change yaw.");
+		return tf::getYaw(mRobotPosition.getRotation()); // no change needed
+	}
+	if (getPathSize() == 1)
+	{
+		//ROS_INFO("Final point yaw.");
+		return tf::getYaw(mPath.front().orientation);
+	}
+
+	//ROS_INFO("Target yaw.");
+
+	/*btVector3 robot(mRobotPosition.getOrigin().getX(), mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ());
+	btVector3 target(getNextPoint().x, getNextPoint().y, getNextPoint().z);
+	return target.y() < robot.y() ? -robot.angle(target) : robot.angle(target);*/
+
+	double dx = getNextPoint().x - mRobotPosition.getOrigin().getX();
+	double dy = getNextPoint().y - mRobotPosition.getOrigin().getY();
+	if (dx == 0.0)
+		dx = 0.01;
+	//ROS_INFO("dx: %lf, dy: %lf", dx, dy);
+	double requiredYaw = atan(fabs(dy / dx));
+	if (dx < 0.0)
+	{
+		if (dy < 0.0)
+			requiredYaw = -M_PI + requiredYaw;
+		else
+			requiredYaw = M_PI - requiredYaw;
+	}
+	else if (dy < 0.0)
+		requiredYaw = -1 * requiredYaw;
+	return requiredYaw;
 }
 
 void PathFollower::continuePath()
 {
-	mPathIndex++;
-	if (int(mPath.poses.size()) == mPathIndex + 1)
-	{
+	mPath.pop_front();
+	if (getPathSize() == 0)
 		ROS_INFO("Goal reached.");
-		mPath.poses.clear();
-		mPathIndex = 0;
 
-		geometry_msgs::Twist msg;
-		mCommandPub.publish(msg);
-	}
+	geometry_msgs::Twist msg;
+	mCommandPub.publish(msg);
+	mFollowState = FOLLOW_STATE_IDLE;
 }
 
 void PathFollower::handlePath(tf::TransformListener *transformListener)
@@ -44,68 +78,58 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	geometry_msgs::Twist command;
 
 	// no path? nothing to handle
-	if (mPath.poses.size() == 0)
+	if (getPathSize() == 0)
 		return;
 
 	// get current position in the map
-	transformListener->lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
-
-	ROS_INFO("Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf).", mRobotPosition.getOrigin().getX(),
-			mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ(), mPath.poses[mPathIndex+1].pose.position.x,
-			mPath.poses[mPathIndex+1].pose.position.y, mPath.poses[mPathIndex+1].pose.position.z);
-
-	double robotYaw = tf::getYaw(mRobotPosition.getRotation());
-	double targetYaw = tf::getYaw(mPath.poses[mPathIndex+1].pose.orientation);
-
-	btVector3 robotPos(mPath.poses[mPathIndex+1].pose.position.x, mPath.poses[mPathIndex+1].pose.position.y, mPath.poses[mPathIndex+1].pose.position.z);
-	double dist = mRobotPosition.getOrigin().distance(robotPos);
-	if (dist < mDistanceTolerance &&
-			(mPathIndex + 1 != int(mPath.poses.size() - 1) || fabs(robotYaw - targetYaw) < mFinalYawTolerance))
+	try
 	{
-		ROS_INFO("Reached waypoint.");
-		continuePath();
-		return;
+		transformListener->lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
+	}
+	catch (tf::TransformException ex)
+	{
+		//ROS_ERROR("%s",ex.what());
 	}
 
-	double requiredYaw;
-	if (dist < mDistanceTolerance && mPathIndex + 1 == int(mPath.poses.size() - 1))
+	double robotYaw = tf::getYaw(mRobotPosition.getRotation());
+	double focusYaw = calculateFocusYaw();
+
+	ROS_INFO("Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf. Diff: %lf", mRobotPosition.getOrigin().getX(),
+			mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ(), getNextPoint().x,
+			getNextPoint().y, getNextPoint().z, robotYaw, focusYaw, focusYaw - robotYaw);
+
+	if (fabs(focusYaw - robotYaw) > mYawTolerance)
 	{
-		requiredYaw = targetYaw;
-		ROS_INFO("Turning for final orientation.");
+		if (canTurn())
+		{
+			//ROS_INFO("Turning.");
+			mFollowState = FOLLOW_STATE_TURNING;
+			command.angular.z = mAngularSpeed;
+			if (focusYaw - robotYaw < 0.0)
+				command.angular.z = -command.angular.z;
+		}
+		else
+			ROS_INFO("Blocked turning.");
 	}
 	else
 	{
-		double dx = mPath.poses[mPathIndex+1].pose.position.x - mRobotPosition.getOrigin().getX();
-		double dy = mPath.poses[mPathIndex+1].pose.position.y - mRobotPosition.getOrigin().getY();
-		if (dx == 0.0)
-			dx = 0.01;
-		requiredYaw = atan(fabs(dy / dx));
-		if (dx < 0.0)
+		// small hack, last point is only for orientation, rarely gets here
+		if (getPathSize() == 1)
+			reachedNextPoint();
+
+		if (canMove())
 		{
-			if (dy < 0.0)
-				requiredYaw = -M_PI + requiredYaw;
+			//ROS_INFO("Moving.");
+			mFollowState = FOLLOW_STATE_FORWARD;
+
+			if (reachedNextPoint())
+				continuePath();
 			else
-				requiredYaw = M_PI - requiredYaw;
+				command.linear.x = mLinearSpeed;
 		}
-		else if (dy < 0.0)
-			requiredYaw = -1 * requiredYaw;
-		ROS_INFO("Turning for target.");
+		else
+			ROS_INFO("Blocked moving.");
 	}
-	double diff = requiredYaw - robotYaw;
-
-	// do we need to go rotate?
-	if ((mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_TURNING) &&
-			fabs(diff) > mYawTolerance)
-	{
-		ROS_INFO("Trying to rotate; yaw: %lf, requiredYaw: %lf, diff: %lf", robotYaw, requiredYaw, diff);
-
-		mFollowState = FOLLOW_STATE_TURNING;
-		command.angular.z = mAngularSpeed;
-		if (diff < 0.0)
-			command.angular.z = -command.angular.z;
-	}
-	else if (mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_FORWARD)// we need to go forward
-		command.linear.x = mLinearSpeed;
 
 	mCommandPub.publish(command);
 }
@@ -127,8 +151,18 @@ void PathFollower::spin()
 void PathFollower::pathCb(const nav_msgs::Path &path)
 {
 	ROS_INFO("Received new path.");
-	mPath = path;
-	mPathIndex = 0;
+
+	mPath.clear();
+
+	for (size_t i = 0; i < path.poses.size(); i++)
+		mPath.push_back(path.poses[i].pose);
+
+	// add last point twice for orientation
+	mPath.push_back(path.poses[path.poses.size() - 1].pose);
+
+	// first waypoint is usually the starting position
+	if (reachedNextPoint())
+		continuePath();
 }
 
 void PathFollower::speedCb(const geometry_msgs::Twist &twist)

@@ -27,8 +27,9 @@ private:
 	ros::Subscriber mPathSub;
 	ros::Subscriber mSpeedFeedbackSub;
 	ros::Publisher mCommandPub;
-	nav_msgs::Path mPath;
-	int mPathIndex;
+	std::list<geometry_msgs::Pose> mPath;
+	geometry_msgs::Point mFocusPoint;
+	geometry_msgs::Quaternion mFocusOrientation;
 	tf::StampedTransform mRobotPosition;
 
 	int mRefreshRate;
@@ -42,6 +43,17 @@ private:
 	double mFinalYawTolerance;
 	double mDistanceTolerance;
 
+	inline geometry_msgs::Point getNextPoint() { return mPath.front().position; };
+	inline int getPathSize() { return mPath.size(); };
+	inline bool reachedNextPoint()
+	{
+		btVector3 np(getNextPoint().x, getNextPoint().y, getNextPoint().z);
+		return np.distance(mRobotPosition.getOrigin()) < mDistanceTolerance;
+	};
+	inline bool canTurn() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_TURNING; };
+	inline bool canMove() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_FORWARD; };
+
+	double calculateFocusYaw();
 public:
 	PathFollower();
 
