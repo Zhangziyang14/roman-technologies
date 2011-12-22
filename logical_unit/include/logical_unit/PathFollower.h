@@ -40,6 +40,7 @@ private:
 	FollowState mAllowState;
 	double mDisableTransitionThreshold;
 	double mFinalYawTolerance;
+	double mDistanceTolerance;
 
 public:
 	PathFollower();

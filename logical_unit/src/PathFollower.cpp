@@ -11,13 +11,14 @@ PathFollower::PathFollower() : mPathIndex(0), mFollowState(FOLLOW_STATE_IDLE), m
 {
 	std::string pathTopic, speedFeedbackTopic;
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
-	mNodeHandle.param<std::string>("speed_feedback_topic", pathTopic, "/speedFeedbackTopic");
+	mNodeHandle.param<std::string>("speed_feedback_topic", speedFeedbackTopic, "/speedFeedbackTopic");
 	mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
 	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.2);
 	mNodeHandle.param<double>("angular_speed", mAngularSpeed, 0.2);
 	mNodeHandle.param<double>("linear_speed", mLinearSpeed, 0.2);
 	mNodeHandle.param<double>("disable_transition_threshold", mDisableTransitionThreshold, 0.05);
 	mNodeHandle.param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.1);
+	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 
 	mPathSub = mNodeHandle.subscribe(pathTopic, 1, &PathFollower::pathCb, this);
 	mSpeedFeedbackSub = mNodeHandle.subscribe(speedFeedbackTopic, 1, &PathFollower::pathCb, this);
@@ -58,7 +59,8 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 
 	btVector3 robotPos(mPath.poses[mPathIndex+1].pose.position.x, mPath.poses[mPathIndex+1].pose.position.y, mPath.poses[mPathIndex+1].pose.position.z);
 	double dist = mRobotPosition.getOrigin().distance(robotPos);
-	if (dist < 0.2 && (mPathIndex + 1 != int(mPath.poses.size() - 1) || fabs(robotYaw - targetYaw) < mFinalYawTolerance))
+	if (dist < mDistanceTolerance &&
+			(mPathIndex + 1 != int(mPath.poses.size() - 1) || fabs(robotYaw - targetYaw) < mFinalYawTolerance))
 	{
 		ROS_INFO("Reached waypoint.");
 		continuePath();
@@ -66,7 +68,12 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	}
 
 	double requiredYaw;
-	if (mPathIndex + 1 == int(mPath.poses.size() - 1))
+	if (dist < mDistanceTolerance && mPathIndex + 1 == int(mPath.poses.size() - 1))
+	{
+		requiredYaw = targetYaw;
+		ROS_INFO("Turning for final orientation.");
+	}
+	else
 	{
 		double dx = mPath.poses[mPathIndex+1].pose.position.x - mRobotPosition.getOrigin().getX();
 		double dy = mPath.poses[mPathIndex+1].pose.position.y - mRobotPosition.getOrigin().getY();
@@ -82,11 +89,7 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 		}
 		else if (dy < 0.0)
 			requiredYaw = -1 * requiredYaw;
-	}
-	else
-	{
-		requiredYaw = targetYaw;
-		ROS_INFO("Turning for final orientation.");
+		ROS_INFO("Turning for target.");
 	}
 	double diff = requiredYaw - robotYaw;
 
