@@ -1,7 +1,5 @@
 #include <ArmMotorHandler.h>
 
-
-
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "ArmMotorHandler");
@@ -27,9 +25,11 @@ int main(int argc, char **argv)
  */
 void ArmMotorHandler::Run()
 {
+
 	while(ros::ok())
 	{
 		mShoulderMotor.update();
+		mSideMotor.update();
 		usleep(500000);
 	}
 }
@@ -40,11 +40,6 @@ void ArmMotorHandler::Run()
  */
 ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(MID_ARM_SHOULDER), mSideMotor(MID_ARM_SIDEWAYS)
 {
-	// Initialise subscribers
-	mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
-	mSideJointAngleSub 	= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
-	mArmJointPosSub		= mNodeHanlde.subscribe("/ArmPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
-
 	// Initialize motors
 	mShoulderMotor.init(path);
 	mShoulderMotor.setEncoderCount(SHOULDERMOTOR_ENCODER_COUNT * SHOULDERMOTOR_CORRECTION_FACTOR);
@@ -55,18 +50,27 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 
 	// initialize arm to zero position (joints will move to their zero-switches)
 	if(init())
-		ROS_INFO("ArmMotorHandler successfully initialized");
-	else
 	{
-		ROS_INFO("Error initializing ArmMotorHandler: failed to determine arm position");
-		return;
+		ROS_INFO("ArmMotorHandler successfully initialized");
+
+		// Initialise subscribers
+		mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
+		mSideJointAngleSub 	= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
+		mArmJointPosSub		= mNodeHandle.subscribe("/ArmPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
+
+		mShoulderMotor.setMode(CM_POSITION_MODE);
+		mSideMotor.setMode(CM_POSITION_MODE);
+
+		// thread to fix 3mxel setPos bug
+		boost::thread thread(&ArmMotorHandler::Run, this);
+		usleep(500000);
+
+		setSideJointAngle(SIDEJOINT_START_POS);
+		usleep(10000);
+		setShoulderAngle(SHOULDERMOTOR_START_POS);
 	}
-
-	mShoulderMotor.setMode(CM_POSITION_MODE);
-	mSideMotor.setMode(CM_POSITION_MODE);
-
-	// thread to fix 3mxel setPos bug
-	boost::thread thread(&ArmMotorHandler::Run, this);
+	else
+		ROS_INFO("Error initializing ArmMotorHandler: failed to determine arm position");
 }
 
 
@@ -74,24 +78,25 @@ bool ArmMotorHandler::init()
 {
 	ROS_INFO("Initializing arm to starting position...");
 
-	mShoulderMotor.setMode(CM_EXT_INIT_MODE);					//Set to external_init mode
-	mShoulderMotor.setAcceleration(EXT_INIT_MODE_ACCEL);		//Set acceleration for initialization
-	mShoulderMotor.setSpeed(EXT_INIT_MODE_SHOULDER_SPEED);		//Set speed for initialization
-	mShoulderMotor.setTorque(EXT_INIT_MODE_TORQUE);				//Set torque to begin initialization
+	mSideMotor.setMode(CM_EXT_INIT_MODE);														//Set to external_init mode
+	mSideMotor.setAcceleration(EXT_INIT_MODE_ACCEL / SIDEMOTOR_CORRECTION_FACTOR);				//Set acceleration for initialization
+	mSideMotor.setSpeed(EXT_INIT_MODE_SIDEJOINT_SPEED / SIDEMOTOR_CORRECTION_FACTOR);			//Set speed for initialization
+	mSideMotor.setTorque(EXT_INIT_MODE_TORQUE);													//Set torque to begin initialization
 
-	mSideMotor.setMode(CM_EXT_INIT_MODE);						//Set to external_init mode
-	mSideMotor.setAcceleration(EXT_INIT_MODE_ACCEL);			//Set acceleration for initialization
-	mSideMotor.setSpeed(EXT_INIT_MODE_SIDEJOINT_SPEED);			//Set speed for initialization
-	mSideMotor.setTorque(EXT_INIT_MODE_TORQUE);					//Set torque to begin initialization
+	// wait untill side arm initialization is done
+	while(mSideMotor.getStatus() == M3XL_STATUS_INITIALIZE_BUSY);
+	if(mSideMotor.getStatus() != M3XL_STATUS_INIT_DONE)
+		return false;
 
+	mShoulderMotor.setMode(CM_EXT_INIT_MODE);													//Set to external_init mode
+	mShoulderMotor.setAcceleration(EXT_INIT_MODE_ACCEL / SHOULDERMOTOR_CORRECTION_FACTOR);		//Set acceleration for initialization
+	mShoulderMotor.setSpeed(EXT_INIT_MODE_SHOULDER_SPEED / SHOULDERMOTOR_CORRECTION_FACTOR);	//Set speed for initialization
+	mShoulderMotor.setTorque(EXT_INIT_MODE_TORQUE);												//Set torque to begin initialization
 
-	// wait untill initializing is done
-	while((mShoulderMotor.getStatus() == M3XL_STATUS_INITIALIZE_BUSY) || (mSideMotor.getStatus() == M3XL_STATUS_INITIALIZE_BUSY));
-
-	return ((mShoulderMotor.getStatus() == M3XL_STATUS_INIT_DONE) && (mSideMotor.getStatus() == M3XL_STATUS_INIT_DONE));
+	// wait untill shoulder initialation is done
+	while(mShoulderMotor.getStatus() == M3XL_STATUS_INITIALIZE_BUSY);
+	return (mShoulderMotor.getStatus() == M3XL_STATUS_INIT_DONE);
 }
-
-
 
 void ArmMotorHandler::setShoulderAngle(double angle)
 {
@@ -107,7 +112,7 @@ void ArmMotorHandler::setShoulderAngle(double angle)
 		ROS_WARN("Desired shoulder position exceeds lower angle limit [%.4f]", SHOULDERMOTOR_MIN_ANGLE);
 		angle = SHOULDERMOTOR_MIN_ANGLE;
 	}
-	mShoulderMotor.setAngle(angle, DEFAULT_SPEED, DEFAULT_ACCEL);
+	mShoulderMotor.setAngle((angle / SHOULDERMOTOR_CORRECTION_FACTOR), (DEFAULT_SPEED / SHOULDERMOTOR_CORRECTION_FACTOR), (DEFAULT_ACCEL / SHOULDERMOTOR_CORRECTION_FACTOR));
 }
 
 void ArmMotorHandler::setSideJointAngle(double angle)
@@ -124,7 +129,7 @@ void ArmMotorHandler::setSideJointAngle(double angle)
 		ROS_WARN("Desired sideJoint position exceeds lower angle limit [%.4f]", SIDEJOINT_MIN_ANGLE);
 		angle = SIDEJOINT_MIN_ANGLE;
 	}
-	mSideMotor.setAngle(angle, DEFAULT_SPEED, DEFAULT_ACCEL);
+	mSideMotor.setAngle((angle / SIDEMOTOR_CORRECTION_FACTOR), (DEFAULT_SPEED / SIDEMOTOR_CORRECTION_FACTOR), (DEFAULT_ACCEL / SIDEMOTOR_CORRECTION_FACTOR));
 
 }
 
@@ -153,4 +158,17 @@ void ArmMotorHandler::shoulderCB(const std_msgs::Float64& msg)
 void ArmMotorHandler::sideJointCB(const std_msgs::Float64& msg)
 {
 	setSideJointAngle(msg.data);
+}
+
+
+/** ArmPositionTopic callback
+ *
+ * @param	const arm::armJointPos		msg		ros message containing the wished positions of both
+ * 												the shoulder and the sideJoint
+ * @return	void
+ */
+void ArmMotorHandler::armPosCB(const arm::armJointPos& msg)
+{
+	setShoulderAngle(msg.upper_joint);
+	setSideJointAngle(msg.wrist_joint);
 }

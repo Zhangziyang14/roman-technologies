@@ -228,7 +228,8 @@ void Motor::init(char *path)
         std::cout << "Using direct connection" << std::endl;
         motor_ = new C3mxl();
 
-        serial_port_.port_open("/dev/roman/threemxl0", LxSerial::RS485_FTDI);
+        //serial_port_.port_open("/dev/roman/threemxl0", LxSerial::RS485_FTDI); //TODO DEBUG this line is correct
+        serial_port_.port_open("/dev/ttyUSB0", LxSerial::RS485_FTDI);	// temporary fix
         serial_port_.set_speed(LxSerial::S921600);
         motor_->setSerialPort(&serial_port_);    
     }
