@@ -50,7 +50,7 @@ void AutonomeArmController::armPositionCB(const arm::armCoordinatesPos &msg)
  */
 void AutonomeArmController::init()
 {
-	mJointCommandPublisher			= mNodeHandle.advertise<std_msgs::Float64>("/ShoulderTopic", 10);	//temporary float64
+	mJointCommandPublisher			= mNodeHandle.advertise<arm::armJointPos>("/ShoulderTopic", 10);	//temporary float64
 	mCurrentPositionSubscriber 		= mNodeHandle.subscribe("/armCoordinatePositionFeedbackTopic", 1, &AutonomeArmController::armPositionCB, this);
 	mCommandSubscriber 				= mNodeHandle.subscribe("/cmd_position", 1, &AutonomeArmController::cmdCB, this);
 	mKinematicsClient 				= mNodeHandle.serviceClient<arm::IK>("IK");
