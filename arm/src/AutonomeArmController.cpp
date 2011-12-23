@@ -11,19 +11,32 @@ void AutonomeArmController::cmdCB(const arm::armCoordinatesPos &msg)
 
 	//Check constraints
 	if(msg.z_value > MAX_Z_VALUE)
+	{
+		ROS_WARN("REACHED MAX_Z_VALUE");
 		srv.request.target.z_value = MAX_Z_VALUE;
+	}
 	else if(msg.z_value < MIN_Z_VALUE)
+	{
+		ROS_WARN("REACHED MAX_Z_VALUE");
 		srv.request.target.z_value = MIN_Z_VALUE;
+	}
 
 	if(msg.x_value > MAX_X_VALUE)
+	{
+		ROS_WARN("REACHED MAX_Z_VALUE");
 		srv.request.target.x_value = MAX_X_VALUE;
+	}
 	else if(msg.x_value < MIN_Z_VALUE)
-		srv.request.target.z_value = MIN_X_VALUE;
+	{
+		ROS_WARN("REACHED MAX_Z_VALUE");
+		srv.request.target.x_value = MIN_X_VALUE;
+	}
 
 	//Calculate joint configurations with IK solver
-	if((msg.z_value < MAX_Z_VALUE) && (msg.z_value > MIN_Z_VALUE) && (msg.x_value < MAX_X_VALUE) && (msg.x_value < MAX_X_VALUE))
+	if((srv.request.target.z_value <= MAX_Z_VALUE) && (srv.request.target.z_value >= MIN_Z_VALUE) && (srv.request.target.x_value <= MAX_X_VALUE) && (srv.request.target.x_value <= MAX_X_VALUE))
+	{
 		mKinematicsClient.call(srv);
-
+	}
 	//Call trajectory planner service?
 
 	arm::armJointPos cmd_msg;

@@ -10,9 +10,9 @@
 #include "arm/armCoordinatesPos.h"
 #include "arm/IK.h"
 
-#define MIN_Z_VALUE -27.5
-#define MAX_Z_VALUE 18.0
-#define MIN_X_VALUE 0
+#define MIN_Z_VALUE -36
+#define MAX_Z_VALUE 16.0
+#define MIN_X_VALUE -29.4
 #define MAX_X_VALUE 33.4
 
 

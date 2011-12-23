@@ -8,12 +8,12 @@
 #define EFFECTOR_ORIGIN 	18		//Offset in [cm] from wrist to the point 3 [cm] in front of the gripper
 
 ros::Publisher *coordinate_publisher;
-float currentX, currentY, currentZ;
+double currentX, currentY, currentZ;
 
 /*
  * Calculates the joint position of the shoulder with a given z value in the gripper's configuration space
  */
-float calculateShoulderJointPosition(float z)
+double calculateShoulderJointPosition(double z)
 {
 	return std::asin(z/UPPER_ARM_LENGTH);
 }
@@ -21,15 +21,15 @@ float calculateShoulderJointPosition(float z)
 /*
  * Calculates the joint position of the wrist with a given x value in the gripper's configuration space
  */
-float calculateWristJointPosition(float x)
+double calculateWristJointPosition(double x)
 {
-	return std::asin(x/WRIST_LENGTH + EFFECTOR_ORIGIN);
+	return std::asin(x/(WRIST_LENGTH + EFFECTOR_ORIGIN));
 }
 
 /*
  * Returns x position of the gripper in configuration space
  */
-float calculateCurrentXPosition(float beta)
+double calculateCurrentXPosition(double beta)
 {
 	return std::sin(beta)*(WRIST_LENGTH + EFFECTOR_ORIGIN);
 }
@@ -37,7 +37,7 @@ float calculateCurrentXPosition(float beta)
 /*
  * Returns y position of the gripper in configuration space
  */
-float calculateCurrentYPosition(float alpha, float beta)
+double calculateCurrentYPosition(double alpha, double beta)
 {
 	return std::cos(alpha)*UPPER_ARM_LENGTH+std::cos(beta)*(WRIST_LENGTH+EFFECTOR_ORIGIN);
 }
@@ -45,7 +45,7 @@ float calculateCurrentYPosition(float alpha, float beta)
 /*
  * Returns z position of the gripper in configuration space
  */
-float calculateCurrentZPosition(float alpha)
+double calculateCurrentZPosition(double alpha)
 {
 	return std::sin(alpha)*UPPER_ARM_LENGTH;
 }

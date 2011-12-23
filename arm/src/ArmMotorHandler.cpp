@@ -112,6 +112,7 @@ void ArmMotorHandler::setShoulderAngle(double angle)
 		ROS_WARN("Desired shoulder position exceeds lower angle limit [%.4f]", SHOULDERMOTOR_MIN_ANGLE);
 		angle = SHOULDERMOTOR_MIN_ANGLE;
 	}
+	angle+= SHOULDERMOTOR_OFFSET;		// offset to transform the absolute position to the position relative to the limit switch
 	mShoulderMotor.setAngle((angle / SHOULDERMOTOR_CORRECTION_FACTOR), (DEFAULT_SPEED / SHOULDERMOTOR_CORRECTION_FACTOR), (DEFAULT_ACCEL / SHOULDERMOTOR_CORRECTION_FACTOR));
 }
 
@@ -129,6 +130,7 @@ void ArmMotorHandler::setSideJointAngle(double angle)
 		ROS_WARN("Desired sideJoint position exceeds lower angle limit [%.4f]", SIDEJOINT_MIN_ANGLE);
 		angle = SIDEJOINT_MIN_ANGLE;
 	}
+	angle+= SIDEJOINT_OFFSET;		// offset to transform the absolute position to the position relative to the limit switch
 	mSideMotor.setAngle((angle / SIDEMOTOR_CORRECTION_FACTOR), (DEFAULT_SPEED / SIDEMOTOR_CORRECTION_FACTOR), (DEFAULT_ACCEL / SIDEMOTOR_CORRECTION_FACTOR));
 
 }
