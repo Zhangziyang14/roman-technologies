@@ -40,29 +40,32 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
 void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 {
 	//Robot is boxed, so block the robot
-	if(mLeft < 50 && mRight < 50 && mFrontLeftCenter < 80 && mFrontRightCenter < 80)
-		mLock = true;
+//	if(mLeft < 50 && mRight < 50 && mFrontLeftCenter < 80 && mFrontRightCenter < 80)
+//		mLock = true;
 	//Unblock the robot
-	else if(mCurrentSpeed.linear.x == 0)
-		mLock = false;
+//	else if(mCurrentSpeed.linear.x == 0)
+//		mLock = false;
 
-	double converted_right 	= ZERO_SPEED, converted_left = ZERO_SPEED;
+//	double converted_right 		= ZERO_SPEED, converted_left = ZERO_SPEED;
 	double left_speed 	 	= ZERO_SPEED;
 	double right_speed 		= ZERO_SPEED;
 
 	//Convert linear speed to motor speeds in [rad/s]
-	if (left_speed == ZERO_SPEED && right_speed == ZERO_SPEED)
-	{
+//	if (left_speed == ZERO_SPEED && right_speed == ZERO_SPEED)
+//	{
 		double vel_linear = msg.linear.x / WHEEL_RADIUS;
-		double vel_angular = msg.angular.z / (BASE_RADIUS / WHEEL_RADIUS);
+		double vel_angular = msg.angular.z * (BASE_RADIUS / WHEEL_RADIUS) * 2;
 
-		converted_left  = vel_linear - vel_angular;
-		converted_right = vel_linear + vel_angular;
-	}
-	if(mLock)
-	{
+//		converted_left  = vel_linear - 0.5*vel_angular;
+//		converted_right = vel_linear + 0.5*vel_angular;
+		left_speed  = vel_linear - 0.5*vel_angular;
+		right_speed = vel_linear + 0.5*vel_angular;
+	
+//	}
+//	if(mLock)
+//	{
 		//Disable motors when boxed or when in position mode
-		if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
+/*		if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
 		{
 			mRightMotor.brake();
 			mLeftMotor.brake();
@@ -73,8 +76,8 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 	}
 	else
 	{
-		//Calculations are in positive numbers because the minimum between speed and scaled speed is used
-		left_speed 	= std::abs(converted_left);
+*/		//Calculations are in positive numbers because the minimum between speed and scaled speed is used
+/*		left_speed 	= std::abs(converted_left);
 		right_speed = std::abs(converted_right);
 
 		left_speed      = scaleSpeed(left_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontRight);
@@ -119,16 +122,16 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 					left_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
 			}
 		}
-
+*/
 		//Restore the direction of the speeds when all calculations are done
-		left_speed = converted_left < ZERO_SPEED ? -left_speed : left_speed;
-		right_speed = converted_right < ZERO_SPEED ? -right_speed : right_speed;
+//		left_speed = converted_left < ZERO_SPEED ? -left_speed : left_speed;
+//		right_speed = converted_right < ZERO_SPEED ? -right_speed : right_speed;
 
 		ROS_INFO("left %f right %f", left_speed, right_speed);
 
 		mRightMotor.setSpeed(right_speed);
 		mLeftMotor.setSpeed(left_speed);
-	}
+//	}
 }
 
 /**
