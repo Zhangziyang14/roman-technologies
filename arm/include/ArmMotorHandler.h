@@ -24,13 +24,13 @@
 #define DEFAULT_ACCEL					(0.5)
 
 #define SHOULDERMOTOR_MIN_ANGLE 		(0.0)
-#define SHOULDERMOTOR_MAX_ANGLE 		(2.35)
-
-#define SHOULDERMOTOR_START_POS			(0.30)	 //
-#define SIDEJOINT_START_POS				(0.65)	 // joint is at this position after being initialized
+#define SHOULDERMOTOR_MAX_ANGLE 		(2.25)
 
 #define SIDEJOINT_MIN_ANGLE				(0.0)
-#define SIDEJOINT_MAX_ANGLE				(2.75)
+#define SIDEJOINT_MAX_ANGLE				(2.40)
+
+#define SHOULDERMOTOR_START_POS			(0.25)	 //
+#define SIDEJOINT_START_POS				(0.48)	 // joint is at this position after being initialized
 
 
 

@@ -2,6 +2,7 @@
 #define __MOTOR_H
 
 #include <CDxlGeneric.h>
+#include <threemxl/dxlassert.h>
 #include <threemxl/C3mxlROS.h>
 
 #define DEFAULT_P 0.01
@@ -11,6 +12,20 @@
 #define DEFAULT_ENCODER_COUNT		500
 #define DEFAULT_ACCELERATION		5
 #define SAFE_BRAKING_DECCELERATION	0.5
+
+#define DXL_FORCE_CALL(call) \
+  do { \
+    int ret = call; \
+    while (ret != DXL_SUCCESS) { \
+    	ret = call; \
+    	if(ret == M3XL_ANGLE_LIMIT_ERROR){ \
+    		ROS_FATAL("DXL CALL FAILED\n\tfile = %s\n\tline = %d\n\tcall = %s\n\tmessage = %s", __FILE__, __LINE__, #call, CDxlCom::translateErrorCode(ret)); \
+    		ROS_ISSUE_BREAK(); \
+    	} \
+    } \
+  } while (0)
+
+
 
 enum ControlMode
 {

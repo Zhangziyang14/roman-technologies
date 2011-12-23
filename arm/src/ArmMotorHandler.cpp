@@ -66,11 +66,11 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		usleep(500000);
 
 		setSideJointAngle(SIDEJOINT_START_POS);
-		usleep(10000);
+		//usleep(1000000);	// TODO DEBUG
 		setShoulderAngle(SHOULDERMOTOR_START_POS);
 	}
 	else
-		ROS_INFO("Error initializing ArmMotorHandler: failed to determine arm position");
+		ROS_WARN("Error initializing ArmMotorHandler: failed to determine arm position. Please make sure the arm is not at its limits and try again.");
 }
 
 

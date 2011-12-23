@@ -101,21 +101,21 @@ void Motor::setPosition(double position)
 void Motor::setAngle(double angle)
 {
 	assertMode(CM_POSITION_MODE);
-	motor_->setPos(angle);
+	DXL_FORCE_CALL(motor_->setPos(angle));	//TODO DEBUG do we need DXL_SAFE_CALL ?
 }
 void Motor::setAngle(double angle, double speed)
 {
 	assertMode(CM_POSITION_MODE);
-	motor_->setPos(angle, speed);
+	DXL_FORCE_CALL(motor_->setPos(angle, speed));
 }
 void Motor::setAngle(double angle, double speed, double accel)
 {
 	assertMode(CM_POSITION_MODE);
-	motor_->setPos(angle, speed, accel);
+	DXL_FORCE_CALL(motor_->setPos(angle, speed, accel));
 }
 double Motor::getAngle()
 {
-	motor_->getPos();
+	DXL_FORCE_CALL(motor_->getPos());
 	return motor_->presentPos();
 }
 
