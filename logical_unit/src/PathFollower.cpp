@@ -13,9 +13,12 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE), mAllowState(FOLL
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
 	mNodeHandle.param<std::string>("speed_feedback_topic", speedFeedbackTopic, "/speedFeedbackTopic");
 	mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
-	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.1);
-	mNodeHandle.param<double>("angular_speed", mAngularSpeed, 0.2);
-	mNodeHandle.param<double>("linear_speed", mLinearSpeed, 0.2);
+	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.5);
+	mNodeHandle.param<double>("min_angular_speed", mMinAngularSpeed, 0.1);
+	mNodeHandle.param<double>("max_angular_speed", mMaxAngularSpeed, 0.4);
+	mNodeHandle.param<double>("min_linear_speed", mMinLinearSpeed, 0.2);
+	mNodeHandle.param<double>("max_linear_speed", mMaxLinearSpeed, 0.3);
+	mNodeHandle.param<double>("angular_adjustment_speed", mAngularAdjustmentSpeed, 0.05);
 	mNodeHandle.param<double>("disable_transition_threshold", mDisableTransitionThreshold, 0.05);
 	mNodeHandle.param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.1);
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
@@ -86,11 +89,11 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 
 	if (fabs(diffYaw) > mYawTolerance)
 	{
-		if (canTurn())
+		if (true || canTurn())
 		{
 			//ROS_INFO("Turning.");
 			mFollowState = FOLLOW_STATE_TURNING;
-			command.angular.z = mAngularSpeed;
+			command.angular.z = getScaledAngularSpeed(diffYaw);
 			if (diffYaw < 0.0)
 				command.angular.z = -command.angular.z;
 		}
@@ -106,7 +109,7 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 			return;
 		}
 
-		if (canMove())
+		if (true || canMove())
 		{
 			//ROS_INFO("Moving.");
 			mFollowState = FOLLOW_STATE_FORWARD;
@@ -114,7 +117,10 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 			if (reachedNextPoint())
 				continuePath();
 			else
-				command.linear.x = mLinearSpeed;
+			{
+				command.linear.x = getScaledLinearSpeed();
+				command.angular.z = diffYaw > 0.0 ? mAngularAdjustmentSpeed : -mAngularAdjustmentSpeed;
+			}
 		}
 		else
 			ROS_INFO("Blocked moving.");

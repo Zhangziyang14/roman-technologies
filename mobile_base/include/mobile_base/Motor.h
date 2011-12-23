@@ -8,7 +8,7 @@
 #define DEFAULT_I 0.0
 #define DEFAULT_D 0.0
 
-#define DEFAULT_ACCELERATION 5
+#define DEFAULT_ACCELERATION 1
 #define SAFE_BRAKING_DECCELERATION 0.5
 
 enum ControlMode

@@ -34,8 +34,9 @@ private:
 
 	int mRefreshRate;
 	double mYawTolerance;
-	double mAngularSpeed;
-	double mLinearSpeed;
+	double mMinAngularSpeed, mMaxAngularSpeed;
+	double mAngularAdjustmentSpeed;
+	double mMinLinearSpeed, mMaxLinearSpeed;
 
 	FollowState mFollowState;
 	FollowState mAllowState;
@@ -52,6 +53,17 @@ private:
 	};
 	inline bool canTurn() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_TURNING; };
 	inline bool canMove() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_FORWARD; };
+	inline double getScaledLinearSpeed()
+	{
+		btVector3 np(getNextPoint().x, getNextPoint().y, getNextPoint().z);
+		double scale = (std::max(std::min(np.distance(mRobotPosition.getOrigin()), 3.0), 1.0) - 1.0) / 2.0;
+		return scale * (mMaxLinearSpeed - mMinLinearSpeed) + mMinLinearSpeed;
+	};
+	inline double getScaledAngularSpeed(double rotationAngle)
+	{
+		double scale = fabs(rotationAngle) / M_PI;
+		return scale * (mMaxAngularSpeed - mMinAngularSpeed) + mMinAngularSpeed;
+	};
 
 	double calculateDiffYaw();
 public:
