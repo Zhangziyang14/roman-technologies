@@ -53,7 +53,7 @@ private:
 	inline bool canTurn() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_TURNING; };
 	inline bool canMove() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_FORWARD; };
 
-	double calculateFocusYaw();
+	double calculateDiffYaw();
 public:
 	PathFollower();
 

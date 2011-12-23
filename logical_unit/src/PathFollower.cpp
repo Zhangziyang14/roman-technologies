@@ -25,41 +25,27 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE), mAllowState(FOLL
 	mCommandPub = mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 }
 
-double PathFollower::calculateFocusYaw()
+double PathFollower::calculateDiffYaw()
 {
 	if (getPathSize() == 0)
 	{
 		//ROS_INFO("No change yaw.");
-		return tf::getYaw(mRobotPosition.getRotation()); // no change needed
+		return 0.0; // no change needed
 	}
 	if (getPathSize() == 1)
 	{
 		//ROS_INFO("Final point yaw.");
-		return tf::getYaw(mPath.front().orientation);
+		double yaw = tf::getYaw(mPath.front().orientation);
+		btVector3 orientation = btVector3(cos(yaw), sin(yaw), 0.0).rotate(btVector3(0,0,1), -tf::getYaw(mRobotPosition.getRotation()));
+		return atan2(orientation.getY(), orientation.getX());
 	}
 
 	//ROS_INFO("Target yaw.");
 
-	/*btVector3 robot(mRobotPosition.getOrigin().getX(), mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ());
-	btVector3 target(getNextPoint().x, getNextPoint().y, getNextPoint().z);
-	return target.y() < robot.y() ? -robot.angle(target) : robot.angle(target);*/
-
 	double dx = getNextPoint().x - mRobotPosition.getOrigin().getX();
 	double dy = getNextPoint().y - mRobotPosition.getOrigin().getY();
-	if (dx == 0.0)
-		dx = 0.01;
-	//ROS_INFO("dx: %lf, dy: %lf", dx, dy);
-	double requiredYaw = atan(fabs(dy / dx));
-	if (dx < 0.0)
-	{
-		if (dy < 0.0)
-			requiredYaw = -M_PI + requiredYaw;
-		else
-			requiredYaw = M_PI - requiredYaw;
-	}
-	else if (dy < 0.0)
-		requiredYaw = -1 * requiredYaw;
-	return requiredYaw;
+	btVector3 diff = btVector3(dx, dy, 0).rotate(btVector3(0,0,1), -tf::getYaw(mRobotPosition.getRotation()));
+	return atan2(diff.getY(), diff.getX());
 }
 
 void PathFollower::continuePath()
@@ -92,20 +78,20 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	}
 
 	double robotYaw = tf::getYaw(mRobotPosition.getRotation());
-	double focusYaw = calculateFocusYaw();
+	double diffYaw = calculateDiffYaw();
 
-	ROS_INFO("Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf. Diff: %lf", mRobotPosition.getOrigin().getX(),
+	ROS_INFO("Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf", mRobotPosition.getOrigin().getX(),
 			mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ(), getNextPoint().x,
-			getNextPoint().y, getNextPoint().z, robotYaw, focusYaw, focusYaw - robotYaw);
+			getNextPoint().y, getNextPoint().z, robotYaw, diffYaw);
 
-	if (fabs(focusYaw - robotYaw) > mYawTolerance)
+	if (fabs(diffYaw) > mYawTolerance)
 	{
 		if (canTurn())
 		{
 			//ROS_INFO("Turning.");
 			mFollowState = FOLLOW_STATE_TURNING;
 			command.angular.z = mAngularSpeed;
-			if (focusYaw - robotYaw < 0.0)
+			if (diffYaw < 0.0)
 				command.angular.z = -command.angular.z;
 		}
 		else
@@ -115,7 +101,10 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	{
 		// small hack, last point is only for orientation, rarely gets here
 		if (getPathSize() == 1)
-			reachedNextPoint();
+		{
+			continuePath();
+			return;
+		}
 
 		if (canMove())
 		{
