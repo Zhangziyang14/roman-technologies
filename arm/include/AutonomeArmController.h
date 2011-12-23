@@ -39,5 +39,4 @@ public:
 	void cmdCB(const arm::armCoordinatesPos &msg);
 };
 
-
 #endif

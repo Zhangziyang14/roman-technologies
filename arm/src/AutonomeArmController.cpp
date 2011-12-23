@@ -1,5 +1,4 @@
 #include "AutonomeArmController.h"
-
 /*
  *	Listens to commands and translates it to joint commands for ArmMotorHandler using inverse kinematics
  */
