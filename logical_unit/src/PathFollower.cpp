@@ -7,25 +7,46 @@
 
 #include "logical_unit/PathFollower.h"
 
-PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE), mAllowState(FOLLOW_STATE_IDLE)
+double distanceToLine(geometry_msgs::Point p, geometry_msgs::Point a, geometry_msgs::Point b)
 {
-	std::string pathTopic, speedFeedbackTopic;
+	double xu = p.x - a.x;
+	double yu = p.y - a.y;
+	double xv = b.x - a.x;
+	double yv = b.y - a.y;
+	if (xu * xv + yu * yv < 0)
+		return sqrt( (p.x-a.x)*(p.x-a.x) + (p.y-a.y)*(p.y-a.y));
+
+	xu = p.x - b.x;
+	yu = p.y - b.y;
+	xv = -xv;
+	yv = -yv;
+	if (xu * xv + yu * yv < 0)
+		return sqrt( (p.x-b.x)*(p.x-b.x) + (p.y-b.y)*(p.y-b.y) );
+
+	return fabs( (p.x*(a.y - b.y) + p.y*(b.x - a.x) + (a.x * b.y - b.x * a.y)) / sqrt((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)));
+}
+
+PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
+{
+	std::string pathTopic, speedFeedbackTopic, goalTopic;
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
 	mNodeHandle.param<std::string>("speed_feedback_topic", speedFeedbackTopic, "/speedFeedbackTopic");
+	mNodeHandle.param<std::string>("goal_topic", goalTopic, "/move_base_simple/goal");
 	mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
-	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.5);
 	mNodeHandle.param<double>("min_angular_speed", mMinAngularSpeed, 0.1);
 	mNodeHandle.param<double>("max_angular_speed", mMaxAngularSpeed, 0.4);
 	mNodeHandle.param<double>("min_linear_speed", mMinLinearSpeed, 0.2);
 	mNodeHandle.param<double>("max_linear_speed", mMaxLinearSpeed, 0.3);
 	mNodeHandle.param<double>("angular_adjustment_speed", mAngularAdjustmentSpeed, 0.05);
 	mNodeHandle.param<double>("disable_transition_threshold", mDisableTransitionThreshold, 0.05);
-	mNodeHandle.param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.1);
+	mNodeHandle.param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.2);
+	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.25 * M_PI);
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
+	mNodeHandle.param<double>("reset_distance_tolerance", mResetDistanceTolerance, 0.5);
 
 	mPathSub = mNodeHandle.subscribe(pathTopic, 1, &PathFollower::pathCb, this);
-	mSpeedFeedbackSub = mNodeHandle.subscribe(speedFeedbackTopic, 1, &PathFollower::speedCb, this);
 	mCommandPub = mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+	mGoalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
 }
 
 double PathFollower::calculateDiffYaw()
@@ -53,13 +74,26 @@ double PathFollower::calculateDiffYaw()
 
 void PathFollower::continuePath()
 {
+	mOrigin = getNextPoint();
+
 	mPath.pop_front();
 	if (getPathSize() == 0)
+	{
+		mFollowState = FOLLOW_STATE_IDLE;
 		ROS_INFO("Goal reached.");
+	}
+	else
+		mFollowState = FOLLOW_STATE_TURNING;
 
+	ROS_INFO("Waypoint reached.");
 	geometry_msgs::Twist msg;
 	mCommandPub.publish(msg);
-	mFollowState = FOLLOW_STATE_IDLE;
+}
+
+void PathFollower::clearPath()
+{
+	while (getPathSize())
+		continuePath();
 }
 
 void PathFollower::handlePath(tf::TransformListener *transformListener)
@@ -83,47 +117,60 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	double robotYaw = tf::getYaw(mRobotPosition.getRotation());
 	double diffYaw = calculateDiffYaw();
 
-	ROS_INFO("Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf", mRobotPosition.getOrigin().getX(),
+	ROS_INFO("Follow state: %d Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf", mFollowState, mRobotPosition.getOrigin().getX(),
 			mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ(), getNextPoint().x,
 			getNextPoint().y, getNextPoint().z, robotYaw, diffYaw);
 
+	geometry_msgs::Point robotPos;
+	robotPos.x = mRobotPosition.getOrigin().x();
+	robotPos.y = mRobotPosition.getOrigin().y();
+	double distToPath = distanceToLine(robotPos, getOrigin(), getNextPoint());
+	if (distToPath > mResetDistanceTolerance)
+	{
+		ROS_INFO("Too far away from path, re-publishing goal, getting new path.");
+		geometry_msgs::PoseStamped goal;
+		goal.pose = getGoal();
+		goal.header.stamp = ros::Time::now();
+		mGoalPub.publish(goal);
+		clearPath();
+	}
 	if (fabs(diffYaw) > mYawTolerance)
 	{
-		if (true || canTurn())
-		{
-			//ROS_INFO("Turning.");
-			mFollowState = FOLLOW_STATE_TURNING;
-			command.angular.z = getScaledAngularSpeed(diffYaw);
-			if (diffYaw < 0.0)
-				command.angular.z = -command.angular.z;
-		}
-		else
-			ROS_INFO("Blocked turning.");
+		ROS_INFO("Yaw too far away from target, turning back.");
+		mFollowState = FOLLOW_STATE_TURNING;
 	}
-	else
+
+	switch (mFollowState)
 	{
-		// small hack, last point is only for orientation, rarely gets here
-		if (getPathSize() == 1)
+	case FOLLOW_STATE_TURNING:
+		if (fabs(diffYaw) < mFinalYawTolerance)
+		{
+			mFollowState = FOLLOW_STATE_FORWARD;
+			break;
+		}
+
+		// if we're already near our goal point and not rotating for final orientation, continue the path
+		if (getPathSize() != 1 && reachedNextPoint())
 		{
 			continuePath();
-			return;
+			break;
 		}
 
-		if (true || canMove())
+		command.angular.z = diffYaw > 0.0 ? getScaledAngularSpeed(diffYaw) : -getScaledAngularSpeed(diffYaw);
+		break;
+	case FOLLOW_STATE_FORWARD:
+		//ROS_INFO("Moving.");
+		if (reachedNextPoint())
 		{
-			//ROS_INFO("Moving.");
-			mFollowState = FOLLOW_STATE_FORWARD;
-
-			if (reachedNextPoint())
-				continuePath();
-			else
-			{
-				command.linear.x = getScaledLinearSpeed();
-				command.angular.z = diffYaw > 0.0 ? mAngularAdjustmentSpeed : -mAngularAdjustmentSpeed;
-			}
+			continuePath();
+			break;
 		}
-		else
-			ROS_INFO("Blocked moving.");
+
+		command.linear.x = getScaledLinearSpeed();
+		command.angular.z = diffYaw > 0.0 ? mAngularAdjustmentSpeed : -mAngularAdjustmentSpeed;
+		break;
+	default:
+		break;
 	}
 
 	mCommandPub.publish(command);
@@ -155,21 +202,10 @@ void PathFollower::pathCb(const nav_msgs::Path &path)
 	// add last point twice for orientation
 	mPath.push_back(path.poses[path.poses.size() - 1].pose);
 
+	mFollowState = FOLLOW_STATE_TURNING;
 	// first waypoint is usually the starting position
 	if (reachedNextPoint())
 		continuePath();
-}
-
-void PathFollower::speedCb(const geometry_msgs::Twist &twist)
-{
-	double vel_left = twist.linear.x + twist.angular.z / 2;
-	double vel_right = twist.linear.x - twist.angular.z / 2;
-
-	if ((fabs(vel_left) > mDisableTransitionThreshold || fabs(vel_right) > mDisableTransitionThreshold) &&
-			mFollowState != FOLLOW_STATE_IDLE)
-		mAllowState = mFollowState;
-	else
-		mAllowState = FOLLOW_STATE_IDLE;
 }
 
 int main(int argc, char **argv)

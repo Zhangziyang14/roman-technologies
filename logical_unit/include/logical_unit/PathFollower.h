@@ -25,34 +25,35 @@ class PathFollower
 private:
 	ros::NodeHandle mNodeHandle;
 	ros::Subscriber mPathSub;
-	ros::Subscriber mSpeedFeedbackSub;
 	ros::Publisher mCommandPub;
+	ros::Publisher mGoalPub;
 	std::list<geometry_msgs::Pose> mPath;
 	geometry_msgs::Point mFocusPoint;
+	geometry_msgs::Point mOrigin;
 	geometry_msgs::Quaternion mFocusOrientation;
 	tf::StampedTransform mRobotPosition;
 
 	int mRefreshRate;
-	double mYawTolerance;
 	double mMinAngularSpeed, mMaxAngularSpeed;
 	double mAngularAdjustmentSpeed;
 	double mMinLinearSpeed, mMaxLinearSpeed;
 
 	FollowState mFollowState;
-	FollowState mAllowState;
 	double mDisableTransitionThreshold;
+	double mYawTolerance;
 	double mFinalYawTolerance;
 	double mDistanceTolerance;
+	double mResetDistanceTolerance;
 
+	inline geometry_msgs::Pose getGoal() { return mPath.back(); };
 	inline geometry_msgs::Point getNextPoint() { return mPath.front().position; };
+	inline geometry_msgs::Point getOrigin() { return mOrigin; };
 	inline int getPathSize() { return mPath.size(); };
 	inline bool reachedNextPoint()
 	{
 		btVector3 np(getNextPoint().x, getNextPoint().y, getNextPoint().z);
 		return np.distance(mRobotPosition.getOrigin()) < mDistanceTolerance;
 	};
-	inline bool canTurn() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_TURNING; };
-	inline bool canMove() { return mAllowState == FOLLOW_STATE_IDLE || mAllowState == FOLLOW_STATE_FORWARD; };
 	inline double getScaledLinearSpeed()
 	{
 		btVector3 np(getNextPoint().x, getNextPoint().y, getNextPoint().z);
@@ -71,8 +72,8 @@ public:
 
 	void spin();
 	void pathCb(const nav_msgs::Path &path);
-	void speedCb(const geometry_msgs::Twist &twist);
 	void continuePath();
+	void clearPath();
 	void handlePath(tf::TransformListener *transformListener);
 };
 
