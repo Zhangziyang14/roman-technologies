@@ -50,7 +50,7 @@ std_msgs::UInt16 ping_msg;
 
 //ROS
 ros::NodeHandle  nh;
-ros::Publisher ping_pub("/roman/pingFeedbackTopic", &ping_msg);
+ros::Publisher ping_pub("/pingFeedbackTopic", &ping_msg);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -215,13 +215,21 @@ long microsecondsToMilimeters(long microseconds)
  */
 void ping()
 {
-  if(pingActivated)
-  {
-    doPulse();
-    int duration = readPulse();
-    ping_msg.data = microsecondsToMilimeters(duration); 
-    ping_pub.publish(&ping_msg);
-  }
+   if(pingActivated){
+      static int pingCount = 0;
+       if(pingCount % 901 == 0)
+       {
+          doPulse();
+          int duration = readPulse();
+          ping_msg.data = microsecondsToMilimeters(duration); 
+          ping_msg.data = (ping_msg.data > 500) ? 500 : ping_msg.data;
+          ping_pub.publish(&ping_msg);
+       }
+       pingCount++;
+       if (pingCount > 901)
+       pingCount = 0;
+    
+       }
 }
 
 /**
@@ -232,7 +240,7 @@ void activatePingCB(const std_msgs::Empty& toggle_msg){
 }
 
 
-ros::Subscriber<std_msgs::Empty> sub("/pingActivateTopic", &activatePingCB);
+ros::Subscriber<std_msgs::Empty> ping_sub("/pingActivateTopic", &activatePingCB);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                       setup & loop Section
@@ -261,6 +269,8 @@ void setup()
   
   //ping init
   pingActivated = false;
+  nh.advertise(ping_pub);
+  nh.subscribe(ping_sub);
   
   //timer
   Timer1.initialize(15000);         // initialize timer1, and set a 15000 us period
