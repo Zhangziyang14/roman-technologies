@@ -1,0 +1,17 @@
+<package>
+  <description brief="audio_player">
+
+     audio_player
+
+  </description>
+  <author>Kelvin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/audio_player</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+
+</package>
+
+

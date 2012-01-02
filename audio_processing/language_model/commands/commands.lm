@@ -1,0 +1,95 @@
+Language model created by QuickLM on Mon Jan  2 05:56:19 EST 2012
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 9 sentences and 20 words
+
+\data\
+ngram 1=20
+ngram 2=29
+ngram 3=23
+
+\1-grams:
+-0.9596 </s> -0.3010
+-0.9596 <s> -0.2385
+-1.9138 BAD -0.2903
+-1.9138 COULD -0.2903
+-1.6128 GET -0.2903
+-1.9138 GO -0.2957
+-1.9138 GOOD -0.2903
+-1.6128 JUICE -0.2505
+-1.9138 JUICE? -0.2505
+-1.9138 NERO -0.2957
+-1.9138 PLEASE -0.2903
+-1.6128 ROBOT -0.2505
+-1.9138 SLEEP -0.2505
+-1.9138 THANK -0.2903
+-1.9138 THANKS -0.2505
+-1.6128 THE -0.2848
+-1.9138 TO -0.2957
+-1.9138 UP -0.2505
+-1.9138 WAKE -0.2957
+-1.6128 YOU -0.2445
+
+\2-grams:
+-1.2553 <s> BAD 0.0000
+-1.2553 <s> COULD 0.0000
+-1.2553 <s> GET 0.0000
+-1.2553 <s> GO 0.0000
+-1.2553 <s> GOOD 0.0000
+-1.2553 <s> JUICE 0.0000
+-1.2553 <s> NERO 0.0000
+-1.2553 <s> THANK 0.0000
+-1.2553 <s> THANKS 0.0000
+-0.3010 BAD ROBOT 0.0000
+-0.3010 COULD YOU -0.1761
+-0.3010 GET THE 0.0000
+-0.3010 GO TO 0.0000
+-0.3010 GOOD ROBOT 0.0000
+-0.3010 JUICE </s> -0.3010
+-0.3010 JUICE? </s> -0.3010
+-0.3010 NERO WAKE 0.0000
+-0.3010 PLEASE GET 0.0000
+-0.3010 ROBOT </s> -0.3010
+-0.3010 SLEEP </s> -0.3010
+-0.3010 THANK YOU -0.1761
+-0.3010 THANKS </s> -0.3010
+-0.6021 THE JUICE 0.0000
+-0.6021 THE JUICE? 0.0000
+-0.3010 TO SLEEP 0.0000
+-0.3010 UP </s> -0.3010
+-0.3010 WAKE UP 0.0000
+-0.6021 YOU </s> -0.3010
+-0.6021 YOU PLEASE 0.0000
+
+\3-grams:
+-0.3010 <s> BAD ROBOT
+-0.3010 <s> COULD YOU
+-0.3010 <s> GET THE
+-0.3010 <s> GO TO
+-0.3010 <s> GOOD ROBOT
+-0.3010 <s> JUICE </s>
+-0.3010 <s> NERO WAKE
+-0.3010 <s> THANK YOU
+-0.3010 <s> THANKS </s>
+-0.3010 BAD ROBOT </s>
+-0.3010 COULD YOU PLEASE
+-0.6021 GET THE JUICE
+-0.6021 GET THE JUICE?
+-0.3010 GO TO SLEEP
+-0.3010 GOOD ROBOT </s>
+-0.3010 NERO WAKE UP
+-0.3010 PLEASE GET THE
+-0.3010 THANK YOU </s>
+-0.3010 THE JUICE </s>
+-0.3010 THE JUICE? </s>
+-0.3010 TO SLEEP </s>
+-0.3010 WAKE UP </s>
+-0.3010 YOU PLEASE GET
+
+\end\
