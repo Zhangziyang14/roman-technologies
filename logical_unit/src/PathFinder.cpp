@@ -108,13 +108,13 @@ void PathFinder::convertTargetBaseCB(const logical_unit::target& msg)
 
 	logical_unit::path path_message;
 
-	//TODO Move calculation to Controller, sned result vector to Controller instead
+	//TODO Move calculation to Controller, send result vector to Controller instead
 
 	//Calculate distance from robot to target
 	double distance = sqrt((double) inner_prod(result, result));
 
 	//Calculate angle from robot's front to target
-	double angle	= atan((double) result(X2) / result(X1));
+	double angle	= std::atan((double) result(X2) / result(X1));
 
 	path_message.distance 	= distance;
 	path_message.angle 		= angle;

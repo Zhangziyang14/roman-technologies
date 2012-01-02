@@ -10,6 +10,10 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/ros/conversions.h>
+#include <sensor_msgs/point_cloud_conversion.h>
 #include <tabletop_object_detector/TabletopDetection.h>
 #include <tabletop_collision_map_processing/TabletopCollisionMapProcessing.h>
 

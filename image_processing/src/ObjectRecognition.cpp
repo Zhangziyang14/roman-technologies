@@ -8,7 +8,7 @@
 #include "image_processing/ObjectRecognition.h"
 
 ros::ServiceClient mObjectRecognizeClient;	//Service client for tabletop_object_detection
-ros::ServiceClient mCollisionmapClient;		//Service client for tabletop_collision_map_processing
+//ros::ServiceClient mCollisionmapClient;	//Service client for tabletop_collision_map_processing
 
 void ObjectRecognition::recognizeCB(const std_msgs::Bool &msg)
 {
@@ -27,7 +27,7 @@ void ObjectRecognition::init()
 		exit(0);
 
 	mObjectRecognizeClient = mNodeHandle.serviceClient<tabletop_object_detector::TabletopDetection>("/object_detection", true);
-
+	/*
 	//wait for collision map processing client
 	while ( !ros::service::waitForService("/tabletop_collision_map_processing/tabletop_collision_map_processing",
 			ros::Duration(2.0)) && mNodeHandle.ok() )
@@ -41,7 +41,7 @@ void ObjectRecognition::init()
 
 	//initialise subscribers
 	mCommandSubscriber = mNodeHandle.subscribe("/objectRecognizeCommandTopic", 1, &ObjectRecognition::recognizeCB, this);
-
+	 */
 	//initialise publishers
 }
 
@@ -64,13 +64,17 @@ int main(int argc, char **argv)
 	//set this to false if you are using the pipeline without the database
 	detection_call.request.return_clusters = true;
 	//we want the individual object point clouds returned as well
-	detection_call.request.return_models = true;
+	detection_call.request.return_models = false;
 	detection_call.request.num_models = 1;
 
-	if (!mObjectRecognizeClient.call(detection_call))
+	while(ros::ok())
 	{
-		ROS_ERROR("Tabletop detection service failed");
-		return -1;
+		if (!mObjectRecognizeClient.call(detection_call))
+		{
+			ROS_ERROR("Tabletop detection service failed");
+			return -1;
+		}
+		usleep(200000);
 	}
 	if (detection_call.response.detection.result !=
 			detection_call.response.detection.SUCCESS)
@@ -86,7 +90,19 @@ int main(int argc, char **argv)
 				"but found no objects");
 		return -1;
 	}
+	/*
+	pcl::PointCloud<pcl::PointXYZ> cloud;
+	sensor_msgs::PointCloud2 converted_point_cloud;
+	for(size_t i=0; i < detection_call.response.detection.clusters.size(); i++)
+	{
+		sensor_msgs::convertPointCloudToPointCloud2(detection_call.response.detection.clusters[i], converted_point_cloud);
+		pcl::fromROSMsg(converted_point_cloud, cloud);
+		std::stringstream ss("cluster_");
+		ss << i << ".pcd";
+		pcl::io::savePCDFileASCII (ss.str().c_str(), cloud);
+	}*/
 
+	/*
 	//call collision map processing
 	ROS_INFO("Calling collision map processing");
 	tabletop_collision_map_processing::TabletopCollisionMapProcessing processing_call;
@@ -109,6 +125,6 @@ int main(int argc, char **argv)
 		ROS_ERROR("Collision map processing returned no graspable objects");
 		return -1;
 	}
-
+	 */
 	ros::spin();
 }

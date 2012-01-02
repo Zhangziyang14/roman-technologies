@@ -9,10 +9,8 @@
   <review status="unreviewed" notes=""/>
   <depend package="nav_msgs"/>
   <depend package="tf"/>
-<!--
-  <depend package="tabletop_object_detector"/> 
-  <depend package="tabletop_collision_map_processing"/>
--->
+  <depend package="audio_processing"/>  
+
   <export>
         <rosdoc config="rosdoc.yaml" />
   </export>

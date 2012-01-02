@@ -8,7 +8,6 @@
 #include <mobile_base/tweak.h>
 #include <mobile_base/BaseController.h>
 #include <std_msgs/Float64.h>
-#include <std_msgs/Bool.h>
 #include <mobile_base/sensorFeedback.h>
 
 #define WHEEL_RADIUS 							0.1475	//[m]
@@ -23,7 +22,7 @@
 #define STANDARD_AVOIDANCE_IMPACT				175.0	//[cm]
 
 #define FRONT_AVOIDANCE_DISTANCE				150.0	//[cm]
-#define FRONT_AVOIDANCE_IMPACT					100.0	//[cm]
+#define FRONT_AVOIDANCE_IMPACT					70.0	//[cm]
 
 #define SIDES_AVOIDANCE_IMPACT					75.0	//[cm]
 #define SIDES_AVOIDANCE_DISTANCE				60.0	//[cm]
@@ -43,7 +42,6 @@ protected:
 	ros::Subscriber mTweakPIDSub;			/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
 
 	ros::Publisher mSpeedPub;				/// Publishes robot's speed
-	ros::Publisher mUltrasoneActivatePub; 	/// Publishes messages to activate ultrasone sensors
 
 	geometry_msgs::Twist mCurrentSpeed;		/// Twist message containing the current speed of the robot
 	double mLeftMotorSpeed;					/// Current speeds for left wheel in rad/s

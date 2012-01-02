@@ -158,6 +158,7 @@ sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplIma
 {
 	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
 	output->header.stamp = ros::Time::now();
+	output->header.frame_id = "/openni_depth_frame";
 	output->width = pc->width;
 	output->height = pc->height;
 	output->is_dense = false;
@@ -204,7 +205,7 @@ sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplIma
 			uint8 data[32];
 			pcl::PointXYZ p;
 			p.x = *getPixel<float>(x, y, pc, 0);
-			p.y = *getPixel<float>(x, y, pc, 1);
+			p.y = -*getPixel<float>(x, y, pc, 1);
 			p.z = *getPixel<float>(x, y, pc, 2);
 			if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0)
 				p.x = p.y = p.z = std::numeric_limits<float>::quiet_NaN();

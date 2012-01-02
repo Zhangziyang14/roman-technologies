@@ -18,7 +18,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
 #rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
-#rosbuild_add_executable(ObjectRecognition src/ObjectRecognition.cpp)
+rosbuild_add_executable(ObjectRecognition src/ObjectRecognition.cpp)
 #rosbuild_add_executable(FocusFace src/FocusFace.cpp src/KinectTools.cpp)
 
 link_directories(/usr/local/lib )
