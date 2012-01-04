@@ -100,16 +100,16 @@ bool ArmMotorHandler::init()
 
 void ArmMotorHandler::setShoulderAngle(double angle)
 {
-	ROS_INFO("Setting shoulder to position [%.4f]...", angle);
+	ROS_INFO("Setting shoulder to position [%.3f]...", angle);
 
 	if(angle > SHOULDERMOTOR_MAX_ANGLE)
 	{
-		ROS_WARN("Desired shoulder position exceeds upper angle limit [%.4f]", SHOULDERMOTOR_MAX_ANGLE);
+		ROS_WARN("Desired shoulder position [%.3f] exceeds upper angle limit [%.3f]", angle, SHOULDERMOTOR_MAX_ANGLE);
 		angle = SHOULDERMOTOR_MAX_ANGLE;
 	}
 	else if(angle < SHOULDERMOTOR_MIN_ANGLE)
 	{
-		ROS_WARN("Desired shoulder position exceeds lower angle limit [%.4f]", SHOULDERMOTOR_MIN_ANGLE);
+		ROS_WARN("Desired shoulder position [%.3f] exceeds lower angle limit [%.3f]", angle, SHOULDERMOTOR_MIN_ANGLE);
 		angle = SHOULDERMOTOR_MIN_ANGLE;
 	}
 	angle+= SHOULDERMOTOR_OFFSET;		// offset to transform the absolute position to the position relative to the limit switch
@@ -118,16 +118,16 @@ void ArmMotorHandler::setShoulderAngle(double angle)
 
 void ArmMotorHandler::setSideJointAngle(double angle)
 {
-	ROS_INFO("Setting sideJoint to position [%.4f]...", angle);
+	ROS_INFO("Setting sideJoint to position [%.3f]...", angle);
 
 	if(angle > SIDEJOINT_MAX_ANGLE)
 	{
-		ROS_WARN("Desired sideJoint position exceeds upper angle limit [%.4f]", SIDEJOINT_MAX_ANGLE);
+		ROS_WARN("Desired sideJoint position [%.3f] exceeds upper angle limit [%.3f]", angle, SIDEJOINT_MAX_ANGLE);
 		angle = SIDEJOINT_MAX_ANGLE;
 	}
 	else if(angle < SIDEJOINT_MIN_ANGLE)
 	{
-		ROS_WARN("Desired sideJoint position exceeds lower angle limit [%.4f]", SIDEJOINT_MIN_ANGLE);
+		ROS_WARN("Desired sideJoint position [%.3f] exceeds lower angle limit [%.3f]", angle, SIDEJOINT_MIN_ANGLE);
 		angle = SIDEJOINT_MIN_ANGLE;
 	}
 	angle+= SIDEJOINT_OFFSET;		// offset to transform the absolute position to the position relative to the limit switch
