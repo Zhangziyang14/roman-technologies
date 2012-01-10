@@ -102,7 +102,7 @@ void PathFollower::continuePath()
 	mPath.pop_front();
 	if (getPathSize() == 0)
 	{
-		mFollowState = FOLLOW_STATE_IDLE;
+		mFollowState = FOLLOW_STATE_FINISHED;
 		ROS_INFO("Goal reached.");
 	}
 	else
