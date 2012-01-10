@@ -1,15 +1,8 @@
 //ROS
 #include "ros.h"
 #include "mobile_base/sensorFeedback.h"
-#include "std_msgs/Bool.h"
 #include "std_msgs/UInt8.h"
 #include <Wire.h>
-
-#include <RunningAverage.h>
-
-RunningAverage frontRight(3);
-RunningAverage frontLeft(3);
-RunningAverage frontCenter(3);
 
 
 int bumperFrontPin = 8;
@@ -17,34 +10,21 @@ int bumperRearPin = 9;
 int bumperLeftPin = 10;
 int bumperRightPin = 11;
 
-boolean activated;
-int ranges[8];
-
-// Hardware addresses of the ultrasone sensors
-/*enum HW_ADDRESS
-{
-   HW_FRONT_LEFT = 0x70,
-   HW_FRONT_CENTER = 0x71,
-   HW_FRONT_RIGHT = 0x72,
-   HW_REAR_RIGHT = 0x73,
-   HW_REAR_CENTER = 0x74,
-   HW_REAR_LEFT = 0x75,
-   HW_LEFT = 0x76,
-   HW_RIGHT = 0x77,
-};*/
-
+int ranges[10];
 
 // Ultrasone mask flags
 enum UltrasoneSensor
-{
-  SENSOR_FRONT_LEFT = 0,
-  SENSOR_FRONT_LEFT_CENTER,
-  SENSOR_FRONT_RIGHT_CENTER,
-  SENSOR_FRONT_RIGHT,
-  SENSOR_RIGHT,
-  SENSOR_REAR_RIGHT,
-  SENSOR_REAR_LEFT,
-  SENSOR_LEFT,
+{                             //Corresponding hardware address
+  SENSOR_FRONT_LEFT = 0,      //0x70
+  SENSOR_FRONT_LEFT_CENTER,   //0x71
+  SENSOR_FRONT_CENTER_LEFT,   //0x72
+  SENSOR_FRONT_CENTER_RIGHT,  //0x73
+  SENSOR_FRONT_RIGHT_CENTER,  //0x74
+  SENSOR_FRONT_RIGHT,         //0x75
+  SENSOR_RIGHT,               //0x76
+  SENSOR_REAR_RIGHT,          //0x77
+  SENSOR_REAR_LEFT,           //0x78
+  SENSOR_LEFT,                //0x79
 };
 
 enum BumperId
@@ -56,11 +36,6 @@ enum BumperId
   BUMPER_REAR_RIGHT
 };
 
-void activateSensors(const std_msgs::Bool &msg)
-{
-  activated = msg.data;
-}
-
 ros::NodeHandle nh;
 
 //declare outgoing messages
@@ -69,8 +44,6 @@ std_msgs::UInt8 bump_msg;
 
 //topic to publish ultrasone sensor data on
 ros::Publisher feedback_pub("/sensorFeedbackTopic", &prox_msg);
-//topic that gives signal for activating or deactivating sensors
-ros::Subscriber<std_msgs::Bool> activate_sub("/sensorActivateTopic", &activateSensors);
 //topic that issues a warning when bumper hits something
 ros::Publisher bumper_pub("/bumperFeedbackTopic", &bump_msg);
 
@@ -86,14 +59,11 @@ void setup()
   //led
   pinMode(13, OUTPUT);
   
-  activated = false;
-  
   Wire.begin();
   Serial.begin(9600);
  
   nh.initNode();
   nh.advertise(feedback_pub);
-  nh.subscribe(activate_sub);
   nh.advertise(bumper_pub);
 };
 
@@ -102,12 +72,16 @@ void setup()
 
 void loop()
 {
-  if (activated)
-  {
-    for (int address = 0x70; address < 0x72; address++)
+  readSensors();
+  nh.spinOnce(); 
+}
+
+void readSensors()
+{
+      for (int address = 0x70; address < 0x72; address++)
     {
       //trigger sensors
-      for (int i = 0; i < 7; i = i + 2)
+      for (int i = 0; i < 9; i = i + 2)
       {
          doSRF02Pulse(address+i);
       }
@@ -115,15 +89,17 @@ void loop()
       delay(70);
       
       //read sensor values
-      for (int i = 0; i < 7; i = i + 2)
+      for (int i = 0; i < 9; i = i + 2)
       {
-         ranges[address+i] = windowFilter(readSRF02(address+i));
+         ranges[address+i-0x70] = windowFilter(readSRF02(address+i));
       }
       
     }
     
    prox_msg.frontLeft = ranges[SENSOR_FRONT_LEFT];                  
    prox_msg.frontLeftCenter = ranges[SENSOR_FRONT_LEFT_CENTER];
+   prox_msg.frontCenterLeft = ranges[SENSOR_FRONT_CENTER_LEFT];
+   prox_msg.frontCenterRight = ranges[SENSOR_FRONT_CENTER_RIGHT];   
    prox_msg.frontRightCenter = ranges[SENSOR_FRONT_RIGHT_CENTER];
    prox_msg.frontRight = ranges[SENSOR_FRONT_RIGHT];
    prox_msg.right = ranges[SENSOR_RIGHT];  
@@ -135,8 +111,7 @@ void loop()
    feedback_pub.publish(&prox_msg);
   
 }
-  nh.spinOnce(); 
-}
+
 
 /*
 *  Filters the sensor data within a given window frame
