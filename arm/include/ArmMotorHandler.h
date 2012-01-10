@@ -13,7 +13,7 @@
 
 #define SIDEMOTOR_ENCODER_COUNT			(500)
 #define SIDEMOTOR_CORRECTION_FACTOR		(1.5)	 // encoder multiplication factor to correct 3mxel angle limits
-
+#define SAFETY_OFFSET					0.05	 // Safety offset for overshoots during intialising
 
 #define EXT_INIT_MODE_TORQUE (0.001)			 // torque required for ext_init mode
 #define EXT_INIT_MODE_ACCEL	(0.5)				 // acceleration for ext_init
@@ -23,20 +23,17 @@
 #define DEFAULT_SPEED 					(0.5)
 #define DEFAULT_ACCEL					(0.5)
 
-
 #define SHOULDERMOTOR_OFFSET			(1.66)
 #define SIDEJOINT_OFFSET				(0.53)
 
-#define SHOULDERMOTOR_MIN_ANGLE 		(0.00 - SHOULDERMOTOR_OFFSET)
+#define SHOULDERMOTOR_MIN_ANGLE 		(-1.1)	//Relative to virtual origin
 #define SHOULDERMOTOR_MAX_ANGLE 		(2.16 - SHOULDERMOTOR_OFFSET)
 
-#define SIDEJOINT_MIN_ANGLE			   (-0.07 - SIDEJOINT_OFFSET)
-#define SIDEJOINT_MAX_ANGLE				(2.35 - SIDEJOINT_OFFSET)
+#define SIDEJOINT_MIN_ANGLE			    (-0.07 - SIDEJOINT_OFFSET)
+#define SIDEJOINT_MAX_ANGLE				(1.55)	//Relative to virtual origin
 
-#define SHOULDERMOTOR_START_POS			(0.03 - SHOULDERMOTOR_OFFSET)	//
-#define SIDEJOINT_START_POS				(0.53 - SIDEJOINT_OFFSET)	 	// joint is at this position after being initialized
-
-
+#define SHOULDERMOTOR_START_POS			(-1.1)	//
+#define SIDEJOINT_START_POS				(1.5)	// joint is at this position after being initialized
 
 #include <ros/ros.h>
 #include <Motor.h>
@@ -88,6 +85,16 @@ public:
 
 	/** Multithreading callbacks **/
 	void Run();
+
+	inline double getShoulderAngle()
+	{
+		return mShoulderMotor.getAngle() * SHOULDERMOTOR_CORRECTION_FACTOR;
+	}
+
+	inline double getSideJointAngle()
+	{
+		return mSideMotor.getAngle() * SIDEMOTOR_CORRECTION_FACTOR;
+	}
 };
 
 

@@ -23,12 +23,12 @@ void AutonomeArmController::cmdCB(const arm::armCoordinatesPos &msg)
 
 	if(msg.x_value > MAX_X_VALUE)
 	{
-		ROS_WARN("REACHED MAX_Z_VALUE");
+		ROS_WARN("REACHED MAX_X_VALUE");
 		srv.request.target.x_value = MAX_X_VALUE;
 	}
 	else if(msg.x_value < MIN_Z_VALUE)
 	{
-		ROS_WARN("REACHED MAX_Z_VALUE");
+		ROS_WARN("REACHED MAX_X_VALUE");
 		srv.request.target.x_value = MIN_X_VALUE;
 	}
 

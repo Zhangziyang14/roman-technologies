@@ -10,10 +10,10 @@
 #include "arm/armCoordinatesPos.h"
 #include "arm/IK.h"
 
-#define MIN_Z_VALUE -36
-#define MAX_Z_VALUE 16.0
-#define MIN_X_VALUE -29.4
-#define MAX_X_VALUE 33.4
+#define MIN_Z_VALUE -32.1
+#define MAX_Z_VALUE 17.25
+#define MIN_X_VALUE -20
+#define MAX_X_VALUE 35.95
 
 
 class AutonomeArmController
