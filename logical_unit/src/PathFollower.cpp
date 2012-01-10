@@ -42,11 +42,12 @@ float distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
  */
 PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 {
-	std::string pathTopic, speedFeedbackTopic, goalTopic, pathLengthTopic;
+	std::string pathTopic, speedFeedbackTopic, goalTopic, pathLengthTopic, followStateTopic;
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
 	mNodeHandle.param<std::string>("speed_feedback_topic", speedFeedbackTopic, "/speedFeedbackTopic");
 	mNodeHandle.param<std::string>("goal_topic", goalTopic, "/move_base_simple/goal");
 	mNodeHandle.param<std::string>("path_length_topic", pathLengthTopic, "/path_length");
+	mNodeHandle.param<std::string>("follow_state_topic", followStateTopic, "/follow_state");
 	mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
 	mNodeHandle.param<double>("min_angular_speed", mMinAngularSpeed, 0.1);
 	mNodeHandle.param<double>("max_angular_speed", mMaxAngularSpeed, 0.4);
@@ -62,6 +63,7 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 	mCommandPub = mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	mGoalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
 	mPathLengthPub = mNodeHandle.advertise<std_msgs::Float32>(pathLengthTopic, 1);
+	mPathLengthPub = mNodeHandle.advertise<std_msgs::UInt8>(followStateTopic, 1);
 }
 
 /**
@@ -116,6 +118,9 @@ void PathFollower::continuePath()
  */
 void PathFollower::publishPathLength()
 {
+	if (mPathLengthPub.getNumSubscribers() == 0)
+		return;
+
 	geometry_msgs::Point a, b;
 	a.x = mRobotPosition.getOrigin().getX();
 	a.y = mRobotPosition.getOrigin().getY();
@@ -126,6 +131,20 @@ void PathFollower::publishPathLength()
 		msg.data += distanceBetweenPoints(a, i->position);
 	}
 	mPathLengthPub.publish(msg);
+}
+
+void PathFollower::publishState()
+{
+	if (mFollowStatePub.getNumSubscribers())
+	{
+		std_msgs::UInt8 msg;
+		msg.data = mFollowState;
+		mFollowStatePub.publish(msg);
+	}
+
+	// only send this state once
+	if (mFollowState == FOLLOW_STATE_FINISHED)
+		mFollowState = FOLLOW_STATE_IDLE;
 }
 
 /**
@@ -143,6 +162,8 @@ void PathFollower::clearPath()
 void PathFollower::handlePath()
 {
 	geometry_msgs::Twist command;
+
+	publishState();
 
 	// no path? nothing to handle
 	if (getPathSize() == 0)

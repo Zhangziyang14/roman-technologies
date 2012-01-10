@@ -12,12 +12,14 @@
 #include "nav_msgs/Path.h"
 #include "tf/transform_listener.h"
 #include "std_msgs/Float32.h"
+#include "std_msgs/UInt8.h"
 
 enum FollowState
 {
 	FOLLOW_STATE_IDLE,
 	FOLLOW_STATE_TURNING,
 	FOLLOW_STATE_FORWARD,
+	FOLLOW_STATE_FINISHED,
 	FOLLOW_STATE_MAX,
 };
 
@@ -29,6 +31,7 @@ private:
 	ros::Publisher mCommandPub;						/// Publishes velocity commands
 	ros::Publisher mGoalPub;						/// Re-publishes goals when a new path needs to be calculated
 	ros::Publisher mPathLengthPub;					/// Publishes path length when path is refreshed
+	ros::Publisher mFollowStatePub;					/// Publishes the current state of the follower
 	std::list<geometry_msgs::Pose> mPath;			/// Current path to follow
 	geometry_msgs::Point mOrigin;					/// Point the robot originated from when moving to a next waypoint
 	tf::StampedTransform mRobotPosition;			/// Current position of the robot on the map
@@ -77,6 +80,7 @@ public:
 	void handlePath();
 	bool updateCurrentPosition();
 	void publishPathLength();
+	void publishState();
 };
 
 #endif /* PATHFOLLOWER_H_ */
