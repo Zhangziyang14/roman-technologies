@@ -133,6 +133,9 @@ void PathFollower::publishPathLength()
 	mPathLengthPub.publish(msg);
 }
 
+/**
+ * Publishes the robot state
+ */
 void PathFollower::publishState()
 {
 	if (mFollowStatePub.getNumSubscribers())
