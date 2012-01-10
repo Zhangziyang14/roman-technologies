@@ -171,17 +171,13 @@ void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
 	geometry_msgs::PoseStamped start, end;
 	start.pose.position.x = mRobotPosition.getOrigin().getX();
 	start.pose.position.y = mRobotPosition.getOrigin().getY();
-	end.pose.position.x = goal.pose.position.x;
-	end.pose.position.y = goal.pose.position.y;
-	end.pose.orientation = goal.pose.orientation;
+	end.pose = goal.pose;
 
 	planPath(start, end, path);
 
 	ROS_INFO("Size: %d", path.poses.size());
 	for (size_t i = 0; i < path.poses.size(); i++)
 	{
-		path.poses[i].pose.position.x = path.poses[i].pose.position.x;
-		path.poses[i].pose.position.y = path.poses[i].pose.position.y;
 		std::cout << "Path[" << i << "]: x = " << path.poses[i].pose.position.x << ", y = " << path.poses[i].pose.position.y << std::endl;
 	}
 
