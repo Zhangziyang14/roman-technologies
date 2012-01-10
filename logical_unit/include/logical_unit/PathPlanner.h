@@ -35,17 +35,18 @@ struct NavMeshTileHeader
 	int dataSize;
 };
 
+/// Handles incoming goal requests, sends out paths to follow.
 class PathPlanner
 {
 private:
-	ros::NodeHandle mNodeHandle;
-	ros::Subscriber mGoalSub;
-	ros::Publisher mPathPub;
-	std::string mNavMeshPath;
-	dtNavMesh *mNavMesh;
-	dtNavMeshQuery *mNavMeshQuery;
-	dtQueryFilter mFilter;
-	tf::StampedTransform mRobotPosition;
+	ros::NodeHandle mNodeHandle;				/// This nodes nodehandle
+	ros::Subscriber mGoalSub;					/// Subscriber for goal positions
+	ros::Publisher mPathPub;					/// Publishes paths to received goals
+	std::string mNavMeshPath;					/// Path to the navmesh .bin file
+	dtNavMesh *mNavMesh;						/// Navmesh object
+	dtNavMeshQuery *mNavMeshQuery;				/// Query handler for the navmesh
+	dtQueryFilter mFilter;						/// Not currently used
+	tf::TransformListener mTransformListener;	/// Listens to current robot position
 
 	void loadNavmesh();
 public:
@@ -53,9 +54,7 @@ public:
 	~PathPlanner();
 
 	void spin();
-
 	void planPath(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped end, nav_msgs::Path &path);
-
 	void goalCb(const geometry_msgs::PoseStamped &goal);
 };
 

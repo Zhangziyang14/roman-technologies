@@ -7,6 +7,9 @@
 
 #include "logical_unit/PathPlanner.h"
 
+/**
+ * PathPlanner constructor.
+ */
 PathPlanner::PathPlanner() :
 	mNodeHandle("~"),
 	mNavMesh(NULL),
@@ -29,6 +32,9 @@ PathPlanner::PathPlanner() :
 	mPathPub = mNodeHandle.advertise<nav_msgs::Path>(pathTopic, 1);
 }
 
+/**
+ * PathPlanner destructor.
+ */
 PathPlanner::~PathPlanner()
 {
 	if (mNavMesh)
@@ -37,6 +43,9 @@ PathPlanner::~PathPlanner()
 		dtFreeNavMeshQuery(mNavMeshQuery);
 }
 
+/**
+ * Loads navigation mesh into memory.
+ */
 void PathPlanner::loadNavmesh()
 {
 	FILE* fp = fopen(mNavMeshPath.c_str(), "rb");
@@ -98,6 +107,9 @@ void PathPlanner::loadNavmesh()
 	fclose(fp);
 }
 
+/**
+ * Plans a path from start to end using the navigation mesh and Detour, putting the result in path.
+ */
 void PathPlanner::planPath(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped end, nav_msgs::Path &path)
 {
 	if (mNavMesh == NULL)
@@ -161,16 +173,30 @@ void PathPlanner::planPath(geometry_msgs::PoseStamped start, geometry_msgs::Pose
 	path.poses[straightPathCount - 1].pose.orientation = end.pose.orientation;
 }
 
+/**
+ * Callback for when a goal is received, calculates a path from current position to goal and publishes it.
+ */
 void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
 {
 	ROS_INFO("Received new goal.");
+
+	tf::StampedTransform robotPosition;
+	try
+	{
+		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), robotPosition);
+	}
+	catch (tf::TransformException ex)
+	{
+		//ROS_ERROR("%s",ex.what());
+		return;
+	}
 
 	nav_msgs::Path path;
 	path.header.frame_id = "/odom";
 
 	geometry_msgs::PoseStamped start, end;
-	start.pose.position.x = mRobotPosition.getOrigin().getX();
-	start.pose.position.y = mRobotPosition.getOrigin().getY();
+	start.pose.position.x = robotPosition.getOrigin().getX();
+	start.pose.position.y = robotPosition.getOrigin().getY();
 	end.pose = goal.pose;
 
 	planPath(start, end, path);
@@ -185,35 +211,11 @@ void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
 	mPathPub.publish(path);
 }
 
-void PathPlanner::spin()
-{
-	tf::TransformListener transformListener;
-
-	while (ros::ok())
-	{
-		try
-		{
-			transformListener.lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
-		}
-		catch (tf::TransformException ex)
-		{
-			//ROS_ERROR("%s",ex.what());
-		}
-		ros::spinOnce();
-	}
-}
-
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "PathPlanner");
 
 	PathPlanner pp;
-	pp.spin();
-
-	//52.752132 0.000002 61.427223  57.043953 -0.000002 42.184956
-
-	//geometry_msgs::Point p2;
-	//p2.x = 57.043953;
-	//p2.y = 42.184956;
+	ros::spin();
 	return 0;
 }

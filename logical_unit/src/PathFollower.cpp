@@ -7,6 +7,9 @@
 
 #include "logical_unit/PathFollower.h"
 
+/**
+ * Calculates a distance from point p to the line described by points a and b.
+ */
 double distanceToLine(geometry_msgs::Point p, geometry_msgs::Point a, geometry_msgs::Point b)
 {
 	double xu = p.x - a.x;
@@ -26,6 +29,9 @@ double distanceToLine(geometry_msgs::Point p, geometry_msgs::Point a, geometry_m
 	return fabs( (p.x*(a.y - b.y) + p.y*(b.x - a.x) + (a.x * b.y - b.x * a.y)) / sqrt((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)));
 }
 
+/**
+ * PathFollower constructor.
+ */
 PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 {
 	std::string pathTopic, speedFeedbackTopic, goalTopic;
@@ -38,7 +44,6 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 	mNodeHandle.param<double>("min_linear_speed", mMinLinearSpeed, 0.2);
 	mNodeHandle.param<double>("max_linear_speed", mMaxLinearSpeed, 0.3);
 	mNodeHandle.param<double>("angular_adjustment_speed", mAngularAdjustmentSpeed, 0.05);
-	mNodeHandle.param<double>("disable_transition_threshold", mDisableTransitionThreshold, 0.05);
 	mNodeHandle.param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.2);
 	mNodeHandle.param<double>("yaw_tolerance", mYawTolerance, 0.25 * M_PI);
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
@@ -49,6 +54,9 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 	mGoalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
 }
 
+/**
+ * Returns the yaw that needs to be turned.
+ */
 double PathFollower::calculateDiffYaw()
 {
 	if (getPathSize() == 0)
@@ -72,6 +80,9 @@ double PathFollower::calculateDiffYaw()
 	return atan2(diff.getY(), diff.getX());
 }
 
+/**
+ * Continue to the next waypoint.
+ */
 void PathFollower::continuePath()
 {
 	mOrigin = getNextPoint();
@@ -90,13 +101,19 @@ void PathFollower::continuePath()
 	mCommandPub.publish(msg);
 }
 
+/**
+ * Clears path (continously calls continuePath until empty)
+ */
 void PathFollower::clearPath()
 {
 	while (getPathSize())
 		continuePath();
 }
 
-void PathFollower::handlePath(tf::TransformListener *transformListener)
+/**
+ * Updates path logic.
+ */
+void PathFollower::handlePath()
 {
 	geometry_msgs::Twist command;
 
@@ -104,17 +121,11 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	if (getPathSize() == 0)
 		return;
 
-	// get current position in the map
-	try
-	{
-		transformListener->lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
-	}
-	catch (tf::TransformException ex)
-	{
-		//ROS_ERROR("%s",ex.what());
-	}
+	// update our position if possible.
+	if (updateCurrentPosition() == false)
+		return;
 
-	double robotYaw = tf::getYaw(mRobotPosition.getRotation());
+	double robotYaw = tf::getYaw(mRobotPosition.getRotation()); // only used for printing
 	double diffYaw = calculateDiffYaw();
 
 	ROS_INFO("Follow state: %d Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf", mFollowState, mRobotPosition.getOrigin().getX(),
@@ -124,6 +135,8 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	geometry_msgs::Point robotPos;
 	robotPos.x = mRobotPosition.getOrigin().x();
 	robotPos.y = mRobotPosition.getOrigin().y();
+
+	// check if we are too far away from our path. If so, reset our path.
 	double distToPath = distanceToLine(robotPos, getOrigin(), getNextPoint());
 	if (distToPath > mResetDistanceTolerance)
 	{
@@ -134,6 +147,8 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 		mGoalPub.publish(goal);
 		clearPath();
 	}
+
+	// Did we turn away too much? Set state back to turning so we can correct it.
 	if (fabs(diffYaw) > mYawTolerance)
 	{
 		ROS_INFO("Yaw too far away from target, turning back.");
@@ -143,6 +158,7 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	switch (mFollowState)
 	{
 	case FOLLOW_STATE_TURNING:
+		// Are we done turning, then change state to move forward
 		if (fabs(diffYaw) < mFinalYawTolerance)
 		{
 			mFollowState = FOLLOW_STATE_FORWARD;
@@ -160,6 +176,8 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 		break;
 	case FOLLOW_STATE_FORWARD:
 		//ROS_INFO("Moving.");
+
+		// Did we reach our waypoint? Then continue to the next waypoint.
 		if (reachedNextPoint())
 		{
 			continuePath();
@@ -167,6 +185,7 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 		}
 
 		command.linear.x = getScaledLinearSpeed();
+		// minor angular adjustments during forward movement.
 		command.angular.z = diffYaw > 0.0 ? mAngularAdjustmentSpeed : -mAngularAdjustmentSpeed;
 		break;
 	default:
@@ -176,20 +195,44 @@ void PathFollower::handlePath(tf::TransformListener *transformListener)
 	mCommandPub.publish(command);
 }
 
+/**
+ * Updates current position of the robot.
+ */
+bool PathFollower::updateCurrentPosition()
+{
+	// get current position in the map
+	try
+	{
+		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
+	}
+	catch (tf::TransformException ex)
+	{
+		//ROS_ERROR("%s",ex.what());
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Main follow loop.
+ */
 void PathFollower::spin()
 {
-	tf::TransformListener transformListener;
 	ros::Rate refreshRate(mRefreshRate);
 
 	while (ros::ok())
 	{
-		handlePath(&transformListener);
+		handlePath();
 
 		refreshRate.sleep();
 		ros::spinOnce();
 	}
 }
 
+/**
+ * Receives path from PathPlanner and starts moving towards goal.
+ */
 void PathFollower::pathCb(const nav_msgs::Path &path)
 {
 	ROS_INFO("Received new path.");
