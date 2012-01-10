@@ -11,6 +11,7 @@
 #include "ros/ros.h"
 #include "nav_msgs/Path.h"
 #include "tf/transform_listener.h"
+#include "std_msgs/Float32.h"
 
 enum FollowState
 {
@@ -27,6 +28,7 @@ private:
 	ros::Subscriber mPathSub;						/// Subscriber that listens to paths from PathPlanner
 	ros::Publisher mCommandPub;						/// Publishes velocity commands
 	ros::Publisher mGoalPub;						/// Re-publishes goals when a new path needs to be calculated
+	ros::Publisher mPathLengthPub;					/// Publishes path length when path is refreshed
 	std::list<geometry_msgs::Pose> mPath;			/// Current path to follow
 	geometry_msgs::Point mOrigin;					/// Point the robot originated from when moving to a next waypoint
 	tf::StampedTransform mRobotPosition;			/// Current position of the robot on the map
@@ -46,7 +48,7 @@ private:
 	inline geometry_msgs::Pose getGoal() { return mPath.back(); };					/// Returns goal position
 	inline geometry_msgs::Point getOrigin() { return mOrigin; };
 	inline geometry_msgs::Point getNextPoint() { return mPath.front().position; };	/// Returns current waypoint the robot is getting to
-	inline int getPathSize() { return mPath.size(); };								/// Returns the size of the remaining path
+	inline uint32_t getPathSize() { return mPath.size(); };								/// Returns the size of the remaining path
 	inline bool reachedNextPoint()													/// Checks if we are close enough to the next point
 	{
 		btVector3 np(getNextPoint().x, getNextPoint().y, getNextPoint().z);
@@ -74,6 +76,7 @@ public:
 	void clearPath();
 	void handlePath();
 	bool updateCurrentPosition();
+	void publishPathLength();
 };
 
 #endif /* PATHFOLLOWER_H_ */

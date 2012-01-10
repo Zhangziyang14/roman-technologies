@@ -29,15 +29,24 @@ double distanceToLine(geometry_msgs::Point p, geometry_msgs::Point a, geometry_m
 	return fabs( (p.x*(a.y - b.y) + p.y*(b.x - a.x) + (a.x * b.y - b.x * a.y)) / sqrt((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)));
 }
 
+float distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
+{
+	float dx = a.x - b.x;
+	float dy = a.y - b.y;
+	float dz = a.z - b.z;
+	return sqrtf(dx*dx + dy*dy + dz*dz);
+}
+
 /**
  * PathFollower constructor.
  */
 PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 {
-	std::string pathTopic, speedFeedbackTopic, goalTopic;
+	std::string pathTopic, speedFeedbackTopic, goalTopic, pathLengthTopic;
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
 	mNodeHandle.param<std::string>("speed_feedback_topic", speedFeedbackTopic, "/speedFeedbackTopic");
 	mNodeHandle.param<std::string>("goal_topic", goalTopic, "/move_base_simple/goal");
+	mNodeHandle.param<std::string>("path_length_topic", pathLengthTopic, "/path_length");
 	mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
 	mNodeHandle.param<double>("min_angular_speed", mMinAngularSpeed, 0.1);
 	mNodeHandle.param<double>("max_angular_speed", mMaxAngularSpeed, 0.4);
@@ -52,6 +61,7 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 	mPathSub = mNodeHandle.subscribe(pathTopic, 1, &PathFollower::pathCb, this);
 	mCommandPub = mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	mGoalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
+	mPathLengthPub = mNodeHandle.advertise<std_msgs::Float32>(pathLengthTopic, 1);
 }
 
 /**
@@ -99,6 +109,23 @@ void PathFollower::continuePath()
 	ROS_INFO("Waypoint reached.");
 	geometry_msgs::Twist msg;
 	mCommandPub.publish(msg);
+}
+
+/**
+ * Publishes the total distance of the remaining path
+ */
+void PathFollower::publishPathLength()
+{
+	geometry_msgs::Point a, b;
+	a.x = mRobotPosition.getOrigin().getX();
+	a.y = mRobotPosition.getOrigin().getY();
+	a.z = mRobotPosition.getOrigin().getZ();
+	std_msgs::Float32 msg;
+	for (std::list<geometry_msgs::Pose>::iterator i = mPath.begin(); i != mPath.end(); i++)
+	{
+		msg.data += distanceBetweenPoints(a, i->position);
+	}
+	mPathLengthPub.publish(msg);
 }
 
 /**
@@ -192,6 +219,7 @@ void PathFollower::handlePath()
 		break;
 	}
 
+	publishPathLength();
 	mCommandPub.publish(command);
 }
 
