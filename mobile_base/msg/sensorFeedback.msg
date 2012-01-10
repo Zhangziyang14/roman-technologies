@@ -1,9 +1,10 @@
 int16 frontLeft
 int16 frontLeftCenter
+int16 frontCenterLeft
+int16 frontCenterRight
 int16 frontRightCenter
 int16 frontRight
 int16 right
 int16 rearRight
 int16 rearLeft
 int16 left
-int32 ping
