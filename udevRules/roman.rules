@@ -1,5 +1,4 @@
-KERNEL=="ttyUSB*", ATTRS{serial} =="FTTJI20L", NAME="roman/threemxl0"
-KERNEL=="ttyUSB*", ATTRS{serial} =="FTT9LBAI", NAME="roman/threemxl1"
+KERNEL=="ttyUSB*", ATTRS{serial} =="FTT9LBAI", NAME="roman/threemxl"
 KERNEL=="ttyUSB*", ATTRS{serial} =="A800eFun", NAME="roman/arduino_duemilanove"
 KERNEL=="ttyACM*", ATTRS{product}=="Arduino Uno", NAME="roman/arduino_uno"
 
