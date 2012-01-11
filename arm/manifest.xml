@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <depend package="roscpp" />
   <depend package="threemxl" />
+  <depend package="geometry_msgs" />
   <url>http://ros.org/wiki/arm</url>
 
 </package>

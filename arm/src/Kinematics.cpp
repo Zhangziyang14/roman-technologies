@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "arm/IK.h"
 #include "arm/armJointPos.h"
-#include "arm/armCoordinatesPos.h"
+#include <geometry_msgs/Pose.h>
 
 #define UPPER_ARM_LENGTH 	36		//Length of upper arm in [cm]
 #define WRIST_LENGTH 		18		//Length of wrist in [cm]
@@ -55,8 +55,8 @@ double calculateCurrentZPosition(double alpha)
  */
 bool solveIK(arm::IK::Request& request, arm::IK::Response& response)
 {
-	response.configuration.upper_joint 	= calculateShoulderJointPosition(request.target.z_value);
-	response.configuration.wrist_joint 	= calculateWristJointPosition(request.target.x_value);
+	response.configuration.upper_joint 	= calculateShoulderJointPosition(request.target.position.z);
+	response.configuration.wrist_joint 	= calculateWristJointPosition(request.target.position.x);
 	return true;
 }
 
@@ -65,14 +65,14 @@ bool solveIK(arm::IK::Request& request, arm::IK::Response& response)
  */
 void ForwardKinematicsCB(const arm::armJointPos &msg)
 {
-	arm::armCoordinatesPos coordinate_msg;
+	geometry_msgs::Pose coordinate_msg;
 	currentZ = calculateCurrentZPosition(msg.upper_joint);
 	currentX = calculateCurrentXPosition(msg.wrist_joint);
 	currentY = calculateCurrentYPosition(msg.upper_joint, msg.wrist_joint);
 
-	coordinate_msg.x_value = currentX;
-	coordinate_msg.y_value = currentY;
-	coordinate_msg.z_value = currentZ;
+	coordinate_msg.position.x = currentX;
+	coordinate_msg.position.y = currentY;
+	coordinate_msg.position.z = currentZ;
 
 	coordinate_publisher->publish(coordinate_msg);
 }
@@ -82,10 +82,12 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "Kinematics");
 	ros::NodeHandle nodeHandle;
 
-	coordinate_publisher = new ros::Publisher(nodeHandle.advertise<arm::armCoordinatesPos>("/armCoordinatePositionFeedbackTopic", 1));
+	coordinate_publisher = new ros::Publisher(nodeHandle.advertise<geometry_msgs::Pose>("/armCoordinatePositionFeedbackTopic", 1));
 	ros::Subscriber position_sub = nodeHandle.subscribe("/armJointPositionFeedbackTopic", 1, ForwardKinematicsCB);
 
 	ros::ServiceServer service = nodeHandle.advertiseService("IK", solveIK);
+
+	ROS_INFO("Kinematics node ready");
 	ros::spin();
 
 	return 0;

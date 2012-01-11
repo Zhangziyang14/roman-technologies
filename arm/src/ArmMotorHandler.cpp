@@ -12,11 +12,24 @@ int main(int argc, char **argv)
 
 	while(ros::ok())
 	{
-		//armHandler.doSomethingFancy();
+		armHandler.publishArmPosition();
 		ros::spinOnce();
 	}
 
 	return 0;
+}
+
+void ArmMotorHandler::publishArmPosition()
+{
+	mCurrentShoulderJointPos = getShoulderAngle();
+	mCurrentSideJointPos 	 = getSideJointAngle();
+
+	arm::armJointPos joint_msg;
+
+	joint_msg.upper_joint = mCurrentShoulderJointPos;
+	joint_msg.wrist_joint = mCurrentSideJointPos;
+
+	mArmPosFeedbackPub.publish(joint_msg);
 }
 
 /** threemxl run callback
@@ -25,7 +38,6 @@ int main(int argc, char **argv)
  */
 void ArmMotorHandler::Run()
 {
-
 	while(ros::ok())
 	{
 		mShoulderMotor.update();
@@ -51,12 +63,15 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 	// initialize arm to zero position (joints will move to their zero-switches)
 	if(init())
 	{
-		ROS_INFO("ArmMotorHandler successfully initialized");
+		ROS_INFO("ArmMotorHandler successfully initialised");
+
+		//Initialise publishers
+		mArmPosFeedbackPub	= mNodeHandle.advertise<arm::armJointPos>("/armJointPositionFeedbackTopic", 1);
 
 		// Initialise subscribers
 		mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
 		mSideJointAngleSub 	= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
-		mArmJointPosSub		= mNodeHandle.subscribe("/ArmPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
+		mArmJointPosSub		= mNodeHandle.subscribe("/armJointPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
 
 		mShoulderMotor.setMode(CM_POSITION_MODE);
 		mSideMotor.setMode(CM_POSITION_MODE);
@@ -66,8 +81,12 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		usleep(500000);
 
 		setShoulderAngle(SHOULDERMOTOR_START_POS);
-		while((getShoulderAngle() -SHOULDERMOTOR_OFFSET) < (SHOULDERMOTOR_MIN_ANGLE - SAFETY_OFFSET));
-			setSideJointAngle(SIDEJOINT_START_POS);
+		while((getShoulderAngle()) < (SHOULDERMOTOR_MIN_ANGLE - SAFETY_OFFSET));
+
+		setSideJointAngle(SIDEJOINT_START_POS);
+
+		mCurrentShoulderJointPos = getShoulderAngle();
+		mCurrentSideJointPos = getSideJointAngle();
 	}
 	else
 		ROS_WARN("Error initializing ArmMotorHandler: failed to determine arm position. Please make sure the arm is not at its limits and try again.");

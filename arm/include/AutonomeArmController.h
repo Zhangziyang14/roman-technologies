@@ -7,7 +7,7 @@
 
 #include <ros/ros.h>
 #include "arm/armJointPos.h"
-#include "arm/armCoordinatesPos.h"
+#include <geometry_msgs/Pose.h>
 #include "arm/IK.h"
 
 #define MIN_Z_VALUE -32.1
@@ -21,11 +21,11 @@ class AutonomeArmController
 protected:
 	ros::NodeHandle mNodeHandle;				//ROS node handler
 	ros::Publisher mJointCommandPublisher;		//Publishes commands for ArmMotorHandler
-	ros::Subscriber mCurrentPositionSubscriber;	//Listens to current positions in coordinates of configuration space
+	//ros::Subscriber mCurrentPositionSubscriber;	//Listens to current positions in coordinates of configuration space
 	ros::Subscriber mCommandSubscriber;			//Listens to commands in coordinates
 	ros::ServiceClient mKinematicsClient;		//Client to call for service to calculate inverse kinematics
 
-	arm::armCoordinatesPos mCurrentPos;			//Keeps track of current position in coordinates of configuration space
+	geometry_msgs::Pose mCurrentPos;			//Keeps track of current position in coordinates of configuration space
 
 public:
 	AutonomeArmController(): mNodeHandle(""){}
@@ -35,8 +35,8 @@ public:
 	}
 
 	void init();
-	void armPositionCB(const arm::armCoordinatesPos &msg);
-	void cmdCB(const arm::armCoordinatesPos &msg);
+	//void armPositionFeedbackCB(const geometry_msgs::Pose &msg);
+	void cmdCB(const geometry_msgs::Pose &msg);
 };
 
 #endif

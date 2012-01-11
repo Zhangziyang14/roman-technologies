@@ -50,12 +50,16 @@ private:
 protected:
 	ros::NodeHandle mNodeHandle;			/// ROS node handle
 
+	ros::Publisher mArmPosFeedbackPub;		/// Publishes current position of the arm in joint space
+
 	ros::Subscriber mShoulderAngleSub;		/// Listen for shoulder angles
 	ros::Subscriber mSideJointAngleSub;		/// Listen for sideJoint angles
 	ros::Subscriber mArmJointPosSub;		/// Listen for armJointPos messages (containing both angles in one message)
 
 	Motor mShoulderMotor;					/// Motor for left wheel
 	Motor mSideMotor;						/// Motor for right wheel
+
+	double mCurrentShoulderJointPos, mCurrentSideJointPos;		/// Keeps track of the current joint positions of both motors
 
 	// initialize motor: find reference point
 	bool init();
@@ -82,22 +86,20 @@ public:
 	void shoulderCB(const std_msgs::Float64& msg);
 	void sideJointCB(const std_msgs::Float64& msg);
 	void armPosCB(const arm::armJointPos& msg);
+	void publishArmPosition();
 
 	/** Multithreading callbacks **/
 	void Run();
 
 	inline double getShoulderAngle()
 	{
-		return mShoulderMotor.getAngle() * SHOULDERMOTOR_CORRECTION_FACTOR;
+		return mShoulderMotor.getAngle() * SHOULDERMOTOR_CORRECTION_FACTOR - SHOULDERMOTOR_OFFSET;
 	}
 
 	inline double getSideJointAngle()
 	{
-		return mSideMotor.getAngle() * SIDEMOTOR_CORRECTION_FACTOR;
+		return mSideMotor.getAngle() * SIDEMOTOR_CORRECTION_FACTOR - SIDEJOINT_OFFSET;
 	}
 };
-
-
-
 
 #endif /* ARMMOTORHANDLER_H_ */

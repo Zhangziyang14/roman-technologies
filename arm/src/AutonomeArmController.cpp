@@ -2,7 +2,7 @@
 /*
  *	Listens to commands and translates it to joint commands for ArmMotorHandler using inverse kinematics
  */
-void AutonomeArmController::cmdCB(const arm::armCoordinatesPos &msg)
+void AutonomeArmController::cmdCB(const geometry_msgs::Pose &msg)
 {
 	arm::IK srv;
 
@@ -10,30 +10,31 @@ void AutonomeArmController::cmdCB(const arm::armCoordinatesPos &msg)
 	srv.request.target = msg;
 
 	//Check constraints
-	if(msg.z_value > MAX_Z_VALUE)
+	if(msg.position.z > MAX_Z_VALUE)
 	{
 		ROS_WARN("REACHED MAX_Z_VALUE");
-		srv.request.target.z_value = MAX_Z_VALUE;
+		srv.request.target.position.z = MAX_Z_VALUE;
 	}
-	else if(msg.z_value < MIN_Z_VALUE)
+	else if(msg.position.z  < MIN_Z_VALUE)
 	{
 		ROS_WARN("REACHED MAX_Z_VALUE");
-		srv.request.target.z_value = MIN_Z_VALUE;
+		srv.request.target.position.z = MIN_Z_VALUE;
 	}
 
-	if(msg.x_value > MAX_X_VALUE)
+	if(msg.position.x > MAX_X_VALUE)
 	{
 		ROS_WARN("REACHED MAX_X_VALUE");
-		srv.request.target.x_value = MAX_X_VALUE;
+		srv.request.target.position.x = MAX_X_VALUE;
 	}
-	else if(msg.x_value < MIN_Z_VALUE)
+	else if(msg.position.x < MIN_X_VALUE)
 	{
-		ROS_WARN("REACHED MAX_X_VALUE");
-		srv.request.target.x_value = MIN_X_VALUE;
+		ROS_WARN("REACHED MIN_X_VALUE");
+		srv.request.target.position.x = MIN_X_VALUE;
 	}
 
 	//Calculate joint configurations with IK solver
-	if((srv.request.target.z_value <= MAX_Z_VALUE) && (srv.request.target.z_value >= MIN_Z_VALUE) && (srv.request.target.x_value <= MAX_X_VALUE) && (srv.request.target.x_value <= MAX_X_VALUE))
+	if((srv.request.target.position.z <= MAX_Z_VALUE) && (srv.request.target.position.z >= MIN_Z_VALUE)
+			&& (srv.request.target.position.x <= MAX_X_VALUE) && (srv.request.target.position.x <= MAX_X_VALUE))
 	{
 		mKinematicsClient.call(srv);
 	}
@@ -47,26 +48,25 @@ void AutonomeArmController::cmdCB(const arm::armCoordinatesPos &msg)
 
 	mJointCommandPublisher.publish(cmd_msg);
 }
-//TODO make x dependent on z as constraint
 
 /*
  * Keep track of current position in configuration space
- */
-void AutonomeArmController::armPositionCB(const arm::armCoordinatesPos &msg)
+
+void AutonomeArmController::armPositionFeedbackCB(const geometry_msgs::Pose &msg)
 {
 	mCurrentPos = msg;
-}
+}*/
 
 /*
  * Initialize AutonomeArmController node
  */
 void AutonomeArmController::init()
 {
-	mJointCommandPublisher			= mNodeHandle.advertise<arm::armJointPos>("/ArmPositionTopic", 10);	//temporary float64
-	mCurrentPositionSubscriber 		= mNodeHandle.subscribe("/armCoordinatePositionFeedbackTopic", 1, &AutonomeArmController::armPositionCB, this);
-	mCommandSubscriber 				= mNodeHandle.subscribe("/cmd_position", 1, &AutonomeArmController::cmdCB, this);
+	mJointCommandPublisher			= mNodeHandle.advertise<arm::armJointPos>("/armJointPositionTopic", 10);
+	//mCurrentPositionSubscriber 	= mNodeHandle.subscribe("/armCoordinatePositionFeedbackTopic", 1, &AutonomeArmController::armPositionFeedbackCB, this);
+	mCommandSubscriber 				= mNodeHandle.subscribe("/cmd_arm_position", 1, &AutonomeArmController::cmdCB, this);
 	mKinematicsClient 				= mNodeHandle.serviceClient<arm::IK>("IK");
-	ROS_INFO("AutonomeArmController initialized");
+	ROS_INFO("AutonomeArmController initialised");
 }
 
 int main(int argc, char** argv)
