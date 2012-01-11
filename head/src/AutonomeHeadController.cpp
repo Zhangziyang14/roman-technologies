@@ -81,8 +81,8 @@ void AutonomeHeadController::init()
 
    
   
-   int main(int argc, char **argv)
-   {
+int main(int argc, char **argv)
+{
 
      ros::init(argc, argv, "AutonomeHeadController");
      
@@ -92,9 +92,9 @@ void AutonomeHeadController::init()
      while (ros::ok())
      {
       ros::spin();
-    }
+     }
   
   
     return 0;
-  }
+}
   
