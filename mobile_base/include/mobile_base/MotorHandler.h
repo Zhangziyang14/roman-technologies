@@ -19,16 +19,18 @@
 #define ULTRASONE_MAX_RANGE						600		//[cm]
 
 #define ZERO_SPEED								0.0		//[m/s]
-#define STANDARD_AVOIDANCE_IMPACT				175.0	//[cm]
+#define STANDARD_AVOIDANCE_IMPACT				150.0
 
 #define FRONT_AVOIDANCE_DISTANCE				150.0	//[cm]
-#define FRONT_AVOIDANCE_IMPACT					70.0	//[cm]
+#define FRONT_AVOIDANCE_IMPACT					70.0
 
-#define SIDES_AVOIDANCE_IMPACT					75.0	//[cm]
+#define SIDES_AVOIDANCE_IMPACT					75.0
 #define SIDES_AVOIDANCE_DISTANCE				60.0	//[cm]
 
-#define FRONT_SIDES_AVOIDANCE_DISTANCE 			120.0	//[cm]
-#define FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT	120.0	//[cm]
+#define FRONT_SIDES_AVOIDANCE_DISTANCE 			100.0	//[cm]
+#define FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT	120.0
+
+#define REAR_HALTING_DISTANCE					60.0	//[cm]
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
@@ -55,7 +57,7 @@ protected:
 
 	bool mLock;
 
-	int mFrontLeftCenter, mFrontRightCenter, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
+	int mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mFrontCenterLeft, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
 
 public:
 	/// Constructor
@@ -76,17 +78,25 @@ public:
 	void positionCB(const std_msgs::Float64& msg);
 	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
 	void tweakCB(const mobile_base::tweak msg);
+	void negateUltrasone(int length, int* ultrasone[]);
 
 	//Scale the speed of a motor based on the measured distance
 	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int measured_distance)
 	{
-		return std::min(speed, std::min(speed-speed*(avoidance_distance-measured_distance)/avoidance_impact, speed-speed*(avoidance_distance-measured_distance)/avoidance_impact));
+		return std::min(speed, speed-speed*(avoidance_distance-measured_distance)/avoidance_impact);
 	};
 
-	//Scale the speed of a motor based on the measured distances
+	//Scale the speed of a motor based on the measured distances, using two distances
 	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int measured_distance1, int measured_distance2)
 	{
 		return std::min(speed, std::min(speed-speed*(avoidance_distance-measured_distance1)/avoidance_impact, speed-speed*(avoidance_distance-measured_distance2)/avoidance_impact));
+	};
+
+	//Scale the speed of a motor based on the measured distances, using two distances
+	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int distances[])
+	{
+		return std::min(scaleSpeed(speed, avoidance_impact, avoidance_distance, distances[0], distances[1]), scaleSpeed(speed, avoidance_impact, avoidance_distance, distances[2], distances[3]));
+
 	};
 };
 

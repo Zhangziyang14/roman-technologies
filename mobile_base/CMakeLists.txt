@@ -25,8 +25,6 @@ rosbuild_add_executable(BaseController src/BaseController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp src/Motor.cpp)
 rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
 
-rosbuild_add_library(local_planner src/LocalPlanner.cpp)
-
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
