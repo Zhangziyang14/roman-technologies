@@ -111,6 +111,7 @@ void PathFollower::continuePath()
 	ROS_INFO("Waypoint reached.");
 	geometry_msgs::Twist msg;
 	mCommandPub.publish(msg);
+
 }
 
 /**

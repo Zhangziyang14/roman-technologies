@@ -10,6 +10,7 @@
   <depend package="nav_msgs"/>
   <depend package="tf"/>
   <depend package="audio_processing"/>  
+  <depend package="yaml_cpp"/>
 
   <export>
         <rosdoc config="rosdoc.yaml" />
