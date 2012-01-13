@@ -7,12 +7,11 @@
 
 #include "image_processing/ObjectRecognition.h"
 
-ros::ServiceClient mObjectRecognizeClient;	//Service client for tabletop_object_detection
-//ros::ServiceClient mCollisionmapClient;	//Service client for tabletop_collision_map_processing
+ros::ServiceClient mObjectRecognizeClient;		//Service client for tabletop_object_detection
 
-void ObjectRecognition::recognizeCB(const std_msgs::Bool &msg)
+void ObjectRecognition::recognizeCB(const std_msgs::UInt8 &msg)
 {
-
+	mObjectToFind = msg.data;
 }
 
 void ObjectRecognition::init()
@@ -27,22 +26,14 @@ void ObjectRecognition::init()
 		exit(0);
 
 	mObjectRecognizeClient = mNodeHandle.serviceClient<tabletop_object_detector::TabletopDetection>("/object_detection", true);
-	/*
-	//wait for collision map processing client
-	while ( !ros::service::waitForService("/tabletop_collision_map_processing/tabletop_collision_map_processing",
-			ros::Duration(2.0)) && mNodeHandle.ok() )
-	{
-		ROS_INFO("Waiting for collision processing service to come up");
-	}
-	if (!mNodeHandle.ok())
-		exit(0);
-
-	mCollisionmapClient = mNodeHandle.serviceClient<tabletop_collision_map_processing::TabletopCollisionMapProcessing>("/tabletop_collision_map_processing/tabletop_collision_map_processing", true);
-
+	
 	//initialise subscribers
-	mCommandSubscriber = mNodeHandle.subscribe("/objectRecognizeCommandTopic", 1, &ObjectRecognition::recognizeCB, this);
-	 */
+	mCommandSubscriber = mNodeHandle.subscribe("/cmd_object_recognition", 1, &ObjectRecognition::recognizeCB, this);
+	
 	//initialise publishers
+	mObjectPosePublisher = mNodeHandle.advertise<geometry_msgs::PoseStamped>("/objectPoseFeedbackTopic", 1);
+
+	mObjectToFind = -1;
 }
 
 int main(int argc, char **argv)
@@ -67,14 +58,16 @@ int main(int argc, char **argv)
 	detection_call.request.return_models = false;
 	detection_call.request.num_models = 1;
 
-	while(ros::ok())
+	while(ros::ok() && objectRecognition.getObjectID() != -1)
 	{
 		if (!mObjectRecognizeClient.call(detection_call))
 		{
 			ROS_ERROR("Tabletop detection service failed");
 			return -1;
 		}
-		usleep(200000);
+
+		ros::spinOnce();
+		//usleep(200000);
 	}
 	if (detection_call.response.detection.result !=
 			detection_call.response.detection.SUCCESS)
@@ -90,6 +83,15 @@ int main(int argc, char **argv)
 				"but found no objects");
 		return -1;
 	}
+	household_objects_database_msgs::DatabaseModelPoseList result = (household_objects_database_msgs::DatabaseModelPoseList) detection_call.response.detection.models.front(); //...?
+	geometry_msgs::PoseStamped result_pose;
+
+	//TODO loop through detection_call.response.detection.models and look for the model with mObjectToFind as ID. Publish the Stamped Pose of this model.
+	for(size_t i = 0; i < result.model_list.size(); i++)
+	{
+		if(household_objects_database_msgs::DatabaseModelPose (result.model_list.at(i)).model_id == objectRecognition.getObjectID())
+			objectRecognition.publishObjectPose(result.model_list.at(i).pose);
+	}
 	/*
 	pcl::PointCloud<pcl::PointXYZ> cloud;
 	sensor_msgs::PointCloud2 converted_point_cloud;
@@ -101,30 +103,4 @@ int main(int argc, char **argv)
 		ss << i << ".pcd";
 		pcl::io::savePCDFileASCII (ss.str().c_str(), cloud);
 	}*/
-
-	/*
-	//call collision map processing
-	ROS_INFO("Calling collision map processing");
-	tabletop_collision_map_processing::TabletopCollisionMapProcessing processing_call;
-	//pass the result of the tabletop detection
-	processing_call.request.detection_result = detection_call.response.detection;
-	//ask for the existing map and collision models to be reset
-	processing_call.request.reset_collision_models = true;
-	processing_call.request.reset_attached_models = true;
-	//ask for the results to be returned in base link frame
-	processing_call.request.desired_frame = "base_link";
-
-	if (!mCollisionmapClient.call(processing_call))
-	{
-		ROS_ERROR("Collision map processing service failed");
-		return -1;
-	}
-	//the collision map processor returns instances of graspable objects
-	if (processing_call.response.graspable_objects.empty())
-	{
-		ROS_ERROR("Collision map processing returned no graspable objects");
-		return -1;
-	}
-	 */
-	ros::spin();
 }
