@@ -35,7 +35,8 @@ void ArmMotorHandler::publishArmPosition()
 /** threemxl run callback
  *
  * Keeps the threemxl awake so it does not interrupt setPos() commands
- */
+ * Not needed anymore since publishRobotSpeed always talks to threemxl, so watchdog won't kick in anymore
+
 void ArmMotorHandler::Run()
 {
 	while(ros::ok())
@@ -45,6 +46,7 @@ void ArmMotorHandler::Run()
 		usleep(500000);
 	}
 }
+*/
 
 /** Constructor
  *
@@ -75,9 +77,6 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 
 		mShoulderMotor.setMode(CM_POSITION_MODE);
 		mSideMotor.setMode(CM_POSITION_MODE);
-
-		// thread to fix 3mxel setPos bug
-		boost::thread thread(&ArmMotorHandler::Run, this);
 		usleep(500000);
 
 		setShoulderAngle(SHOULDERMOTOR_START_POS);

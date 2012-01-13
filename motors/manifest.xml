@@ -1,0 +1,21 @@
+<package>
+  <description brief="Motors">
+
+     Motors
+
+  </description>
+  <author>Kelvin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/Motors</url>
+
+  <depend package="threemxl"/>
+
+    <export>
+      <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lmotors"/>
+  </export>
+
+
+</package>
+
+

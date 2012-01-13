@@ -1,4 +1,4 @@
-#include <mobile_base/Motor.h>
+#include <motors/Motor.h>
 
 /**
  * Square bracket operator so it can be used as a sort of array.
@@ -31,6 +31,7 @@ void Motor::setMode(ControlMode mode)
     {
     case SPEED_MODE: std::cout << "speed"; break;
     case TORQUE_MODE: std::cout << "torque"; break;
+    case EXTERNAL_INIT: std::cout << "external init"; break;
     case CURRENT_MODE: std::cout << "current"; break;
     case STOP_MODE: std::cout << "stop"; break;
     case POSITION_MODE: std::cout << "position"; break;
@@ -40,6 +41,12 @@ void Motor::setMode(ControlMode mode)
     default : break;
     }
     std::cout << " mode." << std::endl;
+}
+
+void Motor::setEncoderCount(int resolution)
+{
+	ROS_INFO("Setting encoder count to [%i]", resolution);
+	motor_->setEncoderCountMotor(resolution);
 }
 
 
@@ -56,12 +63,7 @@ void Motor::setAcceleration(double acceleration)
  */
 void Motor::setLSpeed(double speed, double acceleration)
 {
-	if (cmode != CM_SPEED_MODE)
-	{
-       		 std::cout << "Motor not in speed mode, setting it now." << std::endl;
-	        setMode(CM_SPEED_MODE);
-	}
-
+	assertMode(CM_SPEED_MODE);
     motor_->setLinearSpeed(speed, acceleration);
 }
 
@@ -70,18 +72,11 @@ void Motor::setLSpeed(double speed, double acceleration)
  */
 void Motor::setSpeed(double speed)
 {
-	if (cmode != CM_SPEED_MODE)
-	{
-        std::cout << "Motor not in speed mode, setting it now." << std::endl;
-        setMode(CM_SPEED_MODE);
-
-		setAcceleration(DEFAULT_ACCELERATION);
-	}
-
-    if(speed == 0.0)
-	brake();
+	assertMode(CM_SPEED_MODE);
+	if(speed == 0.0)
+		brake();
     else
-    motor_->setSpeed(speed);
+    	motor_->setSpeed(speed);
 }
 
 /**
@@ -89,29 +84,63 @@ void Motor::setSpeed(double speed)
  */
 void Motor::brake()
 {
-	if (cmode != CM_SPEED_MODE)
-	{
-        std::cout << "Motor not in speed mode, setting it now." << std::endl;
-        setMode(CM_SPEED_MODE);
-
-		setAcceleration(SAFE_BRAKING_DECCELERATION);
-	}
-
+	assertMode(CM_SPEED_MODE);
     motor_->setSpeed(0);
 }
 
 /**
-  * Sets position of the motor when in POSITION_MODE
+  * Sets linear position of the motor when in POSITION_MODE
  */
 void Motor::setPosition(double position)
 {
-	if (cmode != CM_POSITION_MODE)
-	{
-        std::cout << "Motor not in POSITON mode, setting it now." << std::endl;
-        setMode(CM_POSITION_MODE);
-	}
-
+	assertMode(CM_POSITION_MODE);
 	motor_->setLinearPos(position, 1, 0.5, false);
+}
+
+
+void Motor::setAngle(double angle)
+{
+	assertMode(CM_POSITION_MODE);
+	DXL_FORCE_CALL(motor_->setPos(angle));	//TODO DEBUG do we need DXL_SAFE_CALL ?
+}
+void Motor::setAngle(double angle, double speed)
+{
+	assertMode(CM_POSITION_MODE);
+	DXL_FORCE_CALL(motor_->setPos(angle, speed));
+}
+void Motor::setAngle(double angle, double speed, double accel)
+{
+	assertMode(CM_POSITION_MODE);
+	DXL_FORCE_CALL(motor_->setPos(angle, speed, accel));
+}
+double Motor::getAngle()
+{
+	DXL_FORCE_CALL(motor_->getPos());
+	return motor_->presentPos();
+}
+
+
+void Motor::setTorque(double torque)
+{
+	assertMode(CM_TORQUE_MODE);
+	motor_->setTorque(torque);
+}
+
+
+// check if the motor is in the correct control mode.
+// if not, the control mode is set and a warning is emitted
+void Motor::assertMode(ControlMode mode)
+{
+	if ((cmode != mode) && (cmode != CM_EXT_INIT_MODE))
+	{
+		std::cout << "Motor not in specified mode [" << mode << "], setting it now." << std::endl;
+		setMode(mode);
+	}
+}
+
+int Motor::update()
+{
+	return motor_->getStatus();
 }
 
 /**
@@ -167,6 +196,20 @@ int Motor::ping()
 {
 	return motor_->ping();
 }
+
+/** Returns the motor status
+ *
+ * @return	int		status code of the motor.
+ *
+ * @see 3mxlControlTable.h
+ */
+int Motor::getStatus()
+{
+	this->update();
+	return motor_->presentStatus();
+}
+
+
 /**
  * Initalize Motor and its attributes.
 */
@@ -185,7 +228,7 @@ void Motor::init(char *path)
         std::cout << "Using direct connection" << std::endl;
         motor_ = new C3mxl();
 
-        serial_port_.port_open("/dev/roman/threemxl", LxSerial::RS485_FTDI);
+        serial_port_.port_open(THREEMXL_SERIAL_DEVICE, LxSerial::RS485_FTDI); //TODO DEBUG this line is correct
         serial_port_.set_speed(LxSerial::S921600);
         motor_->setSerialPort(&serial_port_);    
     }
@@ -194,7 +237,7 @@ void Motor::init(char *path)
     motor_->setConfig(config->setID(mMotorId));
     motor_->init(false);
     setMode(CM_STOP_MODE);
-    motor_->setEncoderCountMotor(500); // hack until motor is flashed with correct number
+    setEncoderCount(DEFAULT_ENCODER_COUNT);		//NB: this overrides the 3mxel default
 
     delete config;
     std::cout << "Motor " << mMotorId << " initialising completed." << std::endl;

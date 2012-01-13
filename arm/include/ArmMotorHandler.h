@@ -36,7 +36,7 @@
 #define SIDEJOINT_START_POS				(1.5)	// joint is at this position after being initialized
 
 #include <ros/ros.h>
-#include <Motor.h>
+#include <motors/Motor.h>
 #include <std_msgs/Float64.h>
 #include "arm/armJointPos.h"
 #include <boost/thread.hpp>
@@ -89,7 +89,7 @@ public:
 	void publishArmPosition();
 
 	/** Multithreading callbacks **/
-	void Run();
+	//void Run();
 
 	inline double getShoulderAngle()
 	{

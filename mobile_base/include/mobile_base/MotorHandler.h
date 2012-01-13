@@ -2,7 +2,7 @@
 #define __MOTORHANDLER_H
 
 #include <ros/ros.h>
-#include <mobile_base/Motor.h>
+#include <motors/Motor.h>
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <mobile_base/tweak.h>

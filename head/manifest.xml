@@ -8,6 +8,8 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/head</url>
+<depend package="motors"/>
+  <depend package="geometry_msgs"/>
   <depend package="std_msgs"/>
   <depend package="rospy"/>
   <depend package="roscpp"/>

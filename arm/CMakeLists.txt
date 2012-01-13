@@ -12,7 +12,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 rosbuild_init()
 rosbuild_add_executable(Kinematics src/Kinematics.cpp)
 rosbuild_add_executable(AutonomeArmController src/AutonomeArmController.cpp)
-rosbuild_add_executable(ArmMotorHandler src/ArmMotorHandler.cpp src/Motor.cpp)
+rosbuild_add_executable(ArmMotorHandler src/ArmMotorHandler.cpp)
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

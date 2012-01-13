@@ -4,6 +4,9 @@
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/UInt8.h>
+#include <head/eyebrows.h>
+#include <head/panTilt.h>
+#include <geometry_msgs/Pose.h>
 #include <iostream>
 #include "Emotion.h"
 
@@ -23,7 +26,11 @@ protected:
 	ros::NodeHandle mNodeHandle;
 
 	ros::Publisher mRGB_pub;
+	ros::Publisher mHead_movement_pub;
+	ros::Publisher mEyebrows_pub;
+
 	ros::Subscriber mEmotion_sub;
+	ros::Subscriber mCommand_sub;
 
 	Emotion mNeutral;
 	Emotion mHappy;
@@ -48,8 +55,7 @@ public:
 		mNodeHandle.shutdown();
 	}
 
-
-
+	void headCommandCB(const geometry_msgs::Pose &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();
 

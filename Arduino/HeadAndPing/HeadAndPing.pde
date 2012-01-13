@@ -155,7 +155,7 @@ void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
     if (eyebrowRightAngle > EYEBROW_UPPER_LIMIT)
      eyebrowRightAngle = EYEBROW_UPPER_LIMIT;
    else if (eyebrowRightAngle < EYEBROW_LOWER_LIMIT)
-      eyebrowRightAngle = EYEBROW_LOWER_LIMIT;  
+      eyebrowRightAngle = EYEBROW_LOWER_LIMIT;
       
    eyebrowLeft.write(eyebrowLeftAngle);
    eyebrowRight.write(eyebrowRightAngle);
