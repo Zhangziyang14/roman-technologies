@@ -1,15 +1,14 @@
 <launch>
-    <node pkg="tf" type="static_transform_publisher" name="base_to_kinect_broadcaster" args="-0.115 0 0.226 0 0 0 base_link openni_depth_frame 100" />
-
     <arg name="scan_topic" default="narrow_scan" />
 	<arg name="map_file" default="$(find logical_unit)/map/map.yaml" />
 	
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 	
 	<include file="$(find image_processing)/launch/kinect.launch"/>
-    <node pkg="logical_unit" type="MovementSimulator" name="MovementSimulator"/>
-    <!--node pkg="logical_unit" type="PathPlanner" name="PathPlanner"/-->
-    <!--node pkg="logical_unit" type="PathFollower" name="PathFollower"/-->
+
+    <node pkg="logical_unit" type="OdometryTracker" name="OdometryTracker"/>
+    <node pkg="logical_unit" type="PathPlanner" name="PathPlanner"/>
+    <node pkg="logical_unit" type="PathFollower" name="PathFollower"/>
 
     <node pkg="amcl" type="amcl" name="amcl"/>
 

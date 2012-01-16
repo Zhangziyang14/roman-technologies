@@ -1,7 +1,6 @@
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="base_to_kinect_broadcaster" args="-0.115 0 0.226 0 0 0 base_link openni_depth_frame 100" />
 	<node pkg="image_processing" type="Kinect" name="Kinect"/>
-	<node pkg="logical_unit" type="MovementSimulator" name="MovementSimulator"/>
+	<node pkg="logical_unit" type="OdometryTracker" name="OdometryTracker"/>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
 		<!--remap from="scan" to="base_scan"/-->

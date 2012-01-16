@@ -1,12 +1,7 @@
 <launch>
-
-  <group ns="/">
     <param name="~port" value="/dev/arduino"/>
     <node pkg="gripper" name="MotorHandler" type="MotorHandler"/>
     <node pkg="gripper" name="Controller" type="Controller"/>
     <node pkg="gripper" name="TemperatureListener" type="TemperatureListener"/>
     <node pkg="rosserial_python" name="serial_node" type="serial_node.py"/>
-    <node pkg="joy" name="joy" type="joy_node"/>
-  </group>
-
 </launch>
