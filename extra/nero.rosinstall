@@ -1,0 +1,32 @@
+- svn:
+    local-name: dbl-ros-pkg-dev
+    uri: https://svn.3me.tudelft.nl/dbl-ros-pkg/trunk
+
+- svn:
+    local-name: database_interface
+    uri: https://code.ros.org/svn/wg-ros-pkg/stacks/sql_database/trunk/database_interface
+
+- svn:
+    local-name: object_manipulation
+    uri: https://code.ros.org/svn/wg-ros-pkg/stacks/object_manipulation/branches/0.4-branch
+
+- svn:
+    local-name: tabletop_object_perception
+    uri: https://code.ros.org/svn/wg-ros-pkg/stacks/tabletop_object_perception/branches/0.4-branch
+
+- svn:
+    local-name: motion_planning_common
+    uri: https://code.ros.org/svn/wg-ros-pkg/stacks/motion_planning_common/trunk
+
+- svn:
+    local-name: rgbd_assembler
+    uri: https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_object_manipulation/branches/0.4-branch/rgbd_assembler
+
+- svn:
+    local-name: pr2_msgs
+    uri: https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_common/trunk/pr2_msgs
+
+- hg:
+    local-name: rosserial
+    uri: https://kforge.ros.org/rosserial/hg
+

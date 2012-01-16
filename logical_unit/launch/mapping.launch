@@ -1,5 +1,6 @@
 <launch>
-	<node pkg="image_processing" type="Kinect" name="Kinect"/>
+	<include file="$(find image_processing)/launch/kinect.launch"/>
+
 	<node pkg="logical_unit" type="OdometryTracker" name="OdometryTracker"/>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
