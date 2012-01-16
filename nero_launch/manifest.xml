@@ -1,0 +1,14 @@
+<package>
+  <description brief="nero_launch">
+
+     nero_launch
+
+  </description>
+  <author>Hans</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/nero_launch</url>
+
+</package>
+
+

@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- start mobile base -->
+  <include file="$(find mobile_base)/launch/mobile.launch"/>
+
+  <!-- start navigation -->
+  <include file="$(find logical_unit)/launch/navigation.launch"/>
+
+  <!-- start object recognition -->
+  <include file="$(find image_processing)/launch/object_recognition.launch"/>
+
+</launch>
