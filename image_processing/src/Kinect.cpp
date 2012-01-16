@@ -23,7 +23,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 	ros::Publisher laser_pub = nh.advertise<sensor_msgs::LaserScan>("/scan", 1);
 	image_transport::Publisher image_pub = it.advertise("/camera/rgb/image_color", 1);
 	//ros::Publisher image_pub = nh.advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
-	ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
+	ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/depth_registered/points", 1);
 
 	bool captureRGB = false;
 	bool captureCloud = false;
@@ -47,11 +47,11 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 		}
 
 		// try to capture a RGB and pointcloud
-		if ((captureRGB == false || capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
-				capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP))
+		if (((captureRGB || captureCloud) && capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
+			(captureCloud == false || capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP)))
 		{
 			IplImage rgb;
-			if (captureRGB)
+			if (captureRGB || captureCloud)
 				rgb = image;
 			IplImage pc = pointCloud;
 
@@ -63,7 +63,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 					laser_pub.publish(laserscan);
 			}
 
-			if (captureRGB || capture)
+			if (captureRGB || captureCloud)
 				imageMsg = iplImageToImage(&rgb);
 
 			// do we have a listener to the RGB output ?

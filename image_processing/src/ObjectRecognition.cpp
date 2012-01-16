@@ -9,12 +9,7 @@
 
 ros::ServiceClient mObjectRecognizeClient;		//Service client for tabletop_object_detection
 
-void ObjectRecognition::recognizeCB(const std_msgs::UInt8 &msg)
-{
-	mObjectToFind = msg.data;
-}
-
-void ObjectRecognition::init()
+ObjectRecognition::ObjectRecognition() : mNodeHandle("")
 {
 	//wait for detection client
 	while ( !ros::service::waitForService("/object_detection",
@@ -34,20 +29,16 @@ void ObjectRecognition::init()
 	mObjectPosePublisher = mNodeHandle.advertise<geometry_msgs::PoseStamped>("/objectPoseFeedbackTopic", 1);
 
 	mObjectToFind = -1;
+	mNodeHandle.param<double>("min_marker_quality", mMinQuality, 0.003);
 }
 
-int main(int argc, char **argv)
+void ObjectRecognition::recognizeCB(const std_msgs::Int32 &msg)
 {
-	// init ros and ObjectRecognition
-	ros::init(argc, argv, "ObjectRecognition");
-	ObjectRecognition objectRecognition;
+	mObjectToFind = msg.data;
+}
 
-	char *path = NULL;
-	if (argc == 2)
-		path = argv[1];
-
-	objectRecognition.init();
-
+void ObjectRecognition::spin()
+{
 	//call the tabletop detection
 	ROS_INFO("Calling tabletop detector");
 	tabletop_object_detector::TabletopDetection detection_call;
@@ -55,52 +46,59 @@ int main(int argc, char **argv)
 	//set this to false if you are using the pipeline without the database
 	detection_call.request.return_clusters = true;
 	//we want the individual object point clouds returned as well
-	detection_call.request.return_models = false;
+	detection_call.request.return_models = true;
 	detection_call.request.num_models = 1;
 
-	while(ros::ok() && objectRecognition.getObjectID() != -1)
+	while (ros::ok())
 	{
+		// nothing to do when objectID = -1
+		while (getObjectID() == -1)
+		{
+			usleep(200000);
+			ros::spinOnce();
+			if (ros::ok() == false)
+				return;
+		}
+
 		if (!mObjectRecognizeClient.call(detection_call))
 		{
 			ROS_ERROR("Tabletop detection service failed");
-			return -1;
+			//return -1;
+		}
+		if (detection_call.response.detection.result !=
+				detection_call.response.detection.SUCCESS)
+		{
+			ROS_ERROR("Tabletop detection returned error code %d",
+					detection_call.response.detection.result);
+			//return -1;
+		}
+		if (detection_call.response.detection.clusters.empty() &&
+				detection_call.response.detection.models.empty() )
+		{
+			ROS_ERROR("The tabletop detector detected the table, "
+					"but found no objects");
+			//return -1;
+		}
+
+		// check results for match
+		for (size_t i = 0; i < detection_call.response.detection.models.size(); i++)
+		{
+			for (size_t j = 0; j < detection_call.response.detection.models[i].model_list.size(); j++)
+			{
+				household_objects_database_msgs::DatabaseModelPose pose = detection_call.response.detection.models[i].model_list[j];
+				if (pose.model_id == getObjectID() && pose.confidence < mMinQuality)
+					publishObjectPose(pose.pose);
+			}
 		}
 
 		ros::spinOnce();
-		//usleep(200000);
 	}
-	if (detection_call.response.detection.result !=
-			detection_call.response.detection.SUCCESS)
-	{
-		ROS_ERROR("Tabletop detection returned error code %d",
-				detection_call.response.detection.result);
-		return -1;
-	}
-	if (detection_call.response.detection.clusters.empty() &&
-			detection_call.response.detection.models.empty() )
-	{
-		ROS_ERROR("The tabletop detector detected the table, "
-				"but found no objects");
-		return -1;
-	}
-	household_objects_database_msgs::DatabaseModelPoseList result = (household_objects_database_msgs::DatabaseModelPoseList) detection_call.response.detection.models.front(); //...?
-	geometry_msgs::PoseStamped result_pose;
+}
 
-	//TODO loop through detection_call.response.detection.models and look for the model with mObjectToFind as ID. Publish the Stamped Pose of this model.
-	for(size_t i = 0; i < result.model_list.size(); i++)
-	{
-		if(household_objects_database_msgs::DatabaseModelPose (result.model_list.at(i)).model_id == objectRecognition.getObjectID())
-			objectRecognition.publishObjectPose(result.model_list.at(i).pose);
-	}
-	/*
-	pcl::PointCloud<pcl::PointXYZ> cloud;
-	sensor_msgs::PointCloud2 converted_point_cloud;
-	for(size_t i=0; i < detection_call.response.detection.clusters.size(); i++)
-	{
-		sensor_msgs::convertPointCloudToPointCloud2(detection_call.response.detection.clusters[i], converted_point_cloud);
-		pcl::fromROSMsg(converted_point_cloud, cloud);
-		std::stringstream ss("cluster_");
-		ss << i << ".pcd";
-		pcl::io::savePCDFileASCII (ss.str().c_str(), cloud);
-	}*/
+int main(int argc, char **argv)
+{
+	// init ros and ObjectRecognition
+	ros::init(argc, argv, "ObjectRecognition");
+	ObjectRecognition objectRecognition;
+	objectRecognition.spin();
 }

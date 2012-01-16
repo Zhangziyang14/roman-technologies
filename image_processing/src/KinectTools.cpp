@@ -158,7 +158,7 @@ sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplIma
 {
 	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
 	output->header.stamp = ros::Time::now();
-	output->header.frame_id = "/openni_depth_frame";
+	output->header.frame_id = OUTPUT_FRAME_ID;
 	output->width = pc->width;
 	output->height = pc->height;
 	output->is_dense = false;

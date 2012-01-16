@@ -9,7 +9,7 @@
 #define OBJECTRECOGNITION_H_
 
 #include <ros/ros.h>
-#include <std_msgs/UInt8.h>
+#include <std_msgs/Int32.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/ros/conversions.h>
@@ -28,17 +28,16 @@ protected:
 	ros::Subscriber mCommandSubscriber;			//Listens to commands to start image recognition
 	ros::Publisher 	mObjectPosePublisher;		//Publishes the pose of the recognised object
 	int mObjectToFind;							//ID of the object the robot should look for
+	double mMinQuality;							//Threshold for when a model is considered recognised
 
 public:
-	ObjectRecognition(): mNodeHandle(""){}
+	ObjectRecognition();
 	~ObjectRecognition()
 	{
 		mNodeHandle.shutdown();
 	}
 
-	void init();
-
-	void recognizeCB(const std_msgs::UInt8 &msg);
+	void recognizeCB(const std_msgs::Int32 &msg);
 
 	int inline getObjectID()
 	{
@@ -49,6 +48,8 @@ public:
 	{
 		mObjectPosePublisher.publish(msg);
 	}
+
+	void spin();
 };
 
 #endif /* OBJECTRECOGNITION_H_ */
