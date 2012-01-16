@@ -62,21 +62,19 @@ void ObjectRecognition::spin()
 
 		if (!mObjectRecognizeClient.call(detection_call))
 		{
-			ROS_ERROR("Tabletop detection service failed");
+			//ROS_ERROR("Tabletop detection service failed");
 			//return -1;
 		}
 		if (detection_call.response.detection.result !=
 				detection_call.response.detection.SUCCESS)
 		{
-			ROS_ERROR("Tabletop detection returned error code %d",
-					detection_call.response.detection.result);
+			//ROS_ERROR("Tabletop detection returned error code %d", detection_call.response.detection.result);
 			//return -1;
 		}
 		if (detection_call.response.detection.clusters.empty() &&
 				detection_call.response.detection.models.empty() )
 		{
-			ROS_ERROR("The tabletop detector detected the table, "
-					"but found no objects");
+			//ROS_ERROR("The tabletop detector detected the table, but found no objects");
 			//return -1;
 		}
 
