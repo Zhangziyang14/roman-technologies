@@ -8,16 +8,23 @@
  */
 
 #include <ros.h>
-#include <std_msgs/ColorRGBA.h>
 #include <std_msgs/UInt16.h>
 #include <std_msgs/Empty.h>
+#include <head/panTilt.h>
+#include <head/eyebrows.h>
+#include <head/rgb.h>
+#include <head/breath.h>
 #include <TimerOne.h>
 #include <Servo.h>
 
 //Breath properties
-const double transition_step = 0.5;
-const double breath_multiplier = 0.05;
-int breathInterval = 300;
+double transition_speed = 0.5;
+double breath_speed = 0.05;
+int full_pause = 85;
+int low_pause = 300;
+
+
+
 double red, green, blue; 
 int targetRed, targetGreen, targetBlue;
 boolean changeState = false;    // if false => breath, if true => transition to new color
@@ -28,20 +35,30 @@ int count = 0;
 const int redPin = 6;
 const int greenPin = 5;
 const int bluePin = 3;
-const int ebleft = 4;
-const int ebright = 2;
-const int eblift = 7;
+const int ebleft = A4;
+const int ebright = A2;
+const int eblift = A3;
+const int tiltPin = A1;
+const int panPin = A5;
 const int pingPin = 8;
 
 Servo eyebrowLeft;
 Servo eyebrowRight;
 Servo lift;
+Servo panServo;
+Servo tiltServo;
 
 const int LIFT_LOWER_LIMIT = 0;
 const int LIFT_UPPER_LIMIT = 30;
 
 const int EYEBROW_LOWER_LIMIT = 0;
 const int EYEBROW_UPPER_LIMIT = 45;
+
+const int PAN_UPPER_LIMIT = 160;
+const int PAN_LOWER_LIMIT = 20;
+
+const int TILT_UPPER_LIMIT = 70;
+const int TILT_LOWER_LIMIT = 40;
 
 //ping properties
 boolean pingActivated;
@@ -68,11 +85,11 @@ void transition()
   if(changeState)
   {
     if (red != targetRed)
-        red += red < targetRed ? transition_step : (-1*transition_step);
+        red += red < targetRed ? transition_speed : (-1*transition_speed);
     if (green != targetGreen)
-        green += green < targetGreen ? transition_step : (-1*transition_step); 
+        green += green < targetGreen ? transition_speed : (-1*transition_speed); 
     if (blue != targetBlue)
-        blue += blue < targetBlue ? transition_step : (-1*transition_step);   
+        blue += blue < targetBlue ? transition_speed : (-1*transition_speed);   
     if (red == targetRed && green == targetGreen && blue == targetBlue)
         changeState = false;
   }
@@ -83,9 +100,9 @@ void transition()
     else
        count++;
     
-    int newRed = red + (count * breath_multiplier);
-    int newGreen = green + (count * breath_multiplier);
-    int newBlue = blue + (count * breath_multiplier);
+    int newRed = red + (count * breath_speed);
+    int newGreen = green + (count * breath_speed);
+    int newBlue = blue + (count * breath_speed);
     
     if ((newRed > 40) && (newRed > red * 0.5) && newRed < targetRed + 1)
        red = newRed;
@@ -95,14 +112,14 @@ void transition()
        blue = newBlue;
     
     //Pause at low brightness
-    if (count < -85)
+    if (count < -1*low_pause)
     {
        countDown = false;
        count = 0;
     }
     
     // Pause at full brightness
-    if (count > breathInterval)
+    if (count > full_pause)
     {
        countDown = true;
        count = 0;
@@ -119,25 +136,32 @@ void transition()
 /**
  * sets designated color targets received through rgbTopic
  */
-void setRGBCB(const std_msgs::ColorRGBA &msg)
+void setRGBCB(const head::rgb &msg)
 {
-  targetRed = msg.r;
-  targetGreen = msg.g;
-  targetBlue = msg.b;
-  breathInterval = msg.a;
+  targetRed = msg.red;
+  targetGreen = msg.green;
+  targetBlue = msg.blue;
+ // breathInterval = msg.a;
   changeState = true;
 }
 
-ros::Subscriber<std_msgs::ColorRGBA> rgb_sub("/rgbTopic", &setRGBCB);
+void setBreathPropertiesCB(const head::breath &msg)
+{
+  breath_speed = msg.breathSpeed;
+  transition_speed = msg.transitionSpeed;
+  full_pause = msg.fullPause;
+  low_pause = msg.lowPause; 
+}
 
+ros::Subscriber<head::rgb> rgb_sub("/rgbTopic", &setRGBCB);
+ros::Subscriber<head::breath> breath_sub("/breathTopic", &setBreathPropertiesCB);
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//                                  Servo Section
+//                                  EYEBROW Section
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-/**
+/** EYEBROWS
  * Checks for angle limits and sets servos to given angles
  */
 void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
@@ -155,7 +179,7 @@ void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
     if (eyebrowRightAngle > EYEBROW_UPPER_LIMIT)
      eyebrowRightAngle = EYEBROW_UPPER_LIMIT;
    else if (eyebrowRightAngle < EYEBROW_LOWER_LIMIT)
-      eyebrowRightAngle = EYEBROW_LOWER_LIMIT;
+      eyebrowRightAngle = EYEBROW_LOWER_LIMIT;  
       
    eyebrowLeft.write(eyebrowLeftAngle);
    eyebrowRight.write(eyebrowRightAngle);
@@ -165,14 +189,27 @@ void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
 /**
  * wrapper for setPosition
  */
-void setServosCB(const std_msgs::ColorRGBA &msg)
+void setEyebrowCB(const head::eyebrows &msg)
 {
-  setPosition(msg.b, msg.g, msg.r);
+  setPosition(msg.lift, msg.left, msg.right);
 }
 
-ros::Subscriber<std_msgs::ColorRGBA> servo_sub("/servoTopic", &setServosCB);
+ros::Subscriber<head::eyebrows> servo_sub("/eyebrowTopic", &setEyebrowCB);
+
+////////////////////////////////////////////////////////////////////////////////////////
+//                                  PAN_TILT Section
+////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
+
+void panTiltCB(const head::panTilt &msg)
+{
+  
+}
+
+ros::Subscriber<head::panTilt> servo2_sub("/panTiltTopic", &panTiltCB);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                    ping Section
@@ -254,6 +291,7 @@ void setup()
   
   //rgb init
   nh.subscribe(rgb_sub);
+  nh.subscribe(breath_sub);
   pinMode(redPin, OUTPUT);
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
@@ -261,11 +299,16 @@ void setup()
   green = 0;
   blue = 0;
   
-  //servo init
+  //eyebrow init
   nh.subscribe(servo_sub);
-  eyebrowLeft.attach(4);
-  eyebrowRight.attach(2);
-  lift.attach(7);
+  eyebrowLeft.attach(ebleft);
+  eyebrowRight.attach(ebright);
+  lift.attach(eblift);
+  
+  //pantTilt init
+  nh.subscribe(servo2_sub);
+  panServo.attach(panPin);
+  tiltServo.attach(tiltPin);
   
   //ping init
   pingActivated = false;
