@@ -1,0 +1,7 @@
+<launch>
+	<node pkg="tf" type="static_transform_publisher" name="kinect_to__broadcaster" args="-0.115 0 0.226 0 0 0 openni_depth_frame arm_frame 100" />
+
+   	<node pkg="arm" name="Kinematica" type="Kinematica" respawn="false" output="screen"/>
+    <node pkg="arm" name="AutonomeArmController" type="AutonomeArmController" respawn="false" />
+    <node pkg="arm" name="ArmMotorHandler" type="ArmMotorHandler" />
+</launch>
