@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="head" name="HeadMotorHandler" type="HeadMotorHandler"/>
+    <node pkg="head" name="AutonomeHeadController" type="AutonomeHeadController"/>
+</launch>
