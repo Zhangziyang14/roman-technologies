@@ -10,10 +10,10 @@
 #include <geometry_msgs/Pose.h>
 #include "arm/IK.h"
 
-#define MIN_Z_VALUE -32.1
-#define MAX_Z_VALUE 17.25
-#define MIN_X_VALUE -20
-#define MAX_X_VALUE 35.95
+#define MIN_Z_VALUE (-0.321)
+#define MAX_Z_VALUE (0.1725)
+#define MIN_X_VALUE (-0.20)
+#define MAX_X_VALUE (0.3595)
 
 
 class AutonomeArmController
