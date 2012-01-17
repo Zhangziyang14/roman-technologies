@@ -87,7 +87,7 @@ void DynamixelMotor::init(char *path)
 		std::cout << "Using direct connection" << std::endl;
 		motor_ = new CDynamixel();
 
-		serial_port_.port_open("/dev/ttyUSB0", LxSerial::RS485_FTDI);
+		serial_port_.port_open("/dev/roman/threemxl", LxSerial::RS485_FTDI);
 		serial_port_.set_speed(LxSerial::S1000000);
 		motor_->setSerialPort(&serial_port_);
 	}

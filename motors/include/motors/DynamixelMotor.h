@@ -12,12 +12,13 @@
 #include <Dynamixel.h>
 #include <threemxl/CDynamixelROS.h>
 
-#define DYNAMIXEL_MOTOR_SPEED 1
+#define DYNAMIXEL_MOTOR_SPEED 0.5
 
 enum MotorId
 {
-	MID_NONE = -1,
-	DYNAMIXEL_ID = 105,
+	MID_NONE 	= -1,
+	PAN_ID 		= 1,
+	TILT_ID		= 105,
 };
 
 class DynamixelMotor
