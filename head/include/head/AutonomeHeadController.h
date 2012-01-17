@@ -5,7 +5,6 @@
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/UInt8.h>
 #include <head/eyebrows.h>
-#include <head/panTilt.h>
 #include <geometry_msgs/Pose.h>
 #include <iostream>
 #include "Emotion.h"

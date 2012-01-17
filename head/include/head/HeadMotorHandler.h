@@ -12,11 +12,14 @@
 #include <geometry_msgs/Pose.h>
 #include <motors/DynamixelMotor.h>
 
-#define TILT_UPPER_LIMIT	1.25
-#define TILT_LOWER_LIMIT	(-1)
+#define TILT_UPPER_LIMIT	1.1
+#define TILT_LOWER_LIMIT	(-0.6)
 
-#define PAN_UPPER_LIMIT		1.25
-#define PAN_LOWER_LIMIT		(-1)
+#define PAN_UPPER_LIMIT		(0.35)
+#define PAN_LOWER_LIMIT		(-0.35)
+
+#define PAN_OFFSET		(-1)
+#define TILT_OFFSET		(-0.5)
 
 class HeadMotorHandler
 {

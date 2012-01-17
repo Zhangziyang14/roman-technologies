@@ -15,8 +15,8 @@
  */
 void HeadMotorHandler::publishHeadPosition()
 {
-	mCurrentPose.orientation.x = mTilt.getPosition();
-	mCurrentPose.orientation.z = mPan.getPosition();
+	mCurrentPose.orientation.x = mTilt.getPosition() - TILT_OFFSET;
+	mCurrentPose.orientation.z = mPan.getPosition() - PAN_OFFSET;
 	mPositionPub.publish(mCurrentPose);
 }
 
@@ -26,9 +26,9 @@ void HeadMotorHandler::publishHeadPosition()
 void HeadMotorHandler::positionCB(const geometry_msgs::Pose& msg)
 {
 
-	double tilt = msg.orientation.x;
+	double tilt 	= msg.orientation.x;
 	double pan 	= msg.orientation.z;
-	//servo.setPosition(msg.orientation.z);
+
 	if(msg.orientation.x > TILT_UPPER_LIMIT)
 		tilt = TILT_UPPER_LIMIT;
 
@@ -41,8 +41,8 @@ void HeadMotorHandler::positionCB(const geometry_msgs::Pose& msg)
 	if(msg.orientation.z < PAN_LOWER_LIMIT)
 		pan = PAN_LOWER_LIMIT;
 
-	mTilt.setPosition(tilt);
-	mPan.setPosition(pan);
+	mTilt.setPosition(tilt + TILT_OFFSET);
+	mPan.setPosition(pan + PAN_OFFSET);
 }
 
 /**
