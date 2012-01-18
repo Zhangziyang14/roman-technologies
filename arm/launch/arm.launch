@@ -1,5 +1,5 @@
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="kinect_to__broadcaster" args="-0.115 0 0.226 0 0 0 openni_depth_frame arm_frame 100" />
+    <!-- node pkg="tf" type="static_transform_publisher" name="kinect_to_arm" args="0.24 0 -0.24 0 0.122 0 kinect_normal_axis_frame arm_frame 100" / -->
 
     <node pkg="arm" name="Kinematics" type="Kinematics" respawn="false" />
     <node pkg="arm" name="AutonomeArmController" type="AutonomeArmController" respawn="false" />

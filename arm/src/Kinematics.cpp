@@ -23,7 +23,8 @@ double calculateShoulderJointPosition(double z)
  */
 double calculateWristJointPosition(double x)
 {
-	return std::asin(x/(WRIST_LENGTH + EFFECTOR_ORIGIN));
+	// Multiply with -1 to flip x-axis
+	return -1*std::asin(x/(WRIST_LENGTH + EFFECTOR_ORIGIN));
 }
 
 /*

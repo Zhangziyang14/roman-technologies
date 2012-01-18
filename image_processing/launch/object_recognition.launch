@@ -10,7 +10,7 @@
 
   <include file="$(find tabletop_object_detector)/launch/tabletop_complete.launch"/>
 
-  <node pkg="image_processing" name="ObjectRecognition" type="ObjectRecognition" respawn="true" output="screen"/>
+  <node pkg="image_processing" name="ObjectRecognition" type="ObjectRecognition" respawn="true" output="screen" launch-prefix="xterm -e gdb --args" />
 
   <include file="$(find image_processing)/launch/kinect.launch"/>
 </launch>

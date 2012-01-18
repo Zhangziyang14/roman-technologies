@@ -17,8 +17,8 @@
 enum MotorId
 {
 	MID_NONE 	= -1,
-	PAN_ID 		= 1,
-	TILT_ID		= 105,
+	PAN_ID 		= 104,
+	TILT_ID,
 };
 
 class DynamixelMotor

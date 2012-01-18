@@ -16,7 +16,7 @@
 #define SCAN_TIME (1.0/30.0)
 #define RANGE_MIN 0.45
 #define RANGE_MAX 10.0
-#define OUTPUT_FRAME_ID "/openni_depth_frame"
+#define OUTPUT_FRAME_ID "/kinect_frame"
 
 /**
  * Converts an IplImage to a LaserScan. Based on pointcloud_to_laserscan package.

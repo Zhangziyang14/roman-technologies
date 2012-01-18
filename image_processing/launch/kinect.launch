@@ -1,4 +1,6 @@
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="base_to_kinect_broadcaster" args="-0.115 0 0.226 0 0 0 base_link openni_depth_frame 100" />
+	<node pkg="tf" type="static_transform_publisher" name="base_to_kinect_broadcaster" args="-0.115 0 0.226 0 0 0 base_link kinect_frame 100" />
+	<node pkg="tf" type="static_transform_publisher" name="kinect_to_kinect_normal_axis" args="0 0 0 0 -1.57 0 kinect_frame kinect_normal_axis_frame 100" />
+	<node pkg="tf" type="static_transform_publisher" name="kinect_normal_axis_to_arm" args="0.24 0 -0.24 0 -0.4 0 kinect_normal_axis_frame arm_frame 100" />
 	<node pkg="image_processing" name="Kinect" type="Kinect" respawn="true" output="screen"/>
 </launch>

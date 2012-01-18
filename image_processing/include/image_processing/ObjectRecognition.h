@@ -18,6 +18,12 @@
 #include <tabletop_object_detector/TabletopDetection.h>
 #include <tabletop_collision_map_processing/TabletopCollisionMapProcessing.h>
 
+
+// REMOVE THIS
+#include <tf/transform_listener.h>
+
+#define VIEW_OBJECTS_ANGLE	0.4	
+
 class ObjectRecognition
 {
 protected:
@@ -29,6 +35,7 @@ protected:
 	ros::Publisher 	mObjectPosePublisher;		//Publishes the pose of the recognised object
 	int mObjectToFind;							//ID of the object the robot should look for
 	double mMinQuality;							//Threshold for when a model is considered recognised
+	tf::TransformListener mTransformListener;
 
 public:
 	ObjectRecognition();
@@ -44,9 +51,16 @@ public:
 		return mObjectToFind;
 	}
 
-	void inline publishObjectPose(const geometry_msgs::PoseStamped msg)
+	void inline publishObjectPose(geometry_msgs::PoseStamped msg)
 	{
-		mObjectPosePublisher.publish(msg);
+		geometry_msgs::PoseStamped msgToArm;
+		ROS_INFO(msg.header.frame_id.c_str());
+		mTransformListener.transformPose("arm_frame", msg, msgToArm);
+
+		ROS_INFO("Before: [%lf, %lf, %lf]", msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
+		ROS_INFO("After: [%lf, %lf, %lf]", msgToArm.pose.position.x, msgToArm.pose.position.y, msgToArm.pose.position.z);
+
+		mObjectPosePublisher.publish(msgToArm);
 	}
 
 	void spin();

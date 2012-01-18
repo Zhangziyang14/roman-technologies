@@ -75,7 +75,7 @@ void MotorHandler::init(char *path)
         ROS_INFO("Using direct connection");
         motor_ = new C3mxl();
     
-        serial_port_.port_open("/dev/motorusb", LxSerial::RS485_FTDI);
+        serial_port_.port_open("/dev/roman/threemxl", LxSerial::RS485_FTDI);
         serial_port_.set_speed(LxSerial::S921600);
         motor_->setSerialPort(&serial_port_);
     }
