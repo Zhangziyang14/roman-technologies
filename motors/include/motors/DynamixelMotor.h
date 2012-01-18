@@ -46,6 +46,7 @@ public:
     /** \param path path to shared_serial node */
     void init(char *path);
     int update();
+    double getRotationSpeed();
     void setPosition(double position);
     double getPosition();
     void setAngleLimits(double lower, double upper);

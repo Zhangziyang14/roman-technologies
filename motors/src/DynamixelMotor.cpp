@@ -8,6 +8,17 @@
 #include <motors/DynamixelMotor.h>
 
 /**
+  * Gets speed of the motor
+ */
+double DynamixelMotor::getRotationSpeed()
+{
+	motor_->getState();
+
+	//ROS_INFO("PRESENT SPEED, %f rad/s", motor_->presentSpeed());
+    return motor_->presentSpeed();
+}
+
+/**
  *	Gets Status of Dynamixel motor
  */
 int DynamixelMotor::update()
@@ -89,6 +100,7 @@ void DynamixelMotor::init(char *path)
 
 		serial_port_.port_open("/dev/roman/threemxl", LxSerial::RS485_FTDI);
 		serial_port_.set_speed(LxSerial::S1000000);
+
 		motor_->setSerialPort(&serial_port_);
 	}
 
