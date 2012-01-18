@@ -26,7 +26,7 @@ void HeadMotorHandler::publishHeadSpeed()
 {
 	mCurrentSpeed.pitch = mPitch.getRotationSpeed();
 	mCurrentSpeed.yaw = mYaw.getRotationSpeed();
-	mSpeedPub.publish(mCurrentPose);
+	mSpeedPub.publish(mCurrentSpeed);
 }
 
 /**
