@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 
 	while(ros::ok())
 	{
+		motorHandler.publishHeadSpeed();
 		motorHandler.publishHeadPosition();
 		ros::spinOnce();
 	}
