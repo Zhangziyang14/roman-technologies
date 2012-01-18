@@ -15,34 +15,34 @@
  */
 void HeadMotorHandler::publishHeadPosition()
 {
-	mCurrentPose.orientation.x = mTilt.getPosition() - TILT_OFFSET;
-	mCurrentPose.orientation.z = mPan.getPosition() - PAN_OFFSET;
+	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
+	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
 	mPositionPub.publish(mCurrentPose);
 }
 
 /**
  * Controls the motors based on the received position.
  */
-void HeadMotorHandler::positionCB(const geometry_msgs::Pose& msg)
+void HeadMotorHandler::positionCB(const head::PitchYaw &msg)
 {
 
-	double tilt 	= msg.orientation.x;
-	double pan 	= msg.orientation.z;
+	double pitch	= msg.pitch;
+	double yaw 		= msg.yaw;
 
-	if(msg.orientation.x > TILT_UPPER_LIMIT)
-		tilt = TILT_UPPER_LIMIT;
+	if(msg.pitch > PITCH_UPPER_LIMIT)
+		pitch = PITCH_UPPER_LIMIT;
 
-	if(msg.orientation.x < TILT_LOWER_LIMIT)
-		tilt = TILT_LOWER_LIMIT;
+	if(msg.pitch < PITCH_LOWER_LIMIT)
+		pitch = PITCH_LOWER_LIMIT;
 
-	if(msg.orientation.z > PAN_UPPER_LIMIT)
-		pan = PAN_UPPER_LIMIT;
+	if(msg.yaw > YAW_UPPER_LIMIT)
+		yaw = YAW_UPPER_LIMIT;
 
-	if(msg.orientation.z < PAN_LOWER_LIMIT)
-		pan = PAN_LOWER_LIMIT;
+	if(msg.yaw < YAW_LOWER_LIMIT)
+		yaw = YAW_LOWER_LIMIT;
 
-	mTilt.setPosition(tilt + TILT_OFFSET);
-	mPan.setPosition(pan + PAN_OFFSET);
+	mPitch.setPosition(pitch + PITCH_OFFSET);
+	mYaw.setPosition(yaw + YAW_OFFSET);
 }
 
 /**
@@ -51,13 +51,13 @@ void HeadMotorHandler::positionCB(const geometry_msgs::Pose& msg)
 void HeadMotorHandler::init(char *path)
 {
 	//Initialise publishers
-	mPositionPub	= mNodeHandle.advertise<geometry_msgs::Pose>("/headPositionFeedbackTopic", 1);
+	mPositionPub	= mNodeHandle.advertise<head::PitchYaw>("/headPositionFeedbackTopic", 1);
 
 	//Initialise subscribers
 	mPositionSub	= mNodeHandle.subscribe("/headPositionTopic", 10, &HeadMotorHandler::positionCB, this);
 
-	mTilt.init(path);
-	mPan.init(path);
+	mPitch.init(path);
+	mYaw.init(path);
 
 	ROS_INFO("Initialising completed.");
 }

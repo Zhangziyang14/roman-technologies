@@ -148,7 +148,7 @@ int main( int argc, char* argv[] )
 	ros::init(argc, argv, "FocusFace");
 	ros::NodeHandle nh;
 
-	ros::Subscriber image_sub = nh.subscribe("/camera/rgb/points", 1, &imageCb);
+	ros::Subscriber image_sub = nh.subscribe("/camera/depth_registered/points", 1, &imageCb);
 	kinect_motor_pub = new ros::Publisher(nh.advertise<std_msgs::Float64>("/tilt_angle", 1));
 
 	cv::startWindowThread();

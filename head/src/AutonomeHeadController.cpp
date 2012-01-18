@@ -73,7 +73,7 @@ void AutonomeHeadController::init()
 	// initialise publishers
 	mRGB_pub = mNodeHandle.advertise<std_msgs::ColorRGBA>("/rgbTopic", 1);
 	mEyebrows_pub = mNodeHandle.advertise<head::eyebrows>("/eyebrowsTopic", 1);
-	mHead_movement_pub = mNodeHandle.advertise<geometry_msgs::Pose>("/headPositionTopic", 1);
+	mHead_movement_pub = mNodeHandle.advertise<head::PitchYaw>("/headPositionTopic", 1);
 
 	ROS_INFO("AutonomeHeadController initialised");
 
@@ -83,7 +83,7 @@ void AutonomeHeadController::init()
 /**
  * Listens to head commands and streams them to HeadMotorHandler
  */
-void AutonomeHeadController::headCommandCB(const geometry_msgs::Pose &msg)
+void AutonomeHeadController::headCommandCB(const head::PitchYaw &msg)
 {
 	mHead_movement_pub.publish(msg);
 }

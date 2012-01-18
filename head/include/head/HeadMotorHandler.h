@@ -9,17 +9,17 @@
 #define HEADMOTORHANDLER_H_
 
 #include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
+#include <head/PitchYaw.h>
 #include <motors/DynamixelMotor.h>
 
-#define TILT_UPPER_LIMIT	1.1
-#define TILT_LOWER_LIMIT	(-0.6)
+#define PITCH_UPPER_LIMIT	1.1
+#define PITCH_LOWER_LIMIT	(-0.6)
 
-#define PAN_UPPER_LIMIT		(0.35)
-#define PAN_LOWER_LIMIT		(-0.35)
+#define YAW_UPPER_LIMIT		(0.35)
+#define YAW_LOWER_LIMIT		(-0.35)
 
-#define PAN_OFFSET		(-1)
-#define TILT_OFFSET		(-0.5)
+#define YAW_OFFSET			(-1)
+#define PITCH_OFFSET		(-0.5)
 
 class HeadMotorHandler
 {
@@ -29,16 +29,16 @@ protected:
 
 	ros::Subscriber mPositionSub;			/// Listens to pose messages for positioning of the head
 	ros::Publisher mPositionPub;			/// Publishes current head position
-	geometry_msgs::Pose mCurrentPose;		/// Keeps track of the current pose of the head
+	head::PitchYaw mCurrentPose;			/// Keeps track of the current pose of the head
 
-	DynamixelMotor mTilt;					/// Dynamixel motor for tilting the head
-	DynamixelMotor mPan;					/// Dynamixel motor for panning the head
+	DynamixelMotor mPitch;					/// Dynamixel motor for tilting the head
+	DynamixelMotor mYaw;					/// Dynamixel motor for panning the head
 
 	MotorId mMotorId;						/// Id of the motor that is currently being controlled
 
 public:
 	/// Constructor
-	HeadMotorHandler() : mNodeHandle("~"), mTilt(TILT_ID), mPan(PAN_ID) { }
+	HeadMotorHandler() : mNodeHandle("~"), mPitch(TILT_ID), mYaw(PAN_ID) { }
 
 	/// Destructor
 	/** Delete motor interface, close serial port, and shut down node handle */
@@ -50,7 +50,7 @@ public:
 	/// Initialise node
 	void init(char *path);
 
-	void positionCB(const geometry_msgs::Pose& msg);
+	void positionCB(const head::PitchYaw &msg);
 	void publishHeadPosition();
 };
 

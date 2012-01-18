@@ -54,7 +54,6 @@ public:
 	void inline publishObjectPose(geometry_msgs::PoseStamped msg)
 	{
 		geometry_msgs::PoseStamped msgToArm;
-		ROS_INFO(msg.header.frame_id.c_str());
 		mTransformListener.transformPose("arm_frame", msg, msgToArm);
 
 		ROS_INFO("Before: [%lf, %lf, %lf]", msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);

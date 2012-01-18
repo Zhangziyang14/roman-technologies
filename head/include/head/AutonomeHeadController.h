@@ -5,18 +5,18 @@
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/UInt8.h>
 #include <head/eyebrows.h>
-#include <geometry_msgs/Pose.h>
+#include <head/PitchYaw.h>
 #include <iostream>
 #include "Emotion.h"
 
 
 enum Emotions
 {
-  NEUTRAL = 0,
-  HAPPY,
-  SAD,
-  SURPRISED,
-  ERROR  
+	NEUTRAL = 0,
+	HAPPY,
+	SAD,
+	SURPRISED,
+	ERROR
 };
 
 class AutonomeHeadController
@@ -37,24 +37,20 @@ protected:
 	Emotion mSurprised;
 	Emotion mError;
 
-
-	
-
-
 public:
 	//Constructor
 	AutonomeHeadController() : mNodeHandle("") , mNeutral(0,0,0) , mHappy(0,255,0) , mSad(0,150,255) , mSurprised(250,40,0) , mError(255,0,0) { 
 		ROS_INFO("AutonomeHeadController constructor");
-	}
+	};
 
 	/// Destructor
 	~AutonomeHeadController()
 	{
 
 		mNodeHandle.shutdown();
-	}
+	};
 
-	void headCommandCB(const geometry_msgs::Pose &msg);
+	void headCommandCB(const head::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();
 
