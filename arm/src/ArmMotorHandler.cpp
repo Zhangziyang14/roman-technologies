@@ -118,6 +118,12 @@ bool ArmMotorHandler::init()
 
 void ArmMotorHandler::setShoulderAngle(double angle)
 {
+	if (isnan(angle))
+	{
+		ROS_WARN("Received nan shoulder angle.");
+		return;
+	}
+
 	ROS_INFO("Setting shoulder to position [%.3f]...", angle);
 
 	if(angle > SHOULDERMOTOR_MAX_ANGLE)
@@ -136,6 +142,12 @@ void ArmMotorHandler::setShoulderAngle(double angle)
 
 void ArmMotorHandler::setSideJointAngle(double angle)
 {
+	if (isnan(angle))
+	{
+		ROS_WARN("Received nan side joint angle.");
+		return;
+	}
+
 	ROS_INFO("Setting sideJoint to position [%.3f]...", angle);
 
 	if(angle > SIDEJOINT_MAX_ANGLE)

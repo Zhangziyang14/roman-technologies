@@ -10,7 +10,6 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "pcl/ros/conversions.h"
-#include "std_msgs/Float64.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -18,6 +17,8 @@
 #include "image_processing/Util.h"
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
+
+#include "head/PitchYaw.h"
 
 // forward declaration
 IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
@@ -27,7 +28,12 @@ IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
 
 cv::CascadeClassifier gCascade;
 ros::Publisher *kinect_motor_pub = NULL;
-double gCurrentAngle = 0.0;
+head::PitchYaw gCurrentOrientation;
+
+void headPositionCb(const head::PitchYaw &msg)
+{
+	gCurrentOrientation = msg;
+}
 
 void detectAndDraw(pcl::PointCloud<pcl::PointXYZRGB> *cloud, cv::Mat& img, cv::CascadeClassifier& cascade, double scale)
 {
@@ -103,21 +109,23 @@ void detectAndDraw(pcl::PointCloud<pcl::PointXYZRGB> *cloud, cv::Mat& img, cv::C
     	pcl::PointXYZRGB p = cloud->at(minPoint.x, minPoint.y);
     	if (p.z)
     	{
-    		std_msgs::Float64 msg;
-    		double degree = atan(p.y / p.z) * 180 / PI;
+    		head::PitchYaw msg;
+    		double pitch = atan(p.y / p.z);
+    		double yaw = -atan(p.x / p.z);
 
-    		msg.data = degree + gCurrentAngle;
-    		ROS_INFO("Rotate by : %lf, sending : %lf, currentAngle : %lf", degree, msg.data, gCurrentAngle);
-    		gCurrentAngle = msg.data;
-    		if (isnan(gCurrentAngle))
-    			gCurrentAngle = 0.0;
+    		msg.pitch = pitch + gCurrentOrientation.pitch;
+    		msg.yaw = yaw + gCurrentOrientation.yaw;
+    		if (isnan(gCurrentOrientation.pitch))
+    			gCurrentOrientation.pitch = 0.0;
+    		if (isnan(gCurrentOrientation.yaw))
+    			gCurrentOrientation.yaw = 0.0;
 
     		kinect_motor_pub->publish(msg);
     		usleep(500*1000);
 
     	}
     }
-    cv::imshow( "result", img );
+    cv::imshow("result", img);
 }
 
 /**
@@ -140,7 +148,7 @@ void imageCb(const sensor_msgs::PointCloud2Ptr &image)
 	}
 
 	frame = iplImg;
-	detectAndDraw(&cloud, frame, gCascade, /*nestedCascade, */ 2.0);
+	detectAndDraw(&cloud, frame, gCascade, /*nestedCascade, */ 3.0);
 }
 
 int main( int argc, char* argv[] )
@@ -149,19 +157,19 @@ int main( int argc, char* argv[] )
 	ros::NodeHandle nh;
 
 	ros::Subscriber image_sub = nh.subscribe("/camera/depth_registered/points", 1, &imageCb);
-	kinect_motor_pub = new ros::Publisher(nh.advertise<std_msgs::Float64>("/tilt_angle", 1));
+	ros::Subscriber head_position_sub = nh.subscribe("/headPositionFeedbackTopic", 1, &headPositionCb);
+	kinect_motor_pub = new ros::Publisher(nh.advertise<head::PitchYaw>("/cmd_head_position", 1));
+
+	gCurrentOrientation.pitch = 0.f;
+	gCurrentOrientation.yaw = 0.f;
 
 	cv::startWindowThread();
-	cvNamedWindow( "result", 1 );
+	cvNamedWindow("result", 1);
     if (!gCascade.load(CASCADE_NAME))
     {
         std::cerr << "ERROR: Could not load classifier cascade" << std::endl;
         return -1;
     }
-
-	std_msgs::Float64 msg;
-	msg.data = 0.0;
-	kinect_motor_pub->publish(msg);
 
     ros::spin();
 }
