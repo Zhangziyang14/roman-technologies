@@ -12,9 +12,8 @@
 
 #define MIN_Z_VALUE (-0.321)
 #define MAX_Z_VALUE (0.1725)
-#define MIN_X_VALUE (-0.20)
-#define MAX_X_VALUE (0.3595)
-
+#define MAX_X_VALUE (0.20)
+#define MIN_X_VALUE (-0.3595)
 
 class AutonomeArmController
 {
