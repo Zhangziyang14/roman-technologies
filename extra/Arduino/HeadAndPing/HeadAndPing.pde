@@ -3,23 +3,28 @@
  * - Head rgb/servo control
  * - Ping readout
  * - 1 publisher: /pingFeedbackTopic
- * - 3 subscribers: /rgbTopic /servoTopic /pingActivateTopic
+ * - 5 subscribers: /rgbTopic /breathTopic /pingActivateTopic /panTiltTopic /eyebrowTopic
  * Author: Ingmar Jager
  */
 
 #include <ros.h>
 #include <std_msgs/UInt16.h>
+//#include <std_msgs/UInt8.h>
 #include <std_msgs/Empty.h>
+
+#include <std_msgs/ColorRGBA.h>
+
 #include <head/panTilt.h>
 #include <head/eyebrows.h>
-#include <head/rgb.h>
+//#include <head/rgb.h>
 #include <head/breath.h>
 #include <TimerOne.h>
 #include <Servo.h>
+#include <FlexiTimer2.h>
 
 //Breath properties
-double transition_speed = 0.5;
-double breath_speed = 0.05;
+double transition_speed = 3;
+double breath_speed = 3000;
 int full_pause = 85;
 int low_pause = 300;
 
@@ -34,46 +39,41 @@ int count = 0;
 //Pin definitions
 const int redPin = 6;
 const int greenPin = 5;
-const int bluePin = 3;
+const int bluePin = 9;
 const int ebleft = A4;
 const int ebright = A2;
 const int eblift = A3;
-const int tiltPin = A1;
 const int panPin = A5;
 const int pingPin = 8;
 
 Servo eyebrowLeft;
 Servo eyebrowRight;
 Servo lift;
-Servo panServo;
-Servo tiltServo;
 
-const int LIFT_LOWER_LIMIT = 0;
-const int LIFT_UPPER_LIMIT = 30;
+const int LIFT_LOWER_LIMIT = 47;
+const int LIFT_UPPER_LIMIT = 75;
 
-const int EYEBROW_LOWER_LIMIT = 0;
-const int EYEBROW_UPPER_LIMIT = 45;
-
-const int PAN_UPPER_LIMIT = 160;
-const int PAN_LOWER_LIMIT = 20;
-
-const int TILT_UPPER_LIMIT = 70;
-const int TILT_LOWER_LIMIT = 40;
+const int EYEBROW_LOWER_LIMIT = 60;
+const int EYEBROW_UPPER_LIMIT = 120;
 
 //ping properties
 boolean pingActivated;
 std_msgs::UInt16 ping_msg;
-
+//std_msgs::UInt8 dbg_msg;
 
 //ROS
 ros::NodeHandle  nh;
 ros::Publisher ping_pub("/pingFeedbackTopic", &ping_msg);
 
+//ros::Publisher dbg_pub("/debugTopic", &dbg_msg);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                   RGB Section
 ////////////////////////////////////////////////////////////////////////////////////////
 
+    double bRed = red; 
+    double bGreen = green; 
+    double bBlue = blue;
 /**
  * Called every timer interrupt
  * Changes colors fluently
@@ -91,11 +91,42 @@ void transition()
     if (blue != targetBlue)
         blue += blue < targetBlue ? transition_speed : (-1*transition_speed);   
     if (red == targetRed && green == targetGreen && blue == targetBlue)
-        changeState = false;
+        changeState = false;  
+        
   }
-  else // take a breath
+  /*else // take a breath
   {
-    if (countDown)
+    
+    float deltaRed = targetRed/ 2.0 / breath_speed;
+    float deltaGreen = targetGreen/ 2.0 / breath_speed;
+    float deltaBlue = targetBlue/ 2.0 / breath_speed;
+   
+   
+    static boolean dir = true;   
+
+    if ((bRed != targetRed/2.0) && (bGreen != targetGreen/2.0) && (bBlue != targetBlue/2.0) && dir == true)  //decrease brightness
+    {
+        bRed -= deltaRed;
+        bGreen -= deltaGreen;
+        bBlue -= deltaBlue;
+    }
+    else if((bRed != targetRed) && (bGreen != targetGreen) && (bBlue != targetBlue)) //increase brightness
+    {
+        dir == false;
+        bRed += deltaRed;
+        bGreen += deltaGreen;
+        bBlue += deltaBlue;
+    }
+    else
+    {
+      dir == true; //breath again
+    }
+  }
+  
+  /*red = bRed;
+  green = bGreen;
+  blue = bBlue;*/
+   /* if (countDown)
        count--;
     else
        count++;
@@ -104,29 +135,29 @@ void transition()
     int newGreen = green + (count * breath_speed);
     int newBlue = blue + (count * breath_speed);
     
-    if ((newRed > 40) && (newRed > red * 0.5) && newRed < targetRed + 1)
+    if ((newRed > 40) && (newRed > targetRed * 0.45) && newRed < targetRed + 1)
        red = newRed;
-    if ((newGreen > 40) && (newGreen > green * 0.5) && (newGreen < targetGreen + 1))
+    if ((newGreen > 40) && (newGreen > targetGreen * 0.45) && (newGreen < targetGreen + 1))
        green = newGreen;
-    if ((newBlue > 40) && (newBlue > blue * 0.5) && (newBlue < targetBlue +1))
+    if ((newBlue > 40) && (newBlue > targetBlue * 0.45) && (newBlue < targetBlue +1))
        blue = newBlue;
     
     //Pause at low brightness
-    if (count < -1*low_pause)
+    if (count*breath_speed < (max(max(targetGreen*0.45, targetRed*0.45),targetBlue*0.45)*-1 - low_pause))
     {
        countDown = false;
        count = 0;
     }
     
     // Pause at full brightness
-    if (count > full_pause)
+    if (count*breath_speed > (max(max(targetGreen, targetRed),targetBlue) + full_pause))
     {
        countDown = true;
        count = 0;
     }
     
-  }
-  
+  }*/
+
    analogWrite(redPin, red);
    analogWrite(greenPin, green);
    analogWrite(bluePin, blue);
@@ -136,12 +167,11 @@ void transition()
 /**
  * sets designated color targets received through rgbTopic
  */
-void setRGBCB(const head::rgb &msg)
+void setRGBCB(const std_msgs::ColorRGBA &msg)
 {
-  targetRed = msg.red;
-  targetGreen = msg.green;
-  targetBlue = msg.blue;
- // breathInterval = msg.a;
+  targetRed = msg.r;
+  targetGreen = msg.g;
+  targetBlue = msg.b;
   changeState = true;
 }
 
@@ -153,7 +183,8 @@ void setBreathPropertiesCB(const head::breath &msg)
   low_pause = msg.lowPause; 
 }
 
-ros::Subscriber<head::rgb> rgb_sub("/rgbTopic", &setRGBCB);
+//ros::Subscriber<head::rgb> rgb_sub("/rgbTopic", &setRGBCB);
+ros::Subscriber<std_msgs::ColorRGBA> rgb_sub("/rgbTopic", &setRGBCB);
 ros::Subscriber<head::breath> breath_sub("/breathTopic", &setBreathPropertiesCB);
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -180,36 +211,25 @@ void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
      eyebrowRightAngle = EYEBROW_UPPER_LIMIT;
    else if (eyebrowRightAngle < EYEBROW_LOWER_LIMIT)
       eyebrowRightAngle = EYEBROW_LOWER_LIMIT;  
-      
+
    eyebrowLeft.write(eyebrowLeftAngle);
    eyebrowRight.write(eyebrowRightAngle);
    lift.write(liftAngle); 
+  
+ 
 }
 
 /**
- * wrapper for setPosition
+ * message order: lift left right
  */
-void setEyebrowCB(const head::eyebrows &msg)
+void setEyebrowCB(const std_msgs::ColorRGBA &msg)
 {
-  setPosition(msg.lift, msg.left, msg.right);
-}
-
-ros::Subscriber<head::eyebrows> servo_sub("/eyebrowTopic", &setEyebrowCB);
-
-////////////////////////////////////////////////////////////////////////////////////////
-//                                  PAN_TILT Section
-////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-void panTiltCB(const head::panTilt &msg)
-{
+   setPosition(msg.r,msg.g,msg.b);
   
 }
 
-ros::Subscriber<head::panTilt> servo2_sub("/panTiltTopic", &panTiltCB);
+ros::Subscriber<std_msgs::ColorRGBA> servo_sub("/eyebrowTopic", &setEyebrowCB);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                    ping Section
@@ -264,7 +284,7 @@ void ping()
        }
        pingCount++;
        if (pingCount > 901)
-       pingCount = 0;
+         pingCount = 0;
     
        }
 }
@@ -305,10 +325,11 @@ void setup()
   eyebrowRight.attach(ebright);
   lift.attach(eblift);
   
-  //pantTilt init
-  nh.subscribe(servo2_sub);
-  panServo.attach(panPin);
-  tiltServo.attach(tiltPin);
+  //set eyebrows starting position
+   eyebrowLeft.write(90);
+  eyebrowRight.write(90);
+  lift.write(79);
+  //nh.advertise(dbg_pub);
   
   //ping init
   pingActivated = false;
@@ -316,8 +337,13 @@ void setup()
   nh.subscribe(ping_sub);
   
   //timer
-  Timer1.initialize(15000);         // initialize timer1, and set a 15000 us period
-  Timer1.attachInterrupt(transition);  // attaches breath() as a timer overflow interrup\
+  //Timer1.initialize(15000);         // initialize timer1, and set a 15000 us period
+  //Timer1.attachInterrupt(transition);  // attaches breath() as a timer overflow interrup\
+  
+   FlexiTimer2::set(15, 1.0/1000, transition); // call every 500 1ms "ticks"
+  // FlexiTimer2::set(500, flash); // MsTimer2 style is also supported
+   FlexiTimer2::start();
+
   
 }
 
