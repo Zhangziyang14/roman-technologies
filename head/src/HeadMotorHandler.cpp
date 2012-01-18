@@ -7,8 +7,7 @@
 
 #include <head/HeadMotorHandler.h>
 
-//TODO: INITIALISE AND STOPHEAD SAFELY
-//TODO: USE QUATERNION PROPERLY
+//TODO: INITIALISE AND STOP HEAD SAFELY
 
 /**
  * Publishes head's current position
@@ -18,6 +17,16 @@ void HeadMotorHandler::publishHeadPosition()
 	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
 	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
 	mPositionPub.publish(mCurrentPose);
+}
+
+/**
+ * Publishes head's current speed
+ */
+void HeadMotorHandler::publishHeadSpeed()
+{
+	mCurrentSpeed.pitch = mPitch.getRotationSpeed();
+	mCurrentSpeed.yaw = mYaw.getRotationSpeed();
+	mSpeedPub.publish(mCurrentPose);
 }
 
 /**
@@ -57,6 +66,7 @@ void HeadMotorHandler::init(char *path)
 {
 	//Initialise publishers
 	mPositionPub	= mNodeHandle.advertise<head::PitchYaw>("/headPositionFeedbackTopic", 1);
+	mSpeedPub		= mNodeHandle.advertise<head::PitchYaw>("/headSpeedFeedbackTopic", 1);
 
 	//Initialise subscribers
 	mPositionSub	= mNodeHandle.subscribe("/headPositionTopic", 10, &HeadMotorHandler::positionCB, this);
