@@ -1,5 +1,10 @@
-KERNEL=="ttyUSB*", ATTRS{serial} =="FTT9LBAI", NAME="roman/threemxl"
+#Gebruik de volgende commando om informatie te krijgen van een nieuw device om toe te voegen:
+#udevadm info -a -p  $(udevadm info -q path -n /dev/sdb)
+
 #KERNEL=="ttyUSB*", ATTRS{serial} =="A800eFun", NAME="roman/arduino_duemilanove"
+KERNEL=="ttyUSB*", ATTRS{serial} =="FTT9LBAI", NAME="roman/threemxl"
+KERNEL=="ttyUSB*", ATTRS{serial}=="FTTJI3KB", NAME="roman/dynamixel"
 KERNEL=="ttyUSB*", ATTRS{serial} =="A600et9G", NAME="roman/arduino_zero"
 KERNEL=="ttyACM*", ATTRS{product}=="Arduino Uno", NAME="roman/arduino_uno"
+
 
