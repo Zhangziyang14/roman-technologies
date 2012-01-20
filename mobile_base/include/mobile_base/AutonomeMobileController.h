@@ -89,6 +89,7 @@ private:
 	bool updateCurrentPosition();
 	void publishPathLength();
 	void publishState();
+	void scaleTwist();
 
 public:
 	/// Constructor
