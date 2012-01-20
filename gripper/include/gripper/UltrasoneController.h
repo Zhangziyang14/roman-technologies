@@ -15,7 +15,7 @@ class UltrasoneController: public Controller
 public:
 	virtual void init();
 
-	void readSensorDataCB(const gripper::DistancePtr& msg);
+	void readSensorDataCB(const std_msgs::UInt16& msg);
 };
 
 #endif /* ULTRASONECONTROLLER_H_ */

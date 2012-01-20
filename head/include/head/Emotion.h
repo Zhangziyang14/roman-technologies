@@ -12,13 +12,18 @@ class Emotion
 {
 public:  
   
- Emotion(int r, int g, int b);
+ Emotion(int r, int g, int b, int left, int right, int lift);
  int red();
  int green();
  int blue();
+ int leftEyebrow();
+ int rightEyebrow();
+ int liftEyebrow();
   
 private:
  int _red,_green,_blue;
+ int _leftEyebrowAngle, _rightEyebrowAngle;
+ int _liftEyebrowAngle;
   
 };
 

@@ -32,7 +32,6 @@ void Controller::moveArm(const geometry_msgs::PoseStamped msg)
 
 void Controller::moveBase(geometry_msgs::PoseStamped &stamped_goal)
 {
-	//TODO: Put this in a function
 	tf::Quaternion goal_orientation(mOriginalPosition.getRotation().getX(), mOriginalPosition.getRotation().getY(), mOriginalPosition.getRotation().getZ(), mOriginalPosition.getRotation().getW());
 
 	//TODO aanpassen om naar tafel te gaan
@@ -55,9 +54,6 @@ void Controller::moveHead(double x, double z)
 	pose_msg.position.z = z;
 
 	mHeadPositionPublisher.publish(pose_msg);
-	//wait until the head is at its desired Pose
-	//can be replaced when using direct feedback for the head position
-	usleep(1000000);
 }
 
 /**
@@ -72,11 +68,11 @@ void Controller::findObject(u_int8_t object_id)
 
 /**
  *	Listens to the position of the head and updates the head's current pose
- *
+ */
 void Controller::headPoseCB(const geometry_msgs::Pose& msg)
 {
 	mHeadCurrentPose = msg;
-}*/
+}
 
 /**
  *	Updates robot position on map

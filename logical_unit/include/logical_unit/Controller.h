@@ -92,7 +92,7 @@ public:
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);
 	void speechCB(const audio_processing::speech& msg);
-	//void headPoseCB(const geometry_msgs::Pose& msg);
+	void headPoseCB(const geometry_msgs::Pose& msg);
 	void objectPositionCB(const geometry_msgs::PoseStamped& msg);
 	void waitForLock();
 

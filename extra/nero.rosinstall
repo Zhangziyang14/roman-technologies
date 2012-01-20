@@ -30,3 +30,6 @@
     local-name: rosserial
     uri: https://kforge.ros.org/rosserial/hg
 
+- svn:
+    local-name: pocketsphinx
+    uri: http://albany-ros-pkg.googlecode.com/svn/trunk/rharmony/pocketsphinx

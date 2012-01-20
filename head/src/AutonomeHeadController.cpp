@@ -1,68 +1,76 @@
 #include "head/AutonomeHeadController.h"
 
-std_msgs::ColorRGBA rgb;
+/**
+ * Sets the expression to the given emotion
+ */
+void AutonomeHeadController::setExpression(Emotion emotion)
+{
+	std_msgs::ColorRGBA rgb_msg;
+	head::eyebrows eyebrows_msg;
 
+	rgb_msg.r = emotion.red();
+	rgb_msg.g = emotion.green();
+	rgb_msg.b = emotion.blue();
+	rgb_msg.a = 0;
+
+	eyebrows_msg.lift = emotion.liftEyebrow();
+	eyebrows_msg.left = emotion.leftEyebrow();
+	eyebrows_msg.right = emotion.rightEyebrow();
+
+	mRGB_pub.publish(rgb_msg);
+	//mEyebrows_pub.publish(eyebrows_msg);
+}
+
+/**
+ * Sets the expression as given by emotionTopic
+ */
 void AutonomeHeadController::expressEmotionCB(const std_msgs::UInt8 &msg)
 {
+	mCurrentEmotion = msg.data;
 
-	switch(msg.data)
+	switch(mCurrentEmotion)
 	{
 	case NEUTRAL:
 	{
-		rgb.r = mNeutral.red();
-		rgb.g = mNeutral.green();
-		rgb.b = mNeutral.blue();
-
+		setExpression(mNeutral);
 	}
 	break;
 
 	case HAPPY:
 	{
-		rgb.r = mHappy.red();
-		rgb.g = mHappy.green();
-		rgb.b = mHappy.blue();
+		setExpression(mHappy);
 	}
 	break;
 
 	case SAD:
 	{
-		rgb.r = mSad.red();
-		rgb.g = mSad.green();
-		rgb.b = mSad.blue();
+		setExpression(mSad);
 	}
 	break;
 
 	case SURPRISED:
 	{
-		rgb.r = mSurprised.red();
-		rgb.g = mSurprised.green();
-		rgb.b = mSurprised.blue();
+		setExpression(mSurprised);
 	}
 	break;
 
 	case ERROR:
 	{
-		rgb.r = mError.red();
-		rgb.g = mError.green();
-		rgb.b = mError.blue();
+		setExpression(mError);
 	}
 	break;
 
 	default:
 	{
-		rgb.r = mNeutral.red();
-		rgb.g = mNeutral.green();
-		rgb.b = mNeutral.blue();
+		setExpression(mNeutral);
 	}
 
-
-
 	}
-	ROS_INFO("Publish Colors: %f, %f, %f", rgb.r, rgb.g, rgb. g);
-	mRGB_pub.publish(rgb);
-
-
 }
+
+/**
+ * Initialise AutonomeHeadController
+ */
 void AutonomeHeadController::init()
 {
 	// initialise subscribers
@@ -72,12 +80,10 @@ void AutonomeHeadController::init()
 
 	// initialise publishers
 	mRGB_pub = mNodeHandle.advertise<std_msgs::ColorRGBA>("/rgbTopic", 1);
-	mEyebrows_pub = mNodeHandle.advertise<head::eyebrows>("/eyebrowsTopic", 1);
+	mEyebrows_pub = mNodeHandle.advertise<head::eyebrows>("/eyebrowTopic", 1);
 	mHead_movement_pub = mNodeHandle.advertise<head::PitchYaw>("/headPositionTopic", 1);
 
 	ROS_INFO("AutonomeHeadController initialised");
-
-	rgb.a = 0;
 }
 
 /**

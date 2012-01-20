@@ -98,11 +98,19 @@ void DynamixelMotor::init(char *path)
 		std::cout << "Using direct connection" << std::endl;
 		motor_ = new CDynamixel();
 
-		serial_port_.port_open("/dev/roman/threemxl", LxSerial::RS485_FTDI);
+		serial_port_.port_open("/dev/roman/dynamixel", LxSerial::RS485_FTDI);
 		serial_port_.set_speed(LxSerial::S1000000);
 
 		motor_->setSerialPort(&serial_port_);
 	}
+/*
+	ros::Rate init_rate(1);
+	while (ros::ok() && motor_->init() != DXL_SUCCESS)
+	{
+		ROS_WARN_ONCE("Couldn't initialize motor, will continue trying every second");
+		init_rate.sleep();
+	}
+*/
 
 	// initialize the motor
 	motor_->setConfig(config->setID(mMotorId));

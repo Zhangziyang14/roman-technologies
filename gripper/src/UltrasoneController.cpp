@@ -18,9 +18,9 @@ void UltrasoneController::init()
 /**
  * Called when new sensor data is made available.
 */
-void UltrasoneController::readSensorDataCB(const gripper::DistancePtr& msg)
+void UltrasoneController::readSensorDataCB(const std_msgs::UInt16& msg)
 {
-    ROS_INFO("I heard: [%d]", msg->distance);
+    ROS_INFO("I heard: [%d]", msg.data);
 
     // default message, open the gripper
     gripper::MotorControl mc;
@@ -29,14 +29,14 @@ void UltrasoneController::readSensorDataCB(const gripper::DistancePtr& msg)
     mc.waitTime = GRIPPER_WAIT_TIME;
 
     // Is the distance smaller than 10cm and are we not grabbing the object yet? Then close the gripper
-    if (msg->distance < CLOSE_GRIPPER_DISTANCE && mGripperState != GS_CLOSED)
+    if (msg.data < CLOSE_GRIPPER_DISTANCE && mGripperState != GS_CLOSED)
     {
         mc.value = -mc.value;
         mMotor_pub.publish(mc);
         mGripperState = GS_CLOSED;
     }
     // Is the distance greater than 15cm and are we grabbing the object, then open the gripper.
-    else if (msg->distance > OPEN_GRIPPER_DISTANCE && mGripperState != GS_OPEN)
+    else if (msg.data > OPEN_GRIPPER_DISTANCE && mGripperState != GS_OPEN)
     {
         mMotor_pub.publish(mc);
         mGripperState = GS_OPEN;

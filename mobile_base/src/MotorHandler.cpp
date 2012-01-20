@@ -272,17 +272,20 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "MotorHandler");
 
-	char *path=NULL;
+	char *path="serial";
 	if (argc == 2)
 		path = argv[1];
 
 	MotorHandler motorHandler;
 	motorHandler.init(path);
 
+	ros::Rate looprate(50);
+
 	while(ros::ok())
 	{
 		motorHandler.publishRobotSpeed();
 		ros::spinOnce();
+		looprate.sleep();
 	}
 
 	return 0;

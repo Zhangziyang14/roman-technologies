@@ -4,13 +4,13 @@
 #include <ros/ros.h>
 #include <numeric>
 #include <sstream>
-#include <gripper/Distance.h>
 #include <CDxlGeneric.h>
 #include <gripper/MotorControl.h>
 
 #include "sensor_msgs/JointState.h"
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Bool.h"
+#include "std_msgs/UInt16.h"
 
 #define OPEN_GRIPPER_DISTANCE 100 // mm
 #define CLOSE_GRIPPER_DISTANCE 150 // mm

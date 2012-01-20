@@ -22,7 +22,7 @@
 // REMOVE THIS
 #include <tf/transform_listener.h>
 
-#define VIEW_OBJECTS_ANGLE	0.4	
+#define VIEW_OBJECTS_ANGLE	0.4
 
 class ObjectRecognition
 {

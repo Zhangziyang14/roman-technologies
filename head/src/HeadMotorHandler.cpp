@@ -79,7 +79,7 @@ void HeadMotorHandler::init(char *path)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "MotorHandler");
+	ros::init(argc, argv, "HeadMotorHandler");
 
 	char *path=NULL;
 	if (argc == 2)

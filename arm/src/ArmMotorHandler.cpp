@@ -4,16 +4,19 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "ArmMotorHandler");
 
-	char *path=NULL;
+	char *path="serial";
 	if (argc == 2)
 		path = argv[1];
 
 	ArmMotorHandler armHandler(path);
 
+	ros::Rate looprate(50);
+
 	while(ros::ok())
 	{
 		armHandler.publishArmPosition();
 		ros::spinOnce();
+		looprate.sleep();
 	}
 
 	return 0;

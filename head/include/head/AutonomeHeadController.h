@@ -30,6 +30,7 @@ protected:
 
 	ros::Subscriber mEmotion_sub;
 	ros::Subscriber mCommand_sub;
+	u_int8_t mCurrentEmotion;
 
 	Emotion mNeutral;
 	Emotion mHappy;
@@ -39,7 +40,7 @@ protected:
 
 public:
 	//Constructor
-	AutonomeHeadController() : mNodeHandle("") , mNeutral(0,0,0) , mHappy(0,255,0) , mSad(0,150,255) , mSurprised(250,40,0) , mError(255,0,0) { 
+	AutonomeHeadController() : mNodeHandle("") , mNeutral(0, 0, 0, 90, 90, 79) , mHappy(0, 255, 0, 90, 90, 79) , mSad(0, 150, 255, 60, 120, 79) , mSurprised(250, 40, 0, 60, 120, 50) , mError(255, 0, 0, 90, 90, 79) {
 		ROS_INFO("AutonomeHeadController constructor");
 	};
 
@@ -50,6 +51,7 @@ public:
 		mNodeHandle.shutdown();
 	};
 
+	void setExpression(Emotion emotion);
 	void headCommandCB(const head::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();

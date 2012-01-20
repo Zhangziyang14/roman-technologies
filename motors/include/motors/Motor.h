@@ -27,8 +27,6 @@
     } \
   } while (0)
 
-
-
 enum ControlMode
 {
     CM_NONE = -1,

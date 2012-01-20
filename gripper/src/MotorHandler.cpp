@@ -34,7 +34,6 @@ void MotorHandler::chatterCallback(const gripper::MotorControlPtr& mc)
         motor_->set3MxlMode(mode);
         cmode = mode;
     }
-
     // pass the value to the motor
     switch (mode)
     {
@@ -95,7 +94,7 @@ int main(int argc, char **argv)
 
     ros::NodeHandle n;
 
-    char *path=NULL;
+    char *path="serial";
     if (argc == 2)
         path = argv[1];
  
@@ -105,6 +104,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub = n.subscribe("motorTopic", 1, &MotorHandler::chatterCallback, &motorHandler);
 
     ros::spin();
+
 
     return 0;
 }

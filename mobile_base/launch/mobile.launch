@@ -1,9 +1,10 @@
 <launch>
   <group ns="/">
-    <node pkg="mobile_base" name="BaseMotorHandler" type="BaseMotorHandler"/>
-    <node pkg="mobile_base" name="BaseController" type="BaseController"/>
-    <node pkg="mobile_base" name="SafeKeeper" type="SafeKeeper"/>
+    <node pkg="mobile_base" name="BaseMotorHandler" type="BaseMotorHandler" />
+    <node pkg="mobile_base" name="SafeKeeper" type="SafeKeeper" />
+    <!--node pkg="mobile_base" name="BaseController" type="BaseController" /-->
     <!-- node pkg="joy" name="joy" type="joy_node"/-->
+
   </group>
 
 </launch>

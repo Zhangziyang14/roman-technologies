@@ -230,11 +230,19 @@ void Motor::init(char *path)
 
         serial_port_.port_open(THREEMXL_SERIAL_DEVICE, LxSerial::RS485_FTDI);
         serial_port_.set_speed(LxSerial::S921600);
-        motor_->setSerialPort(&serial_port_);    
+        motor_->setSerialPort(&serial_port_);
     }
 
     // initialize the motor
     motor_->setConfig(config->setID(mMotorId));
+
+    /*ros::Rate init_rate(1);
+    	while (ros::ok() && motor_->init() != DXL_SUCCESS)
+    	{
+    		ROS_WARN_ONCE("Couldn't initialize motor, will continue trying every second");
+    		init_rate.sleep();
+    	}
+*/
     motor_->init(false);
     setMode(CM_STOP_MODE);
     setEncoderCount(DEFAULT_ENCODER_COUNT);		//NB: this overrides the 3mxel default
