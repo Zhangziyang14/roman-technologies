@@ -25,7 +25,7 @@ protected:
 
 public:
 	/// Constructor
-	AutonomeMobileController(): mNodeHandle("")
+	AutonomeMobileController(): mNodeHandle(""), mPathFollower(&mNodeHandle)
 	{
 		mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
 	};

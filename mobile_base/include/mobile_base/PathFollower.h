@@ -78,6 +78,9 @@ private:
 
 public:
 	void updatePath();
+
+	PathFollower(ros::NodeHandle *nodeHandle);
+	~PathFollower() {};
 };
 
 #endif /* PATHFOLLOWER_H_ */
