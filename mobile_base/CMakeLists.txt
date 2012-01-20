@@ -22,7 +22,7 @@ rosbuild_genmsg()
 #rosbuild_gensrv()
 
 rosbuild_add_executable(PS3MobileController src/PS3MobileController.cpp)
-rosbuild_add_executable(AutonomeMobileController src/AutonomeMobileController.cpp src/PathFollower.cpp)
+rosbuild_add_executable(AutonomeMobileController src/AutonomeMobileController.cpp src/PathFollower.cpp src/LocalPlanner.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp)
 rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
 

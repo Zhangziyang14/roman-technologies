@@ -22,10 +22,13 @@ enum FollowState
 #include "tf/transform_listener.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/UInt8.h"
+#include "mobile_base/LocalPlanner.h"
 
 class PathFollower
 {
 private:
+	LocalPlanner mLocalPlanner;
+
 	ros::Subscriber mPathSub;						/// Subscriber that listens to paths from PathPlanner
 	ros::Publisher mCommandPub;						/// Publishes velocity commands
 	ros::Publisher mGoalPub;						/// Re-publishes goals when a new path needs to be calculated

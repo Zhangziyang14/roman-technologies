@@ -40,7 +40,7 @@ float distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
 /**
  * Constructor
  */
-PathFollower::PathFollower(ros::NodeHandle *nodeHandle): mFollowState(FOLLOW_STATE_IDLE)
+PathFollower::PathFollower(ros::NodeHandle *nodeHandle) : mLocalPlanner(nodeHandle), mFollowState(FOLLOW_STATE_IDLE)
 {
 	std::string pathTopic, speedFeedbackTopic, goalTopic, pathLengthTopic, followStateTopic;
 	nodeHandle->param<std::string>("path_topic", pathTopic, "/global_path");
@@ -245,6 +245,9 @@ void PathFollower::updatePath()
 	}
 
 	publishPathLength();
+
+	mLocalPlanner.scaleTwist(command);
+
 	mCommandPub.publish(command);
 }
 
