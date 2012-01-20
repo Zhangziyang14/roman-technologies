@@ -109,14 +109,14 @@ void Controller::getJuice()
 	//First, rotate head in the right direction
 
 	//Go to the table
-	updateRobotPosition();
+	//updateRobotPosition();
 	/*
 	geometry_msgs::PoseStamped msg;
 	msg.pose.position.x = std::cos(tf::getYaw());
 	msg.pose.position.y = std::sin();
 	 */
 
-	geometry_msgs::PoseStamped msg;
+	//geometry_msgs::PoseStamped msg;
 
 	//moveBase(msg);
 
@@ -125,19 +125,13 @@ void Controller::getJuice()
 
 	//ROS_INFO("Reached Goal");
 
-	//Then, lift the arm just above the table
-	moveArm(0.0, 0.0);
-
 	//Aim Kinect to the table
-	moveHead(0.0, 0.0);
-	//TODO measure the correct angles
+	moveHead(VIEW_OBJECTS_ANGLE, 0.0);
 
 	//Start object recognition process
-	mLock = true;
+	mLock = OBJECT_RECOGNITION_LOCK;
 	findObject(9387);
 	waitForLock();
-
-	mTransformListener.transformPose("arm_frame", mObjectPose, mObjectToArmPose);
 
 	//Move arm to object and grab it
 	moveArm(mObjectToArmPose);
@@ -146,7 +140,7 @@ void Controller::getJuice()
 	moveArm(MAX_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 
 	//Go back to original position
-	moveBase(msg);
+	//moveBase(msg);
 
 	//Deliver the juice
 }
@@ -209,7 +203,7 @@ void Controller::speechCB(const audio_processing::speech& msg)
 void Controller::navigationStateCB(const std_msgs::UInt8& msg)
 {
 	if(msg.data == FOLLOW_STATE_FINISHED)
-		mLock = false;
+		mLock = NONE;
 }
 
 /**
@@ -226,7 +220,7 @@ void Controller::baseGoalCB(const std_msgs::Float32& msg)
 void Controller::objectPositionCB(const geometry_msgs::PoseStamped& msg)
 {
 	mObjectPose = msg;
-	mLock = false;
+	mLock = NONE;
 }
 
 /**
@@ -292,10 +286,6 @@ int main(int argc, char **argv)
 	// init ros and pathfinder
 	ros::init(argc, argv, "controller");
 	Controller controller;
-
-	char *path = NULL;
-	if (argc == 2)
-		path = argv[1];
 
 	controller.init();
 
