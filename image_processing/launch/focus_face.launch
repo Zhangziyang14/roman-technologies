@@ -1,0 +1,4 @@
+<launch>
+	<arg name="cascade_file" default="$(find image_processing)/cascade/haarcascade_frontalface_alt.xml" />
+	<node pkg="image_processing" name="FocusFace" type="FocusFace" output="screen" args="$(arg cascade_file)"/>
+</launch>

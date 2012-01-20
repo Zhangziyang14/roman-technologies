@@ -23,12 +23,26 @@
 // forward declaration
 IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
 
-#define CASCADE_NAME "cascade/haarcascade_frontalface_alt.xml"
-#define PI 3.14159265
+#define STOP_SPEED_TOLERANCE 0.01
 
 cv::CascadeClassifier gCascade;
 ros::Publisher *kinect_motor_pub = NULL;
 head::PitchYaw gCurrentOrientation;
+
+bool gLock = false;
+
+void headSpeedCb(const head::PitchYaw &msg)
+{
+	bool tmpLock = gLock;
+	gLock = fabs(msg.pitch) > STOP_SPEED_TOLERANCE || fabs(msg.yaw) > STOP_SPEED_TOLERANCE;
+	if (tmpLock != gLock)
+	{
+		if (gLock)
+			ROS_INFO("Locking movement.");
+		else
+			ROS_INFO("Unlocking movement.");
+	}
+}
 
 void headPositionCb(const head::PitchYaw &msg)
 {
@@ -115,14 +129,10 @@ void detectAndDraw(pcl::PointCloud<pcl::PointXYZRGB> *cloud, cv::Mat& img, cv::C
 
     		msg.pitch = pitch + gCurrentOrientation.pitch;
     		msg.yaw = yaw + gCurrentOrientation.yaw;
-    		if (isnan(gCurrentOrientation.pitch))
-    			gCurrentOrientation.pitch = 0.0;
-    		if (isnan(gCurrentOrientation.yaw))
-    			gCurrentOrientation.yaw = 0.0;
+    		if (isnan(msg.pitch) || isnan(msg.yaw))
+    			return;
 
     		kinect_motor_pub->publish(msg);
-    		usleep(500*1000);
-
     	}
     }
     cv::imshow("result", img);
@@ -147,8 +157,17 @@ void imageCb(const sensor_msgs::PointCloud2Ptr &image)
 		return;
 	}
 
+	if (gLock)
+	{
+		cvShowImage("result", iplImg);
+		cvReleaseImage(&iplImg);
+		return;
+	}
+
 	frame = iplImg;
-	detectAndDraw(&cloud, frame, gCascade, /*nestedCascade, */ 3.0);
+	detectAndDraw(&cloud, frame, gCascade, /*nestedCascade, */ 2.0);
+
+	cvReleaseImage(&iplImg);
 }
 
 int main( int argc, char* argv[] )
@@ -158,14 +177,21 @@ int main( int argc, char* argv[] )
 
 	ros::Subscriber image_sub = nh.subscribe("/camera/depth_registered/points", 1, &imageCb);
 	ros::Subscriber head_position_sub = nh.subscribe("/headPositionFeedbackTopic", 1, &headPositionCb);
+	ros::Subscriber head_speed_sub = nh.subscribe("/headSpeedFeedbackTopic", 1, &headSpeedCb);
 	kinect_motor_pub = new ros::Publisher(nh.advertise<head::PitchYaw>("/cmd_head_position", 1));
 
 	gCurrentOrientation.pitch = 0.f;
 	gCurrentOrientation.yaw = 0.f;
 
+	if (argc != 2)
+	{
+		ROS_ERROR("Invalid input arguments.");
+		return 0;
+	}
+
 	cv::startWindowThread();
 	cvNamedWindow("result", 1);
-    if (!gCascade.load(CASCADE_NAME))
+    if (!gCascade.load(argv[1]))
     {
         std::cerr << "ERROR: Could not load classifier cascade" << std::endl;
         return -1;
