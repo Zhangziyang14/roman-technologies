@@ -3,9 +3,9 @@
 #include "arm/armJointPos.h"
 #include <geometry_msgs/Pose.h>
 
-#define UPPER_ARM_LENGTH 	0.36		//Length of upper arm in [cm]
-#define WRIST_LENGTH 		0.18		//Length of wrist in [cm]
-#define EFFECTOR_ORIGIN 	0.18		//Offset in [cm] from wrist to the point 3 [cm] in front of the gripper
+#define UPPER_ARM_LENGTH 	0.36		//Length of upper arm in [m]
+#define WRIST_LENGTH 		0.18		//Length of wrist in [m]
+#define EFFECTOR_ORIGIN 	0.18		//Offset in [m] from wrist to the point 3 [cm] in front of the gripper
 
 ros::Publisher *coordinate_publisher;
 double currentX, currentY, currentZ;

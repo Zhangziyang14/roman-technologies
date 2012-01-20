@@ -9,9 +9,8 @@
   <review status="unreviewed" notes=""/>
   <depend package="motors"/>
   <depend package="std_msgs"/>
-  <depend package="sensor_msgs"/>
-  <depend package="nav_core"/>
-  <depend package="costmap_2d"/>
+  <depend package="tf"/>
+  <depend package="nav_msgs"/>
 
 </package>
 

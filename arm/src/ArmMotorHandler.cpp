@@ -4,7 +4,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "ArmMotorHandler");
 
-	char *path="serial";
+	char *path=NULL;
 	if (argc == 2)
 		path = argv[1];
 

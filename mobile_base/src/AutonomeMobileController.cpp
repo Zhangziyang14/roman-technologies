@@ -1,11 +1,10 @@
 /*
- * PathFollower.cpp
+ * AutonomeMobileController.cpp
  *
- *  Created on: Dec 20, 2011
- *      Author: hans
+ *  Created on: 2012-01-20
+ *      Author: wilson
  */
-
-#include "logical_unit/PathFollower.h"
+#include "mobile_base/AutonomeMobileController.h"
 
 /**
  * Calculates a distance from point p to the line described by points a and b.
@@ -38,9 +37,9 @@ float distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
 }
 
 /**
- * PathFollower constructor.
+ * Constructor
  */
-PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
+AutonomeMobileController::AutonomeMobileController() : mNodeHandle(""), mFollowState(FOLLOW_STATE_IDLE)
 {
 	std::string pathTopic, speedFeedbackTopic, goalTopic, pathLengthTopic, followStateTopic;
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
@@ -59,7 +58,7 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 	mNodeHandle.param<double>("reset_distance_tolerance", mResetDistanceTolerance, 0.5);
 
-	mPathSub = mNodeHandle.subscribe(pathTopic, 1, &PathFollower::pathCb, this);
+	mPathSub = mNodeHandle.subscribe(pathTopic, 1, &AutonomeMobileController::pathCb, this);
 	mCommandPub = mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	mGoalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
 	mPathLengthPub = mNodeHandle.advertise<std_msgs::Float32>(pathLengthTopic, 1);
@@ -67,9 +66,9 @@ PathFollower::PathFollower() : mFollowState(FOLLOW_STATE_IDLE)
 }
 
 /**
- * Returns the yaw that needs to be turned.
- */
-double PathFollower::calculateDiffYaw()
+* Returns the yaw that needs to be turned.
+*/
+double AutonomeMobileController::calculateDiffYaw()
 {
 	if (getPathSize() == 0)
 	{
@@ -95,7 +94,7 @@ double PathFollower::calculateDiffYaw()
 /**
  * Continue to the next waypoint.
  */
-void PathFollower::continuePath()
+void AutonomeMobileController::continuePath()
 {
 	mOrigin = getNextPoint();
 
@@ -117,7 +116,7 @@ void PathFollower::continuePath()
 /**
  * Publishes the total distance of the remaining path
  */
-void PathFollower::publishPathLength()
+void AutonomeMobileController::publishPathLength()
 {
 	if (mPathLengthPub.getNumSubscribers() == 0)
 		return;
@@ -137,7 +136,7 @@ void PathFollower::publishPathLength()
 /**
  * Publishes the robot state
  */
-void PathFollower::publishState()
+void AutonomeMobileController::publishState()
 {
 	if (mFollowStatePub.getNumSubscribers())
 	{
@@ -154,7 +153,7 @@ void PathFollower::publishState()
 /**
  * Clears path (continously calls continuePath until empty)
  */
-void PathFollower::clearPath()
+void AutonomeMobileController::clearPath()
 {
 	while (getPathSize())
 		continuePath();
@@ -163,7 +162,7 @@ void PathFollower::clearPath()
 /**
  * Updates path logic.
  */
-void PathFollower::handlePath()
+void AutonomeMobileController::handlePath()
 {
 	geometry_msgs::Twist command;
 
@@ -251,7 +250,7 @@ void PathFollower::handlePath()
 /**
  * Updates current position of the robot.
  */
-bool PathFollower::updateCurrentPosition()
+bool AutonomeMobileController::updateCurrentPosition()
 {
 	// get current position in the map
 	try
@@ -270,7 +269,7 @@ bool PathFollower::updateCurrentPosition()
 /**
  * Main follow loop.
  */
-void PathFollower::spin()
+void AutonomeMobileController::spin()
 {
 	ros::Rate refreshRate(mRefreshRate);
 
@@ -286,7 +285,7 @@ void PathFollower::spin()
 /**
  * Receives path from PathPlanner and starts moving towards goal.
  */
-void PathFollower::pathCb(const nav_msgs::Path &path)
+void AutonomeMobileController::pathCb(const nav_msgs::Path &path)
 {
 	ROS_INFO("Received new path.");
 
@@ -306,10 +305,10 @@ void PathFollower::pathCb(const nav_msgs::Path &path)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "PathFollower");
+	ros::init(argc, argv, "AutonomeMobileController");
 
-	PathFollower pf;
+	AutonomeMobileController autonomeMobileController;
 
-	pf.spin();
+	autonomeMobileController.spin();
 	return 0;
 }

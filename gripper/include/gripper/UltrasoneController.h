@@ -9,6 +9,7 @@
 #define ULTRASONECONTROLLER_H_
 
 #include "Controller.h"
+#include <std_msgs/ColorRGBA.h>
 
 class UltrasoneController: public Controller
 {

@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
     ros::NodeHandle n;
 
-    char *path="serial";
+    char *path=NULL;
     if (argc == 2)
         path = argv[1];
  

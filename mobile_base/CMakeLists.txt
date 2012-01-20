@@ -21,10 +21,10 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-rosbuild_add_executable(BaseController src/BaseController.cpp)
+rosbuild_add_executable(PS3MobileController src/PS3MobileController.cpp)
+rosbuild_add_executable(AutonomeMobileController src/AutonomeMobileController.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp)
 rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
-rosbuild_add_executable(testnode src/test.cpp)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

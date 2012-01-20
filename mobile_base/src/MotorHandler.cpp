@@ -142,7 +142,7 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 /**
  * Called when a Twist message is received over the motor topic.
  */
-void MotorHandler::tweakCB(const mobile_base::tweak msg)
+void MotorHandler::tweakCB(const mobile_base::tweak& msg)
 {
 	Motor *motor = mMotorId == MID_LEFT ? &mLeftMotor : &mRightMotor;
 
@@ -244,7 +244,7 @@ void MotorHandler::init(char *path)
 
 	//Initialise subscribers
 	mTweakPIDSub 	= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
-	mTwistSub 		= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
+	mTwistSub 		= mNodeHandle.subscribe("/mobileSpeedTopic", 10, &MotorHandler::moveCB, this);
 	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub 	= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 
@@ -270,9 +270,9 @@ void MotorHandler::init(char *path)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "MotorHandler");
+	ros::init(argc, argv, "BaseMotorHandler");
 
-	char *path="serial";
+	char *path=NULL;
 	if (argc == 2)
 		path = argv[1];
 

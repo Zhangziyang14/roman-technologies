@@ -1,14 +1,18 @@
 /*
- * PathFollower.h
+ * AutonomeMobileController.h
  *
- *  Created on: Dec 20, 2011
- *      Author: hans
+ *  Created on: 2012-01-20
+ *      Author: wilson
  */
 
-#ifndef PATHFOLLOWER_H_
-#define PATHFOLLOWER_H_
+#ifndef AUTONOMEMOBILECONTROLLER_H_
+#define AUTONOMEMOBILECONTROLLER_H_
 
-#include "ros/ros.h"
+
+#include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
+#include <mobile_base/MotorHandler.h>
+
 #include "nav_msgs/Path.h"
 #include "tf/transform_listener.h"
 #include "std_msgs/Float32.h"
@@ -23,10 +27,16 @@ enum FollowState
 	FOLLOW_STATE_MAX,
 };
 
-class PathFollower
+
+/// Controller for teleoperation
+class AutonomeMobileController
 {
+protected:
+	ros::NodeHandle mNodeHandle;      /// ROS node handle
+
+	ros::Publisher mSpeedPub; 	      /// Twist message publisher, publishes movement data for engines
+
 private:
-	ros::NodeHandle mNodeHandle;					/// Handle for this node
 	ros::Subscriber mPathSub;						/// Subscriber that listens to paths from PathPlanner
 	ros::Publisher mCommandPub;						/// Publishes velocity commands
 	ros::Publisher mGoalPub;						/// Re-publishes goals when a new path needs to be calculated
@@ -70,10 +80,8 @@ private:
 	};
 
 	double calculateDiffYaw();
-public:
-	PathFollower();
 
-	void spin();
+	/// Listen to Twist messages and stream them
 	void pathCb(const nav_msgs::Path &path);
 	void continuePath();
 	void clearPath();
@@ -81,6 +89,18 @@ public:
 	bool updateCurrentPosition();
 	void publishPathLength();
 	void publishState();
+
+public:
+	/// Constructor
+	AutonomeMobileController();
+
+	/// Destructor
+	~AutonomeMobileController()
+	{
+		mNodeHandle.shutdown();
+	};
+
+	void spin();
 };
 
-#endif /* PATHFOLLOWER_H_ */
+#endif /* AUTONOMEMOBILECONTROLLER_H_ */

@@ -6,7 +6,7 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <mobile_base/tweak.h>
-#include <mobile_base/BaseController.h>
+
 #include <std_msgs/Float64.h>
 #include <mobile_base/sensorFeedback.h>
 
@@ -77,7 +77,7 @@ public:
 	void moveCB(const geometry_msgs::Twist& msg);
 	void positionCB(const std_msgs::Float64& msg);
 	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
-	void tweakCB(const mobile_base::tweak msg);
+	void tweakCB(const mobile_base::tweak& msg);
 	void negateUltrasone(int length, int* ultrasone[]);
 
 	//Scale the speed of a motor based on the measured distance

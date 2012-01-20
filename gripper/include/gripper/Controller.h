@@ -13,7 +13,7 @@
 #include "std_msgs/UInt16.h"
 
 #define OPEN_GRIPPER_DISTANCE 100 // mm
-#define CLOSE_GRIPPER_DISTANCE 150 // mm
+#define CLOSE_GRIPPER_DISTANCE 80 // mm
 #define AUTOMATIC_GRIPPER_TORQUE 0.02f // Nm
 #define GRIPPER_WAIT_TIME 1000 // msec to wait for opening/closing
 
@@ -39,6 +39,7 @@ protected:
     ros::Publisher mJoint_pub;      /// Joint topic, used for changing the joints in RViz
 
     ros::Subscriber mSensor_sub;    /// Sensor feedback topic, provides sensor data
+    ros::Publisher mEmotion_pub;
 
     GripperState mGripperState;     /// Defines the state of the gripper
 
