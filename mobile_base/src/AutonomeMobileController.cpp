@@ -30,10 +30,12 @@ void AutonomeMobileController::init()
 	//Initialise Subscribers
 	mPositionSub = mNodeHandle.subscribe("/cmd_mobile_position", 1, &AutonomeMobileController::positionCB, this);
 	mTurnSub	 = mNodeHandle.subscribe("/cmd_mobile_turn", 1, &AutonomeMobileController::turnCB, this);
+
+	ROS_INFO("Initialising complete");
 }
 
 /**
- * Makes Nero move forward or backwards
+ * Makes Eva move forward or backwards
  */
 void AutonomeMobileController::positionCB(const std_msgs::Float32& msg)
 {
@@ -46,7 +48,7 @@ void AutonomeMobileController::positionCB(const std_msgs::Float32& msg)
 }
 
 /**
- * Makes Nero turn around her axis
+ * Makes Eva turn around her axis
  */
 void AutonomeMobileController::turnCB(const std_msgs::Float32& msg)
 {
@@ -64,6 +66,8 @@ int main(int argc, char **argv)
 
 	AutonomeMobileController autonomeMobileController;
 
+	autonomeMobileController.init();
 	autonomeMobileController.spin();
+
 	return 0;
 }

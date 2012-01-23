@@ -29,7 +29,7 @@ protected:
 	ros::Subscriber mTwistSub;				/// Listens to Twist messages for movement
 	ros::Subscriber mPositionSub;			/// Listens to integer messages for positioning
 	ros::Subscriber mTweakPIDSub;			/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
-
+    ros::Subscriber mUltrasoneSub;          /// Listens to ultrasone distances
 	ros::Publisher mSpeedPub;				/// Publishes robot's speed
 
 	geometry_msgs::Twist mCurrentSpeed;		/// Twist message containing the current speed of the robot
@@ -65,7 +65,6 @@ public:
 	void positionCB(const mobile_base::position& msg);
 	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
 	void tweakCB(const mobile_base::tweak& msg);
-	void negateUltrasone(int length, int* ultrasone[]);
 
 };
 

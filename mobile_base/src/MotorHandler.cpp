@@ -20,7 +20,9 @@ void MotorHandler::publishRobotSpeed()
  */
 void MotorHandler::positionCB(const mobile_base::position& msg)
 {
-	//TODO: adjust Safekeeper to work with correct message
+	mRightMotor.brake();
+	mLeftMotor.brake();
+
 	double currentRightPosition = mRightMotor.getPosition();
 	double currentLeftPosition = mLeftMotor.getPosition();
 
@@ -28,7 +30,9 @@ void MotorHandler::positionCB(const mobile_base::position& msg)
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	if((msg.left > 0 && msg.right > 0  && mFrontLeftCenter > msg.left*100 && mFrontRightCenter > msg.left*100) || (msg.left < 0 && msg.right < 0 && mRearLeft > std::abs(msg.left*100) && mRearRight > std::abs(msg.left*100)))
+	//ROS_INFO("left: %f, right: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", msg.left, msg.right, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
+	if((msg.left > 0 && msg.right > 0  && mFrontLeftCenter > msg.left*100 && mFrontRightCenter > msg.left*100) || 
+			(msg.left < 0 && msg.right < 0 && mRearLeft > std::abs(msg.left*100) && mRearRight > std::abs(msg.left*100)))
 	{
 		mRightMotor.setPosition(currentRightPosition + msg.right);
 		mLeftMotor.setPosition(currentLeftPosition + msg.left);
@@ -52,11 +56,12 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 
 	converted_left  = vel_linear - 0.5*vel_angular;
 	converted_right = vel_linear + 0.5*vel_angular;
-
+/*
 	if(mLock)
 	{
+		//ROS_INFO("linear.x: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", mCurrentSpeed.linear.x, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
 		//Disable motors when boxed or when in position mode
-		if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
+		if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) || (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
 		{
 			mRightMotor.brake();
 			mLeftMotor.brake();
@@ -64,9 +69,12 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 	}
 	else
 	{
-		mRightMotor.setSpeed(converted_right);
-		mLeftMotor.setSpeed(converted_left);
+
 	}
+	*/
+
+	mRightMotor.setSpeed(converted_right);
+	mLeftMotor.setSpeed(converted_left);
 }
 
 /**
@@ -109,6 +117,66 @@ void MotorHandler::tweakCB(const mobile_base::tweak& msg)
 	}
 }
 
+/**
+ * Negate the ultrasone sensors in the ultrasone array
+ */
+void negateUltrasone(int length, int* ultrasone[])
+{
+	for(int i = 0; i < length ; i++)
+		*ultrasone[i] = 150;
+}
+
+/**
+ *	Reads distances from ultrasone sensors
+ */
+//TODO: Turn off the unused ultrasone sensors in arduino code
+void MotorHandler::ultrasoneCB(const mobile_base::sensorFeedback& msg)
+{
+	if(mCurrentSpeed.linear.x > 0)
+	{
+		int* ultrasone[2] = {&mRearLeft, &mRearRight};
+		negateUltrasone(2, ultrasone);
+
+		//TODO: mFrontLeftCenter and frontCenterLeft are flipped in arduino code.. Fix this! (vice versa for mFrontRightCenter and frontCenterRight)
+
+		mFrontLeftCenter	= msg.frontCenterLeft;
+		mFrontRightCenter	= msg.frontCenterRight;
+
+		mFrontCenterRight	= msg.frontRightCenter;
+		mFrontCenterLeft	= msg.frontLeftCenter;
+
+		mFrontLeft 			= msg.frontLeft;
+		mFrontRight			= msg.frontRight;
+	}
+	else if(mCurrentSpeed.linear.x < 0)
+	{
+		int* ultrasone[6] = {&mFrontLeftCenter, &mFrontRightCenter, &mFrontCenterRight, &mFrontCenterLeft, &mFrontLeft, &mFrontRight};
+		negateUltrasone(6, ultrasone);
+
+		mRearLeft			= msg.rearLeft;
+		mRearRight			= msg.rearRight;
+	}
+	else
+	{
+		mFrontLeftCenter	= msg.frontCenterLeft;
+		mFrontRightCenter	= msg.frontCenterRight;
+
+		mFrontCenterRight	= msg.frontRightCenter;
+		mFrontCenterLeft	= msg.frontLeftCenter;
+
+		mFrontLeft 			= msg.frontLeft;
+		mFrontRight			= msg.frontRight;
+
+		mRearLeft			= msg.rearLeft;
+		mRearRight			= msg.rearRight;
+	}
+
+	mLeft				= msg.left;
+	mRight				= msg.right;
+
+	//ROS_INFO("left %d, frontLeft %d, frontCenterLeft %d, frontLeftCenter %d, frontRightCenter %d, frontCenterRight %d, right %d", mLeft, mFrontLeft, mFrontCenterLeft, mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mRight);
+	//ROS_INFO("rearLeft %d, rearRight %d", mRearLeft, mRearRight);
+}
 
 /**
  * Initialise MotorHandler and its attributes.
@@ -122,11 +190,24 @@ void MotorHandler::init(char *path)
 	mTweakPIDSub 	= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
 	mTwistSub 		= mNodeHandle.subscribe("/mobileSpeedTopic", 10, &MotorHandler::moveCB, this);
 	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
+	mUltrasoneSub   = mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 
 	mLock = false;
 
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
+
+	//Initialise distances from ultrasone sensors
+	mFrontLeftCenter 	= ULTRASONE_MAX_RANGE;
+	mFrontRightCenter 	= ULTRASONE_MAX_RANGE;
+	mFrontCenterLeft 	= ULTRASONE_MAX_RANGE;
+	mFrontCenterRight 	= ULTRASONE_MAX_RANGE;
+	mRearLeft 			= ULTRASONE_MAX_RANGE;
+	mFrontLeft			= ULTRASONE_MAX_RANGE;
+	mRearRight 			= ULTRASONE_MAX_RANGE;
+	mFrontRight 		= ULTRASONE_MAX_RANGE;
+	mRight 				= ULTRASONE_MAX_RANGE;
+	mLeft 				= ULTRASONE_MAX_RANGE;
 
 	ROS_INFO("Initialising completed.");
 }
