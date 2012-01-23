@@ -8,6 +8,12 @@
 #ifndef PATHFOLLOWER_H_
 #define PATHFOLLOWER_H_
 
+#include "ros/ros.h"
+#include "nav_msgs/Path.h"
+#include "tf/transform_listener.h"
+#include "std_msgs/Float32.h"
+#include "std_msgs/UInt8.h"
+
 enum FollowState
 {
 	FOLLOW_STATE_IDLE,

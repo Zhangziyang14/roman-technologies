@@ -1,0 +1,7 @@
+int32 objectId
+---
+geometry_msgs/PoseStamped pose
+
+int32 FAILED = 1
+int32 SUCCESS = 2
+int32 result

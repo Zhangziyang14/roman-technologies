@@ -11,7 +11,6 @@
 #include <ros/ros.h>
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Float32.h>
-#include <logical_unit/PathFollower.h>
 #include <audio_processing/speech.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -19,6 +18,8 @@
 #include "yaml-cpp/yaml.h"
 #include "fstream"
 #include <map>
+#include "logical_unit/FindObject.h"
+#include "head/PitchYaw.h"
 
 #define MIN_ARM_Z_VALUE (-0.321)
 #define MAX_ARM_Z_VALUE (0.1725)
@@ -27,30 +28,44 @@
 
 #define VIEW_OBJECTS_ANGLE	0.4
 
+#define TARGET_YAW_THRESHOLD 0.05
+#define TARGET_DISTANCE_THRESHOLD 0.1
+#define TARGET_DISTANCE 0.5
+#define GRAB_TARGET_DISTANCE 0.3
+#define CLEAR_TABLE_DISTANCE 0.5
+
+#define LOCK_STARTUP_TIME	 0.5
+#define FIND_OBJECT_DURATION 5.0
+
+#define OBJECT_ID 18904
+
+#define HEAD_FREE_THRESHOLD 0.001
+#define BASE_FREE_THRESHOLD 0.001
+
 enum commandValue
 {
 	NOTHING = -1,
-			WAKE_UP,
-			JUICE,
-			SLEEP,
+	WAKE_UP,
+	JUICE,
+	SLEEP,
 };
 
 enum Emotions
 {
 	NEUTRAL = 0,
-			HAPPY,
-			SAD,
-			SURPRISED,
+	HAPPY,
+	SAD,
+	SURPRISED,
 };
 
 enum Locks
 {
-	NONE = 0,
-			BASE_LOCK,
-			HEAD_LOCK,
-			ARM_LOCK,
-			GRIPPER_LOCK,
-			OBJECT_RECOGNITION_LOCK,
+	LOCK_NONE = 0,
+	LOCK_PATH,
+	LOCK_BASE,
+	LOCK_HEAD,
+	LOCK_ARM,
+	LOCK_GRIPPER,
 };
 
 class Controller
@@ -59,25 +74,25 @@ private:
 	ros::NodeHandle mNodeHandle;
 
 	ros::Subscriber mSpeechSubscriber;				/// Listens to speech processed by SpeechRecognition node
-	ros::Subscriber mObjectPoseSubscriber;			/// Listens to the Pose of the found object
 	ros::Subscriber mBaseGoalSubscriber;			/// Listens to path distances to see whether goal is reached
 	ros::Subscriber mNavigationStateSubscriber;		///	Listens to the state of the navigation algorithm
+	ros::Subscriber mHeadSpeedSubscriber;			/// Listens to head motor speeds
+	ros::Subscriber mBaseSpeedSubscriber;			/// Listens to base motor speeds
 
 	ros::Publisher mBaseGoalPublisher;				/// Publishes goal commands to PathPlanner
 	ros::Publisher mArmPositionPublisher;			/// Publishes coordinates to AutonomeArmController
 	ros::Publisher mHeadPositionPublisher;			/// Publishes coordinates to AutonomeHeadController
-	ros::Publisher mObjectRecognitionPublisher;		/// Publishes ID of the object to recognize
+	ros::Publisher mRotateBasePublisher;			/// Publishes rotation angle for base
+	ros::Publisher mPositionBasePublisher;			/// Publishes rotation angle for base
+
+	ros::ServiceClient mFindObjectClient;			/// Service client for rotating the base
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
 	tf::StampedTransform mOriginalPosition;			/// Keeps track of the original position of the robot in the map
-	geometry_msgs::Pose mHeadCurrentPose;			/// Keeps track of the current Pose of the head
 	geometry_msgs::Pose mGoal;						/// Stores the goal postion
 
 	double mDistanceToGoal;							/// Distance to the goal
 	double mDistanceTolerance;						/// Distance tolerance to the goal
-
-	geometry_msgs::PoseStamped mObjectPose;			/// Keeps track of the pose of the found object
-	geometry_msgs::PoseStamped mObjectToArmPose;	/// Keeps track of the pose of the found object in arm space
 
 	Emotions mEmotionalState;						/// Keeps track of Nero's current emotion
 	std::string mSpeech;							/// Keeps track of what is said by the user
@@ -96,14 +111,17 @@ public:
 	void moveArm(const geometry_msgs::PoseStamped msg);
 	void moveBase(geometry_msgs::PoseStamped &stamped_goal);
 	void moveHead(double x, double z);
-	void findObject(u_int8_t object_id);
+	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose);
+	void rotateBase(float angle);
+	void positionBase(float dist);
 
 	void getJuice();
 
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);
 	void speechCB(const audio_processing::speech& msg);
-	void headPoseCB(const geometry_msgs::Pose& msg);
+	void headSpeedCB(const head::PitchYaw &msg);
+	void baseSpeedCB(const geometry_msgs::Twist &msg);
 	void objectPositionCB(const geometry_msgs::PoseStamped& msg);
 
 	void waitForLock();

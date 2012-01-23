@@ -10,6 +10,38 @@
 /// Maps incoming string to a commandValue for use in switch-case in main function
 static std::map<std::string, commandValue> stringToValue;
 
+bool waitForServiceClient(ros::NodeHandle *nodeHandle, const char *serviceName)
+{
+	//wait for client
+	while (!ros::service::waitForService(serviceName, ros::Duration(2.0)) && nodeHandle->ok())
+	{
+		ROS_INFO("Waiting for object detection service to come up");
+	}
+	if (nodeHandle->ok() == false)
+	{
+		ROS_ERROR("Error waiting for %s", serviceName);
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Sends an angle to make the base rotate.
+ */
+void Controller::rotateBase(float angle)
+{
+	std_msgs::Float32 msg;
+	msg.data = angle;
+	mRotateBasePublisher.publish(msg);
+}
+
+void Controller::positionBase(float dist)
+{
+	std_msgs::Float32 msg;
+	msg.data = dist;
+	mRotateBasePublisher.publish(msg);
+}
+
 /**
  * Sends a Pose command to AutonomeArmController, given x and z coordinates
  */
@@ -59,19 +91,48 @@ void Controller::moveHead(double x, double z)
 /**
  *	Sends the id of the object to recognize to ObjectRecognition
  */
-void Controller::findObject(u_int8_t object_id)
+bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose)
 {
-	std_msgs::UInt8 int_msg;
-	int_msg.data = object_id;
-	mObjectRecognitionPublisher.publish(int_msg);
+	logical_unit::FindObject find_call;
+	find_call.request.objectId = object_id;
+
+	double timer = ros::Time::now().toSec();
+
+	while (ros::Time::now().toSec() - timer < FIND_OBJECT_DURATION)
+	{
+		if (mFindObjectClient.call(find_call))
+		{
+			if (find_call.response.result == find_call.response.SUCCESS)
+			{
+				object_pose = find_call.response.pose;
+				return true;
+			}
+			else
+				ROS_ERROR("Something went wrong finding the object.");
+		}
+		else
+			ROS_ERROR("Failed calling finding service.");
+	}
+
+	return false;
 }
 
 /**
- *	Listens to the position of the head and updates the head's current pose
+ *	Listens to the speed of the head and releases lock if necessary
  */
-void Controller::headPoseCB(const geometry_msgs::Pose& msg)
+void Controller::headSpeedCB(const head::PitchYaw &msg)
 {
-	mHeadCurrentPose = msg;
+	if (mLock == LOCK_HEAD && fabs(msg.pitch) < HEAD_FREE_THRESHOLD && fabs(msg.yaw) < HEAD_FREE_THRESHOLD)
+		mLock = LOCK_NONE;
+}
+
+/**
+ *	Listens to the speed of the base and releases lock if necessary
+ */
+void Controller::baseSpeedCB(const geometry_msgs::Twist &msg)
+{
+	if (mLock == LOCK_BASE && fabs(msg.linear.x) < BASE_FREE_THRESHOLD && fabs(msg.angular.z) < BASE_FREE_THRESHOLD)
+		mLock = LOCK_NONE;
 }
 
 /**
@@ -94,6 +155,7 @@ void Controller::updateRobotPosition()
  */
 void Controller::waitForLock()
 {
+	usleep(LOCK_STARTUP_TIME * 1000 * 1000);
 	while(ros::ok() && mLock)
 	{
 		ros::spinOnce();
@@ -126,18 +188,68 @@ void Controller::getJuice()
 	//ROS_INFO("Reached Goal");
 
 	//Aim Kinect to the table
+	mLock = LOCK_HEAD;
 	moveHead(VIEW_OBJECTS_ANGLE, 0.0);
-
-	//Start object recognition process
-	mLock = OBJECT_RECOGNITION_LOCK;
-	findObject(9387);
 	waitForLock();
 
+	//Start object recognition process
+	geometry_msgs::PoseStamped objectPose;
+	if (findObject(OBJECT_ID, objectPose) == false || objectPose.pose.position.y == 0.0)
+	{
+		ROS_ERROR("Failed to find object, quitting script.");
+		return;
+	}
+
+	double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
+	while (yaw > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
+	{
+		if (yaw > TARGET_YAW_THRESHOLD)
+		{
+			ROS_INFO("Rotating by %lf.", yaw);
+
+			mLock = LOCK_BASE;
+			rotateBase(yaw);
+			waitForLock();
+		}
+		else if (fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
+		{
+			ROS_INFO("Moving by %lf.", objectPose.pose.position.y - TARGET_DISTANCE);
+
+			mLock = LOCK_BASE;
+			positionBase(objectPose.pose.position.y - TARGET_DISTANCE);
+			waitForLock();
+		}
+
+		if (findObject(OBJECT_ID, objectPose) == false || objectPose.pose.position.y == 0.0)
+		{
+			ROS_ERROR("Failed to find object, quitting script.");
+			return;
+		}
+
+		yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
+	}
+
 	//Move arm to object and grab it
-	moveArm(mObjectToArmPose);
+	mLock = LOCK_ARM;
+	moveArm(objectPose);
+	waitForLock();
+
+	mLock = LOCK_BASE;
+	positionBase(GRAB_TARGET_DISTANCE);
+	waitForLock();
+
+	mLock = LOCK_BASE;
+	positionBase(CLEAR_TABLE_DISTANCE);
+	waitForLock();
 
 	//Tuck in arm while holding object
-	moveArm(MAX_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+	mLock = LOCK_ARM;
+	moveArm(MIN_ARM_X_VALUE, objectPose.pose.position.z);
+	waitForLock();
+
+	mLock = LOCK_ARM;
+	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+	waitForLock();
 
 	//Go back to original position
 	//moveBase(msg);
@@ -202,8 +314,9 @@ void Controller::speechCB(const audio_processing::speech& msg)
  */
 void Controller::navigationStateCB(const std_msgs::UInt8& msg)
 {
-	if(msg.data == FOLLOW_STATE_FINISHED)
-		mLock = NONE;
+	//TODO: Fix this
+	//if(msg.data == FOLLOW_STATE_FINISHED)
+	//	mLock = NONE;
 }
 
 /**
@@ -212,15 +325,6 @@ void Controller::navigationStateCB(const std_msgs::UInt8& msg)
 void Controller::baseGoalCB(const std_msgs::Float32& msg)
 {
 	mDistanceToGoal = msg.data;
-}
-
-/**
- * Listens to poses of the found object
- */
-void Controller::objectPositionCB(const geometry_msgs::PoseStamped& msg)
-{
-	mObjectPose = msg;
-	mLock = NONE;
 }
 
 /**
@@ -242,13 +346,18 @@ void Controller::init()
 	//initialise subscribers
 	mSpeechSubscriber 			= mNodeHandle.subscribe("/processedSpeechTopic", 1, &Controller::speechCB, this);
 	mBaseGoalSubscriber 		= mNodeHandle.subscribe("/path_length", 1, &Controller::baseGoalCB, this);
-	mObjectPoseSubscriber		= mNodeHandle.subscribe("/objectPoseFeedbackTopic", 1, &Controller::objectPositionCB, this);
+	mHeadSpeedSubscriber		= mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &Controller::headSpeedCB, this);
+	mBaseSpeedSubscriber		= mNodeHandle.subscribe("/speedFeedbackTopic", 1, &Controller::baseSpeedCB, this);
 
 	//initialise publishers
 	mBaseGoalPublisher 			= mNodeHandle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
 	mArmPositionPublisher 		= mNodeHandle.advertise<geometry_msgs::Pose>("/cmd_arm_position", 1);
 	mHeadPositionPublisher		= mNodeHandle.advertise<geometry_msgs::Pose>("/cmd_head_position", 1);
-	mObjectRecognitionPublisher = mNodeHandle.advertise<std_msgs::UInt8>("cmd_object_recognition", 1);
+	mRotateBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_turn", 1);
+	mPositionBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_position", 1);
+
+	if (waitForServiceClient(&mNodeHandle, "/cmd_find_object"))
+		mFindObjectClient		= mNodeHandle.serviceClient<logical_unit::FindObject>("/cmd_find_object", true);
 
 	//Store goal position
 

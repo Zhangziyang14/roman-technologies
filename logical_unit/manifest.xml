@@ -11,6 +11,7 @@
   <depend package="tf"/>
   <depend package="audio_processing"/>  
   <depend package="yaml_cpp"/>
+  <depend package="head"/>
 
   <export>
         <rosdoc config="rosdoc.yaml" />

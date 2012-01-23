@@ -7,7 +7,10 @@
 
 #include "image_processing/ObjectRecognition.h"
 
-ros::ServiceClient mObjectRecognizeClient;		//Service client for tabletop_object_detection
+double distanceFromPose(geometry_msgs::Pose pose)
+{
+	return sqrt(pose.position.x*pose.position.x + pose.position.y*pose.position.y + pose.position.z*pose.position.z);
+}
 
 ObjectRecognition::ObjectRecognition() : mNodeHandle("")
 {
@@ -22,23 +25,18 @@ ObjectRecognition::ObjectRecognition() : mNodeHandle("")
 
 	mObjectRecognizeClient = mNodeHandle.serviceClient<tabletop_object_detector::TabletopDetection>("/object_detection", true);
 	
-	//initialise subscribers
-	mCommandSubscriber = mNodeHandle.subscribe("/cmd_object_recognition", 1, &ObjectRecognition::recognizeCB, this);
-	
-	//initialise publishers
-	mObjectPosePublisher = mNodeHandle.advertise<geometry_msgs::PoseStamped>("/objectPoseFeedbackTopic", 1);
+	//initialise services
+	mFindObjectServer = mNodeHandle.advertiseService("/cmd_object_recognition", &ObjectRecognition::recognizeCB, this);
 
-	mObjectToFind = -1;
 	mNodeHandle.param<double>("min_marker_quality", mMinQuality, 0.003);
 }
 
-void ObjectRecognition::recognizeCB(const std_msgs::Int32 &msg)
+bool ObjectRecognition::recognizeCB(logical_unit::FindObject::Request &req, logical_unit::FindObject::Response &res)
 {
-	mObjectToFind = msg.data;
-}
+	res.result = res.SUCCESS;
+	if (req.objectId == -1)
+		return false;
 
-void ObjectRecognition::spin()
-{
 	//call the tabletop detection
 	ROS_INFO("Calling tabletop detector");
 	tabletop_object_detector::TabletopDetection detection_call;
@@ -49,48 +47,50 @@ void ObjectRecognition::spin()
 	detection_call.request.return_models = true;
 	detection_call.request.num_models = 1;
 
-	while (ros::ok())
+	if (!mObjectRecognizeClient.call(detection_call))
 	{
-		// nothing to do when objectID = -1
-		while (getObjectID() == -1)
-		{
-			usleep(200000);
-			ros::spinOnce();
-			if (ros::ok() == false)
-				return;
-		}
+		res.result = res.FAILED;
+		//ROS_ERROR("Tabletop detection service failed");
+		//return -1;
+	}
+	if (detection_call.response.detection.result !=
+			detection_call.response.detection.SUCCESS)
+	{
+		res.result = res.FAILED;
+		//ROS_ERROR("Tabletop detection returned error code %d", detection_call.response.detection.result);
+		//return -1;
+	}
+	if (detection_call.response.detection.clusters.empty() &&
+			detection_call.response.detection.models.empty() )
+	{
+		res.result = res.FAILED;
+		//ROS_ERROR("The tabletop detector dete0cted the table, but found no objects");
+		//return -1;
+	}
 
-		if (!mObjectRecognizeClient.call(detection_call))
+	// check results for match
+	double closestDistance = 9999.9;
+	for (size_t i = 0; i < detection_call.response.detection.models.size(); i++)
+	{
+		for (size_t j = 0; j < detection_call.response.detection.models[i].model_list.size(); j++)
 		{
-			//ROS_ERROR("Tabletop detection service failed");
-			//return -1;
-		}
-		if (detection_call.response.detection.result !=
-				detection_call.response.detection.SUCCESS)
-		{
-			//ROS_ERROR("Tabletop detection returned error code %d", detection_call.response.detection.result);
-			//return -1;
-		}
-		if (detection_call.response.detection.clusters.empty() &&
-				detection_call.response.detection.models.empty() )
-		{
-			//ROS_ERROR("The tabletop detector detected the table, but found no objects");
-			//return -1;
-		}
+			household_objects_database_msgs::DatabaseModelPose pose = detection_call.response.detection.models[i].model_list[j];
 
-		// check results for match
-		for (size_t i = 0; i < detection_call.response.detection.models.size(); i++)
-		{
-			for (size_t j = 0; j < detection_call.response.detection.models[i].model_list.size(); j++)
+			if (pose.model_id == req.objectId && pose.confidence < mMinQuality)
 			{
-				household_objects_database_msgs::DatabaseModelPose pose = detection_call.response.detection.models[i].model_list[j];
-				if (pose.model_id == getObjectID() && pose.confidence < mMinQuality)
-					publishObjectPose(pose.pose);
+				geometry_msgs::PoseStamped msgToArm;
+				mTransformListener.transformPose("arm_frame", pose.pose, msgToArm);
+				double dist = distanceFromPose(msgToArm.pose);
+				if (dist < closestDistance)
+				{
+					res.pose = msgToArm;
+					closestDistance = dist;
+				}
 			}
 		}
-
-		ros::spinOnce();
 	}
+
+	return closestDistance < 9999.0;
 }
 
 int main(int argc, char **argv)
@@ -98,5 +98,5 @@ int main(int argc, char **argv)
 	// init ros and ObjectRecognition
 	ros::init(argc, argv, "ObjectRecognition");
 	ObjectRecognition objectRecognition;
-	objectRecognition.spin();
+	ros::spin();
 }

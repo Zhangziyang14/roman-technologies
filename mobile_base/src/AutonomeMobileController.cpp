@@ -25,11 +25,11 @@ void AutonomeMobileController::spin()
 void AutonomeMobileController::init()
 {
 	//Initialise Publishers
-	mPositionPub = mNodeHandle.advertise<mobile_base::position>("positionTopic", 1);
+	mPositionPub = mNodeHandle.advertise<mobile_base::position>("/positionTopic", 1);
 
 	//Initialise Subscribers
-	mPositionSub = mNodeHandle.subscribe("cmd_mobile_position", 1, &AutonomeMobileController::positionCB, this);
-	mTurnSub	 = mNodeHandle.subscribe("cmd_mobile_turn", 1, &AutonomeMobileController::turnCB, this);
+	mPositionSub = mNodeHandle.subscribe("/cmd_mobile_position", 1, &AutonomeMobileController::positionCB, this);
+	mTurnSub	 = mNodeHandle.subscribe("/cmd_mobile_turn", 1, &AutonomeMobileController::turnCB, this);
 }
 
 /**
