@@ -50,7 +50,7 @@ private:
 
 	void loadNavmesh();
 public:
-	PathPlanner();
+	PathPlanner(const char *navmesh_file);
 	~PathPlanner();
 
 	void spin();

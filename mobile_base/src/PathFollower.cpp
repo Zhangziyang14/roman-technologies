@@ -277,6 +277,12 @@ void PathFollower::pathCb(const nav_msgs::Path &path)
 {
 	ROS_INFO("Received new path.");
 
+	if (path.poses.size() == 0)
+	{
+		ROS_ERROR("Received empty path.");
+		return;
+	}
+
 	mPath.clear();
 
 	for (size_t i = 0; i < path.poses.size(); i++)

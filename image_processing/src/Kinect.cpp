@@ -47,8 +47,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 		}
 
 		// try to capture a RGB and pointcloud
-		if (((captureRGB || captureCloud) && capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
-			(captureCloud == false || capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP)))
+		if (capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE) && capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP))
 		{
 			IplImage rgb;
 			if (captureRGB || captureCloud)

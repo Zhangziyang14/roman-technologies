@@ -32,7 +32,8 @@ void MotorHandler::positionCB(const mobile_base::position& msg)
 
 	//ROS_INFO("left: %f, right: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", msg.left, msg.right, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
 	if((msg.left > 0 && msg.right > 0  && mFrontLeftCenter > msg.left*100 && mFrontRightCenter > msg.left*100) || 
-			(msg.left < 0 && msg.right < 0 && mRearLeft > std::abs(msg.left*100) && mRearRight > std::abs(msg.left*100)))
+			(msg.left < 0 && msg.right < 0 && mRearLeft > std::abs(msg.left*100) && mRearRight > std::abs(msg.left*100)) ||
+			msg.left != msg.right)
 	{
 		mRightMotor.setPosition(currentRightPosition + msg.right);
 		mLeftMotor.setPosition(currentLeftPosition + msg.left);

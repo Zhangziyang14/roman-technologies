@@ -10,12 +10,12 @@
 /**
  * PathPlanner constructor.
  */
-PathPlanner::PathPlanner() :
+PathPlanner::PathPlanner(const char *navmesh_file) :
 	mNodeHandle("~"),
 	mNavMesh(NULL),
 	mNavMeshQuery(NULL)
 {
-	mNodeHandle.param<std::string>("navmesh", mNavMeshPath, "./navigation/navmesh.bin");
+	mNavMeshPath = navmesh_file;
 	loadNavmesh();
 
 	mNavMeshQuery = dtAllocNavMeshQuery();
@@ -215,7 +215,13 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "PathPlanner");
 
-	PathPlanner pp;
+	if (argc != 2)
+	{
+		ROS_ERROR("Invalid input arguments.");
+		return 0;
+	}
+
+	PathPlanner pp(argv[1]);
 	ros::spin();
 	return 0;
 }

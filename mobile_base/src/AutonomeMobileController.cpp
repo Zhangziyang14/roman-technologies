@@ -54,7 +54,7 @@ void AutonomeMobileController::turnCB(const std_msgs::Float32& msg)
 {
 	mobile_base::position pos_msg;
 
-	pos_msg.left = msg.data > 0 ?  -1 * msg.data/2 * BASE_RADIUS : msg.data/2 * BASE_RADIUS;
+	pos_msg.left = msg.data > 0 ? -1 * msg.data/2 * BASE_RADIUS : msg.data/2 * BASE_RADIUS;
 	pos_msg.right = msg.data > 0 ? msg.data/2 * BASE_RADIUS : -1 * msg.data/2 * BASE_RADIUS;
 
 	mPositionPub.publish(pos_msg);
