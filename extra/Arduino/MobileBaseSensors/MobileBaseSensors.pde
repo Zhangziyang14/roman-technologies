@@ -2,8 +2,18 @@
 #include "ros.h"
 #include "mobile_base/sensorFeedback.h"
 #include "std_msgs/UInt8.h"
+#include <head/eyebrows.h>
+#include <std_msgs/Int32.h>
 #include <Wire.h>
+#include <Servo.h>
 
+const int eblift = A0;
+const int ebright = A1;
+const int ebleft = A3;
+
+Servo eyebrowLeft;
+Servo eyebrowRight;
+Servo lift;
 
 int bumperFrontPin = 8;
 int bumperRearPin = 9;
@@ -11,6 +21,12 @@ int bumperLeftPin = 10;
 int bumperRightPin = 11;
 
 int ranges[10];
+
+const int LIFT_LOWER_LIMIT = 47;
+const int LIFT_UPPER_LIMIT = 75;
+
+const int EYEBROW_LOWER_LIMIT = 60;
+const int EYEBROW_UPPER_LIMIT = 120;
 
 // Ultrasone mask flags
 enum UltrasoneSensor
@@ -41,40 +57,13 @@ ros::NodeHandle nh;
 //declare outgoing messages
 mobile_base::sensorFeedback prox_msg;
 std_msgs::UInt8 bump_msg;
+std_msgs::Int32 dbg_msg;
 
 //topic to publish ultrasone sensor data on
 ros::Publisher feedback_pub("/sensorFeedbackTopic", &prox_msg);
 //topic that issues a warning when bumper hits something
 ros::Publisher bumper_pub("/bumperFeedbackTopic", &bump_msg);
-
-
-void setup()
-{
-  //attach interrupt 0(= pin 2) 
-  attachInterrupt(0, bumperHit, RISING);
-  pinMode(bumperFrontPin, INPUT);
-  pinMode(bumperRearPin, INPUT);
-  pinMode(bumperLeftPin, INPUT);
-  pinMode(bumperRightPin, INPUT);
-  //led
-  pinMode(13, OUTPUT);
-  
-  Wire.begin();
-  Serial.begin(9600);
- 
-  nh.initNode();
-  nh.advertise(feedback_pub);
-  nh.advertise(bumper_pub);
-};
-
-
-
-
-void loop()
-{
-  readSensors();
-  nh.spinOnce(); 
-}
+ros::Publisher dbg_pub("/dbgTopic", &dbg_msg);
 
 void readSensors()
 {
@@ -178,6 +167,84 @@ void bumperHit()
     
   bumper_pub.publish(&bump_msg);
   digitalWrite(13, LOW);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//                                  EYEBROW Section
+////////////////////////////////////////////////////////////////////////////////////////
+
+
+/** EYEBROWS
+ * Checks for angle limits and sets servos to given angles
+ */
+void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
+{
+   if (liftAngle > LIFT_UPPER_LIMIT)
+     liftAngle = LIFT_UPPER_LIMIT;
+   else if (liftAngle < LIFT_LOWER_LIMIT)
+      liftAngle = LIFT_LOWER_LIMIT;
+     
+    if (eyebrowLeftAngle > EYEBROW_UPPER_LIMIT)
+     eyebrowLeftAngle = EYEBROW_UPPER_LIMIT;
+   else if (eyebrowLeftAngle < EYEBROW_LOWER_LIMIT)
+      eyebrowLeftAngle = EYEBROW_LOWER_LIMIT;
+    
+    if (eyebrowRightAngle > EYEBROW_UPPER_LIMIT)
+     eyebrowRightAngle = EYEBROW_UPPER_LIMIT;
+   else if (eyebrowRightAngle < EYEBROW_LOWER_LIMIT)
+      eyebrowRightAngle = EYEBROW_LOWER_LIMIT;  
+
+   eyebrowLeft.write(eyebrowLeftAngle);
+   eyebrowRight.write(eyebrowRightAngle);
+   lift.write(liftAngle);
+   
+   dbg_msg.data = liftAngle;
+   dbg_pub.publish(&dbg_msg);
+}
+
+/**
+ * message order: lift left right
+ */
+void setEyebrowCB(const head::eyebrows &msg)
+{
+   setPosition(msg.lift, msg.left, msg.right);
+  
+}
+
+
+//Subscriber to eyebrow commands from eyebrowTopic
+ros::Subscriber<head::eyebrows> servo_sub("/eyebrowTopic", &setEyebrowCB);
+
+void setup()
+{
+  //attach interrupt 0(= pin 2) 
+  attachInterrupt(0, bumperHit, RISING);
+  pinMode(bumperFrontPin, INPUT);
+  pinMode(bumperRearPin, INPUT);
+  pinMode(bumperLeftPin, INPUT);
+  pinMode(bumperRightPin, INPUT);
+  //led
+  pinMode(13, OUTPUT);
+  
+  Wire.begin();
+ 
+  nh.initNode();
+  
+  //eyebrow init
+  nh.subscribe(servo_sub);
+  eyebrowLeft.attach(ebleft);
+  eyebrowRight.attach(ebright);
+  lift.attach(eblift);
+  
+  nh.advertise(dbg_pub);
+  nh.advertise(feedback_pub);
+  nh.advertise(bumper_pub);
+};
+
+void loop()
+{
+  readSensors();
+  nh.spinOnce(); 
 }
 
 /*
