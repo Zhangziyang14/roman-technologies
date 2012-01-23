@@ -11,15 +11,21 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Float32.h>
 #include <mobile_base/MotorHandler.h>
 #include <mobile_base/PathFollower.h>
+#include <mobile_base/position.h>
 
 /// Controller for teleoperation
 class AutonomeMobileController
 {
 protected:
 	ros::NodeHandle mNodeHandle;	/// ROS node handle
-	ros::Publisher mSpeedPub;  		/// Twist message publisher, publishes movement data for motors
+	ros::Publisher mPositionPub;  	/// Twist message publisher, publishes movement data for motors
+
+	ros::Subscriber mPositionSub;	/// Listens to position commands
+	ros::Subscriber mTurnSub;		/// Listens to turning commands
+
 	int mRefreshRate;				/// Rate at which the path gets updated
 	PathFollower mPathFollower;		/// Handles received paths
 
@@ -36,6 +42,9 @@ public:
 		mNodeHandle.shutdown();
 	};
 
+	void init();
+	void positionCB(const std_msgs::Float32& msg);
+	void turnCB(const std_msgs::Float32& msg);
 	void scaleTwist(const geometry_msgs::Twist& msg);
 	void spin();
 };

@@ -18,8 +18,9 @@ void MotorHandler::publishRobotSpeed()
 /**
  * Controls the motors based on the received position.
  */
-void MotorHandler::positionCB(const std_msgs::Float64& msg)
+void MotorHandler::positionCB(const mobile_base::position& msg)
 {
+	//TODO: adjust Safekeeper to work with correct message
 	double currentRightPosition = mRightMotor.getPosition();
 	double currentLeftPosition = mLeftMotor.getPosition();
 
@@ -27,10 +28,10 @@ void MotorHandler::positionCB(const std_msgs::Float64& msg)
 	mRightMotor.setMode(CM_POSITION_MODE);
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
-	if((msg.data > 0 && mFrontLeftCenter > msg.data*100 && mFrontRightCenter > msg.data*100) || (msg.data < 0 && mRearLeft > std::abs(msg.data*100) && mRearRight > std::abs(msg.data*100)))
+	if((msg.left > 0 && msg.right > 0  && mFrontLeftCenter > msg.left*100 && mFrontRightCenter > msg.left*100) || (msg.left < 0 && msg.right < 0 && mRearLeft > std::abs(msg.left*100) && mRearRight > std::abs(msg.left*100)))
 	{
-		mRightMotor.setPosition(currentRightPosition + msg.data);
-		mLeftMotor.setPosition(currentLeftPosition + msg.data);
+		mRightMotor.setPosition(currentRightPosition + msg.right);
+		mLeftMotor.setPosition(currentLeftPosition + msg.left);
 	}
 }
 

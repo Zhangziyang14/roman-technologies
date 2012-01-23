@@ -7,8 +7,7 @@
 
 #include "mobile_base/SafeKeeper.h"
 
-std_msgs::Float64 position_msg;
-mobile_base::BumperDisableMotor disableBumper_msg;
+mobile_base::position position_msg;
 
 /**
  * Checks whether robot collided with something and determines if forward or backward motion should be disabled
@@ -18,37 +17,31 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 {
 
 	// did the robot collide with something in the front?
-	disableBumper_msg.disableForward = msg.data == BUMPER_FRONT;
+	mDisableForward = msg.data == BUMPER_FRONT;
 
 	// did the robot collide with something in the back?
-	disableBumper_msg.disableBackward = msg.data == BUMPER_REAR;
+	mDisableBackward = msg.data == BUMPER_REAR;
 
-	mBumperDisableMotor_pub.publish(disableBumper_msg);
-
-	if(mBumperState != BUMPER_FRONT && disableBumper_msg.disableForward)
+	if(mBumperState != BUMPER_FRONT && mDisableForward)
 	{
 		mBumperState = BUMPER_FRONT;
-		position_msg.data = -SAFE_DISTANCE;
+		position_msg.left 	= -SAFE_DISTANCE;
+		position_msg.right 	= -SAFE_DISTANCE;
 	}
 
-	if(mBumperState != BUMPER_REAR && disableBumper_msg.disableBackward)
+	if(mBumperState != BUMPER_REAR && mDisableBackward)
 	{
 		mBumperState = BUMPER_REAR;
-		position_msg.data = SAFE_DISTANCE;
+		position_msg.left 	= -SAFE_DISTANCE;
+		position_msg.right 	= -SAFE_DISTANCE;
 	}
 
-	if(mBumperState == BUMPER_REAR)
-		mMovement_pub.publish(position_msg);
+	mMovement_pub.publish(position_msg);
 
-	else if(mBumperState == BUMPER_FRONT)
-		mMovement_pub.publish(position_msg);
-
-	disableBumper_msg.disableForward = false;
-	disableBumper_msg.disableBackward = false;
+	mDisableForward	 = false;
+	mDisableBackward = false;
 
 	mBumperState = BUMPER_NONE;
-
-	mBumperDisableMotor_pub.publish(disableBumper_msg);
 }
 
 /**
@@ -60,8 +53,10 @@ void SafeKeeper::init()
 	mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &SafeKeeper::bumperFeedbackCB, this);
 
 	// initialise publishers
-	mBumperDisableMotor_pub = mNodeHandle.advertise<mobile_base::BumperDisableMotor>("/bumperDisableMotorTopic", 10);
-	mMovement_pub = mNodeHandle.advertise<std_msgs::Float64>("/positionTopic", 1);
+	mMovement_pub = mNodeHandle.advertise<mobile_base::position>("/positionTopic", 1);
+
+	mDisableForward	 = false;
+	mDisableBackward = false;
 
 	ROS_INFO("SafeKeeper initialised");
 }

@@ -22,6 +22,42 @@ void AutonomeMobileController::spin()
 	}
 }
 
+void AutonomeMobileController::init()
+{
+	//Initialise Publishers
+	mPositionPub = mNodeHandle.advertise<mobile_base::position>("positionTopic", 1);
+
+	//Initialise Subscribers
+	mPositionSub = mNodeHandle.subscribe("cmd_mobile_position", 1, &AutonomeMobileController::positionCB, this);
+	mTurnSub	 = mNodeHandle.subscribe("cmd_mobile_turn", 1, &AutonomeMobileController::turnCB, this);
+}
+
+/**
+ * Makes Nero move forward or backwards
+ */
+void AutonomeMobileController::positionCB(const std_msgs::Float32& msg)
+{
+	mobile_base::position pos_msg;
+
+	pos_msg.left = msg.data;
+	pos_msg.right = msg.data;
+
+	mPositionPub.publish(pos_msg);
+}
+
+/**
+ * Makes Nero turn around her axis
+ */
+void AutonomeMobileController::turnCB(const std_msgs::Float32& msg)
+{
+	mobile_base::position pos_msg;
+
+	pos_msg.left = msg.data > 0 ?  -1 * msg.data/2 * BASE_RADIUS : msg.data/2 * BASE_RADIUS;
+	pos_msg.right = msg.data > 0 ? msg.data/2 * BASE_RADIUS : -1 * msg.data/2 * BASE_RADIUS;
+
+	mPositionPub.publish(pos_msg);
+}
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "AutonomeMobileController");

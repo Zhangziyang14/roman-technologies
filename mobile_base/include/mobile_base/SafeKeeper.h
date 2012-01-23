@@ -12,8 +12,9 @@
 #include <mobile_base/BaseMotorControl.h>
 #include <mobile_base/BumperDisableMotor.h>
 #include <mobile_base/DisableMotor.h>
+#include <mobile_base/position.h>
 #include <std_msgs/UInt8.h>
-#include <std_msgs/Float64.h>
+
 
 #define SAFE_DISTANCE  0.5
 
@@ -32,11 +33,11 @@ class SafeKeeper
 private:
 	ros::NodeHandle mNodeHandle;    			/// ROS node handle
 
-	ros::Subscriber mBumperFeedback_sub;		/// Subscriber to arduino bumper sensor feedback
+	ros::Subscriber mBumperFeedback_sub;		/// Subscriber to Arduino bumper sensor feedback
 
-	ros::Publisher	mBumperDisableMotor_pub;	/// Publisher for disabling forward/backward movement, triggered by bumper sensors
 	ros::Publisher  mMovement_pub;				/// Publisher to control the motors
-	BumperState 	mBumperState;
+	BumperState 	mBumperState;				/// Keeps track of the current state for the bumpers
+	bool mDisableForward, mDisableBackward;		/// Keeps track of the front and backward buttons of the bumpers
 
 public:
 	SafeKeeper() :  mBumperState(BUMPER_NONE) {};

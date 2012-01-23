@@ -7,7 +7,7 @@
 #include <geometry_msgs/Twist.h>
 #include <mobile_base/tweak.h>
 
-#include <std_msgs/Float64.h>
+#include <mobile_base/position.h>
 #include <mobile_base/sensorFeedback.h>
 
 #define WHEEL_RADIUS 			0.1475	//[m]
@@ -62,7 +62,7 @@ public:
 
 	void publishRobotSpeed();
 	void moveCB(const geometry_msgs::Twist& msg);
-	void positionCB(const std_msgs::Float64& msg);
+	void positionCB(const mobile_base::position& msg);
 	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
 	void tweakCB(const mobile_base::tweak& msg);
 	void negateUltrasone(int length, int* ultrasone[]);
