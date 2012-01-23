@@ -14,6 +14,7 @@ const int ebleft = A3;
 Servo eyebrowLeft;
 Servo eyebrowRight;
 Servo lift;
+boolean attache;
 
 int bumperFrontPin = 8;
 int bumperRearPin = 9;
@@ -57,13 +58,12 @@ ros::NodeHandle nh;
 //declare outgoing messages
 mobile_base::sensorFeedback prox_msg;
 std_msgs::UInt8 bump_msg;
-std_msgs::Int32 dbg_msg;
 
 //topic to publish ultrasone sensor data on
 ros::Publisher feedback_pub("/sensorFeedbackTopic", &prox_msg);
 //topic that issues a warning when bumper hits something
 ros::Publisher bumper_pub("/bumperFeedbackTopic", &bump_msg);
-ros::Publisher dbg_pub("/dbgTopic", &dbg_msg);
+
 
 void readSensors()
 {
@@ -196,10 +196,20 @@ void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
 
    eyebrowLeft.write(eyebrowLeftAngle);
    eyebrowRight.write(eyebrowRightAngle);
+   
+   if(!attache)
+   {
+     lift.attach(eblift);
+     attache=true;
+   }
+     
    lift.write(liftAngle);
    
-   dbg_msg.data = liftAngle;
-   dbg_pub.publish(&dbg_msg);
+   if(liftAngle < 170)
+   {
+     lift.detach();
+     attache = false;
+   }
 }
 
 /**
@@ -235,8 +245,11 @@ void setup()
   eyebrowLeft.attach(ebleft);
   eyebrowRight.attach(ebright);
   lift.attach(eblift);
+  lift.write(150);
+  delay(500);
+  lift.detach();
+  attache = false;
   
-  nh.advertise(dbg_pub);
   nh.advertise(feedback_pub);
   nh.advertise(bumper_pub);
 };
