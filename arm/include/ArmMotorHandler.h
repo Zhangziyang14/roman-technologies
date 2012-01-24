@@ -39,7 +39,6 @@
 #include <motors/Motor.h>
 #include <std_msgs/Float64.h>
 #include "arm/armJointPos.h"
-#include <boost/thread.hpp>
 
 class ArmMotorHandler
 {
@@ -51,6 +50,7 @@ protected:
 	ros::NodeHandle mNodeHandle;			/// ROS node handle
 
 	ros::Publisher mArmPosFeedbackPub;		/// Publishes current position of the arm in joint space
+	ros::Publisher mArmSpeedFeedbackPub;	/// Publishes current speeds of the arm
 
 	ros::Subscriber mShoulderAngleSub;		/// Listen for shoulder angles
 	ros::Subscriber mSideJointAngleSub;		/// Listen for sideJoint angles
@@ -60,6 +60,7 @@ protected:
 	Motor mSideMotor;						/// Motor for right wheel
 
 	double mCurrentShoulderJointPos, mCurrentSideJointPos;		/// Keeps track of the current joint positions of both motors
+	double mCurrentShoulderJointSpeed, mCurrentSideJointSpeed;	/// Keeps track of the current speeds of both motors
 
 	// initialize motor: find reference point
 	bool init();
@@ -87,8 +88,9 @@ public:
 	void sideJointCB(const std_msgs::Float64& msg);
 	void armPosCB(const arm::armJointPos& msg);
 	void publishArmPosition();
+	void publishArmSpeed();
 
-	/** Multithreading callbacks **/
+	/** Multi threading callbacks **/
 	//void Run();
 
 	inline double getShoulderAngle()
@@ -99,6 +101,16 @@ public:
 	inline double getSideJointAngle()
 	{
 		return mSideMotor.getAngle() * SIDEMOTOR_CORRECTION_FACTOR - SIDEJOINT_OFFSET;
+	}
+
+	inline double getShoulderSpeed()
+	{
+		return mShoulderMotor.getRotationSpeed();
+	}
+
+	inline double getSideJointSpeed()
+	{
+		return mSideMotor.getRotationSpeed();
 	}
 };
 

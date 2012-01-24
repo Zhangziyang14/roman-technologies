@@ -15,6 +15,7 @@ int main(int argc, char **argv)
 	while(ros::ok())
 	{
 		armHandler.publishArmPosition();
+		armHandler.publishArmSpeed();
 		ros::spinOnce();
 		looprate.sleep();
 	}
@@ -22,6 +23,9 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+/**
+ * Publishes the current positions of both motors
+ */
 void ArmMotorHandler::publishArmPosition()
 {
 	mCurrentShoulderJointPos = getShoulderAngle();
@@ -29,10 +33,26 @@ void ArmMotorHandler::publishArmPosition()
 
 	arm::armJointPos joint_msg;
 
-	joint_msg.upper_joint = mCurrentShoulderJointPos;
-	joint_msg.wrist_joint = mCurrentSideJointPos;
+	joint_msg.upper_joint 	= mCurrentShoulderJointPos;
+	joint_msg.wrist_joint 	= mCurrentSideJointPos;
 
 	mArmPosFeedbackPub.publish(joint_msg);
+}
+
+/**
+ * Publishes the current speeds of both motors
+ */
+void ArmMotorHandler::publishArmSpeed()
+{
+	mCurrentShoulderJointSpeed 	 = getShoulderSpeed();
+	mCurrentSideJointSpeed	 	 = getSideJointSpeed();
+
+	arm::armJointPos speed_msg;
+
+	speed_msg.upper_joint 	= mCurrentShoulderJointSpeed;
+	speed_msg.wrist_joint 	= mCurrentSideJointSpeed;
+
+	mArmSpeedFeedbackPub.publish(speed_msg);
 }
 
 /** threemxl run callback
@@ -49,7 +69,7 @@ void ArmMotorHandler::Run()
 		usleep(500000);
 	}
 }
-*/
+ */
 
 /** Constructor
  *
@@ -71,7 +91,8 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		ROS_INFO("ArmMotorHandler successfully initialised");
 
 		//Initialise publishers
-		mArmPosFeedbackPub	= mNodeHandle.advertise<arm::armJointPos>("/armJointPositionFeedbackTopic", 1);
+		mArmPosFeedbackPub		= mNodeHandle.advertise<arm::armJointPos>("/armJointPositionFeedbackTopic", 1);
+		mArmSpeedFeedbackPub	= mNodeHandle.advertise<arm::armJointPos>("/armJointSpeedFeedbackTopic", 1);
 
 		// Initialise subscribers
 		mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
