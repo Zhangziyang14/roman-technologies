@@ -179,7 +179,7 @@ void bumperHit()
  */
 void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
 {
-   if (liftAngle > LIFT_UPPER_LIMIT)
+ /*  if (liftAngle > LIFT_UPPER_LIMIT)
      liftAngle = LIFT_UPPER_LIMIT;
    else if (liftAngle < LIFT_LOWER_LIMIT)
       liftAngle = LIFT_LOWER_LIMIT;
@@ -193,23 +193,24 @@ void setPosition(int liftAngle, int eyebrowLeftAngle, int eyebrowRightAngle)
      eyebrowRightAngle = EYEBROW_UPPER_LIMIT;
    else if (eyebrowRightAngle < EYEBROW_LOWER_LIMIT)
       eyebrowRightAngle = EYEBROW_LOWER_LIMIT;  
-
+*/
    eyebrowLeft.write(eyebrowLeftAngle);
    eyebrowRight.write(eyebrowRightAngle);
-   
+      lift.write(liftAngle);
+   /*
    if(!attache)
    {
      lift.attach(eblift);
      attache=true;
    }
-     
+    
    lift.write(liftAngle);
    
    if(liftAngle < 170)
    {
      lift.detach();
      attache = false;
-   }
+   }*/
 }
 
 /**
@@ -247,8 +248,8 @@ void setup()
   lift.attach(eblift);
   lift.write(150);
   delay(500);
-  lift.detach();
-  attache = false;
+  //lift.detach();
+  //attache = false;
   
   nh.advertise(feedback_pub);
   nh.advertise(bumper_pub);
