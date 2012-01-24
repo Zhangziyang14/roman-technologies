@@ -21,6 +21,11 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
+rosbuild_add_executable(SpeechRecognition src/SpeechRecognition.cpp)
+rosbuild_add_executable(SoundPlayer src/SoundPlayer.cpp)
+
+target_link_libraries(SoundPlayer sfml-audio sfml-system)
+
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
@@ -29,5 +34,3 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 #rosbuild_add_executable(wav_player src/wav_player.cpp)
-rosbuild_add_executable(SpeechRecognition src/SpeechRecognition.cpp)
-#target_link_libraries(wav_player sfml-audio sfml-system)
