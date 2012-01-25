@@ -1,8 +1,6 @@
 #include "image_processing/Util.h"
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
-#include <std_msgs/String.h>
-#include <sensor_msgs/distortion_models.h>
 
 // forward declarations of some needed functions
 sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
@@ -10,6 +8,7 @@ sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
 IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image);
 sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplImage *rgb);
+sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image);
 
 /**
  * Constantly grabs images from the Kinect and performs operations on these images if necessary.
@@ -23,10 +22,15 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 	ros::Publisher laser_pub = nh.advertise<sensor_msgs::LaserScan>("/scan", 1);
 	image_transport::Publisher image_pub = it.advertise("/camera/rgb/image_color", 1);
 	//ros::Publisher image_pub = nh.advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
-	ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/depth_registered/points", 1);
+	ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
+	ros::Publisher rgbcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/depth_registered/points", 1);
 
 	bool captureRGB = false;
 	bool captureCloud = false;
+	bool publishRGBCloud = false;
+	bool publishLaserscan = false;
+	bool publishRGB = false;
+	bool publishCloud = false;
 
 	sensor_msgs::ImagePtr imageMsg;
 
@@ -35,10 +39,18 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 		cv::Mat image, pointCloud;
 		//IplImage iplImage;
 
+		// is it required to capture a laserscan ?
+		publishLaserscan = laser_pub.getNumSubscribers() != 0;
+		// is it required to capture a pointcloud with rgb data ?
+		publishRGBCloud = rgbcloud_pub.getNumSubscribers() != 0;
 		// is it required to convert to point clouds and publish ?
-		captureCloud = cloud_pub.getNumSubscribers() != 0;
+		publishCloud = cloud_pub.getNumSubscribers() != 0;
 		// is it required to capture RGB images ?
-		captureRGB = image_pub.getNumSubscribers() != 0;
+		publishRGB = image_pub.getNumSubscribers() != 0;
+		// is it required to convert to point clouds and publish ?
+		captureCloud = publishRGBCloud || publishLaserscan || publishCloud;
+		// is it required to capture RGB images ?
+		captureRGB = publishRGBCloud || publishRGB;
 
 		if (capture->grab() == false)
 		{
@@ -47,33 +59,38 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 		}
 
 		// try to capture a RGB and pointcloud
-		if (capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE) && capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP))
+		if ((captureRGB == false || capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
+			(captureCloud == false || capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP)))
 		{
 			IplImage rgb;
-			if (captureRGB || captureCloud)
+			if (captureRGB)
 				rgb = image;
 			IplImage pc = pointCloud;
 
 			// SLAM / AMCL
-			if (laser_pub.getNumSubscribers())
+			if (publishLaserscan)
 			{
 				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
 				if (laserscan)
 					laser_pub.publish(laserscan);
 			}
 
-			if (captureRGB || captureCloud)
+			if (publishRGB)
+			{
 				imageMsg = iplImageToImage(&rgb);
-
-			// do we have a listener to the RGB output ?
-			if (captureRGB)
 				image_pub.publish(imageMsg);
+			}
 
-			if (captureCloud)
+			if (publishCloud)
+			{
+				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToPointCloud2(&pc);
+				cloud_pub.publish(cloudMsg);
+			}
+
+			if (publishRGBCloud)
 			{
 				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToRegisteredPointCloud2(&pc, &rgb);
-				cloud_pub.publish(cloudMsg);
-				//roscom.processPointcloud(cloudMsg);
+				rgbcloud_pub.publish(cloudMsg);
 			}
 		}
 
