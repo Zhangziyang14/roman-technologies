@@ -37,8 +37,6 @@ std_msgs::UInt16 ping_msg;
 //ROS
 ros::NodeHandle nh;
 ros::Publisher ping_pub("/pingFeedbackTopic", &ping_msg);
-ros::Subscriber<std_msgs::Bool> ping_sub("/pingActivateTopic", &activatePingCB);
-ros::Subscriber<head::RGB> rgb_sub("/rgbTopic", &setRGBCB);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                   RGB Section
@@ -115,6 +113,7 @@ void setRGBCB(const head::RGB &msg)
 	start_time = millis();
 }
 
+ros::Subscriber<head::RGB> rgb_sub("/rgbTopic", &setRGBCB);
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                    ping Section
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -183,6 +182,8 @@ void activatePingCB(const std_msgs::Bool& msg)
 {
 	pingActivated = msg.data;
 }
+
+ros::Subscriber<std_msgs::Bool> ping_sub("/pingActivateTopic", &activatePingCB);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                       setup & loop Section
