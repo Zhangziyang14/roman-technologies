@@ -37,11 +37,10 @@ protected:
 
     ros::Publisher mMotor_pub;      /// Motor topic, used for controlling the motor
     ros::Publisher mJoint_pub;      /// Joint topic, used for changing the joints in RViz
+    ros::Publisher mSensor_pub;		/// Publishes commands to ping
 
     ros::Subscriber mSensor_sub;    /// Sensor feedback topic, provides sensor data
     ros::Subscriber mOpen_sub;		/// Listens to messages to open the gripper
-    ros::Publisher mEmotion_pub;
-
 
     GripperState mGripperState;     /// Defines the state of the gripper
 
