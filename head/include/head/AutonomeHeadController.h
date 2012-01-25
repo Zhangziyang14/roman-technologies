@@ -29,7 +29,7 @@ protected:
 	head::Emotion mSad;
 	head::Emotion mSurprised;
 	head::Emotion mError;
-	head::Emotion mNone;
+	head::Emotion mSleep;
 
 public:
 	//Constructor

@@ -13,10 +13,10 @@
 #include <head/RGB.h>
 #include <FlexiTimer2.h>
 
-unsigned short r, g, b;				// current RGB values
-unsigned short old_r, old_g, old_b;	// previous set RGB values (used for smooth transitions between RGB commands)
-unsigned short min_r, min_g, min_b;	// lower RGB limit
-unsigned short max_r, max_g, max_b;	// upper RGB limit
+int r, g, b;				// current RGB values
+int old_r, old_g, old_b;	// previous set RGB values (used for smooth transitions between RGB commands)
+int min_r, min_g, min_b;	// lower RGB limit
+int max_r, max_g, max_b;	// upper RGB limit
 unsigned long start_time;			// time at which breathing started
 unsigned long breath_time;			// time a breath cycle takes
 boolean transition_rgb;				// determines whether we are transitioning from old_r/g/b to min_r/g/b
@@ -62,7 +62,7 @@ void updateRGBEvent()
 		}
 		else
 		{
-			double scale = 0.5 * sin(((now - start_time) / double(TRANSITION_TIME)) * 6.28 - 1.57) + 0.5;
+			double scale = 0.5 * sin(((now - start_time) / double(TRANSITION_TIME)) * 3.14 - 1.57) + 0.5;
 
 			// transition from old_rgb to min_rgb
 			r = old_r + scale * (min_r - old_r);

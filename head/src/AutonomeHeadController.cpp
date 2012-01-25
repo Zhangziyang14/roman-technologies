@@ -20,11 +20,11 @@ void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint
 AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 {
 	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0);
-	constructEmotion(mHappy,   0, 255, 0,   0, 255, 0,   0,   90, 90, 120,   0, 0, 0);
-	constructEmotion(mSad,   0, 150, 255,   0, 150, 255,   0,   60, 120, 120,   0, 0, 0);
-	constructEmotion(mSurprised,   250, 40, 0,   250, 40, 0,   0,   60, 120, 140,   0, 0, 0);
-	constructEmotion(mError,   255, 0, 0,   255, 0, 0,   0,   90, 90, 120,   0, 0, 0);
-	constructEmotion(mNone,   0, 0, 0,   0, 0, 0,   0,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mHappy,   50, 250, 30,   255, 150, 30,   1500,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   0, 0, 0);
+	constructEmotion(mSurprised,   255, 120, 20,   255, 100, 0,   1000,   60, 120, 140,   0, 0, 0);
+	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0);
 
 	ROS_INFO("AutonomeHeadController initialised.");
 }
@@ -41,49 +41,6 @@ void AutonomeHeadController::setExpression(head::Emotion emotion)
 	sound_msg.data = mCurrentEmotion;
 
 	mSounds_pub.publish(sound_msg);
-
-	/*std_msgs::ColorRGBA rgb_msg;
-	head::eyebrows eyebrows_msg;
-
-	rgb_msg.r = emotion.red();
-	rgb_msg.g = emotion.green();
-	rgb_msg.b = emotion.blue();
-	rgb_msg.a = 0;
-
-	eyebrows_msg.lift = emotion.liftEyebrow();
-	eyebrows_msg.left = emotion.leftEyebrow();
-	eyebrows_msg.right = emotion.rightEyebrow();
-
-	mRGB_pub.publish(rgb_msg);
-	if (emotion.leftEyebrowTime() || emotion.rightEyebrowTime() || emotion.liftEyebrowTime())
-	{
-		uint64_t time = ros::Time::now().toNSec();
-		uint64_t time_passed = 0;
-		ros::Rate refresh_rate(10);
-		while (ros::Time::now().toNSec() - time < emotion.leftEyebrowTime() ||
-				ros::Time::now().toNSec() - time < emotion.rightEyebrowTime() ||
-				ros::Time::now().toNSec() - time < emotion.liftEyebrowTime())
-		{
-			if (emotion.leftEyebrowTime())
-				eyebrows_msg.left = mCurrentLeftAngle + (mCurrentLeftAngle - emotion.leftEyebrow()) *
-					std::min(1.0, double(time_passed) / double(emotion.leftEyebrowTime()));
-			if (emotion.rightEyebrowTime())
-				eyebrows_msg.right = mCurrentRightAngle + (mCurrentRightAngle - emotion.rightEyebrow()) *
-					std::min(1.0, double(time_passed) / double(emotion.rightEyebrowTime()));
-			if (emotion.liftEyebrowTime())
-				eyebrows_msg.lift = mCurrentLiftAngle + (mCurrentLiftAngle - emotion.liftEyebrow()) *
-					std::min(1.0, double(time_passed) / double(emotion.liftEyebrowTime()));
-
-			refresh_rate.sleep();
-			time_passed = ros::Time::now().toNSec() - time;
-
-			mEyebrows_pub.publish(eyebrows_msg);
-		}
-	}
-
-	mCurrentLeftAngle = eyebrows_msg.left;
-	mCurrentRightAngle = eyebrows_msg.right;
-	mCurrentLiftAngle = eyebrows_msg.lift;*/
 }
 
 /**
@@ -100,7 +57,7 @@ void AutonomeHeadController::expressEmotionCB(const std_msgs::UInt8 &msg)
 	case head::Emotion::SAD: 		setExpression(mSad); break;
 	case head::Emotion::SURPRISED:	setExpression(mSurprised); break;
 	case head::Emotion::ERROR: 		setExpression(mError); break;
-	case head::Emotion::NONE:		setExpression(mNone); break;
+	case head::Emotion::SLEEP:		setExpression(mSleep); break;
 
 	default:
 		setExpression(mNeutral);
