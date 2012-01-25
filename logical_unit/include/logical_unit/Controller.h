@@ -22,11 +22,18 @@
 #include "logical_unit/FindObject.h"
 #include "head/PitchYaw.h"
 #include "arm/armJointPos.h"
+#include "head/Emotion.h"
 
 #define MIN_ARM_Z_VALUE (-0.321)
 #define MAX_ARM_Z_VALUE (0.1725)
 #define MAX_ARM_X_VALUE (0.20)
 #define MIN_ARM_X_VALUE (-0.3595)
+
+#define HEAD_INIT_X  0.0
+#define HEAD_INIT_Z  0.0
+
+#define HEAD_SLEEP_X  0.0
+#define HEAD_SLEEP_Z  -0.6
 
 #define VIEW_OBJECTS_ANGLE	0.4
 
@@ -45,7 +52,7 @@
 #define BASE_FREE_THRESHOLD 0.001
 #define ARM_FREE_THRESHOLD 0.001
 
-#define GRAB_OBJECT_Z_OFFSET 0.0
+#define GRAB_OBJECT_Z_OFFSET 0.05
 
 enum commandValue
 {
@@ -91,6 +98,7 @@ private:
 	ros::Publisher mHeadPositionPublisher;			/// Publishes coordinates to AutonomeHeadController
 	ros::Publisher mRotateBasePublisher;			/// Publishes rotation angle for base
 	ros::Publisher mPositionBasePublisher;			/// Publishes rotation angle for base
+	ros::Publisher mEmotionPublisher;				/// Publishes emotions for the head
 
 	ros::ServiceClient mFindObjectClient;			/// Service client for rotating the base
 
@@ -122,8 +130,11 @@ public:
 	void rotateBase(float angle);
 	void positionBase(float dist);
 	void setGripper(bool open);
+	void expressEmotion(uint8_t emotion);
 
-	void getJuice();
+	uint8_t getJuice();
+	uint8_t wakeUp();
+	uint8_t sleep();
 
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);

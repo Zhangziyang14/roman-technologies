@@ -19,11 +19,12 @@ void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint
 
 AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 {
-	constructEmotion(mNeutral,   0, 0, 0,   0, 0, 0,   0,   90, 90, 79,   0, 0, 0);
-	constructEmotion(mHappy,   0, 255, 0,   0, 255, 0,   0,   90, 90, 79,   0, 0, 0);
-	constructEmotion(mSad,   0, 150, 255,   0, 150, 255,   0,   60, 120, 79,   0, 0, 0);
-	constructEmotion(mSurprised,   250, 40, 0,   250, 40, 0,   0,   60, 120, 50,   0, 0, 0);
-	constructEmotion(mError,   255, 0, 0,   255, 0, 0,   0,   90, 90, 79,   0, 0, 0);
+	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mHappy,   0, 255, 0,   0, 255, 0,   0,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mSad,   0, 150, 255,   0, 150, 255,   0,   60, 120, 120,   0, 0, 0);
+	constructEmotion(mSurprised,   250, 40, 0,   250, 40, 0,   0,   60, 120, 140,   0, 0, 0);
+	constructEmotion(mError,   255, 0, 0,   255, 0, 0,   0,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mNone,   0, 0, 0,   0, 0, 0,   0,   90, 90, 120,   0, 0, 0);
 
 	ROS_INFO("AutonomeHeadController initialised.");
 }
@@ -35,6 +36,12 @@ void AutonomeHeadController::setExpression(head::Emotion emotion)
 {
 	mRGB_pub.publish(emotion.rgb);
 	mEyebrows_pub.publish(emotion.eyebrows);
+
+	std_msgs::UInt8 sound_msg;
+	sound_msg.data = mCurrentEmotion;
+
+	mSounds_pub.publish(sound_msg);
+
 	/*std_msgs::ColorRGBA rgb_msg;
 	head::eyebrows eyebrows_msg;
 
@@ -88,11 +95,13 @@ void AutonomeHeadController::expressEmotionCB(const std_msgs::UInt8 &msg)
 
 	switch(mCurrentEmotion)
 	{
-	case NEUTRAL: 	setExpression(mNeutral); break;
-	case HAPPY: 	setExpression(mHappy); break;
-	case SAD: 		setExpression(mSad); break;
-	case SURPRISED: setExpression(mSurprised); break;
-	case ERROR: 	setExpression(mError); break;
+	case head::Emotion::NEUTRAL:	setExpression(mNeutral); break;
+	case head::Emotion::HAPPY:		setExpression(mHappy); break;
+	case head::Emotion::SAD: 		setExpression(mSad); break;
+	case head::Emotion::SURPRISED:	setExpression(mSurprised); break;
+	case head::Emotion::ERROR: 		setExpression(mError); break;
+	case head::Emotion::NONE:		setExpression(mNone); break;
+
 	default:
 		setExpression(mNeutral);
 	}
@@ -109,9 +118,16 @@ void AutonomeHeadController::init()
 	mCommand_sub = mNodeHandle.subscribe("/cmd_head_position",1, &AutonomeHeadController::headCommandCB, this);
 
 	// initialise publishers
-	mRGB_pub = mNodeHandle.advertise<head::RGB>("/rgbTopic", 1);
-	mEyebrows_pub = mNodeHandle.advertise<head::Eyebrows>("/eyebrowTopic", 1);
-	mHead_movement_pub = mNodeHandle.advertise<head::PitchYaw>("/headPositionTopic", 1);
+	mRGB_pub 			= mNodeHandle.advertise<head::RGB>("/rgbTopic", 1, true);
+	mEyebrows_pub 		= mNodeHandle.advertise<head::Eyebrows>("/eyebrowTopic", 1, true);
+	mSounds_pub			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_sound", 1, true);
+	mHead_movement_pub 	= mNodeHandle.advertise<head::PitchYaw>("/headPositionTopic", 1, true);
+
+	head::PitchYaw msg;
+	msg.pitch = 0.0;
+	msg.yaw = 0.0;
+	mHead_movement_pub.publish(msg);
+	setExpression(mNeutral);
 
 	ROS_INFO("AutonomeHeadController initialised");
 }

@@ -25,6 +25,13 @@ bool waitForServiceClient(ros::NodeHandle *nodeHandle, const char *serviceName)
 	return true;
 }
 
+void Controller::expressEmotion(uint8_t emotion)
+{
+	std_msgs::UInt8 msg;
+	msg.data = emotion;
+	mEmotionPublisher.publish(msg);
+}
+
 /**
  * Sends an angle to make the base rotate.
  */
@@ -185,10 +192,30 @@ void Controller::waitForLock()
 	}
 }
 
+/**
+ * Actions to do when waking up
+ */
+uint8_t Controller::wakeUp()
+{
+	mWakeUp = true;
+	moveHead(HEAD_INIT_X, HEAD_INIT_Z);
+	return head::Emotion::HAPPY;
+}
+
+/**
+ * Actions to do when going to sleep
+ */
+uint8_t Controller::sleep()
+{
+	mWakeUp = false;
+	moveHead(HEAD_SLEEP_X, HEAD_SLEEP_Z);
+	return head::Emotion::NONE;
+}
+
 /*
  * Method for getting juice
  */
-void Controller::getJuice()
+uint8_t Controller::getJuice()
 {
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
@@ -223,11 +250,12 @@ void Controller::getJuice()
 	if (findObject(OBJECT_ID, objectPose) == false || objectPose.pose.position.y == 0.0)
 	{
 		ROS_ERROR("Failed to find object, quitting script.");
-		return;
+		return head::Emotion::SAD;
 	}
 
 	double yaw = atan(objectPose.pose.position.x / objectPose.pose.position.y);
 	ROS_INFO("yaw: %lf", yaw);
+	ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
 	{
 		if (fabs(yaw) > TARGET_YAW_THRESHOLD)
@@ -250,11 +278,17 @@ void Controller::getJuice()
 		if (findObject(OBJECT_ID, objectPose) == false || objectPose.pose.position.y == 0.0)
 		{
 			ROS_ERROR("Failed to find object, quitting script.");
-			return;
+			return head::Emotion::SAD;
 		}
 
 		yaw = atan(objectPose.pose.position.x / objectPose.pose.position.y);
+
+		ROS_INFO("yaw: %lf", yaw);
+		ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 	}
+
+	ROS_INFO("yaw: %lf", yaw);
+	ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 
 	objectPose.pose.position.z += GRAB_OBJECT_Z_OFFSET;
 	objectPose.pose.position.x = 0.0;
@@ -274,6 +308,8 @@ void Controller::getJuice()
 	mLock = LOCK_BASE;
 	positionBase(GRAB_TARGET_DISTANCE);
 	waitForLock();
+
+	return head::Emotion::HAPPY;
 
 	/*mLock = LOCK_BASE;
 	positionBase(CLEAR_TABLE_DISTANCE);
@@ -308,9 +344,9 @@ void Controller::speechCB(const audio_processing::speech& msg)
 	case WAKE_UP:
 		if(!mWakeUp)
 		{
-			mWakeUp = true;
 			//Start initiating actions to show that the robot has heard the user
 			ROS_INFO("Heard user...");
+			expressEmotion(wakeUp());
 		}
 		else
 			ROS_INFO("I'm already awake");
@@ -321,7 +357,7 @@ void Controller::speechCB(const audio_processing::speech& msg)
 		{
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting juice...");
-			getJuice();
+			expressEmotion(getJuice());
 		}
 		else
 			ROS_INFO("Don't disturb me in my sleep...");
@@ -331,8 +367,8 @@ void Controller::speechCB(const audio_processing::speech& msg)
 		if(mWakeUp)
 		{
 			//Go to sleep
-			mWakeUp = false;
 			ROS_INFO("Going to sleep...");
+			expressEmotion(sleep());
 		}
 		else
 			ROS_INFO("I'm already sleeping...");
@@ -394,6 +430,7 @@ void Controller::init()
 	mRotateBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_turn", 1);
 	mPositionBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_position", 1);
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
+	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<logical_unit::FindObject>("/cmd_object_recognition", true);

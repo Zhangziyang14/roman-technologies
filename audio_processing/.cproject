@@ -227,7 +227,7 @@
 <pathentry kind="mac" name="__EXCEPTIONS" path="" value="1"/>
 <pathentry kind="mac" name="__GCC_HAVE_DWARF2_CFI_ASM" path="" value="1"/>
 <pathentry kind="mac" name="_GNU_SOURCE" path="" value="1"/>
-<pathentry include="/home/kelvin/wilson/roman-technologies/audio_processing/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/roman-technologies/audio_processing/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/cpp/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/srv_gen/cpp/include" kind="inc" path="" system="true"/>
@@ -245,7 +245,7 @@
 <pathentry include="/opt/ros/electric/ros/tools/rospack" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/ros/tools/rospack/include" kind="inc" path="" system="true"/>
 <pathentry include="/usr/include" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/wilson/roman-technologies/audio_processing/msg_gen/cpp/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/roman-technologies/audio_processing/msg_gen/cpp/include" kind="inc" path="" system="true"/>
 <pathentry include="/usr/local/include" kind="inc" path="" system="true"/>
 <pathentry include="/usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.5.2/include" kind="inc" path="" system="true"/>
 <pathentry include="/usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.5.2/include-fixed" kind="inc" path="" system="true"/>
@@ -288,6 +288,20 @@
 <buildCommand>/usr/bin/make</buildCommand>
 <buildArguments/>
 <buildTarget>ROSBUILD_gensrv_lisp</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[exe] SoundPlayer" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>SoundPlayer</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[exe] SoundPlayer/fast" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>SoundPlayer/fast</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
@@ -403,20 +417,6 @@
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="[exe] wav_player" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments/>
-<buildTarget>wav_player</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] wav_player/fast" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments/>
-<buildTarget>wav_player/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
 <target name=": all" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>/usr/bin/make</buildCommand>
 <buildArguments/>
@@ -428,6 +428,27 @@
 <buildCommand>/usr/bin/make</buildCommand>
 <buildArguments/>
 <buildTarget>clean</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[obj] src/SoundPlayer.o" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/SoundPlayer.o</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[pre] src/SoundPlayer.i" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/SoundPlayer.i</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[to asm] src/SoundPlayer.s" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/SoundPlayer.s</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
@@ -449,27 +470,6 @@
 <buildCommand>/usr/bin/make</buildCommand>
 <buildArguments/>
 <buildTarget>src/SpeechRecognition.s</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[obj] src/wav_player.o" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments/>
-<buildTarget>src/wav_player.o</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[pre] src/wav_player.i" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments/>
-<buildTarget>src/wav_player.i</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[to asm] src/wav_player.s" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments/>
-<buildTarget>src/wav_player.s</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>

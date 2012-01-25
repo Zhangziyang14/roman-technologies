@@ -10,22 +10,13 @@
 #include "head/Eyebrows.h"
 #include <stdint.h>
 
-
-enum Emotions
-{
-	NEUTRAL = 0,
-	HAPPY,
-	SAD,
-	SURPRISED,
-	ERROR
-};
-
 class AutonomeHeadController
 {
 protected:
 	ros::NodeHandle mNodeHandle;
 
 	ros::Publisher mHead_movement_pub;
+	ros::Publisher mSounds_pub;
 	ros::Publisher mRGB_pub;
 	ros::Publisher mEyebrows_pub;
 
@@ -38,6 +29,7 @@ protected:
 	head::Emotion mSad;
 	head::Emotion mSurprised;
 	head::Emotion mError;
+	head::Emotion mNone;
 
 public:
 	//Constructor

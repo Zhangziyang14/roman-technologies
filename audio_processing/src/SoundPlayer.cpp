@@ -8,7 +8,7 @@
 #include <audio_processing/SoundPlayer.h>
 
 /// Maps incoming Emotion to a file path for playback
-static std::map<u_int8_t, std::string> EmotionToPath;
+static std::map<u_int8_t, std::string> emotionToPath;
 
 bool SoundPlayer::playSound(std::string Path)
 {
@@ -35,10 +35,17 @@ bool SoundPlayer::playSound(std::string Path)
 
 void SoundPlayer::playCB(const std_msgs::UInt8& msg)
 {
-	if(playSound(EmotionToPath[msg.data]))
+	if(emotionToPath.find(msg.data) == emotionToPath.end())
+	{
+		ROS_WARN("No wav file for this emotion");
+		return;
+	}
+
+	if(playSound(emotionToPath[msg.data]))
 		ROS_INFO("Played sound successfully");
 	else
 		ROS_ERROR("Could not find wav file");
+
 }
 
 /**
@@ -66,9 +73,9 @@ int main( int argc, char* argv[])
 	SoundPlayer soundPlayer;
 	soundPlayer.init();
 
-	EmotionToPath[HAPPY] 	 = argv[1];
-	EmotionToPath[SAD]   	 = argv[2];
-	EmotionToPath[SURPRISED] = argv[3];
+	emotionToPath[HAPPY] 	 = argv[1];
+	emotionToPath[SAD]   	 = argv[2];
+	emotionToPath[SURPRISED] = argv[3];
 
 	ros::spin();
 

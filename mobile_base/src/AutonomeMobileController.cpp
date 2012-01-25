@@ -54,8 +54,9 @@ void AutonomeMobileController::turnCB(const std_msgs::Float32& msg)
 {
 	mobile_base::position pos_msg;
 
-	pos_msg.left = msg.data > 0 ? -1 * msg.data * BASE_RADIUS : msg.data * BASE_RADIUS;
-	pos_msg.right = msg.data > 0 ? msg.data * BASE_RADIUS : -1 * msg.data * BASE_RADIUS;
+	// turning with the clock = negative
+	pos_msg.left = -1 * msg.data * BASE_RADIUS;
+	pos_msg.right = msg.data * BASE_RADIUS;
 
 	mPositionPub.publish(pos_msg);
 }
