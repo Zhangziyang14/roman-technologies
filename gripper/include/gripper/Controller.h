@@ -11,9 +11,10 @@
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt16.h"
+#include "std_msgs/Empty.h"
 
 #define OPEN_GRIPPER_DISTANCE 100 // mm
-#define CLOSE_GRIPPER_DISTANCE 80 // mm
+#define CLOSE_GRIPPER_DISTANCE 70 // mm
 #define AUTOMATIC_GRIPPER_TORQUE 0.02f // Nm
 #define GRIPPER_WAIT_TIME 1000 // msec to wait for opening/closing
 
@@ -34,12 +35,13 @@ class Controller
 protected:
     ros::NodeHandle mNodeHandle;    /// ROS node handle
 
-    ros::Publisher mSensor_pub;     /// Sensor topic, used for toggling the sensor
     ros::Publisher mMotor_pub;      /// Motor topic, used for controlling the motor
     ros::Publisher mJoint_pub;      /// Joint topic, used for changing the joints in RViz
 
     ros::Subscriber mSensor_sub;    /// Sensor feedback topic, provides sensor data
+    ros::Subscriber mOpen_sub;		/// Listens to messages to open the gripper
     ros::Publisher mEmotion_pub;
+
 
     GripperState mGripperState;     /// Defines the state of the gripper
 
@@ -55,6 +57,20 @@ public:
         mNodeHandle.shutdown();
     }
 
+    inline void setGripper(bool open)
+    {
+    	gripper::MotorControl mc_msg;
+    	mc_msg.value = open ? AUTOMATIC_GRIPPER_TORQUE : -AUTOMATIC_GRIPPER_TORQUE;
+    	mc_msg.modeStr = "torque";
+
+    	mGripperState = open ? GS_OPEN : GS_CLOSED;
+
+    	ROS_INFO("%s gripper", open ? "Opening" : "Closing");
+
+
+    	mMotor_pub.publish(mc_msg);
+    }
+
     /// Updates joints in RViz
     void UpdateJoints();
 
@@ -63,6 +79,10 @@ public:
 
     /// Publish MotorControl message
     void publish(gripper::MotorControl mc);
+
+    /// Opens the gripper
+    void openCB(const std_msgs::Empty& msg);
+    void commandCB(const std_msgs::Bool& msg);
 };    
 
 #endif /* __CONTROLLER_H */

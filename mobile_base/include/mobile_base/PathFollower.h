@@ -13,6 +13,7 @@
 #include "tf/transform_listener.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/UInt8.h"
+#include "mobile_base/LocalPlanner.h"
 
 enum FollowState
 {
@@ -22,13 +23,6 @@ enum FollowState
 	FOLLOW_STATE_FINISHED,
 	FOLLOW_STATE_MAX,
 };
-
-#include "ros/ros.h"
-#include "nav_msgs/Path.h"
-#include "tf/transform_listener.h"
-#include "std_msgs/Float32.h"
-#include "std_msgs/UInt8.h"
-#include "mobile_base/LocalPlanner.h"
 
 class PathFollower
 {

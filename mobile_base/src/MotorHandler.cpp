@@ -1,5 +1,7 @@
 #include <mobile_base/MotorHandler.h>
 
+using namespace mobile_base;
+
 /**
  * Publishes the linear and angular speed of the robot
  */
@@ -31,8 +33,8 @@ void MotorHandler::positionCB(const mobile_base::position& msg)
 	mLeftMotor.setMode(CM_POSITION_MODE);
 
 	//ROS_INFO("left: %f, right: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", msg.left, msg.right, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
-	if((msg.left > 0 && msg.right > 0  && mFrontLeftCenter > msg.left*100 && mFrontRightCenter > msg.left*100) || 
-			(msg.left < 0 && msg.right < 0 && mRearLeft > std::abs(msg.left*100) && mRearRight > std::abs(msg.left*100)) ||
+	if((msg.left > 0 && msg.right > 0  && mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] > msg.left*100 && mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] > msg.left*100) ||
+			(msg.left < 0 && msg.right < 0 && mSensorData[SensorFeedback::SENSOR_REAR_LEFT] > std::abs(msg.left*100) && mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] > std::abs(msg.left*100)) ||
 			msg.left != msg.right)
 	{
 		mRightMotor.setPosition(currentRightPosition + msg.right);
@@ -119,62 +121,12 @@ void MotorHandler::tweakCB(const mobile_base::tweak& msg)
 }
 
 /**
- * Negate the ultrasone sensors in the ultrasone array
- */
-void negateUltrasone(int length, int* ultrasone[])
-{
-	for(int i = 0; i < length ; i++)
-		*ultrasone[i] = 150;
-}
-
-/**
  *	Reads distances from ultrasone sensors
  */
 //TODO: Turn off the unused ultrasone sensors in arduino code
-void MotorHandler::ultrasoneCB(const mobile_base::sensorFeedback& msg)
+void MotorHandler::ultrasoneCB(const mobile_base::SensorFeedback& msg)
 {
-	if(mCurrentSpeed.linear.x > 0)
-	{
-		int* ultrasone[2] = {&mRearLeft, &mRearRight};
-		negateUltrasone(2, ultrasone);
-
-		//TODO: mFrontLeftCenter and frontCenterLeft are flipped in arduino code.. Fix this! (vice versa for mFrontRightCenter and frontCenterRight)
-
-		mFrontLeftCenter	= msg.frontCenterLeft;
-		mFrontRightCenter	= msg.frontCenterRight;
-
-		mFrontCenterRight	= msg.frontRightCenter;
-		mFrontCenterLeft	= msg.frontLeftCenter;
-
-		mFrontLeft 			= msg.frontLeft;
-		mFrontRight			= msg.frontRight;
-	}
-	else if(mCurrentSpeed.linear.x < 0)
-	{
-		int* ultrasone[6] = {&mFrontLeftCenter, &mFrontRightCenter, &mFrontCenterRight, &mFrontCenterLeft, &mFrontLeft, &mFrontRight};
-		negateUltrasone(6, ultrasone);
-
-		mRearLeft			= msg.rearLeft;
-		mRearRight			= msg.rearRight;
-	}
-	else
-	{
-		mFrontLeftCenter	= msg.frontCenterLeft;
-		mFrontRightCenter	= msg.frontCenterRight;
-
-		mFrontCenterRight	= msg.frontRightCenter;
-		mFrontCenterLeft	= msg.frontLeftCenter;
-
-		mFrontLeft 			= msg.frontLeft;
-		mFrontRight			= msg.frontRight;
-
-		mRearLeft			= msg.rearLeft;
-		mRearRight			= msg.rearRight;
-	}
-
-	mLeft				= msg.left;
-	mRight				= msg.right;
-
+	mSensorData = msg.data;
 	//ROS_INFO("left %d, frontLeft %d, frontCenterLeft %d, frontLeftCenter %d, frontRightCenter %d, frontCenterRight %d, right %d", mLeft, mFrontLeft, mFrontCenterLeft, mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mRight);
 	//ROS_INFO("rearLeft %d, rearRight %d", mRearLeft, mRearRight);
 }
@@ -199,16 +151,8 @@ void MotorHandler::init(char *path)
 	mRightMotor.init(path);
 
 	//Initialise distances from ultrasone sensors
-	mFrontLeftCenter 	= ULTRASONE_MAX_RANGE;
-	mFrontRightCenter 	= ULTRASONE_MAX_RANGE;
-	mFrontCenterLeft 	= ULTRASONE_MAX_RANGE;
-	mFrontCenterRight 	= ULTRASONE_MAX_RANGE;
-	mRearLeft 			= ULTRASONE_MAX_RANGE;
-	mFrontLeft			= ULTRASONE_MAX_RANGE;
-	mRearRight 			= ULTRASONE_MAX_RANGE;
-	mFrontRight 		= ULTRASONE_MAX_RANGE;
-	mRight 				= ULTRASONE_MAX_RANGE;
-	mLeft 				= ULTRASONE_MAX_RANGE;
+	for (int i = 0; i < SensorFeedback::SENSOR_COUNT; i++)
+		mSensorData[i] = SensorFeedback::ULTRASONE_MAX_RANGE;
 
 	ROS_INFO("Initialising completed.");
 }

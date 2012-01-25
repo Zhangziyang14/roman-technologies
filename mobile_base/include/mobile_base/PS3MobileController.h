@@ -4,7 +4,6 @@
 #include <ros/ros.h>
 #include <std_msgs/Int32.h>
 #include <sensor_msgs/Joy.h>
-#include <mobile_base/sensorFeedback.h>
 #include <mobile_base/tweak.h>
 #include <mobile_base/MotorHandler.h>
 #include <numeric>

@@ -1,281 +1,232 @@
-  /*
-   * Roman Technologies 
-   * - Head rgb/servo control
-   * - Ping readout
-   * - 1 publisher: /pingFeedbackTopic
-   * - 5 subscribers: /rgbTopic /breathTopic /pingActivateTopic /panTiltTopic /eyebrowTopic
-   * Author: Ingmar Jager
-   */
-  
-  #include <ros.h>
-  #include <std_msgs/UInt16.h>
-  //#include <std_msgs/UInt8.h>
-  #include <std_msgs/Bool.h>
-  #include <std_msgs/ColorRGBA.h>
-  //#include <head/rgb.h>
-  #include <head/breath.h>
-  #include <TimerOne.h>
-  #include <FlexiTimer2.h>
-  
-  //Breath properties
-  double transition_speed = 3;
-  double breath_speed = 3000;
-  int full_pause = 85;
-  int low_pause = 300;  
-  
-  double red, green, blue; 
-  int targetRed, targetGreen, targetBlue;
-  boolean changeState = false;    // if false => breath, if true => transition to new color
-  boolean countDown = true;      //CLEAN: could be a static boolean inside transition()'s scope
-  int count = 0;
-  
-  //Pin definitions
-  const int redPin = 6;
-  const int greenPin = 5;
-  const int bluePin = 9;
-  
-  const int pingPin = 8;
-  
-  //ping properties
-  boolean pingActivated;
-  std_msgs::UInt16 ping_msg;
-  //std_msgs::UInt8 dbg_msg;
-  
-  //ROS
-  ros::NodeHandle nh;
-  ros::Publisher ping_pub("/pingFeedbackTopic", &ping_msg);
-  
-  //ros::Publisher dbg_pub("/debugTopic", &dbg_msg);
-  
-  ////////////////////////////////////////////////////////////////////////////////////////
-  //                                   RGB Section
-  ////////////////////////////////////////////////////////////////////////////////////////
-  
-      double bRed = red; 
-      double bGreen = green; 
-      double bBlue = blue;
-  /**
-   * Called every timer interrupt
-   * Changes colors fluently
-   * Colors fade up and down
-   */
-  void transition()
-  {
-    //transition to new color from current values
-    if(changeState)
-    {
-      if (red != targetRed)
-          red += red < targetRed ? transition_speed : (-1*transition_speed);
-      if (green != targetGreen)
-          green += green < targetGreen ? transition_speed : (-1*transition_speed); 
-      if (blue != targetBlue)
-          blue += blue < targetBlue ? transition_speed : (-1*transition_speed);   
-      if (red == targetRed && green == targetGreen && blue == targetBlue)
-          changeState = false;  
-          
-    }
-    /*else // take a breath
-    {
-      
-      float deltaRed = targetRed/ 2.0 / breath_speed;
-      float deltaGreen = targetGreen/ 2.0 / breath_speed;
-      float deltaBlue = targetBlue/ 2.0 / breath_speed;
-     
-     
-      static boolean dir = true;   
-  
-      if ((bRed != targetRed/2.0) && (bGreen != targetGreen/2.0) && (bBlue != targetBlue/2.0) && dir == true)  //decrease brightness
-      {
-          bRed -= deltaRed;
-          bGreen -= deltaGreen;
-          bBlue -= deltaBlue;
-      }
-      else if((bRed != targetRed) && (bGreen != targetGreen) && (bBlue != targetBlue)) //increase brightness
-      {
-          dir == false;
-          bRed += deltaRed;
-          bGreen += deltaGreen;
-          bBlue += deltaBlue;
-      }
-      else
-      {
-        dir == true; //breath again
-      }
-    }
-    
-    /*red = bRed;
-    green = bGreen;
-    blue = bBlue;*/
-     /* if (countDown)
-         count--;
-      else
-         count++;
-      
-      int newRed = red + (count * breath_speed);
-      int newGreen = green + (count * breath_speed);
-      int newBlue = blue + (count * breath_speed);
-      
-      if ((newRed > 40) && (newRed > targetRed * 0.45) && newRed < targetRed + 1)
-         red = newRed;
-      if ((newGreen > 40) && (newGreen > targetGreen * 0.45) && (newGreen < targetGreen + 1))
-         green = newGreen;
-      if ((newBlue > 40) && (newBlue > targetBlue * 0.45) && (newBlue < targetBlue +1))
-         blue = newBlue;
-      
-      //Pause at low brightness
-      if (count*breath_speed < (max(max(targetGreen*0.45, targetRed*0.45),targetBlue*0.45)*-1 - low_pause))
-      {
-         countDown = false;
-         count = 0;
-      }
-      
-      // Pause at full brightness
-      if (count*breath_speed > (max(max(targetGreen, targetRed),targetBlue) + full_pause))
-      {
-         countDown = true;
-         count = 0;
-      }
-      
-    }*/
-  
-     analogWrite(redPin, red);
-     analogWrite(greenPin, green);
-     analogWrite(bluePin, blue);
-    
-  }
-  
-  /**
-   * sets designated color targets received through rgbTopic
-   */
-  void setRGBCB(const std_msgs::ColorRGBA &msg)
-  {
-    targetRed = msg.r;
-    targetGreen = msg.g;
-    targetBlue = msg.b;
-    changeState = true;
-  }
-  
-  void setBreathPropertiesCB(const head::breath &msg)
-  {
-    breath_speed = msg.breathSpeed;
-    transition_speed = msg.transitionSpeed;
-    full_pause = msg.fullPause;
-    low_pause = msg.lowPause; 
-  }
-  
-  //ros::Subscriber<head::rgb> rgb_sub("/rgbTopic", &setRGBCB);
-  ros::Subscriber<std_msgs::ColorRGBA> rgb_sub("/rgbTopic", &setRGBCB);
-  ros::Subscriber<head::breath> breath_sub("/breathTopic", &setBreathPropertiesCB);
-  
-  ////////////////////////////////////////////////////////////////////////////////////////
-  //                                    ping Section
-  ////////////////////////////////////////////////////////////////////////////////////////
-  
-  
-  /**
-  * Start sending out an ultrasonic pulse
-  */
-  void doPulse(){
-    pinMode(pingPin, OUTPUT);
-    digitalWrite(pingPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(pingPin, HIGH);
-    delayMicroseconds(5);
-    digitalWrite(pingPin, LOW); 
-  }  
-  
-  /**
-  * Reading is done from same pin as the output pin, so change pinMode. a HIGH
-  * pulse whose duration is the time (in microseconds) from the sending
-  * of the ping to the reception of its echo off an object.
-  */
-  long readPulse(){   
-    pinMode(pingPin, INPUT);
-    return pulseIn(pingPin, HIGH); 
-  }
-  
-  /**
-  * Convert measured time to distance;
-  */
-  long microsecondsToMilimeters(long microseconds)
-  { 
-    //speed of sound = 343.2 metres per second. Or 2.913752914 µs per mm. 
-     return microseconds / 2.913 / 2; 
-  }
-  
-  /**
-   * measure and publish ping data if activated
-   */
-  void ping()
-  {
-     if(pingActivated){
-        static int pingCount = 0;
-         if(pingCount % 901 == 0)
-         {
-            doPulse();
-            int duration = readPulse();
-            ping_msg.data = microsecondsToMilimeters(duration); 
-            ping_msg.data = (ping_msg.data > 500) ? 500 : ping_msg.data;
-            ping_pub.publish(&ping_msg);
-         }
-         pingCount++;
-         if (pingCount > 901)
-           pingCount = 0;
-      
-         }
-  }
-  
-  /**
-  * toggle ping sensor
-  */
-  void activatePingCB(const std_msgs::Bool& msg){
-    pingActivated = msg.data;
-  }
-  
-  
-  ros::Subscriber<std_msgs::Bool> ping_sub("/pingActivateTopic", &activatePingCB);
-  
-  ////////////////////////////////////////////////////////////////////////////////////////
-  //                                       setup & loop Section
-  ////////////////////////////////////////////////////////////////////////////////////////
-  
-  
-  
-  void setup()
-  {
-    nh.initNode();
-    
-    //rgb init
-    nh.subscribe(rgb_sub);
-    nh.subscribe(breath_sub);
-    pinMode(redPin, OUTPUT);
-    pinMode(greenPin, OUTPUT);
-    pinMode(bluePin, OUTPUT);
-    red = 0;
-    green = 0;
-    blue = 0;
-   
-    //nh.advertise(dbg_pub);
-    
-    //ping init
-    pingActivated = false;
-    nh.advertise(ping_pub);
-    nh.subscribe(ping_sub);
-    
-    //timer
-    //Timer1.initialize(15000);         // initialize timer1, and set a 15000 us period
-    //Timer1.attachInterrupt(transition);  // attaches breath() as a timer overflow interrup\
-    
-     FlexiTimer2::set(15, 1.0/1000, transition); // call every 500 1ms "ticks"
-    // FlexiTimer2::set(500, flash); // MsTimer2 style is also supported
-     FlexiTimer2::start();
-  
-    
-  }
-  
-  void loop()
-  {
-    ping();
-    nh.spinOnce();
-  }
+/*
+* Roman Technologies 
+* - Head rgb control
+* - Ping readout
+* - 1 publisher: /pingFeedbackTopic
+* - 2 subscribers: /rgbTopic /pingActivateTopic
+* Author: Ingmar Jager
+*/
+
+#include <ros.h>
+#include <std_msgs/UInt16.h>
+#include <std_msgs/Bool.h>
+#include <head/RGB.h>
+#include <FlexiTimer2.h>
+
+int r, g, b;				// current RGB values
+int old_r, old_g, old_b;	// previous set RGB values (used for smooth transitions between RGB commands)
+int min_r, min_g, min_b;	// lower RGB limit
+int max_r, max_g, max_b;	// upper RGB limit
+unsigned long start_time;			// time at which breathing started
+unsigned long breath_time;			// time a breath cycle takes
+boolean transition_rgb;				// determines whether we are transitioning from old_r/g/b to min_r/g/b
+
+#define TRANSITION_TIME 500
+
+//Pin definitions
+#define RED_PIN 6
+#define GREEN_PIN 5
+#define BLUE_PIN 9
+
+#define PING_PIN 8
+
+//ping properties
+boolean pingActivated;
+std_msgs::UInt16 ping_msg;
+
+//ROS
+ros::NodeHandle nh;
+ros::Publisher ping_pub("/pingFeedbackTopic", &ping_msg);
+
+////////////////////////////////////////////////////////////////////////////////////////
+//                                   RGB Section
+////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+* Called every timer interrupt
+* Changes colors fluently
+* Colors fade up and down
+*/
+void updateRGBEvent()
+{
+	unsigned long now = millis();
+        
+	// transitioning from one RGB command to another
+	if (transition_rgb)
+	{
+		if (now - start_time > TRANSITION_TIME)
+		{
+			// we no longer need to do the transition
+			transition_rgb = false;
+			start_time = now;
+		}
+		else
+		{
+			double scale = 0.5 * sin(((now - start_time) / double(TRANSITION_TIME)) * 3.14 - 1.57) + 0.5;
+
+			// transition from old_rgb to min_rgb
+			r = old_r + scale * (min_r - old_r);
+			g = old_g + scale * (min_g - old_g);
+			b = old_b + scale * (min_b - old_b);
+		}
+	}
+	else // breathing
+	{
+		r = min_r;
+		g = min_g;
+		b = min_b;
+
+		if (breath_time)
+		{
+			double scale = 0.5 * sin(((now - start_time) / double(breath_time)) * 6.28 - 1.57) + 0.5;
+
+			r += scale * (max_r - min_r);
+			g += scale * (max_g - min_g);
+			b += scale * (max_b - min_b);
+		}
+	}
+
+	analogWrite(RED_PIN, r);
+	analogWrite(GREEN_PIN, g);
+	analogWrite(BLUE_PIN, b);
+}
+
+/**
+* sets designated color targets received through rgbTopic
+*/
+void setRGBCB(const head::RGB &msg)
+{
+	// store current RGB for smooth transition
+	old_r = r;
+	old_g = g;
+	old_b = b;
+	transition_rgb = true;
+
+	min_r = msg.min_r;
+	min_g = msg.min_g;
+	min_b = msg.min_b;
+	max_r = msg.max_r;
+	max_g = msg.max_g;
+	max_b = msg.max_b;
+	breath_time = msg.breath_time;
+
+	start_time = millis();
+}
+
+ros::Subscriber<head::RGB> rgb_sub("/rgbTopic", &setRGBCB);
+
+////////////////////////////////////////////////////////////////////////////////////////
+//                                    ping Section
+////////////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+* Start sending out an ultrasonic pulse
+*/
+void doPulse()
+{
+	pinMode(PING_PIN, OUTPUT);
+	digitalWrite(PING_PIN, LOW);
+	delayMicroseconds(2);
+	digitalWrite(PING_PIN, HIGH);
+	delayMicroseconds(5);
+	digitalWrite(PING_PIN, LOW); 
+}  
+
+/**
+* Reading is done from same pin as the output pin, so change pinMode. a HIGH
+* pulse whose duration is the time (in microseconds) from the sending
+* of the ping to the reception of its echo off an object.
+*/
+long readPulse()
+{   
+	pinMode(PING_PIN, INPUT);
+	return pulseIn(PING_PIN, HIGH); 
+}
+
+/**
+* Convert measured time to distance;
+*/
+long microsecondsToMilimeters(long microseconds)
+{ 
+	//speed of sound = 343.2 metres per second. Or 2.913752914 µs per mm. 
+	return microseconds / 2.913 / 2; 
+}
+
+/**
+* measure and publish ping data if activated
+*/
+void ping()
+{
+	if(pingActivated)
+	{
+		static int pingCount = 0;
+		if(pingCount % 901 == 0)
+		{
+			doPulse();
+			int duration = readPulse();
+			ping_msg.data = microsecondsToMilimeters(duration); 
+			ping_msg.data = (ping_msg.data > 500) ? 500 : ping_msg.data;
+			ping_pub.publish(&ping_msg);
+		}
+
+		pingCount++;
+		if (pingCount > 901)
+			pingCount = 0;
+	 }
+}
+
+/**
+* toggle ping sensor
+*/
+void activatePingCB(const std_msgs::Bool& msg)
+{
+	pingActivated = msg.data;
+}
+
+ros::Subscriber<std_msgs::Bool> ping_sub("/pingActivateTopic", &activatePingCB);
+
+////////////////////////////////////////////////////////////////////////////////////////
+//                                       setup & loop Section
+////////////////////////////////////////////////////////////////////////////////////////
+
+void setup()
+{
+	nh.initNode();
+
+	//rgb init
+	nh.subscribe(rgb_sub);
+	pinMode(RED_PIN, OUTPUT);
+	pinMode(GREEN_PIN, OUTPUT);
+	pinMode(BLUE_PIN, OUTPUT);
+	r = 0;
+	g = 0;
+	b = 0;
+	old_r = 0;
+	old_g = 0;
+	old_b = 0;
+	min_r = 0;
+	min_g = 0;
+	min_b = 0;
+	max_r = 0;
+	max_g = 0;
+	max_b = 0;
+	breath_time = 0;
+	start_time = 0;
+	transition_rgb = false;
+
+	//ping init
+	pingActivated = false;
+	nh.advertise(ping_pub);
+	nh.subscribe(ping_sub);
+
+	FlexiTimer2::set(15, 1.0/1000, updateRGBEvent); // call every 15ms
+	FlexiTimer2::start();
+}
+
+void loop()
+{
+	ping();
+	nh.spinOnce();
+}
 

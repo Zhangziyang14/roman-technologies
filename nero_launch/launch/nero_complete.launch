@@ -1,18 +1,27 @@
 <launch>
 
-  <!-- start mobile base -->
-  <!--include file="$(find mobile_base)/launch/mobile.launch"/-->
-
-  <!-- start navigation -->
-  <!--include file="$(find logical_unit)/launch/navigation.launch"/-->
-
-  <!-- start object recognition -->
-  <!--include file="$(find image_processing)/launch/object_recognition.launch"/-->
-
   <node name="serial" pkg="shared_serial" type="server" respawn="true">
 	  <param name="port_name" value="/dev/roman/threemxl" />
 	  <param name="port_type" value="RS485_FTDI" />
       <param name="baud_rate" value="921600" />
   </node>
+
+  <!-- start mobile base -->
+  <include file="$(find mobile_base)/launch/mobile.launch"/>
+
+  <!-- start arm -->
+  <include file="$(find arm)/launch/arm.launch"/>
+
+  <!-- start head -->
+  <include file="$(find head)/launch/head.launch"/>
+
+  <!-- start gripper -->
+  <include file="$(find gripper)/launch/gripper.launch"/>
+
+  <!-- start navigation -->
+  <!--include file="$(find logical_unit)/launch/navigation.launch"/-->
+
+  <!-- start object recognition -->
+  <include file="$(find image_processing)/launch/object_recognition.launch"/>
 
 </launch>

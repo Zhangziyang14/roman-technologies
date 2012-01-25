@@ -53,15 +53,18 @@ void Controller::UpdateJoints()
 void Controller::init()
 {
     // intialise publishers
-    mSensor_pub  = mNodeHandle.advertise<std_msgs::Bool>("sensorTopic", 10);
     mMotor_pub   = mNodeHandle.advertise<gripper::MotorControl>("motorTopic", 10);
     mJoint_pub   = mNodeHandle.advertise<sensor_msgs::JointState>("joint_states", 10);
 
-    std_msgs::Bool msg;
-    msg.data = mSensorActive;
-    mSensor_pub.publish(msg);
+	// initialize subscribers
+    mOpen_sub	= mNodeHandle.subscribe("/openGripperTopic", 1, &Controller::openCB, this);
 
     ROS_INFO("Controller initialised");
+}
+
+void Controller::openCB(const std_msgs::Empty& msg)
+{
+	setGripper(true);
 }
 
 /**

@@ -12,6 +12,7 @@
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Float32.h>
 #include <audio_processing/speech.h>
+#include <std_msgs/Bool.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -20,6 +21,7 @@
 #include <map>
 #include "logical_unit/FindObject.h"
 #include "head/PitchYaw.h"
+#include "arm/armJointPos.h"
 
 #define MIN_ARM_Z_VALUE (-0.321)
 #define MAX_ARM_Z_VALUE (0.1725)
@@ -30,7 +32,7 @@
 
 #define TARGET_YAW_THRESHOLD 0.05
 #define TARGET_DISTANCE_THRESHOLD 0.1
-#define TARGET_DISTANCE 0.5
+#define TARGET_DISTANCE 1.05
 #define GRAB_TARGET_DISTANCE 0.3
 #define CLEAR_TABLE_DISTANCE 0.5
 
@@ -41,6 +43,9 @@
 
 #define HEAD_FREE_THRESHOLD 0.001
 #define BASE_FREE_THRESHOLD 0.001
+#define ARM_FREE_THRESHOLD 0.001
+
+#define GRAB_OBJECT_Z_OFFSET 0.0
 
 enum commandValue
 {
@@ -78,7 +83,9 @@ private:
 	ros::Subscriber mNavigationStateSubscriber;		///	Listens to the state of the navigation algorithm
 	ros::Subscriber mHeadSpeedSubscriber;			/// Listens to head motor speeds
 	ros::Subscriber mBaseSpeedSubscriber;			/// Listens to base motor speeds
+	ros::Subscriber mArmSpeedSubscriber;			/// Listens to arm motor speeds
 
+	ros::Publisher mGripperCommandPublisher;		/// Publishes commands to gripper Ultrasone controller
 	ros::Publisher mBaseGoalPublisher;				/// Publishes goal commands to PathPlanner
 	ros::Publisher mArmPositionPublisher;			/// Publishes coordinates to AutonomeArmController
 	ros::Publisher mHeadPositionPublisher;			/// Publishes coordinates to AutonomeHeadController
@@ -114,6 +121,7 @@ public:
 	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose);
 	void rotateBase(float angle);
 	void positionBase(float dist);
+	void setGripper(bool open);
 
 	void getJuice();
 
@@ -122,6 +130,7 @@ public:
 	void speechCB(const audio_processing::speech& msg);
 	void headSpeedCB(const head::PitchYaw &msg);
 	void baseSpeedCB(const geometry_msgs::Twist &msg);
+	void armSpeedCB(const arm::armJointPos &msg);
 	void objectPositionCB(const geometry_msgs::PoseStamped& msg);
 
 	void waitForLock();

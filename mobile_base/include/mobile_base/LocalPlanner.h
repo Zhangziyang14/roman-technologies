@@ -10,15 +10,11 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <mobile_base/sensorFeedback.h>
+#include <mobile_base/SensorFeedback.h>
 
 #define WHEEL_RADIUS 							0.1475	//[m]
 #define BASE_RADIUS 							0.25	//[m]
 #define PID_TWEAK_STEP 							0.01
-
-#define ULTRASONE_ALL							true	//Activate all ultrasone sensors
-#define ULTRASONE_NONE							false	//Deactivate all ultrasone sensors
-#define ULTRASONE_MAX_RANGE						600		//[cm]
 
 #define ZERO_SPEED								0.0		//[m/s]
 #define STANDARD_AVOIDANCE_IMPACT				150.0
@@ -43,12 +39,12 @@ private:
 
 	ros::Publisher mSpeedPub;				/// Publishes velocity commands
 
-	int mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mFrontCenterLeft, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
+	boost::array<int16_t, 10> mSensorData;
 	geometry_msgs::Twist mCurrentSpeed;
 
 
 	void speedCB(const geometry_msgs::Twist& msg);
-	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
+	void ultrasoneCB(const mobile_base::SensorFeedback& msg);
 
 	//Scale the speed of a motor based on the measured distance
 	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int measured_distance)

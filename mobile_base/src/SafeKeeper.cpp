@@ -7,6 +7,8 @@
 
 #include "mobile_base/SafeKeeper.h"
 
+using namespace mobile_base;
+
 /**
  * Checks whether robot collided with something and determines if forward or backward motion should be disabled
  * Also moves the robot 0.5 [m] (if possible) from the object.
@@ -46,16 +48,18 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
  * Listens to ultrasone sensor data and stops the base when something suddenly gets in the way of the base.
  * Also moves the base a bit back from where it came.
  */
-void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::sensorFeedback& msg)
+void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
 {
-	if(msg.frontLeftCenter - mFrontLeftCenter < 0 && msg.frontRightCenter - mFrontRightCenter < 0)
+	if(msg.data[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] < 0 &&
+			msg.data[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < 0)
 	{
 		mobile_base::position position_msg;
 		position_msg.left   = -SAFE_DISTANCE;
 		position_msg.right  = -SAFE_DISTANCE;
 		mMovement_pub.publish(position_msg);
 	}
-	else if(msg.rearLeft - mRearLeft < 0 && msg.rearRight - mRearRight < 0)
+	else if(msg.data[SensorFeedback::SENSOR_REAR_LEFT] - mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < 0 &&
+			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0)
 	{
 		mobile_base::position position_msg;
 		position_msg.left   = SAFE_DISTANCE;
@@ -63,11 +67,7 @@ void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::sensorFeedback& msg)
 		mMovement_pub.publish(position_msg);
 	}
 
-	mFrontLeftCenter 	= msg.frontLeftCenter;
-	mFrontRightCenter	= msg.frontRightCenter;
-
-	mRearLeft			= msg.rearLeft;
-	mRearRight			= msg.rearRight;
+	mSensorData = msg.data;
 }
 
 /**
@@ -85,8 +85,8 @@ void SafeKeeper::init()
 	mDisableForward	 	= false;
 	mDisableBackward 	= false;
 
-	mFrontLeftCenter 	= 0;
-	mFrontRightCenter 	= 0;
+	for (int i = 0; i < SensorFeedback::SENSOR_COUNT; i++)
+		mSensorData[i] = 0;
 
 	ROS_INFO("SafeKeeper initialised");
 }

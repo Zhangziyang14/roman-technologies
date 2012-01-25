@@ -10,7 +10,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
 rosbuild_init()
-rosbuild_add_executable(AutonomeHeadController src/AutonomeHeadController.cpp src/Emotion.cpp)
+rosbuild_add_executable(AutonomeHeadController src/AutonomeHeadController.cpp)
 rosbuild_add_executable(HeadMotorHandler src/HeadMotorHandler.cpp)
 
 #set the default path for built executables to the "bin" directory

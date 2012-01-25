@@ -12,6 +12,7 @@
   <depend package="audio_processing"/>  
   <depend package="yaml_cpp"/>
   <depend package="head"/>
+  <depend package="arm"/>
 
   <export>
         <rosdoc config="rosdoc.yaml" />

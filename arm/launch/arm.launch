@@ -3,5 +3,5 @@
 
     <node pkg="arm" name="Kinematics" type="Kinematics" respawn="false" />
     <node pkg="arm" name="AutonomeArmController" type="AutonomeArmController" respawn="false" />
-    <node pkg="arm" name="ArmMotorHandler" type="ArmMotorHandler" />
+    <node pkg="arm" name="ArmMotorHandler" type="ArmMotorHandler" args="serial"/>
 </launch>

@@ -6,6 +6,8 @@
  */
 #include <mobile_base/LocalPlanner.h>
 
+using namespace mobile_base;
+
 LocalPlanner::LocalPlanner(ros::NodeHandle *nodeHandle)
 {
 	//Initialise Publishers
@@ -16,16 +18,8 @@ LocalPlanner::LocalPlanner(ros::NodeHandle *nodeHandle)
 	mSpeedSub	  = nodeHandle->subscribe("speedFeedbackTopic", 10, &LocalPlanner::speedCB, this);
 
 	//Initialise distances from ultrasone sensors
-	mFrontLeftCenter 	= ULTRASONE_MAX_RANGE;
-	mFrontRightCenter 	= ULTRASONE_MAX_RANGE;
-	mFrontCenterLeft 	= ULTRASONE_MAX_RANGE;
-	mFrontCenterRight 	= ULTRASONE_MAX_RANGE;
-	mRearLeft 			= ULTRASONE_MAX_RANGE;
-	mFrontLeft			= ULTRASONE_MAX_RANGE;
-	mRearRight 			= ULTRASONE_MAX_RANGE;
-	mFrontRight 		= ULTRASONE_MAX_RANGE;
-	mRight 				= ULTRASONE_MAX_RANGE;
-	mLeft 				= ULTRASONE_MAX_RANGE;
+	for (int i = 0; i < SensorFeedback::SENSOR_COUNT; i++)
+		mSensorData[i] = SensorFeedback::ULTRASONE_MAX_RANGE;
 
 }
 
@@ -37,59 +31,12 @@ void LocalPlanner::speedCB(const geometry_msgs::Twist &msg)
 	mCurrentSpeed = msg;
 }
 
-/**
- * Negate the ultrasone sensors in the ultrasone array
- */
-void negateUltrasone(int length, int* ultrasone[])
-{
-	for(int i = 0; i < length ; i++)
-		*ultrasone[i] = 150;
-}
-
-/**
+/**s
  *	Reads distances from ultrasone sensors
  */
-void LocalPlanner::ultrasoneCB(const mobile_base::sensorFeedback& msg)
+void LocalPlanner::ultrasoneCB(const mobile_base::SensorFeedback& msg)
 {
-	if(mCurrentSpeed.linear.x > 0)
-	{
-		int* ultrasone[2] = {&mRearLeft, &mRearRight};
-		negateUltrasone(2, ultrasone);
-
-		mFrontLeftCenter	= msg.frontCenterLeft;
-		mFrontRightCenter	= msg.frontCenterRight;
-
-		mFrontCenterRight	= msg.frontRightCenter;
-		mFrontCenterLeft	= msg.frontLeftCenter;
-
-		mFrontLeft 			= msg.frontLeft;
-		mFrontRight			= msg.frontRight;
-	}
-	else if(mCurrentSpeed.linear.x < 0)
-	{
-		int* ultrasone[6] = {&mFrontLeftCenter, &mFrontRightCenter, &mFrontCenterRight, &mFrontCenterLeft, &mFrontLeft, &mFrontRight};
-		negateUltrasone(6, ultrasone);
-
-		mRearLeft			= msg.rearLeft;
-		mRearRight			= msg.rearRight;
-	}
-	else
-	{
-		mFrontLeftCenter	= msg.frontCenterLeft;
-		mFrontRightCenter	= msg.frontCenterRight;
-
-		mFrontCenterRight	= msg.frontRightCenter;
-		mFrontCenterLeft	= msg.frontLeftCenter;
-
-		mFrontLeft 			= msg.frontLeft;
-		mFrontRight			= msg.frontRight;
-
-		mRearLeft			= msg.rearLeft;
-		mRearRight			= msg.rearRight;
-	}
-
-	mLeft				= msg.left;
-	mRight				= msg.right;
+	mSensorData = msg.data;
 
 	//ROS_INFO("left %d, frontLeft %d, frontCenterLeft %d, frontLeftCenter %d, frontRightCenter %d, frontCenterRight %d, right %d", mLeft, mFrontLeft, mFrontCenterLeft, mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mRight);
 	//ROS_INFO("rearLeft %d, rearRight %d", mRearLeft, mRearRight);
@@ -112,58 +59,58 @@ void LocalPlanner::scaleTwist(geometry_msgs::Twist& msg)
 	converted_right = vel_linear + 0.5*vel_angular;
 
 	//Disable motors when boxed or when in position mode
-	if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
+	/*if((mCurrentSpeed.linear.x > ZERO_SPEED && (mFrontLeftCenter < 80 || mFrontRightCenter < 80)) ||  (mCurrentSpeed.linear.x < ZERO_SPEED && (mRearLeft < 50 || mRearRight < 50)))
 	{
 		msg.angular.z 	= 0;
 		msg.linear.x 	= 0;
 		return;
-	}
+	}*/
 
 	//Calculations are in positive numbers because the minimum between speed and scaled speed is used
 	left_speed 	= std::abs(converted_left);
 	right_speed = std::abs(converted_right);
 
-	left_speed      = scaleSpeed(left_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontRight, mFrontCenterRight);
-	right_speed		= scaleSpeed(right_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontLeft, mFrontCenterLeft);
+	left_speed      = scaleSpeed(left_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT], mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT_CENTER]);
+	right_speed		= scaleSpeed(right_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_LEFT_CENTER]);
 
 	//Check right and left side for walls and avoid them when needed.
 	//Don't avoid the walls when distance to both sides are close to the robot
-	if(!(mLeft < SIDES_AVOIDANCE_DISTANCE && mRight < SIDES_AVOIDANCE_DISTANCE))
+	if(!(mSensorData[SensorFeedback::SENSOR_LEFT] < SIDES_AVOIDANCE_DISTANCE && mSensorData[SensorFeedback::SENSOR_RIGHT] < SIDES_AVOIDANCE_DISTANCE))
 	{
-		left_speed	= scaleSpeed(left_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mRight);
-		right_speed	= scaleSpeed(right_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mLeft);
+		left_speed	= scaleSpeed(left_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_RIGHT]);
+		right_speed	= scaleSpeed(right_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_LEFT]);
 	}
 	//Avoidance rules when object is in front of robot
-	if(mFrontLeftCenter < FRONT_AVOIDANCE_DISTANCE || mFrontRightCenter < FRONT_AVOIDANCE_DISTANCE)
+	if(mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] < FRONT_AVOIDANCE_DISTANCE || mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < FRONT_AVOIDANCE_DISTANCE)
 	{
 		//Turn to left when left side has more space than right side
-		if(mLeft > mRight && mRight < SIDES_AVOIDANCE_DISTANCE)
-			left_speed = scaleSpeed(left_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+		if(mSensorData[SensorFeedback::SENSOR_LEFT] > mSensorData[SensorFeedback::SENSOR_RIGHT] && mSensorData[SensorFeedback::SENSOR_RIGHT] < SIDES_AVOIDANCE_DISTANCE)
+			left_speed = scaleSpeed(left_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 
 		//Turn to right when right side has more space than left side
-		else if(mLeft < mRight && mLeft < SIDES_AVOIDANCE_DISTANCE)
-			right_speed = scaleSpeed(right_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+		else if(mSensorData[SensorFeedback::SENSOR_LEFT] < mSensorData[SensorFeedback::SENSOR_RIGHT] && mSensorData[SensorFeedback::SENSOR_LEFT] < SIDES_AVOIDANCE_DISTANCE)
+			right_speed = scaleSpeed(right_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 
 		//Turn right when object is more to the left of the robot
-		else if(mFrontLeft < FRONT_AVOIDANCE_DISTANCE || mFrontCenterLeft < FRONT_AVOIDANCE_DISTANCE)
-			right_speed = scaleSpeed(right_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+		else if(mSensorData[SensorFeedback::SENSOR_FRONT_LEFT] < FRONT_AVOIDANCE_DISTANCE || mSensorData[SensorFeedback::SENSOR_FRONT_LEFT_CENTER] < FRONT_AVOIDANCE_DISTANCE)
+			right_speed = scaleSpeed(right_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 
 		//Turn left when object is more to the right of the robot
-		else if(mFrontRight < FRONT_AVOIDANCE_DISTANCE || mFrontCenterRight < FRONT_AVOIDANCE_DISTANCE)
-			left_speed = scaleSpeed(left_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+		else if(mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT] < FRONT_AVOIDANCE_DISTANCE || mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT_CENTER] < FRONT_AVOIDANCE_DISTANCE)
+			left_speed = scaleSpeed(left_speed, FRONT_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 
 		//Turn right when robot is driving straight to a wall
-		else if(mFrontCenterRight < FRONT_SIDES_AVOIDANCE_DISTANCE-20 && mFrontCenterLeft < FRONT_SIDES_AVOIDANCE_DISTANCE-20)
+		else if(mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT_CENTER] < FRONT_SIDES_AVOIDANCE_DISTANCE-20 && mSensorData[SensorFeedback::SENSOR_FRONT_LEFT_CENTER] < FRONT_SIDES_AVOIDANCE_DISTANCE-20)
 		{
-			right_speed = scaleSpeed(right_speed, 0.5*FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+			right_speed = scaleSpeed(right_speed, 0.5*FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 		}
 		else
 		{
 			//If there is space front right of the robot, then turn to that side. Otherwise, turn to the other side.
-			if(mFrontRight > FRONT_AVOIDANCE_DISTANCE)
-				right_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+			if(mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT] > FRONT_AVOIDANCE_DISTANCE)
+				right_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 			else
-				left_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mFrontLeftCenter, mFrontRightCenter);
+				left_speed = scaleSpeed(right_speed, FRONT_CENTER_AND_SIDES_AVOIDANCE_IMPACT, FRONT_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT]);
 		}
 	}
 
@@ -172,7 +119,7 @@ void LocalPlanner::scaleTwist(geometry_msgs::Twist& msg)
 	right_speed = converted_right < ZERO_SPEED ? -right_speed : right_speed;
 
 	//Don't go backwards when there is a wall
-	if(msg.linear.x < 0 && mRearLeft < REAR_HALTING_DISTANCE && mRearRight < REAR_HALTING_DISTANCE)
+	if(msg.linear.x < 0 && mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < REAR_HALTING_DISTANCE && mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < REAR_HALTING_DISTANCE)
 	{
 		msg.linear.x = 0;
 		msg.angular.z = 0;

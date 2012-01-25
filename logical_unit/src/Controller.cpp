@@ -39,7 +39,16 @@ void Controller::positionBase(float dist)
 {
 	std_msgs::Float32 msg;
 	msg.data = dist;
-	mRotateBasePublisher.publish(msg);
+	mPositionBasePublisher.publish(msg);
+}
+
+void Controller::setGripper(bool open)
+{
+	std_msgs::Bool bool_msg;
+	bool_msg.data = open;
+
+	ROS_INFO("%s gripper", open ? "Opening" : "Closing");
+	mGripperCommandPublisher.publish(bool_msg);
 }
 
 /**
@@ -47,6 +56,7 @@ void Controller::positionBase(float dist)
  */
 void Controller::moveArm(double x, double z)
 {
+	ROS_INFO("Moving arm to %lf, %lf", x, z);
 	geometry_msgs::Pose pose_msg;
 	pose_msg.position.x = x;
 	pose_msg.position.z = z;
@@ -81,11 +91,12 @@ void Controller::moveBase(geometry_msgs::PoseStamped &stamped_goal)
  */
 void Controller::moveHead(double x, double z)
 {
-	geometry_msgs::Pose pose_msg;
-	pose_msg.position.x = x;
-	pose_msg.position.z = z;
+	ROS_INFO("Moving head to pitch: %lf, yaw: %lf", x, z);
+	head::PitchYaw head_msg;
+	head_msg.pitch = x;
+	head_msg.yaw = z;
 
-	mHeadPositionPublisher.publish(pose_msg);
+	mHeadPositionPublisher.publish(head_msg);
 }
 
 /**
@@ -98,6 +109,7 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 
 	double timer = ros::Time::now().toSec();
 
+	ROS_INFO("Starting search for object with id: %d", object_id);
 	while (ros::Time::now().toSec() - timer < FIND_OBJECT_DURATION)
 	{
 		if (mFindObjectClient.call(find_call))
@@ -114,6 +126,7 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 			ROS_ERROR("Failed calling finding service.");
 	}
 
+	ROS_INFO("Finding object failed.");
 	return false;
 }
 
@@ -132,6 +145,15 @@ void Controller::headSpeedCB(const head::PitchYaw &msg)
 void Controller::baseSpeedCB(const geometry_msgs::Twist &msg)
 {
 	if (mLock == LOCK_BASE && fabs(msg.linear.x) < BASE_FREE_THRESHOLD && fabs(msg.angular.z) < BASE_FREE_THRESHOLD)
+		mLock = LOCK_NONE;
+}
+
+/**
+ *	Listens to the speed of the base and releases lock if necessary
+ */
+void Controller::armSpeedCB(const arm::armJointPos &msg)
+{
+	if (mLock == LOCK_ARM && fabs(msg.upper_joint) < ARM_FREE_THRESHOLD && fabs(msg.wrist_joint) < ARM_FREE_THRESHOLD)
 		mLock = LOCK_NONE;
 }
 
@@ -168,6 +190,10 @@ void Controller::waitForLock()
  */
 void Controller::getJuice()
 {
+	mLock = LOCK_ARM;
+	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+	waitForLock();
+
 	//First, rotate head in the right direction
 
 	//Go to the table
@@ -200,10 +226,11 @@ void Controller::getJuice()
 		return;
 	}
 
-	double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-	while (yaw > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
+	double yaw = atan(objectPose.pose.position.x / objectPose.pose.position.y);
+	ROS_INFO("yaw: %lf", yaw);
+	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
 	{
-		if (yaw > TARGET_YAW_THRESHOLD)
+		if (fabs(yaw) > TARGET_YAW_THRESHOLD)
 		{
 			ROS_INFO("Rotating by %lf.", yaw);
 
@@ -213,7 +240,7 @@ void Controller::getJuice()
 		}
 		else if (fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
 		{
-			ROS_INFO("Moving by %lf.", objectPose.pose.position.y - TARGET_DISTANCE);
+			ROS_INFO("Moving by %lf. Distance: %lf", objectPose.pose.position.y - TARGET_DISTANCE, objectPose.pose.position.y);
 
 			mLock = LOCK_BASE;
 			positionBase(objectPose.pose.position.y - TARGET_DISTANCE);
@@ -226,19 +253,29 @@ void Controller::getJuice()
 			return;
 		}
 
-		yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
+		yaw = atan(objectPose.pose.position.x / objectPose.pose.position.y);
 	}
+
+	objectPose.pose.position.z += GRAB_OBJECT_Z_OFFSET;
+	objectPose.pose.position.x = 0.0;
 
 	//Move arm to object and grab it
 	mLock = LOCK_ARM;
+	moveArm(MIN_ARM_X_VALUE, objectPose.pose.position.z);
+	waitForLock();
+	mLock = LOCK_ARM;
 	moveArm(objectPose);
 	waitForLock();
+
+	setGripper(true);
+	usleep(1000000);
+	setGripper(false);
 
 	mLock = LOCK_BASE;
 	positionBase(GRAB_TARGET_DISTANCE);
 	waitForLock();
 
-	mLock = LOCK_BASE;
+	/*mLock = LOCK_BASE;
 	positionBase(CLEAR_TABLE_DISTANCE);
 	waitForLock();
 
@@ -249,7 +286,7 @@ void Controller::getJuice()
 
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
-	waitForLock();
+	waitForLock();*/
 
 	//Go back to original position
 	//moveBase(msg);
@@ -348,20 +385,22 @@ void Controller::init()
 	mBaseGoalSubscriber 		= mNodeHandle.subscribe("/path_length", 1, &Controller::baseGoalCB, this);
 	mHeadSpeedSubscriber		= mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &Controller::headSpeedCB, this);
 	mBaseSpeedSubscriber		= mNodeHandle.subscribe("/speedFeedbackTopic", 1, &Controller::baseSpeedCB, this);
+	mArmSpeedSubscriber			= mNodeHandle.subscribe("/armJointSpeedFeedbackTopic", 1, &Controller::armSpeedCB, this);
 
 	//initialise publishers
 	mBaseGoalPublisher 			= mNodeHandle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
 	mArmPositionPublisher 		= mNodeHandle.advertise<geometry_msgs::Pose>("/cmd_arm_position", 1);
-	mHeadPositionPublisher		= mNodeHandle.advertise<geometry_msgs::Pose>("/cmd_head_position", 1);
+	mHeadPositionPublisher		= mNodeHandle.advertise<head::PitchYaw>("/cmd_head_position", 1);
 	mRotateBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_turn", 1);
 	mPositionBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_position", 1);
+	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 
-	if (waitForServiceClient(&mNodeHandle, "/cmd_find_object"))
-		mFindObjectClient		= mNodeHandle.serviceClient<logical_unit::FindObject>("/cmd_find_object", true);
+	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
+		mFindObjectClient		= mNodeHandle.serviceClient<logical_unit::FindObject>("/cmd_object_recognition", true);
 
 	//Store goal position
 
-	std::ifstream fin("config/goal.yaml");
+	/*std::ifstream fin("config/goal.yaml");
 	if (fin.fail())
 	{
 		ROS_ERROR("Failed to open YAML file.");
@@ -385,7 +424,9 @@ void Controller::init()
 	{
 		ROS_ERROR("No goal found in yaml file");
 		return;
-	}
+	}*/
+
+	usleep(1000000);
 
 	ROS_INFO("Initialised Controller");
 }
@@ -397,6 +438,7 @@ int main(int argc, char **argv)
 	Controller controller;
 
 	controller.init();
+	controller.getJuice();
 
 	ros::spin();
 }

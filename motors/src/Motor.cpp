@@ -94,7 +94,7 @@ void Motor::brake()
 void Motor::setPosition(double position)
 {
 	assertMode(CM_POSITION_MODE);
-	motor_->setLinearPos(position, 1, 0.5, false);
+	motor_->setLinearPos(position, 1, 0.1, false);
 }
 
 

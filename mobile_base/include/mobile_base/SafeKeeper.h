@@ -10,7 +10,7 @@
 
 #include <ros/ros.h>
 #include <mobile_base/BaseMotorControl.h>
-#include <mobile_base/sensorFeedback.h>
+#include <mobile_base/SensorFeedback.h>
 #include <mobile_base/position.h>
 #include <std_msgs/UInt8.h>
 
@@ -39,14 +39,14 @@ private:
 	BumperState 	mBumperState;				/// Keeps track of the current state for the bumpers
 	bool mDisableForward, mDisableBackward;		/// Keeps track of the front and backward buttons of the bumpers
 
-	int mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mFrontCenterLeft, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
+	boost::array<int16_t, 10> mSensorData;
 
 public:
 	SafeKeeper() :  mBumperState(BUMPER_NONE) {};
 
 	void init();
 	void bumperFeedbackCB(const std_msgs::UInt8 &msg);
-	void ultrasoneFeedbackCB(const mobile_base::sensorFeedback& msg);
+	void ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg);
 };
 
 #endif /* SAFEKEEPER_H_ */

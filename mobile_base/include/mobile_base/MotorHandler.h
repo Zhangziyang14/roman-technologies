@@ -8,15 +8,11 @@
 #include <mobile_base/tweak.h>
 
 #include <mobile_base/position.h>
-#include <mobile_base/sensorFeedback.h>
+#include <mobile_base/SensorFeedback.h>
 
 #define WHEEL_RADIUS 			0.1475	//[m]
 #define BASE_RADIUS 			0.25	//[m]
 #define PID_TWEAK_STEP 			0.01
-
-#define ULTRASONE_ALL			true	//Activate all ultrasone sensors
-#define ULTRASONE_NONE			false	//Deactivate all ultrasone sensors
-#define ULTRASONE_MAX_RANGE		600		//[cm]
 
 #define ZERO_SPEED				0.0
 
@@ -44,7 +40,7 @@ protected:
 
 	bool mLock;
 
-	int mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mFrontCenterLeft, mRear, mLeft, mRight, mFrontLeft, mFrontRight, mRearRight, mRearLeft;
+	boost::array<int16_t, 10> mSensorData;
 
 public:
 	/// Constructor
@@ -63,7 +59,7 @@ public:
 	void publishRobotSpeed();
 	void moveCB(const geometry_msgs::Twist& msg);
 	void positionCB(const mobile_base::position& msg);
-	void ultrasoneCB(const mobile_base::sensorFeedback& msg);
+	void ultrasoneCB(const mobile_base::SensorFeedback& msg);
 	void tweakCB(const mobile_base::tweak& msg);
 
 };
