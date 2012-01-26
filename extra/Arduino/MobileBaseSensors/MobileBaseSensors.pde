@@ -11,8 +11,8 @@
 #define EYEBROW_RIGHT A1
 #define EYEBROW_LIFT A0
 
-#define LIFT_LOWER_LIMIT 120
-#define LIFT_UPPER_LIMIT 140
+#define LIFT_LOWER_LIMIT 94
+#define LIFT_UPPER_LIMIT 130
 #define EYEBROW_LOWER_LIMIT 60
 #define EYEBROW_UPPER_LIMIT 120
 
@@ -181,9 +181,9 @@ void updateEyebrowEvent()
 			scale = double(now - start_time) / double(left_eb_angle_time);
 			left_eb_angle = old_left_eb_angle + scale * (new_left_eb_angle - old_left_eb_angle);
 		}
+
+		eyebrowLeft.write(left_eb_angle);
 	}
-	else
-		left_eb_angle = new_left_eb_angle;
 
 	// are we set on a timer?
 	if (right_eb_angle_time)
@@ -200,9 +200,9 @@ void updateEyebrowEvent()
 			scale = double(now - start_time) / double(right_eb_angle_time);
 			right_eb_angle = old_right_eb_angle + scale * (new_right_eb_angle - old_right_eb_angle);
 		}
+
+		eyebrowRight.write(right_eb_angle);
 	}
-	else
-		right_eb_angle = new_right_eb_angle;
 
 	// are we set on a timer?
 	if (lift_time)
@@ -219,13 +219,9 @@ void updateEyebrowEvent()
 			scale = double(now - start_time) / double(lift_time);
 			lift_angle = old_lift_angle + scale * (new_lift_angle - old_lift_angle);
 		}
-	}
-	else
-		lift_angle = new_lift_angle;
 
-	eyebrowLeft.write(left_eb_angle);
-	eyebrowRight.write(right_eb_angle);
-	lift.write(lift_angle);
+		lift.write(lift_angle);
+	}
 }
 
 /**
@@ -241,9 +237,9 @@ void setEyebrowCB(const head::Eyebrows &msg)
 	new_right_eb_angle = msg.right;
 	new_lift_angle = msg.lift;
 
-	left_eb_angle_time = msg.left_time;
-	right_eb_angle_time = msg.right_time;
-	lift_time = msg.lift_time;
+	left_eb_angle_time = max(1, msg.left_time);
+	right_eb_angle_time = max(1, msg.right_time);
+	lift_time = max(1, msg.lift_time);
 
     if (new_left_eb_angle > EYEBROW_UPPER_LIMIT)
 		new_left_eb_angle = EYEBROW_UPPER_LIMIT;
