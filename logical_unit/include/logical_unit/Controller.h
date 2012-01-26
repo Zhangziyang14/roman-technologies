@@ -48,7 +48,8 @@
 #define LOCK_STARTUP_TIME	 0.5
 #define FIND_OBJECT_DURATION 5.0
 
-#define OBJECT_ID 18904
+#define COLA_ID 18904
+#define JUICE_ID 18904
 
 #define HEAD_FREE_THRESHOLD 0.001
 #define BASE_FREE_THRESHOLD 0.001
@@ -61,6 +62,9 @@ enum commandValue
 	NOTHING = -1,
 	WAKE_UP,
 	JUICE,
+	COKE,
+	COLA,
+	RELEASE,
 	SLEEP,
 };
 
@@ -99,10 +103,10 @@ private:
 	ros::Publisher mArmPositionPublisher;			/// Publishes coordinates to AutonomeArmController
 	ros::Publisher mHeadPositionPublisher;			/// Publishes coordinates to AutonomeHeadController
 	ros::Publisher mRotateBasePublisher;			/// Publishes rotation angle for base
-	ros::Publisher mPositionBasePublisher;			/// Publishes rotation angle for base
+	ros::Publisher mPositionBasePublisher;			/// Publishes position for base
 	ros::Publisher mEmotionPublisher;				/// Publishes emotions for the head
 
-	ros::ServiceClient mFindObjectClient;			/// Service client for rotating the base
+	ros::ServiceClient mFindObjectClient;			/// Service client for finding the object
 	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
@@ -136,9 +140,10 @@ public:
 	void setGripper(bool open);
 	void expressEmotion(uint8_t emotion);
 
-	uint8_t getJuice();
+	uint8_t get(int object);
 	uint8_t wakeUp();
 	uint8_t sleep();
+	uint8_t	release();
 
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);

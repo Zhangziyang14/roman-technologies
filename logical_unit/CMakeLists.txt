@@ -21,11 +21,9 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
 
-rosbuild_add_executable(OdometryTracker src/OdometryTracker.cpp)
-#rosbuild_add_executable(PathFinder src/PathFinder.cpp)
+#rosbuild_add_executable(OdometryTracker src/OdometryTracker.cpp)
 rosbuild_add_executable(PathPlanner src/PathPlanner.cpp)
 rosbuild_add_executable(Controller src/Controller.cpp)
-#rosbuild_add_executable(ArmTrajectoryPlanner src/ArmTrajectoryPlanner.cpp)
 #rosbuild_add_executable(InitPosition src/InitPosition.cpp)
 #include_directories(/usr/local/include)
 #target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)

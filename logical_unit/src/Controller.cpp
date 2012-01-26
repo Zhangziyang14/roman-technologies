@@ -233,7 +233,7 @@ uint8_t Controller::sleep()
 /*
  * Method for getting juice
  */
-uint8_t Controller::getJuice()
+uint8_t Controller::get(int object)
 {
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
@@ -266,7 +266,7 @@ uint8_t Controller::getJuice()
 
 	//Start object recognition process
 	geometry_msgs::PoseStamped objectPose;
-	if (findObject(OBJECT_ID, objectPose) == false || objectPose.pose.position.y == 0.0)
+	if (findObject(object, objectPose) == false || objectPose.pose.position.y == 0.0)
 	{
 		ROS_ERROR("Failed to find object, quitting script.");
 		return head::Emotion::SAD;
@@ -294,7 +294,7 @@ uint8_t Controller::getJuice()
 			waitForLock();
 		}
 
-		if (findObject(OBJECT_ID, objectPose) == false || objectPose.pose.position.y == 0.0)
+		if (findObject(object, objectPose) == false || objectPose.pose.position.y == 0.0)
 		{
 			ROS_ERROR("Failed to find object, quitting script.");
 			return head::Emotion::SAD;
@@ -368,6 +368,14 @@ uint8_t Controller::getJuice()
 }
 
 /**
+ * Release gripper and deliver the object
+ */
+uint8_t Controller::release()
+{
+	setGripper(true);
+	return 0;
+}
+/**
  * Listens to user commands and executes them
  */
 void Controller::speechCB(const audio_processing::speech& msg)
@@ -397,7 +405,14 @@ void Controller::speechCB(const audio_processing::speech& msg)
 		case JUICE:
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting juice...");
-			expressEmotion(getJuice());
+			expressEmotion(get(JUICE_ID));
+			break;
+
+		case COKE:
+		case COLA:
+			//Start initiating actions to get the juice
+			ROS_INFO("Getting coke...");
+			expressEmotion(get(COLA_ID));
 			break;
 
 		case SLEEP:
@@ -420,7 +435,6 @@ void Controller::speechCB(const audio_processing::speech& msg)
 		}
 	}
 }
-//TODO Decide how to score recognized arousal/emotions
 
 /**
  * Listens to navigation state
@@ -451,7 +465,10 @@ void Controller::init()
 	//initialise map
 	stringToValue[""]		 = NOTHING;
 	stringToValue["wake up"] = WAKE_UP;
+	stringToValue["cola"]	 = COLA;
+	stringToValue["coke"]	 = COKE;
 	stringToValue["juice"]   = JUICE;
+	stringToValue["release"] = RELEASE;
 	stringToValue["sleep"]	 = SLEEP;
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
@@ -487,9 +504,9 @@ void Controller::init()
 		return;
 	}
 
-	YAML::Parser parser(fin);
-	YAML::Node doc;
-	parser.GetNextDocument(doc);
+	//YAML::Parser parser(fin);
+	//YAML::Node doc;
+	//parser.GetNextDocument(doc);
 
 	float yaw;
 	try
@@ -518,7 +535,7 @@ int main(int argc, char **argv)
 	Controller controller;
 
 	controller.init();
-	controller.expressEmotion(controller.getJuice());
+	controller.expressEmotion(controller.get(JUICE_ID));
 
 	ros::spin();
 }
