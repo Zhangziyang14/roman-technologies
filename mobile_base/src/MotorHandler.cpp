@@ -40,6 +40,11 @@ void MotorHandler::positionCB(const mobile_base::position& msg)
 		mRightMotor.setPosition(currentRightPosition + msg.right);
 		mLeftMotor.setPosition(currentLeftPosition + msg.left);
 	}
+	else if(msg.left == 0 && msg.right == 0)
+	{
+		mRightMotor.brake();
+		mLeftMotor.brake();
+	}
 }
 
 /**
