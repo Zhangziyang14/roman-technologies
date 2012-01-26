@@ -3,4 +3,5 @@
     <param name="lm" value="$(find audio_processing)/language_model/commands/commands.lm"/>
     <param name="dict" value="$(find audio_processing)/language_model/commands/commands.dic"/>
   </node>
+  <node name="SpeechRecognition" pkg="audio_processing" type="SpeechRecognition"/>
 </launch>

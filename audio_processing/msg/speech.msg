@@ -1,2 +1,2 @@
 string command
-uint8 arousal
+int32 arousal

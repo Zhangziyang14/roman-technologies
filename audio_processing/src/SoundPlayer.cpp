@@ -45,7 +45,6 @@ void SoundPlayer::playCB(const std_msgs::UInt8& msg)
 		ROS_INFO("Played sound successfully");
 	else
 		ROS_ERROR("Could not find wav file");
-
 }
 
 /**
