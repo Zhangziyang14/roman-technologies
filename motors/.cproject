@@ -227,18 +227,18 @@
 <pathentry kind="mac" name="__EXCEPTIONS" path="" value="1"/>
 <pathentry kind="mac" name="__GCC_HAVE_DWARF2_CFI_ASM" path="" value="1"/>
 <pathentry kind="mac" name="_GNU_SOURCE" path="" value="1"/>
-<pathentry include="/home/kelvin/wilson/roman-technologies/motors/include" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/drivers/threemxl/include" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/externals/tinyxml" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/externals/muparser/include" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/io/logging" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/io/configuration" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/serial" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/dynamixel" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/dynamixel/dynamixel" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/dynamixel/3mxl" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/drivers/shared_serial/msg_gen/cpp/include" kind="inc" path="" system="true"/>
-<pathentry include="/home/kelvin/ros/dbl-ros-pkg-dev/drivers/shared_serial/srv_gen/cpp/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/roman-technologies/motors/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/drivers/threemxl/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/externals/tinyxml" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/externals/muparser/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/io/logging" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/io/configuration" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/serial" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/dynamixel" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/dynamixel/dynamixel" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/dbl_repos/dbl/platform/hardware/dynamixel/3mxl" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/drivers/shared_serial/msg_gen/cpp/include" kind="inc" path="" system="true"/>
+<pathentry include="/home/hans/ros/dbl-ros-pkg-dev/drivers/shared_serial/srv_gen/cpp/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/cpp/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/srv_gen/cpp/include" kind="inc" path="" system="true"/>
@@ -306,6 +306,20 @@
 <buildCommand>/usr/bin/make</buildCommand>
 <buildArguments/>
 <buildTarget>edit_cache</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[lib] motors" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>motors</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[lib] motors/fast" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>motors/fast</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
@@ -397,6 +411,48 @@
 <buildCommand>/usr/bin/make</buildCommand>
 <buildArguments/>
 <buildTarget>clean</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[obj] src/DynamixelMotor.o" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/DynamixelMotor.o</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[pre] src/DynamixelMotor.i" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/DynamixelMotor.i</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[to asm] src/DynamixelMotor.s" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/DynamixelMotor.s</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[obj] src/Motor.o" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/Motor.o</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[pre] src/Motor.i" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/Motor.i</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="[to asm] src/Motor.s" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>/usr/bin/make</buildCommand>
+<buildArguments/>
+<buildTarget>src/Motor.s</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>

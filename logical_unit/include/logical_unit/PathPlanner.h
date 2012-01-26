@@ -56,6 +56,8 @@ public:
 	void spin();
 	void planPath(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped end, nav_msgs::Path &path);
 	void goalCb(const geometry_msgs::PoseStamped &goal);
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* PATHPLANNER_H_ */

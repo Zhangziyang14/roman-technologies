@@ -11,6 +11,7 @@
 #include <ros/ros.h>
 #include <head/PitchYaw.h>
 #include <motors/DynamixelMotor.h>
+#include <tf/transform_broadcaster.h>
 
 #define PITCH_UPPER_LIMIT	1.1
 #define PITCH_LOWER_LIMIT	(-0.6)
@@ -37,6 +38,9 @@ protected:
 	DynamixelMotor mPitch;					/// Dynamixel motor for tilting the head
 	DynamixelMotor mYaw;					/// Dynamixel motor for panning the head
 
+	tf::Transform				mKinectTF;
+	tf::TransformBroadcaster 	mKinectTFBroadcaster;
+
 	MotorId mMotorId;						/// Id of the motor that is currently being controlled
 
 public:
@@ -56,6 +60,8 @@ public:
 	void positionCB(const head::PitchYaw &msg);
 	void publishHeadPosition();
 	void publishHeadSpeed();
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 

@@ -25,6 +25,12 @@ bool waitForServiceClient(ros::NodeHandle *nodeHandle, const char *serviceName)
 	return true;
 }
 
+void Controller::gripperStateCB(const std_msgs::UInt8 &msg)
+{
+	if (msg.data == GS_CLOSED)
+		positionBase(0.f);
+}
+
 void Controller::expressEmotion(uint8_t emotion)
 {
 	std_msgs::UInt8 msg;
@@ -239,8 +245,6 @@ uint8_t Controller::get(int object)
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
 
-	//First, rotate head in the right direction
-
 	//Go to the table
 	//updateRobotPosition();
 	/*
@@ -272,7 +276,7 @@ uint8_t Controller::get(int object)
 		return head::Emotion::SAD;
 	}
 
-	double yaw = atan(objectPose.pose.position.x / objectPose.pose.position.y);
+	double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
 	ROS_INFO("yaw: %lf", yaw);
 	ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
@@ -300,7 +304,7 @@ uint8_t Controller::get(int object)
 			return head::Emotion::SAD;
 		}
 
-		yaw = atan(objectPose.pose.position.x / objectPose.pose.position.y);
+		yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
 
 		ROS_INFO("yaw: %lf", yaw);
 		ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
@@ -351,7 +355,7 @@ uint8_t Controller::get(int object)
 
 	setFocusFace(true);
 
-	return head::Emotion::NEUTRAL;
+	return head::Emotion::HAPPY;
 
 	/*mLock = LOCK_BASE;
 	positionBase(CLEAR_TABLE_DISTANCE);
@@ -504,6 +508,7 @@ void Controller::init()
 	mHeadSpeedSubscriber		= mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &Controller::headSpeedCB, this);
 	mBaseSpeedSubscriber		= mNodeHandle.subscribe("/speedFeedbackTopic", 1, &Controller::baseSpeedCB, this);
 	mArmSpeedSubscriber			= mNodeHandle.subscribe("/armJointSpeedFeedbackTopic", 1, &Controller::armSpeedCB, this);
+	mGripperStateSubscriber		= mNodeHandle.subscribe("/gripper_state", 1, &Controller::gripperStateCB, this);
 
 	//initialise publishers
 	mBaseGoalPublisher 			= mNodeHandle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
@@ -514,24 +519,24 @@ void Controller::init()
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 
-	/*if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
+	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
 
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
-*/
+
 	//Store goal position
 
-	/*std::ifstream fin("config/goal.yaml");
+	std::ifstream fin("config/goal.yaml");
 	if (fin.fail())
 	{
 		ROS_ERROR("Failed to open YAML file.");
 		return;
 	}
 
-	//YAML::Parser parser(fin);
-	//YAML::Node doc;
-	//parser.GetNextDocument(doc);
+	YAML::Parser parser(fin);
+	YAML::Node doc;
+	parser.GetNextDocument(doc);
 
 	float yaw;
 	try
@@ -546,7 +551,7 @@ void Controller::init()
 	{
 		ROS_ERROR("No goal found in yaml file");
 		return;
-	}*/
+	}
 
 	usleep(1000000);
 
@@ -560,7 +565,15 @@ int main(int argc, char **argv)
 	Controller controller;
 
 	controller.init();
-	//controller.expressEmotion(controller.get(JUICE_ID));
+	controller.expressEmotion(controller.get(JUICE_ID));
 
-	ros::spin();
+	int sleep_rate;
+	controller.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
 }

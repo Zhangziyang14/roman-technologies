@@ -89,7 +89,16 @@ int main(int argc, char **argv)
 	ros::ServiceServer service = nodeHandle.advertiseService("IK", solveIK);
 
 	ROS_INFO("Kinematics node ready");
-	ros::spin();
+
+	int sleep_rate;
+	nodeHandle.param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
 
 	return 0;
 }

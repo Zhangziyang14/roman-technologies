@@ -41,15 +41,15 @@
 #define TARGET_YAW_THRESHOLD 0.05
 #define TARGET_DISTANCE_THRESHOLD 0.1
 #define TARGET_DISTANCE 0.95
-#define GRAB_TARGET_DISTANCE 0.3
-#define CLEAR_TABLE_DISTANCE (-0.3)
+#define GRAB_TARGET_DISTANCE 0.6
+#define CLEAR_TABLE_DISTANCE (-0.6)
 #define LIFT_OBJECT_DISTANCE 0.15
 
 #define LOCK_STARTUP_TIME	 0.5
 #define FIND_OBJECT_DURATION 5.0
 
 #define COLA_ID 18904
-#define JUICE_ID 18904
+#define JUICE_ID 18906
 
 #define NEUTRAL_AROUSAL	1
 
@@ -57,7 +57,7 @@
 #define BASE_FREE_THRESHOLD 0.001
 #define ARM_FREE_THRESHOLD 0.001
 
-#define GRAB_OBJECT_Z_OFFSET 0.0
+#define GRAB_OBJECT_Z_OFFSET 0.08
 
 enum commandValue
 {
@@ -89,6 +89,13 @@ enum Locks
 	LOCK_GRIPPER,
 };
 
+enum GripperState
+{
+    GS_NONE = -1,
+    GS_OPEN,
+    GS_CLOSED,
+};
+
 class Controller
 {
 private:
@@ -100,6 +107,7 @@ private:
 	ros::Subscriber mHeadSpeedSubscriber;			/// Listens to head motor speeds
 	ros::Subscriber mBaseSpeedSubscriber;			/// Listens to base motor speeds
 	ros::Subscriber mArmSpeedSubscriber;			/// Listens to arm motor speeds
+	ros::Subscriber mGripperStateSubscriber;		/// Listens to gripper state
 
 	ros::Publisher mGripperCommandPublisher;		/// Publishes commands to gripper Ultrasone controller
 	ros::Publisher mBaseGoalPublisher;				/// Publishes goal commands to PathPlanner
@@ -155,16 +163,19 @@ public:
 	void baseSpeedCB(const geometry_msgs::Twist &msg);
 	void armSpeedCB(const arm::armJointPos &msg);
 	void objectPositionCB(const geometry_msgs::PoseStamped& msg);
+	void gripperStateCB(const std_msgs::UInt8 &msg);
 
 	void waitForLock();
 
-	inline void convertQuaternion(geometry_msgs::Quaternion q1, tf::Quaternion q2)
+	inline void convertQuaternion(geometry_msgs::Quaternion &q1, tf::Quaternion q2)
 	{
 		q1.x = q2.getX();
 		q1.y = q2.getY();
 		q1.z = q2.getZ();
 		q1.w = q2.getW();
 	}
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* CONTROLLER_H_ */

@@ -76,7 +76,15 @@ int main( int argc, char* argv[])
 	emotionToPath[SAD]   	 = argv[2];
 	emotionToPath[SURPRISED] = argv[3];
 
-	ros::spin();
+	int sleep_rate;
+	soundPlayer.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
 
 	return EXIT_SUCCESS;
 }

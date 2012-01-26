@@ -180,6 +180,7 @@ bool setActiveCB(image_processing::SetActive::Request &req, image_processing::Se
 	{
 		image_sub->shutdown();
 		delete image_sub;
+		image_sub = NULL;
 	}
 	else if (active == false && req.active)
 		image_sub = new ros::Subscriber(nh->subscribe("/camera/depth_registered/points", 1, &imageCb));
@@ -215,5 +216,14 @@ int main( int argc, char* argv[] )
         return -1;
     }
 
-    ros::spin();
+	int sleep_rate;
+	nh->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		if (active == false)
+			sleep.sleep();
+		ros::spinOnce();
+	}
 }

@@ -10,14 +10,16 @@ int main(int argc, char **argv)
 
 	ArmMotorHandler armHandler(path);
 
-	ros::Rate looprate(50);
+	int sleep_rate;
+	armHandler.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
 
 	while(ros::ok())
 	{
 		armHandler.publishArmPosition();
 		armHandler.publishArmSpeed();
 		ros::spinOnce();
-		looprate.sleep();
+		sleep.sleep();
 	}
 
 	return 0;
@@ -128,7 +130,10 @@ bool ArmMotorHandler::init()
 	// wait untill side arm initialization is done
 	while(mSideMotor.getStatus() == M3XL_STATUS_INITIALIZE_BUSY);
 	if(mSideMotor.getStatus() != M3XL_STATUS_INIT_DONE)
+	{
+		ROS_ERROR("Error: %s", C3mxl::translateErrorCode(mSideMotor.getStatus()));
 		return false;
+	}
 
 	mShoulderMotor.setMode(CM_EXT_INIT_MODE);													//Set to external_init mode
 	mShoulderMotor.setAcceleration(EXT_INIT_MODE_ACCEL / SHOULDERMOTOR_CORRECTION_FACTOR);		//Set acceleration for initialization
@@ -137,6 +142,8 @@ bool ArmMotorHandler::init()
 
 	// wait untill shoulder initialation is done
 	while(mShoulderMotor.getStatus() == M3XL_STATUS_INITIALIZE_BUSY);
+	if(mShoulderMotor.getStatus() != M3XL_STATUS_INIT_DONE)
+		ROS_ERROR("Error: %s", C3mxl::translateErrorCode(mShoulderMotor.getStatus()));
 	return (mShoulderMotor.getStatus() == M3XL_STATUS_INIT_DONE);
 }
 

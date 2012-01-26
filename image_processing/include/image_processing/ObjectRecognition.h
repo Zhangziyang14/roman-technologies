@@ -46,6 +46,8 @@ public:
 	bool recognizeCB(image_processing::FindObject::Request &req, image_processing::FindObject::Response &res);
 
 	void spin();
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* OBJECTRECOGNITION_H_ */

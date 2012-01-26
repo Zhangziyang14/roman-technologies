@@ -76,7 +76,15 @@ int main(int argc, char** argv)
 	AutonomeArmController armController;
 	armController.init();
 
-	ros::spin();
+	int sleep_rate;
+	armController.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
 
 	return EXIT_SUCCESS;	// 0
 }

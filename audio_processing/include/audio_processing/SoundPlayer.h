@@ -46,6 +46,8 @@ public:
 	void init();
 	void playCB(const std_msgs::UInt8& msg);
 	bool playSound(std::string Path);
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* SOUNDPLAYER_H_ */

@@ -176,12 +176,16 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "controller");
 
 	PS3MobileController base_controller;
-
-	char *path = NULL;
-	if (argc == 2)
-		path = argv[1];
-
 	base_controller.init();
-	ros::spin();
+
+	int sleep_rate;
+	base_controller.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		sleep.sleep();
+		ros::spin();
+	}
 	return 0;
 }

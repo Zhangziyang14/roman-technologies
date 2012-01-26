@@ -98,6 +98,8 @@ public:
 
 	//inline double calcRobotAngularSpeed() { if (mCurrentSpeed.linear.x) return (1.0/mCurrentSpeed.linear.x*10.0) * SPEED_CONST;  else return 0.f; };
 	inline double calcRobotAngularSpeed() { return MAX_ANGULAR_AT_LOW_SPEED - ((MAX_ANGULAR_AT_LOW_SPEED - MAX_ANGULAR_AT_TOP_SPEED) * mCurrentSpeed.linear.x) / MAX_LINEAR_SPEED; };
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* __PS3MOBILECONTROLLER_H */

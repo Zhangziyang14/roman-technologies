@@ -36,6 +36,8 @@ public:
 	void init();
 	//void armPositionFeedbackCB(const geometry_msgs::Pose &msg);
 	void cmdCB(const geometry_msgs::Pose &msg);
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif

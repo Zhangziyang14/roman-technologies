@@ -98,5 +98,14 @@ int main(int argc, char **argv)
 	// init ros and ObjectRecognition
 	ros::init(argc, argv, "ObjectRecognition");
 	ObjectRecognition objectRecognition;
-	ros::spin();
+
+	int sleep_rate;
+	objectRecognition.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while(ros::ok())
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
 }

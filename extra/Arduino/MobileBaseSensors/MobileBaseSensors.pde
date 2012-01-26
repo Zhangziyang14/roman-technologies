@@ -71,7 +71,7 @@ void readSensors()
 			doSRF02Pulse(SENSOR_ADDRESS(sensor));
 		}
 
-		//wait for sound to return
+		//wait for	if (left_eb_angle_time) sound to return
 		delay(70);
 
 		//read sensor values

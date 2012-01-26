@@ -34,6 +34,10 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 
 	sensor_msgs::ImagePtr imageMsg;
 
+	int sleep_rate;
+	nh.param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
 	while (quit == false && ros::ok())
 	{
 		cv::Mat image, pointCloud;
@@ -94,17 +98,7 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 			}
 		}
 
-		// check for pressed keys
-		int key = cv::waitKey(30);
-		switch (key)
-		{
-		// Esc
-		case 27:
-			quit = true;
-			break;
-		default:
-			break;
-		}
+		sleep.sleep();
 		ros::spinOnce();
 	}
 }

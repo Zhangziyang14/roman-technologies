@@ -112,6 +112,8 @@ public:
 	{
 		return mSideMotor.getRotationSpeed();
 	}
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* ARMMOTORHANDLER_H_ */

@@ -1,30 +1,35 @@
 <launch>
-<!--
   <node name="serial" pkg="shared_serial" type="server" respawn="true">
-	  <param name="port_name" value="/dev/roman/threemxl" />
-	  <param name="port_type" value="RS485_FTDI" />
-      <param name="baud_rate" value="921600" />
+	<param name="port_name" value="/dev/roman/threemxl" />
+	<param name="port_type" value="RS485_FTDI" />
+	<param name="baud_rate" value="921600" />
   </node>
--->
-  <node ns="arduino_zero" name="nero_arduino_zero" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_zero" output="screen" />
-  <node ns="arduino_uno" name="nero_arduino_uno" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_uno" output="screen" />
+  <!-- node ns="arduino_zero" name="nero_arduino_zero" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_zero" output="screen" /-->
+  <!-- node ns="arduino_uno" name="nero_arduino_uno" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_uno" output="screen" /-->
 
-  <!-- start mobile base >
+  <!-- start mobile base -->
   <include file="$(find mobile_base)/launch/mobile.launch"/>
 
-  <! start arm >
+  <!-- start arm -->
   <include file="$(find arm)/launch/arm.launch"/>
 
-  <! start head >
+  <!-- start head -->
   <include file="$(find head)/launch/head.launch"/>
 
-  <! start gripper >
+  <!-- start focus face -->
+  <include file="$(find image_processing)/launch/focus_face.launch"/>
+
+  <!-- start audio processing -->
+  <!-- include file="$(find audio_processing)/launch/speech.launch"/ -->
+  <include file="$(find audio_processing)/launch/soundplayer.launch"/>
+
+  <!-- start gripper -->
   <include file="$(find gripper)/launch/gripper.launch"/>
 
-  <! start navigation >
-  <! include file="$(find logical_unit)/launch/navigation.launch"/-->
+  <!-- start navigation -->
+  <!-- include file="$(find logical_unit)/launch/navigation.launch"/ -->
 
-  <!-- start object recognition >
-  <include file="$(find image_processing)/launch/object_recognition.launch"/ -->
+  <!-- start object recognition -->
+  <include file="$(find image_processing)/launch/object_recognition.launch"/>
 
 </launch>

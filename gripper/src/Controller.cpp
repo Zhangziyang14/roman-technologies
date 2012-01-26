@@ -53,8 +53,9 @@ void Controller::UpdateJoints()
 void Controller::init()
 {
     // intialise publishers
-    mMotor_pub   = mNodeHandle.advertise<gripper::MotorControl>("motorTopic", 10);
-    mJoint_pub   = mNodeHandle.advertise<sensor_msgs::JointState>("joint_states", 10);
+    mMotor_pub   = mNodeHandle.advertise<gripper::MotorControl>("/motorTopic", 10);
+    mJoint_pub   = mNodeHandle.advertise<sensor_msgs::JointState>("/joint_states", 10);
+    mGripper_pub = mNodeHandle.advertise<std_msgs::UInt8>("/gripper_state", 1);
 
 	// initialize subscribers
     mOpen_sub	= mNodeHandle.subscribe("/openGripperTopic", 1, &Controller::openCB, this);

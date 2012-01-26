@@ -47,6 +47,8 @@ public:
 	void init();
 	void bumperFeedbackCB(const std_msgs::UInt8 &msg);
 	void ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg);
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* SAFEKEEPER_H_ */

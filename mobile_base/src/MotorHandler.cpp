@@ -173,13 +173,15 @@ int main(int argc, char **argv)
 	MotorHandler motorHandler;
 	motorHandler.init(path);
 
-	ros::Rate looprate(50);
+	int sleep_rate;
+	motorHandler.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
 
 	while(ros::ok())
 	{
 		motorHandler.publishRobotSpeed();
 		ros::spinOnce();
-		looprate.sleep();
+		sleep.sleep();
 	}
 
 	return 0;

@@ -62,6 +62,7 @@ public:
 	void ultrasoneCB(const mobile_base::SensorFeedback& msg);
 	void tweakCB(const mobile_base::tweak& msg);
 
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* __MOTORHANDLER_H */

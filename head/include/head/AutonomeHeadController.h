@@ -46,6 +46,8 @@ public:
 	void headCommandCB(const head::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif

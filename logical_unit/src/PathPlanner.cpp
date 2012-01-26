@@ -222,6 +222,15 @@ int main(int argc, char **argv)
 	}
 
 	PathPlanner pp(argv[1]);
-	ros::spin();
+
+	int sleep_rate;
+	pp.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while (ros::ok())
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
 	return 0;
 }

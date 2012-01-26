@@ -17,6 +17,11 @@ void HeadMotorHandler::publishHeadPosition()
 	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
 	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
 	mPositionPub.publish(mCurrentPose);
+
+	btQuaternion orientation;
+	orientation.setRPY(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
+	mKinectTF.setRotation(orientation);
+	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now(), "kinect_normal_axis_frame", "head_frame"));
 }
 
 /**
@@ -74,6 +79,8 @@ void HeadMotorHandler::init(char *path)
 	mPitch.init(path);
 	mYaw.init(path);
 
+	mKinectTF.setOrigin(tf::Vector3(0.03, -0.055, -0.12));
+
 	ROS_INFO("Initialising completed.");
 }
 
@@ -88,10 +95,15 @@ int main(int argc, char **argv)
 	HeadMotorHandler motorHandler;
 	motorHandler.init(path);
 
+	int sleep_rate;
+	motorHandler.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
 	while(ros::ok())
 	{
 		motorHandler.publishHeadSpeed();
 		motorHandler.publishHeadPosition();
+		sleep.sleep();
 		ros::spinOnce();
 	}
 

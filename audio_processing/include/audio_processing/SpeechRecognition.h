@@ -34,6 +34,8 @@ public:
 	/// Initialise node
 	void init();
 	void speechCB(const std_msgs::String& msg);
+
+	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
 
 #endif /* SPEECHRECOGNITION_H_ */

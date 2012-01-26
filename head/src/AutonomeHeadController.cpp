@@ -102,12 +102,17 @@ int main(int argc, char **argv)
 
 	ros::init(argc, argv, "AutonomeHeadController");
 
-	AutonomeHeadController *headController = new AutonomeHeadController();
-	headController->init();
+	AutonomeHeadController headController;
+	headController.init();
+
+	int sleep_rate;
+	headController.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
 
 	while (ros::ok())
 	{
-		ros::spin();
+		sleep.sleep();
+		ros::spinOnce();
 	}
 
 
