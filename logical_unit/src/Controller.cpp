@@ -152,7 +152,10 @@ void Controller::setFocusFace(bool active)
 void Controller::headSpeedCB(const head::PitchYaw &msg)
 {
 	if (mLock == LOCK_HEAD && fabs(msg.pitch) < HEAD_FREE_THRESHOLD && fabs(msg.yaw) < HEAD_FREE_THRESHOLD)
+	{
 		mLock = LOCK_NONE;
+		ROS_INFO("UNLOCKING HEAD");
+	}
 }
 
 /**
@@ -161,7 +164,10 @@ void Controller::headSpeedCB(const head::PitchYaw &msg)
 void Controller::baseSpeedCB(const geometry_msgs::Twist &msg)
 {
 	if (mLock == LOCK_BASE && fabs(msg.linear.x) < BASE_FREE_THRESHOLD && fabs(msg.angular.z) < BASE_FREE_THRESHOLD)
+	{
 		mLock = LOCK_NONE;
+		ROS_INFO("UNLOCKING BASE");
+	}
 }
 
 /**
@@ -170,7 +176,10 @@ void Controller::baseSpeedCB(const geometry_msgs::Twist &msg)
 void Controller::armSpeedCB(const arm::armJointPos &msg)
 {
 	if (mLock == LOCK_ARM && fabs(msg.upper_joint) < ARM_FREE_THRESHOLD && fabs(msg.wrist_joint) < ARM_FREE_THRESHOLD)
+	{
 		mLock = LOCK_NONE;
+		ROS_INFO("UNLOCKING ARM");
+	}
 }
 
 /**
@@ -250,6 +259,7 @@ uint8_t Controller::getJuice()
 	//ROS_INFO("Reached Goal");
 
 	//Aim Kinect to the table
+	setFocusFace(false);
 	mLock = LOCK_HEAD;
 	moveHead(VIEW_OBJECTS_ANGLE, 0.0);
 	waitForLock();
@@ -316,6 +326,24 @@ uint8_t Controller::getJuice()
 
 	mLock = LOCK_BASE;
 	positionBase(GRAB_TARGET_DISTANCE);
+	waitForLock();
+
+	moveHead(0.0, 0.0);
+	setFocusFace(true);
+
+	//Lift object and move it to our body
+	mLock = LOCK_ARM;
+	moveArm(objectPose.pose.position.x, objectPose.pose.position.z + LIFT_OBJECT_DISTANCE);
+	waitForLock();
+
+	ROS_INFO("mLock: %d", mLock);
+
+	mLock = LOCK_BASE;
+	positionBase(CLEAR_TABLE_DISTANCE);
+	waitForLock();
+
+	mLock = LOCK_ARM;
+	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
 
 	return head::Emotion::HAPPY;
@@ -490,7 +518,7 @@ int main(int argc, char **argv)
 	Controller controller;
 
 	controller.init();
-	controller.getJuice();
+	controller.expressEmotion(controller.getJuice());
 
 	ros::spin();
 }
