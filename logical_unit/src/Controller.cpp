@@ -111,7 +111,7 @@ void Controller::moveHead(double x, double z)
  */
 bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose)
 {
-	logical_unit::FindObject find_call;
+	image_processing::FindObject find_call;
 	find_call.request.objectId = object_id;
 
 	double timer = ros::Time::now().toSec();
@@ -135,6 +135,15 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 
 	ROS_INFO("Finding object failed.");
 	return false;
+}
+
+void Controller::setFocusFace(bool active)
+{
+	image_processing::SetActive active_call;
+	active_call.request.active = active;
+	mSetFaceFocusClient.call(active_call);
+
+	ROS_INFO("%s focus face.", active ? "Activating" : "De-activating");
 }
 
 /**
@@ -209,7 +218,7 @@ uint8_t Controller::sleep()
 {
 	mWakeUp = false;
 	moveHead(HEAD_SLEEP_X, HEAD_SLEEP_Z);
-	return head::Emotion::NONE;
+	return head::Emotion::SLEEP;
 }
 
 /*
@@ -266,7 +275,7 @@ uint8_t Controller::getJuice()
 			rotateBase(yaw);
 			waitForLock();
 		}
-		else if (fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
+		else
 		{
 			ROS_INFO("Moving by %lf. Distance: %lf", objectPose.pose.position.y - TARGET_DISTANCE, objectPose.pose.position.y);
 
@@ -339,45 +348,48 @@ void Controller::speechCB(const audio_processing::speech& msg)
 	mArousal 	 = msg.arousal;
 
 	ROS_INFO("String: %s, Value: %d", mSpeech.c_str(), stringToValue[mSpeech]);
-	switch(stringToValue[mSpeech])
+	if (stringToValue[mSpeech] != WAKE_UP && mWakeUp == false)
+		ROS_INFO("Don't disturb me in my sleep...");
+	else
 	{
-	case WAKE_UP:
-		if(!mWakeUp)
+		switch(stringToValue[mSpeech])
 		{
-			//Start initiating actions to show that the robot has heard the user
-			ROS_INFO("Heard user...");
-			expressEmotion(wakeUp());
-		}
-		else
-			ROS_INFO("I'm already awake");
-		break;
+		case WAKE_UP:
+			if(!mWakeUp)
+			{
+				//Start initiating actions to show that the robot has heard the user
+				ROS_INFO("Heard user...");
+				expressEmotion(wakeUp());
+				setFocusFace(true);
+			}
+			else
+				ROS_INFO("I'm already awake");
+			break;
 
-	case JUICE:
-		if(mWakeUp)
-		{
+		case JUICE:
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting juice...");
 			expressEmotion(getJuice());
-		}
-		else
-			ROS_INFO("Don't disturb me in my sleep...");
-		break;
+			break;
 
-	case SLEEP:
-		if(mWakeUp)
-		{
-			//Go to sleep
-			ROS_INFO("Going to sleep...");
-			expressEmotion(sleep());
-		}
-		else
-			ROS_INFO("I'm already sleeping...");
-		break;
+		case SLEEP:
+			if(mWakeUp)
+			{
+				//Go to sleep
+				ROS_INFO("Going to sleep...");
+				expressEmotion(sleep());
+				setFocusFace(false);
+			}
+			else
+				ROS_INFO("I'm already sleeping...");
+			break;
 
-	case NOTHING:
-		ROS_INFO("No commands");
-	default:
-		break;
+		case NOTHING:
+			ROS_INFO("No commands");
+		default:
+			break;
+
+		}
 	}
 }
 //TODO Decide how to score recognized arousal/emotions
@@ -433,7 +445,10 @@ void Controller::init()
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
-		mFindObjectClient		= mNodeHandle.serviceClient<logical_unit::FindObject>("/cmd_object_recognition", true);
+		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
+
+	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
+		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
 
 	//Store goal position
 

@@ -22,7 +22,6 @@
   <depend package="tabletop_collision_map_processing"/>
 
   <depend package="head"/>
-  <depend package="logical_unit"/>
 </package>
 
 

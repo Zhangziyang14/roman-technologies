@@ -30,9 +30,9 @@ target_link_libraries(PGMToObj opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(FocusFace opencv_core opencv_imgproc opencv_highgui opencv_contrib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

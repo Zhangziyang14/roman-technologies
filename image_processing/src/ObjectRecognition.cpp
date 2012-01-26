@@ -31,7 +31,7 @@ ObjectRecognition::ObjectRecognition() : mNodeHandle("")
 	mNodeHandle.param<double>("min_marker_quality", mMinQuality, 0.003);
 }
 
-bool ObjectRecognition::recognizeCB(logical_unit::FindObject::Request &req, logical_unit::FindObject::Response &res)
+bool ObjectRecognition::recognizeCB(image_processing::FindObject::Request &req, image_processing::FindObject::Response &res)
 {
 	res.result = res.SUCCESS;
 	if (req.objectId == -1)

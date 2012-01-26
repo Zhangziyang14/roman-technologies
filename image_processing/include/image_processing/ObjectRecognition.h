@@ -18,7 +18,7 @@
 #include <tabletop_object_detector/TabletopDetection.h>
 #include <tabletop_collision_map_processing/TabletopCollisionMapProcessing.h>
 
-#include "logical_unit/FindObject.h"
+#include "image_processing/FindObject.h"
 
 // REMOVE THIS
 #include <tf/transform_listener.h>
@@ -43,7 +43,7 @@ public:
 		mNodeHandle.shutdown();
 	}
 
-	bool recognizeCB(logical_unit::FindObject::Request &req, logical_unit::FindObject::Response &res);
+	bool recognizeCB(image_processing::FindObject::Request &req, image_processing::FindObject::Response &res);
 
 	void spin();
 };

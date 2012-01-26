@@ -19,10 +19,11 @@
 #include "yaml-cpp/yaml.h"
 #include "fstream"
 #include <map>
-#include "logical_unit/FindObject.h"
+#include "image_processing/FindObject.h"
 #include "head/PitchYaw.h"
 #include "arm/armJointPos.h"
 #include "head/Emotion.h"
+#include "image_processing/SetActive.h"
 
 #define MIN_ARM_Z_VALUE (-0.321)
 #define MAX_ARM_Z_VALUE (0.1725)
@@ -101,6 +102,7 @@ private:
 	ros::Publisher mEmotionPublisher;				/// Publishes emotions for the head
 
 	ros::ServiceClient mFindObjectClient;			/// Service client for rotating the base
+	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
 	tf::StampedTransform mOriginalPosition;			/// Keeps track of the original position of the robot in the map
@@ -127,6 +129,7 @@ public:
 	void moveBase(geometry_msgs::PoseStamped &stamped_goal);
 	void moveHead(double x, double z);
 	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose);
+	void setFocusFace(bool active);
 	void rotateBase(float angle);
 	void positionBase(float dist);
 	void setGripper(bool open);

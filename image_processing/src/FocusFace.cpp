@@ -20,6 +20,8 @@
 
 #include "head/PitchYaw.h"
 
+#include "image_processing/SetActive.h"
+
 // forward declaration
 IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
 
@@ -27,8 +29,10 @@ IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
 
 cv::CascadeClassifier gCascade;
 ros::Publisher *kinect_motor_pub = NULL;
+ros::Subscriber *image_sub = NULL;
+ros::NodeHandle *nh = NULL;
 head::PitchYaw gCurrentOrientation;
-
+bool active = false;
 bool gLock = false;
 
 void headSpeedCb(const head::PitchYaw &msg)
@@ -170,15 +174,29 @@ void imageCb(const sensor_msgs::PointCloud2Ptr &image)
 	cvReleaseImage(&iplImg);
 }
 
+bool setActiveCB(image_processing::SetActive::Request &req, image_processing::SetActive::Response &res)
+{
+	if (active && req.active == false)
+	{
+		image_sub->shutdown();
+		delete image_sub;
+	}
+	else if (active == false && req.active)
+		image_sub = new ros::Subscriber(nh->subscribe("/camera/depth_registered/points", 1, &imageCb));
+
+	active = req.active;
+	return true;
+}
+
 int main( int argc, char* argv[] )
 {
 	ros::init(argc, argv, "FocusFace");
-	ros::NodeHandle nh;
+	nh = new ros::NodeHandle("");
 
-	ros::Subscriber image_sub = nh.subscribe("/camera/depth_registered/points", 1, &imageCb);
-	ros::Subscriber head_position_sub = nh.subscribe("/headPositionFeedbackTopic", 1, &headPositionCb);
-	ros::Subscriber head_speed_sub = nh.subscribe("/headSpeedFeedbackTopic", 1, &headSpeedCb);
-	kinect_motor_pub = new ros::Publisher(nh.advertise<head::PitchYaw>("/cmd_head_position", 1));
+	ros::Subscriber head_position_sub = nh->subscribe("/headPositionFeedbackTopic", 1, &headPositionCb);
+	ros::Subscriber head_speed_sub = nh->subscribe("/headSpeedFeedbackTopic", 1, &headSpeedCb);
+	kinect_motor_pub = new ros::Publisher(nh->advertise<head::PitchYaw>("/cmd_head_position", 1));
+	ros::ServiceServer active_server = nh->advertiseService("/set_focus_face", &setActiveCB);
 
 	gCurrentOrientation.pitch = 0.f;
 	gCurrentOrientation.yaw = 0.f;

@@ -13,6 +13,7 @@
   <depend package="yaml_cpp"/>
   <depend package="head"/>
   <depend package="arm"/>
+  <depend package="image_processing"/>
 
   <export>
         <rosdoc config="rosdoc.yaml" />
