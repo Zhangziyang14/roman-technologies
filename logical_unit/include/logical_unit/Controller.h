@@ -51,6 +51,8 @@
 #define COLA_ID 18904
 #define JUICE_ID 18904
 
+#define NEUTRAL_AROUSAL	1
+
 #define HEAD_FREE_THRESHOLD 0.001
 #define BASE_FREE_THRESHOLD 0.001
 #define ARM_FREE_THRESHOLD 0.001
@@ -61,6 +63,7 @@ enum commandValue
 {
 	NOTHING = -1,
 	WAKE_UP,
+	EVA,
 	JUICE,
 	COKE,
 	COLA,
@@ -118,7 +121,7 @@ private:
 
 	Emotions mEmotionalState;						/// Keeps track of Nero's current emotion
 	std::string mSpeech;							/// Keeps track of what is said by the user
-	uint8_t mArousal;								/// Keeps track of the arousal contained in the speech of user
+	int mArousal;								/// Keeps track of the arousal contained in the speech of user
 	bool mWakeUp;									/// Keeps track of whether Nero is listening to commands or not
 	Locks mLock;									/// Checks whether the Controller is blocked or not and keeps track of which node it is being blocked by
 

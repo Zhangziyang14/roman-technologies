@@ -320,33 +320,38 @@ uint8_t Controller::get(int object)
 	moveArm(objectPose);
 	waitForLock();
 
+	//Be ready to grab object
 	setGripper(true);
 	usleep(1000000);
 	setGripper(false);
 
+	//Move forward to grab the object
 	mLock = LOCK_BASE;
 	positionBase(GRAB_TARGET_DISTANCE);
 	waitForLock();
 
-	moveHead(0.0, 0.0);
-	setFocusFace(true);
-
-	//Lift object and move it to our body
+	//Lift object
 	mLock = LOCK_ARM;
 	moveArm(objectPose.pose.position.x, objectPose.pose.position.z + LIFT_OBJECT_DISTANCE);
 	waitForLock();
 
 	ROS_INFO("mLock: %d", mLock);
 
+	//Move away from table
 	mLock = LOCK_BASE;
 	positionBase(CLEAR_TABLE_DISTANCE);
 	waitForLock();
 
+	//Move object to body
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
 
-	return head::Emotion::HAPPY;
+	//TODO: Move back to the owner
+
+	setFocusFace(true);
+
+	return head::Emotion::NEUTRAL;
 
 	/*mLock = LOCK_BASE;
 	positionBase(CLEAR_TABLE_DISTANCE);
@@ -373,7 +378,19 @@ uint8_t Controller::get(int object)
 uint8_t Controller::release()
 {
 	setGripper(true);
-	return 0;
+
+	//Reset arousal and listen to feedback
+	mArousal = NEUTRAL_AROUSAL;
+
+	if(mArousal > NEUTRAL_AROUSAL)
+		return head::Emotion::HAPPY;
+	else if(mArousal < NEUTRAL_AROUSAL)
+		return head::Emotion::SAD;
+	else
+	{
+		//Move away from client
+		return head::Emotion::NEUTRAL;
+	}
 }
 /**
  * Listens to user commands and executes them
@@ -384,6 +401,7 @@ void Controller::speechCB(const audio_processing::speech& msg)
 	mArousal 	 = msg.arousal;
 
 	ROS_INFO("String: %s, Value: %d", mSpeech.c_str(), stringToValue[mSpeech]);
+	ROS_INFO("Arousal: %d", mArousal);
 	if (stringToValue[mSpeech] != WAKE_UP && mWakeUp == false)
 		ROS_INFO("Don't disturb me in my sleep...");
 	else
@@ -413,6 +431,12 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting coke...");
 			expressEmotion(get(COLA_ID));
+			break;
+
+		case RELEASE:
+			//Start initiating actions to get the juice
+			ROS_INFO("Getting coke...");
+			expressEmotion(release());
 			break;
 
 		case SLEEP:
@@ -465,6 +489,7 @@ void Controller::init()
 	//initialise map
 	stringToValue[""]		 = NOTHING;
 	stringToValue["wake up"] = WAKE_UP;
+	stringToValue["eva"]	 = EVA;
 	stringToValue["cola"]	 = COLA;
 	stringToValue["coke"]	 = COKE;
 	stringToValue["juice"]   = JUICE;
@@ -489,12 +514,12 @@ void Controller::init()
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 
-	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
+	/*if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
 
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
-
+*/
 	//Store goal position
 
 	/*std::ifstream fin("config/goal.yaml");
@@ -535,7 +560,7 @@ int main(int argc, char **argv)
 	Controller controller;
 
 	controller.init();
-	controller.expressEmotion(controller.get(JUICE_ID));
+	//controller.expressEmotion(controller.get(JUICE_ID));
 
 	ros::spin();
 }
