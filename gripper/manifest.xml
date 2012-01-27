@@ -10,6 +10,7 @@
   <depend package="threemxl"/>
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
+  <depend package="motors"/>
   <export>
         <rosdoc config="rosdoc.yaml" />
   </export>
