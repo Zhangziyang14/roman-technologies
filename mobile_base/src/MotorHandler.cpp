@@ -8,13 +8,47 @@ using namespace mobile_base;
 void MotorHandler::publishRobotSpeed()
 {
 	mRightMotorSpeed = mRightMotor.getRotationSpeed();
-	mLeftMotorSpeed = mLeftMotor.getRotationSpeed();
+	mLeftMotorSpeed	 = mLeftMotor.getRotationSpeed();
 
 	// linear speed is the average of both motor speeds and it is converted from rad/s to m/s
 	mCurrentSpeed.linear.x  = (mRightMotorSpeed + mLeftMotorSpeed) * WHEEL_RADIUS / 2.0;
 	mCurrentSpeed.angular.z = (mRightMotorSpeed - mLeftMotorSpeed) * WHEEL_RADIUS / 0.25 /2.0; //* getBaseRadius();
 
 	mSpeedPub.publish(mCurrentSpeed);
+}
+
+/**
+ * Disables unused ultrasone sensors
+ */
+void MotorHandler::disableUltrasoneSensors()
+{
+	mobile_base::SensorFeedback disable_msg;
+
+	//Disable rear sensors and activate front sensors when driving forward
+	if(mCurrentSpeed.linear.x > 0)
+	{
+		for(int sensor = 0; sensor <= SensorFeedback::SENSOR_FRONT_RIGHT; sensor++)
+			disable_msg.data[sensor] = DISABLE_FALSE;
+
+		disable_msg.data[SensorFeedback::SENSOR_REAR_RIGHT] = DISABLE_TRUE;
+		disable_msg.data[SensorFeedback::SENSOR_REAR_LEFT] = DISABLE_TRUE;
+	}
+	//Disable rear sensors and activate front sensors when driving backwards
+	else if(mCurrentSpeed.linear.x < 0)
+	{
+		for(int sensor = 0; sensor <= SensorFeedback::SENSOR_FRONT_RIGHT; sensor++)
+			disable_msg.data[sensor] = DISABLE_FALSE;
+
+		disable_msg.data[SensorFeedback::SENSOR_REAR_RIGHT] = DISABLE_TRUE;
+		disable_msg.data[SensorFeedback::SENSOR_REAR_LEFT] = DISABLE_TRUE;
+	}
+	//Activate all sensors when standing still
+	else
+	{
+		for(int sensor = 0; sensor <= SensorFeedback::SENSOR_COUNT; sensor++)
+			disable_msg.data[sensor] = DISABLE_FALSE;
+	}
+	mDisableUltrasonePub.publish(disable_msg);
 }
 
 /**
@@ -42,8 +76,8 @@ void MotorHandler::positionCB(const mobile_base::position& msg)
 	}
 	else if(msg.left == 0 && msg.right == 0)
 	{
-		mRightMotor.brake();
-		mLeftMotor.brake();
+		mRightMotor.stopAtPosition(currentRightPosition);
+		mLeftMotor.stopAtPosition(currentRightPosition);
 	}
 }
 
@@ -64,7 +98,7 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 
 	converted_left  = vel_linear - 0.5*vel_angular;
 	converted_right = vel_linear + 0.5*vel_angular;
-/*
+	/*
 	if(mLock)
 	{
 		//ROS_INFO("linear.x: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", mCurrentSpeed.linear.x, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
@@ -79,7 +113,7 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 	{
 
 	}
-	*/
+	 */
 
 	mRightMotor.setSpeed(converted_right);
 	mLeftMotor.setSpeed(converted_left);
@@ -142,13 +176,14 @@ void MotorHandler::ultrasoneCB(const mobile_base::SensorFeedback& msg)
 void MotorHandler::init(char *path)
 {
 	//Initialise publishers
-	mSpeedPub = mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
+	mDisableUltrasonePub 	= mNodeHandle.advertise<mobile_base::SensorFeedback>("/sensorDisableTopic", 1);
+	mSpeedPub 				= mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
 
 	//Initialise subscribers
-	mTweakPIDSub 	= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
-	mTwistSub 		= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
-	mPositionSub 	= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
-	mUltrasoneSub   = mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
+	mTweakPIDSub 			= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
+	mTwistSub 				= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
+	mPositionSub 			= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
+	mUltrasoneSub   		= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 
 	mLock = false;
 

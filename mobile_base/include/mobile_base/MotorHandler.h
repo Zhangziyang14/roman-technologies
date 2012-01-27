@@ -16,6 +16,9 @@
 
 #define ZERO_SPEED				0.0
 
+#define DISABLE_TRUE			1
+#define DISABLE_FALSE			0
+
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
 {
@@ -26,6 +29,8 @@ protected:
 	ros::Subscriber mPositionSub;			/// Listens to integer messages for positioning
 	ros::Subscriber mTweakPIDSub;			/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
     ros::Subscriber mUltrasoneSub;          /// Listens to ultrasone distances
+
+    ros::Publisher mDisableUltrasonePub;	///	Disables unused ultrasone sensors
 	ros::Publisher mSpeedPub;				/// Publishes robot's speed
 
 	geometry_msgs::Twist mCurrentSpeed;		/// Twist message containing the current speed of the robot
@@ -57,6 +62,7 @@ public:
 	void init(char *path);
 
 	void publishRobotSpeed();
+	void disableUltrasoneSensors();
 	void moveCB(const geometry_msgs::Twist& msg);
 	void positionCB(const mobile_base::position& msg);
 	void ultrasoneCB(const mobile_base::SensorFeedback& msg);
