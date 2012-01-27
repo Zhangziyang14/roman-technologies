@@ -229,10 +229,31 @@ sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image)
 {
 	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
 	output->header.stamp = ros::Time::now();
+	output->header.frame_id = OUTPUT_FRAME_ID;
 	output->width = image->width;
 	output->height = image->height;
 	output->is_dense = false;
-	output->header.frame_id = OUTPUT_FRAME_ID;
+	output->point_step = 16;
+	output->is_bigendian = false;
+	output->point_step = 8*sizeof(float);
+	output->row_step = output->width * output->point_step;
+
+	sensor_msgs::PointField pf;
+	pf.name = "x";
+	pf.offset = 0;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "y";
+	pf.offset = 4;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "z";
+	pf.offset = 8;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
 
 	output->data.assign(image->imageData, image->imageData + size_t(image->width * image->height * image->nChannels));
 	return output;

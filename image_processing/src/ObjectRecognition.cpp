@@ -90,7 +90,18 @@ bool ObjectRecognition::recognizeCB(image_processing::FindObject::Request &req, 
 		}
 	}
 
-	return closestDistance < 9999.0;
+	if (closestDistance < 9999.0)
+	{
+		geometry_msgs::PoseStamped pose, poseInArmSpace;
+		pose = detection_call.response.detection.table.pose;
+		mTransformListener.transformPose("arm_frame", pose, poseInArmSpace);
+
+		res.min_y = detection_call.response.detection.table.y_min;
+		res.table_z = poseInArmSpace.pose.position.z;
+		return true;
+	}
+
+	return false;
 }
 
 int main(int argc, char **argv)

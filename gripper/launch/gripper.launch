@@ -1,10 +1,4 @@
 <launch>
-  <node name="serial" pkg="shared_serial" type="server" respawn="true">
-	<param name="port_name" value="/dev/roman/threemxl" />
-	<param name="port_type" value="RS485_FTDI" />
-	<param name="baud_rate" value="921600" />
-  </node>
- 
     <!--param name="~port" value="/dev/arduino"/-->
     <node pkg="gripper" name="MotorHandler" type="MotorHandler" args="serial" output="screen" />
     <node pkg="gripper" name="UltrasoneController" type="UltrasoneController"/>

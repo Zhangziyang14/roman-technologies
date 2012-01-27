@@ -61,7 +61,7 @@ public:
     inline void setGripper(bool open)
     {
     	gripper::MotorControl mc_msg;
-    	mc_msg.value = open ? -AUTOMATIC_GRIPPER_TORQUE : AUTOMATIC_GRIPPER_TORQUE;
+    	mc_msg.value = open ? AUTOMATIC_GRIPPER_TORQUE : -AUTOMATIC_GRIPPER_TORQUE;
     	mc_msg.modeStr = "torque";
     	mc_msg.waitTime = open ? 1000 : 0;
 

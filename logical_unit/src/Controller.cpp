@@ -28,7 +28,10 @@ bool waitForServiceClient(ros::NodeHandle *nodeHandle, const char *serviceName)
 void Controller::gripperStateCB(const std_msgs::UInt8 &msg)
 {
 	if (msg.data == GS_CLOSED)
+	{
 		positionBase(0.f);
+		mGripperStop = true;
+	}
 }
 
 void Controller::expressEmotion(uint8_t emotion)
@@ -53,6 +56,27 @@ void Controller::positionBase(float dist)
 	std_msgs::Float32 msg;
 	msg.data = dist;
 	mPositionBasePublisher.publish(msg);
+}
+
+double Controller::positionBaseSpeed(double time, double lin_speed)
+{
+	double start_time = ros::Time::now().toSec();
+
+	geometry_msgs::Twist msg;
+	msg.linear.x = lin_speed;
+
+	ros::Rate sleep_rate(50);
+	mGripperStop = false;
+	while (ros::ok() && ros::Time::now().toSec() - start_time < time && mGripperStop == false)
+	{
+		mBaseSpeedPublisher.publish(msg);
+		sleep_rate.sleep();
+		ros::spinOnce();
+	}
+
+	msg.linear.x = 0.0;
+	mBaseSpeedPublisher.publish(msg);
+	return ros::Time::now().toSec() - start_time;
 }
 
 void Controller::setGripper(bool open)
@@ -115,7 +139,7 @@ void Controller::moveHead(double x, double z)
 /**
  *	Sends the id of the object to recognize to ObjectRecognition
  */
-bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose)
+bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y)
 {
 	image_processing::FindObject find_call;
 	find_call.request.objectId = object_id;
@@ -130,6 +154,8 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 			if (find_call.response.result == find_call.response.SUCCESS)
 			{
 				object_pose = find_call.response.pose;
+				object_pose.pose.position.z = find_call.response.table_z + GRAB_OBJECT_Z_OFFSET;
+				min_y = find_call.response.min_y;
 				return true;
 			}
 			else
@@ -241,6 +267,8 @@ uint8_t Controller::sleep()
  */
 uint8_t Controller::get(int object)
 {
+	float min_y = 0.f;
+
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
@@ -270,26 +298,16 @@ uint8_t Controller::get(int object)
 
 	//Start object recognition process
 	geometry_msgs::PoseStamped objectPose;
-	if (findObject(object, objectPose) == false || objectPose.pose.position.y == 0.0)
+	if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 	{
 		ROS_ERROR("Failed to find object, quitting script.");
 		return head::Emotion::SAD;
 	}
 
 	double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-	ROS_INFO("yaw: %lf", yaw);
-	ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
 	{
-		if (fabs(yaw) > TARGET_YAW_THRESHOLD)
-		{
-			ROS_INFO("Rotating by %lf.", yaw);
-
-			mLock = LOCK_BASE;
-			rotateBase(yaw);
-			waitForLock();
-		}
-		else
+		if (fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
 		{
 			ROS_INFO("Moving by %lf. Distance: %lf", objectPose.pose.position.y - TARGET_DISTANCE, objectPose.pose.position.y);
 
@@ -297,26 +315,29 @@ uint8_t Controller::get(int object)
 			positionBase(objectPose.pose.position.y - TARGET_DISTANCE);
 			waitForLock();
 		}
+		else
+		{
+			ROS_INFO("Rotating by %lf.", yaw);
 
-		if (findObject(object, objectPose) == false || objectPose.pose.position.y == 0.0)
+			mLock = LOCK_BASE;
+			rotateBase(yaw);
+			waitForLock();
+		}
+
+		if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 		{
 			ROS_ERROR("Failed to find object, quitting script.");
 			return head::Emotion::SAD;
 		}
 
 		yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-
-		ROS_INFO("yaw: %lf", yaw);
-		ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 	}
 
 	ROS_INFO("yaw: %lf", yaw);
 	ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
 
-	objectPose.pose.position.z += GRAB_OBJECT_Z_OFFSET;
-	objectPose.pose.position.x = 0.0;
-
 	//Move arm to object and grab it
+	objectPose.pose.position.x = 0.0;
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, objectPose.pose.position.z);
 	waitForLock();
@@ -330,9 +351,17 @@ uint8_t Controller::get(int object)
 	setGripper(false);
 
 	//Move forward to grab the object
-	mLock = LOCK_BASE;
+	/*mLock = LOCK_BASE;
 	positionBase(GRAB_TARGET_DISTANCE);
-	waitForLock();
+	waitForLock();*/
+	double drive_time = positionBaseSpeed(GRAB_TARGET_TIME, GRAB_TARGET_SPEED);
+	if (drive_time >= GRAB_TARGET_TIME)
+	{
+		ROS_ERROR("Been driving forward too long!");
+		return head::Emotion::SAD;
+	}
+
+	usleep(500000);
 
 	//Lift object
 	mLock = LOCK_ARM;
@@ -342,9 +371,10 @@ uint8_t Controller::get(int object)
 	ROS_INFO("mLock: %d", mLock);
 
 	//Move away from table
-	mLock = LOCK_BASE;
+	/*mLock = LOCK_BASE;
 	positionBase(CLEAR_TABLE_DISTANCE);
-	waitForLock();
+	waitForLock();*/
+	positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
 
 	//Move object to body
 	mLock = LOCK_ARM;
@@ -353,6 +383,7 @@ uint8_t Controller::get(int object)
 
 	//TODO: Move back to the owner
 
+	moveHead(FOCUS_FACE_ANGLE, 0.0);
 	setFocusFace(true);
 
 	return head::Emotion::HAPPY;
@@ -518,6 +549,7 @@ void Controller::init()
 	mPositionBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_position", 1);
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
+	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
