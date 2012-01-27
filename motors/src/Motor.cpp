@@ -89,6 +89,15 @@ void Motor::brake()
 }
 
 /**
+  * Stops the base when in POSITION_MODE
+ */
+void Motor::stopAtPosition(double current_position)
+{
+	assertMode(CM_POSITION_MODE);
+	motor_->setLinearPos(current_position, 0, 0.1, false);
+}
+
+/**
   * Sets linear position of the motor when in POSITION_MODE
  */
 void Motor::setPosition(double position)
@@ -97,6 +106,14 @@ void Motor::setPosition(double position)
 	motor_->setLinearPos(position, 1, 0.1, false);
 }
 
+/**
+ * Sets current of the motor when in CURRENT_MODE
+ */
+void Motor::setCurrent(double current)
+{
+	assertMode(CM_CURRENT_MODE);
+	motor_->setCurrent(current);
+}
 
 void Motor::setAngle(double angle)
 {
@@ -208,6 +225,8 @@ int Motor::getStatus()
 	this->update();
 	return motor_->presentStatus();
 }
+
+
 
 
 /**

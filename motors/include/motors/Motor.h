@@ -14,6 +14,9 @@
 #define DEFAULT_ENCODER_COUNT		500
 #define DEFAULT_ACCELERATION		5
 #define SAFE_BRAKING_DECCELERATION	0.5
+#define POSITION_CONTROL_SPEED		0.2
+
+#define GRIPPER_SAFE_CURRENT	-0.027
 
 #define DXL_FORCE_CALL(call) \
   do { \
@@ -107,6 +110,7 @@ public:
     void setEncoderCount(int resolution);
     void setSpeed(double speed);
     void brake();
+    void stopAtPosition(double current_position);
     void setLSpeed(double speed, double acceleration);
     void setPosition(double position);
     void setAcceleration(double aceleration);
@@ -122,6 +126,9 @@ public:
 
     // torque control
     void setTorque(double torque);
+
+    // current control
+    void setCurrent(double current);
 
     double getRotationSpeed();
     int getMode();
