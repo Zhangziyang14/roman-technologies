@@ -176,6 +176,9 @@ void MotorHandler::init(char *path)
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
 
+	mLeftMotor.setAcceleration(DEFAULT_ACCELERATION);
+	mRightMotor.setAcceleration(DEFAULT_ACCELERATION);
+
 	//Initialise distances from ultrasone sensors
 	for (int sensor = 0; sensor < SensorFeedback::SENSOR_COUNT; sensor++)
 		mSensorData[sensor] = SensorFeedback::ULTRASONE_MAX_RANGE;

@@ -17,6 +17,7 @@
 #define PID_TWEAK_STEP 			0.01
 
 #define ZERO_SPEED				0.0
+#define DEFAULT_ACCELERATION	5
 
 using namespace mobile_base;
 
