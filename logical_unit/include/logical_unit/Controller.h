@@ -68,6 +68,7 @@ enum commandValue
 	NOTHING = -1,
 	WAKE_UP,
 	EVA,
+	BEER,
 	JUICE,
 	COKE,
 	COLA,
@@ -163,6 +164,7 @@ public:
 	uint8_t wakeUp();
 	uint8_t sleep();
 	uint8_t	release();
+	uint8_t respond();
 
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);

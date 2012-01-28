@@ -33,6 +33,9 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	else if(msg.data.find("drink") != string::npos)
 			processed_msg.command = "drink";
 
+	else if(msg.data.find("beer") != string::npos)
+			processed_msg.command = "beer";
+
 	else if(msg.data.find("coke") != string::npos)
 			processed_msg.command = "coke";
 

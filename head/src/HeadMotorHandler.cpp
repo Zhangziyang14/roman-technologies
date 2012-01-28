@@ -39,6 +39,7 @@ void HeadMotorHandler::publishHeadSpeed()
  */
 void HeadMotorHandler::positionCB(const head::PitchYaw &msg)
 {
+	ROS_INFO("Position CB");
 	double pitch	= msg.pitch;
 	double yaw 		= msg.yaw;
 
@@ -105,6 +106,7 @@ int main(int argc, char **argv)
 		motorHandler.publishHeadPosition();
 		sleep.sleep();
 		ros::spinOnce();
+		usleep(2000000);
 	}
 
 	return 0;

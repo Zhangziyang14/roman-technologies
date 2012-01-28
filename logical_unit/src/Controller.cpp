@@ -253,6 +253,17 @@ uint8_t Controller::sleep()
 	return head::Emotion::SLEEP;
 }
 
+/**
+ * Respond to the user
+ */
+uint8_t Controller::respond()
+{
+	moveHead(HEAD_INIT_X, HEAD_INIT_Z);
+	setFocusFace(true);
+
+	return head::Emotion::SURPRISED;
+}
+
 /*
  * Method for getting juice
  */
@@ -437,10 +448,21 @@ void Controller::speechCB(const audio_processing::speech& msg)
 				ROS_INFO("I'm already awake");
 			break;
 
+		case EVA:
+			ROS_INFO("Responding...");
+			expressEmotion(respond());
+			break;
+
+		case BEER:
+			ROS_INFO("Responding with surprise");
+			expressEmotion(head::Emotion::SURPRISED);
+			break;
+
 		case JUICE:
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting juice...");
 			expressEmotion(get(JUICE_ID));
+			mOriginalPosition.getRotation();
 			break;
 
 		case COKE:
@@ -507,6 +529,7 @@ void Controller::init()
 	stringToValue[""]		 = NOTHING;
 	stringToValue["wake up"] = WAKE_UP;
 	stringToValue["eva"]	 = EVA;
+	stringToValue["beer"]	 = BEER;
 	stringToValue["cola"]	 = COLA;
 	stringToValue["coke"]	 = COKE;
 	stringToValue["juice"]   = JUICE;

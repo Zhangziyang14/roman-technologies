@@ -1,4 +1,4 @@
-Language model created by QuickLM on Thu Jan 26 17:30:29 EST 2012
+Language model created by QuickLM on Fri Jan 27 08:07:45 EST 2012
 Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
 
 The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
@@ -7,70 +7,73 @@ The code that was used to produce this language model is available in Open Sourc
 Please visit http://www.speech.cs.cmu.edu/tools/ for more information
 
 The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
-This model based on a corpus of 21 sentences and 32 words
+This model based on a corpus of 22 sentences and 33 words
 
 \data\
-ngram 1=32
-ngram 2=53
-ngram 3=37
+ngram 1=33
+ngram 2=55
+ngram 3=38
 
 \1-grams:
--0.8764 </s> -0.3010
--0.8764 <s> -0.2262
--2.1987 BAD -0.2955
--2.1987 COKE -0.2391
--2.1987 COLA -0.2391
--2.1987 COULD -0.2955
--2.1987 DELICIOUS -0.2391
--2.1987 DRINK -0.2391
--2.1987 EVA -0.2983
--2.1987 FETCH -0.2899
--1.8976 GET -0.2955
--2.1987 GO -0.2983
--2.1987 GOOD -0.2955
--2.1987 GREAT -0.2391
--1.5966 JUICE -0.2391
--2.1987 JUICE? -0.2391
--2.1987 NICE -0.2391
--2.1987 NOT -0.2391
--2.1987 PLEASE -0.2955
--2.1987 RELEASE -0.2391
--2.1987 RETRIEVE -0.2899
--1.8976 ROBOT -0.2391
--2.1987 SLEEP -0.2391
--2.1987 STOP -0.2391
--2.1987 THANK -0.2955
--2.1987 THANKS -0.2391
--1.8976 THE -0.2871
--2.1987 TO -0.2983
--2.1987 UP -0.2391
--2.1987 WAKE -0.2983
--1.8976 YOU -0.2359
--2.1987 YUMMY -0.2391
+-0.8724 </s> -0.3010
+-0.8724 <s> -0.2261
+-2.2148 BAD -0.2957
+-2.2148 BEER -0.2385
+-2.2148 COKE -0.2385
+-2.2148 COLA -0.2385
+-2.2148 COULD -0.2957
+-2.2148 DELICIOUS -0.2385
+-2.2148 DRINK -0.2385
+-2.2148 EVA -0.2984
+-2.2148 FETCH -0.2903
+-1.9138 GET -0.2957
+-2.2148 GO -0.2984
+-2.2148 GOOD -0.2957
+-2.2148 GREAT -0.2385
+-1.6128 JUICE -0.2385
+-2.2148 JUICE? -0.2385
+-2.2148 NICE -0.2385
+-2.2148 NOT -0.2385
+-2.2148 PLEASE -0.2957
+-2.2148 RELEASE -0.2385
+-2.2148 RETRIEVE -0.2903
+-1.9138 ROBOT -0.2385
+-2.2148 SLEEP -0.2385
+-2.2148 STOP -0.2385
+-2.2148 THANK -0.2957
+-2.2148 THANKS -0.2385
+-1.9138 THE -0.2876
+-2.2148 TO -0.2984
+-2.2148 UP -0.2385
+-2.2148 WAKE -0.2984
+-1.9138 YOU -0.2354
+-2.2148 YUMMY -0.2385
 
 \2-grams:
--1.6232 <s> BAD 0.0000
--1.6232 <s> COKE 0.0000
--1.6232 <s> COLA 0.0000
--1.6232 <s> COULD 0.0000
--1.6232 <s> DELICIOUS 0.0000
--1.6232 <s> DRINK 0.0000
--1.6232 <s> EVA 0.0000
--1.6232 <s> FETCH 0.0000
--1.6232 <s> GET 0.0000
--1.6232 <s> GO 0.0000
--1.6232 <s> GOOD 0.0000
--1.6232 <s> GREAT 0.0000
--1.6232 <s> JUICE 0.0000
--1.6232 <s> NICE 0.0000
--1.6232 <s> NOT 0.0000
--1.6232 <s> RELEASE 0.0000
--1.6232 <s> RETRIEVE 0.0000
--1.6232 <s> STOP 0.0000
--1.6232 <s> THANK 0.0000
--1.6232 <s> THANKS 0.0000
--1.6232 <s> YUMMY 0.0000
+-1.6435 <s> BAD 0.0000
+-1.6435 <s> BEER 0.0000
+-1.6435 <s> COKE 0.0000
+-1.6435 <s> COLA 0.0000
+-1.6435 <s> COULD 0.0000
+-1.6435 <s> DELICIOUS 0.0000
+-1.6435 <s> DRINK 0.0000
+-1.6435 <s> EVA 0.0000
+-1.6435 <s> FETCH 0.0000
+-1.6435 <s> GET 0.0000
+-1.6435 <s> GO 0.0000
+-1.6435 <s> GOOD 0.0000
+-1.6435 <s> GREAT 0.0000
+-1.6435 <s> JUICE 0.0000
+-1.6435 <s> NICE 0.0000
+-1.6435 <s> NOT 0.0000
+-1.6435 <s> RELEASE 0.0000
+-1.6435 <s> RETRIEVE 0.0000
+-1.6435 <s> STOP 0.0000
+-1.6435 <s> THANK 0.0000
+-1.6435 <s> THANKS 0.0000
+-1.6435 <s> YUMMY 0.0000
 -0.3010 BAD ROBOT 0.0000
+-0.3010 BEER </s> -0.3010
 -0.3010 COKE </s> -0.3010
 -0.3010 COLA </s> -0.3010
 -0.3010 COULD YOU -0.1761
@@ -105,6 +108,7 @@ ngram 3=37
 
 \3-grams:
 -0.3010 <s> BAD ROBOT
+-0.3010 <s> BEER </s>
 -0.3010 <s> COKE </s>
 -0.3010 <s> COLA </s>
 -0.3010 <s> COULD YOU
