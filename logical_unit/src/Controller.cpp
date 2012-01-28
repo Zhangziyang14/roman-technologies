@@ -109,9 +109,13 @@ void Controller::moveArm(const geometry_msgs::PoseStamped msg)
 	mArmPositionPublisher.publish(msg.pose);
 }
 
-void Controller::moveBase(geometry_msgs::PoseStamped &stamped_goal)
+void Controller::moveBase(geometry_msgs::Pose &goal)
 {
 	ROS_INFO("Publishing path goal.");
+	geometry_msgs::PoseStamped stamped_goal;
+	stamped_goal.pose = goal;
+	stamped_goal.header.frame_id = "/map";
+	stamped_goal.header.stamp = ros::Time::now();
 	mBaseGoalPublisher.publish(stamped_goal);
 }
 /**
@@ -214,7 +218,9 @@ void Controller::updateRobotPosition()
 	{
 		tf::StampedTransform originalPosition;
 		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), originalPosition);
-		tf::poseStampedTFToMsg(originalPosition, mOriginalPosition);
+
+		tf::Stamped<tf::Pose> p = tf::Stamped<tf::Pose>(tf::Pose(originalPosition.getRotation(), originalPosition.getOrigin()), ros::Time::now(), originalPosition.frame_id_);
+		tf::poseStampedTFToMsg(p, mOriginalPosition);
 	}
 	catch (tf::TransformException ex)
 	{
@@ -225,7 +231,7 @@ void Controller::updateRobotPosition()
 void Controller::returnToOriginalPosition()
 {
 	mLock = LOCK_PATH;
-	moveBase(mOriginalPosition);
+	moveBase(mOriginalPosition.pose);
 	waitForLock();
 }
 
@@ -276,7 +282,7 @@ uint8_t Controller::respond()
 /*
  * Method for getting juice
  */
-uint8_t Controller::get(int object)
+uint8_t Controller::get(int object, uint8_t attempt_nr)
 {
 	float min_y = 0.f;
 
@@ -287,11 +293,7 @@ uint8_t Controller::get(int object)
 	//Go to the table
 	updateRobotPosition();
 
-	geometry_msgs::PoseStamped msg;
-	msg.pose = mGoal;
-	msg.header.stamp = ros::Time::now();
-	msg.header.frame_id = "/map";
-	moveBase(msg);
+	moveBase(mGoal);
 	mLock = LOCK_PATH;
 	waitForLock();
 
@@ -468,7 +470,6 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting juice...");
 			expressEmotion(get(JUICE_ID));
-			mOriginalPosition.getRotation();
 			break;
 
 		case COKE:

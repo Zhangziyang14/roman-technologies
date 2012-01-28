@@ -129,7 +129,7 @@ private:
 	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
-	geometry_msgs::Pose mOriginalPosition;			/// Keeps track of the original position of the robot in the map
+	geometry_msgs::PoseStamped mOriginalPosition;	/// Keeps track of the original position of the robot in the map
 	geometry_msgs::Pose mGoal;						/// Stores the goal postion
 
 	double mDistanceToGoal;							/// Distance to the goal
@@ -152,7 +152,7 @@ public:
 	void updateRobotPosition();
 	void moveArm(double x, double z);
 	void moveArm(const geometry_msgs::PoseStamped msg);
-	void moveBase(geometry_msgs::PoseStamped &stamped_goal);
+	void moveBase(geometry_msgs::Pose &goal);
 	void returnToOriginalPosition();
 	void moveHead(double x, double z);
 	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y);
@@ -163,7 +163,7 @@ public:
 	void setGripper(bool open);
 	void expressEmotion(uint8_t emotion);
 
-	uint8_t get(int object, uint8 attempt_nr = 1);
+	uint8_t get(int object, uint8_t attempt_nr = 1);
 	uint8_t wakeUp();
 	uint8_t sleep();
 	uint8_t	release();
