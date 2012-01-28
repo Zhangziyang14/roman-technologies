@@ -139,7 +139,7 @@ void detectAndDraw(pcl::PointCloud<pcl::PointXYZRGB> *cloud, cv::Mat& img, cv::C
     		kinect_motor_pub->publish(msg);
     	}
     }
-    cv::imshow("result", img);
+    //cv::imshow("result", img);
 }
 
 /**
@@ -163,7 +163,7 @@ void imageCb(const sensor_msgs::PointCloud2Ptr &image)
 
 	if (gLock)
 	{
-		cvShowImage("result", iplImg);
+		//cvShowImage("result", iplImg);
 		cvReleaseImage(&iplImg);
 		return;
 	}
@@ -208,8 +208,8 @@ int main( int argc, char* argv[] )
 		return 0;
 	}
 
-	cv::startWindowThread();
-	cvNamedWindow("result", 1);
+	//cv::startWindowThread();
+	//cvNamedWindow("result", 1);
     if (!gCascade.load(argv[1]))
     {
         std::cerr << "ERROR: Could not load classifier cascade" << std::endl;

@@ -84,7 +84,7 @@ void AutonomeHeadController::init()
 	msg.pitch = 0.0;
 	msg.yaw = 0.0;
 	mHead_movement_pub.publish(msg);
-	setExpression(mNeutral);
+	setExpression(x);
 
 	ROS_INFO("AutonomeHeadController initialised");
 }

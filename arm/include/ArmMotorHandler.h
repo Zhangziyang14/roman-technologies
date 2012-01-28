@@ -24,7 +24,7 @@
 #define DEFAULT_ACCEL					(0.5)
 
 #define SHOULDERMOTOR_OFFSET			(1.66)
-#define SIDEJOINT_OFFSET				(0.53)
+#define SIDEJOINT_OFFSET				(0.48)
 
 #define SHOULDERMOTOR_MIN_ANGLE 		(-1.1)	//Relative to virtual origin
 #define SHOULDERMOTOR_MAX_ANGLE 		(2.16 - SHOULDERMOTOR_OFFSET)

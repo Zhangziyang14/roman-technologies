@@ -1,6 +1,6 @@
 <launch>
     <!--param name="~port" value="/dev/arduino"/-->
-    <node pkg="gripper" name="MotorHandler" type="MotorHandler" args="serial" output="screen" />
+    <node pkg="gripper" name="MotorHandler" type="MotorHandler" args="serial"/>
     <node pkg="gripper" name="UltrasoneController" type="UltrasoneController"/>
     <!--node pkg="gripper" name="TemperatureListener" type="TemperatureListener"/ -->
     <node pkg="rosserial_python" name="serial_node" type="serial_node.py" args="/dev/roman/arduino_zero"/>

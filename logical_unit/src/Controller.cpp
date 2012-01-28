@@ -111,16 +111,7 @@ void Controller::moveArm(const geometry_msgs::PoseStamped msg)
 
 void Controller::moveBase(geometry_msgs::PoseStamped &stamped_goal)
 {
-	tf::Quaternion goal_orientation(mOriginalPosition.getRotation().getX(), mOriginalPosition.getRotation().getY(), mOriginalPosition.getRotation().getZ(), mOriginalPosition.getRotation().getW());
-
-	//TODO aanpassen om naar tafel te gaan
-	stamped_goal.pose.position.x = std::cos(tf::getYaw(goal_orientation)) + mOriginalPosition.getOrigin().getX();
-	stamped_goal.pose.position.y = std::sin(tf::getYaw(goal_orientation)) + mOriginalPosition.getOrigin().getY();
-
-	convertQuaternion(stamped_goal.pose.orientation, goal_orientation);
-
-	stamped_goal.header.stamp = ros::Time::now();
-
+	ROS_INFO("Publishing path goal.");
 	mBaseGoalPublisher.publish(stamped_goal);
 }
 /**
@@ -249,7 +240,7 @@ uint8_t Controller::wakeUp()
 {
 	mWakeUp = true;
 	moveHead(HEAD_INIT_X, HEAD_INIT_Z);
-	return head::Emotion::HAPPY;
+	return head::Emotion::NEUTRAL;
 }
 
 /**
@@ -274,21 +265,17 @@ uint8_t Controller::get(int object)
 	waitForLock();
 
 	//Go to the table
-	//updateRobotPosition();
-	/*
+	updateRobotPosition();
+
 	geometry_msgs::PoseStamped msg;
-	msg.pose.position.x = std::cos(tf::getYaw());
-	msg.pose.position.y = std::sin();
-	 */
+	msg.pose = mGoal;
+	msg.header.stamp = ros::Time::now();
+	msg.header.frame_id = "/map";
+	moveBase(msg);
+	mLock = LOCK_PATH;
+	waitForLock();
 
-	//geometry_msgs::PoseStamped msg;
-
-	//moveBase(msg);
-
-	//mLock = true;
-	//waitForLock();
-
-	//ROS_INFO("Reached Goal");
+	ROS_INFO("Reached Goal");
 
 	//Aim Kinect to the table
 	setFocusFace(false);
@@ -386,25 +373,20 @@ uint8_t Controller::get(int object)
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
 	setFocusFace(true);
 
-	return head::Emotion::HAPPY;
-
-	/*mLock = LOCK_BASE;
-	positionBase(CLEAR_TABLE_DISTANCE);
-	waitForLock();
-
-	//Tuck in arm while holding object
-	mLock = LOCK_ARM;
-	moveArm(MIN_ARM_X_VALUE, objectPose.pose.position.z);
-	waitForLock();
-
-	mLock = LOCK_ARM;
-	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
-	waitForLock();*/
-
 	//Go back to original position
-	//moveBase(msg);
+	msg.pose.position.x = mOriginalPosition.getOrigin().getX();
+	msg.pose.position.y = mOriginalPosition.getOrigin().getY();
+	msg.pose.position.z = mOriginalPosition.getOrigin().getZ();
+	msg.pose.orientation.x = mOriginalPosition.getRotation().getX();
+	msg.pose.orientation.y = mOriginalPosition.getRotation().getY();
+	msg.pose.orientation.z = mOriginalPosition.getRotation().getZ();
+	msg.pose.orientation.w = mOriginalPosition.getRotation().getW();
+	msg.header.stamp = ros::Time::now();
+	moveBase(msg);
 
 	//Deliver the juice
+
+	return head::Emotion::HAPPY;
 }
 
 /**
@@ -500,9 +482,9 @@ void Controller::speechCB(const audio_processing::speech& msg)
  */
 void Controller::navigationStateCB(const std_msgs::UInt8& msg)
 {
-	//TODO: Fix this
-	//if(msg.data == FOLLOW_STATE_FINISHED)
-	//	mLock = NONE;
+	ROS_INFO("Received navigation update: %d", msg.data);
+	if(mLock == LOCK_PATH && msg.data == 3) // finished
+		mLock = LOCK_NONE;
 }
 
 /**
@@ -551,11 +533,11 @@ void Controller::init()
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
-	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
+	/*if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
 
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
-		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
+		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);*/
 
 	//Store goal position
 
@@ -584,9 +566,10 @@ void Controller::init()
 		ROS_ERROR("No goal found in yaml file");
 		return;
 	}
+	ROS_INFO("x: %f, y: %f, yaw: %f", mGoal.position.x, mGoal.position.y, yaw);
 
 	usleep(1000000);
-
+	expressEmotion(head::Emotion::SLEEP);
 	ROS_INFO("Initialised Controller");
 }
 
@@ -597,7 +580,7 @@ int main(int argc, char **argv)
 	Controller controller;
 
 	controller.init();
-	controller.expressEmotion(controller.get(JUICE_ID));
+	//controller.expressEmotion(controller.get(JUICE_ID));
 
 	int sleep_rate;
 	controller.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);

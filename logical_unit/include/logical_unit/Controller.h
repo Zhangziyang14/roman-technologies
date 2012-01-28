@@ -53,7 +53,7 @@
 #define FIND_OBJECT_DURATION 5.0
 
 #define COLA_ID 18904
-#define JUICE_ID 18904
+#define JUICE_ID 18906
 
 #define NEUTRAL_AROUSAL	1
 

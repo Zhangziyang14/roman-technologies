@@ -5,7 +5,7 @@
 	
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 	
-    <include file="$(find image_processing)/launch/kinect.launch"/>
+    <!-- include file="$(find image_processing)/launch/kinect.launch"/ -->
 
     <node pkg="logical_unit" type="OdometryTracker" name="OdometryTracker"/>
     <node pkg="logical_unit" type="PathPlanner" name="PathPlanner" output="screen" args="$(arg navmesh_file)"/>
