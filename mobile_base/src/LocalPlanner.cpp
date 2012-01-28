@@ -70,8 +70,11 @@ void LocalPlanner::scaleTwist(geometry_msgs::Twist& msg)
 	left_speed 	= std::abs(converted_left);
 	right_speed = std::abs(converted_right);
 
-	left_speed      = scaleSpeed(left_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT], mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT_CENTER]);
-	right_speed		= scaleSpeed(right_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_LEFT_CENTER]);
+	if(msg.linear.x > 0)
+	{
+		left_speed      = scaleSpeed(left_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT], mSensorData[SensorFeedback::SENSOR_FRONT_RIGHT_CENTER]);
+		right_speed		= scaleSpeed(right_speed, STANDARD_AVOIDANCE_IMPACT, FRONT_SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_FRONT_LEFT], mSensorData[SensorFeedback::SENSOR_FRONT_LEFT_CENTER]);
+	}
 
 	//Check right and left side for walls and avoid them when needed.
 	//Don't avoid the walls when distance to both sides are close to the robot
@@ -81,7 +84,8 @@ void LocalPlanner::scaleTwist(geometry_msgs::Twist& msg)
 		right_speed	= scaleSpeed(right_speed, SIDES_AVOIDANCE_IMPACT, SIDES_AVOIDANCE_DISTANCE, mSensorData[SensorFeedback::SENSOR_LEFT]);
 	}
 	//Avoidance rules when object is in front of robot
-	if(mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] < FRONT_AVOIDANCE_DISTANCE || mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < FRONT_AVOIDANCE_DISTANCE)
+	if((mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] < FRONT_AVOIDANCE_DISTANCE
+			|| mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < FRONT_AVOIDANCE_DISTANCE) && msg.linear.x > 0)
 	{
 		//Turn to left when left side has more space than right side
 		if(mSensorData[SensorFeedback::SENSOR_LEFT] > mSensorData[SensorFeedback::SENSOR_RIGHT] && mSensorData[SensorFeedback::SENSOR_RIGHT] < SIDES_AVOIDANCE_DISTANCE)

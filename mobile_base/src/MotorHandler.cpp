@@ -19,37 +19,22 @@ void MotorHandler::publishRobotSpeed()
 
 /**
  * Disables unused ultrasone sensors
- */
+ * Is not used because arduino does not support any more service servers or subscribers...
+
 void MotorHandler::disableUltrasoneSensors()
 {
-	mobile_base::SensorFeedback disable_msg;
+	mobile_base::disableUltrasone disable_srv;
+	disable_srv.request.disable = mCurrentSpeed.linear.x > 0 ? uint16_t(SensorFeedback::DISABLE_REAR) : uint16_t(SensorFeedback::DISABLE_FRONT);
 
-	//Disable rear sensors and activate front sensors when driving forward
-	if(mCurrentSpeed.linear.x > 0)
-	{
-		for(int sensor = 0; sensor <= SensorFeedback::SENSOR_FRONT_RIGHT; sensor++)
-			disable_msg.data[sensor] = DISABLE_FALSE;
+	if(mCurrentSpeed.linear.x == 0)
+		disable_srv.request.disable = uint16_t(SensorFeedback::DISABLE_NONE);
 
-		disable_msg.data[SensorFeedback::SENSOR_REAR_RIGHT] = DISABLE_TRUE;
-		disable_msg.data[SensorFeedback::SENSOR_REAR_LEFT] = DISABLE_TRUE;
-	}
-	//Disable rear sensors and activate front sensors when driving backwards
-	else if(mCurrentSpeed.linear.x < 0)
-	{
-		for(int sensor = 0; sensor <= SensorFeedback::SENSOR_FRONT_RIGHT; sensor++)
-			disable_msg.data[sensor] = DISABLE_FALSE;
+	if(mCurrentUltrasoneState != disable_srv.request.disable)
+		mUltrasoneDisableClient.call(disable_srv);
 
-		disable_msg.data[SensorFeedback::SENSOR_REAR_RIGHT] = DISABLE_TRUE;
-		disable_msg.data[SensorFeedback::SENSOR_REAR_LEFT] = DISABLE_TRUE;
-	}
-	//Activate all sensors when standing still
-	else
-	{
-		for(int sensor = 0; sensor <= SensorFeedback::SENSOR_COUNT; sensor++)
-			disable_msg.data[sensor] = DISABLE_FALSE;
-	}
-	mDisableUltrasonePub.publish(disable_msg);
+	mCurrentUltrasoneState = disable_srv.request.disable;
 }
+**/
 
 /**
  * Controls the motors based on the received position.
@@ -174,7 +159,7 @@ void MotorHandler::ultrasoneCB(const mobile_base::SensorFeedback& msg)
 void MotorHandler::init(char *path)
 {
 	//Initialise publishers
-	mDisableUltrasonePub 	= mNodeHandle.advertise<mobile_base::SensorFeedback>("/sensorDisableTopic", 1);
+	//mDisableUltrasonePub 	= mNodeHandle.advertise<mobile_base::SensorFeedback>("/sensorDisableTopic", 1);
 	mSpeedPub 				= mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
 
 	//Initialise subscribers
@@ -183,14 +168,19 @@ void MotorHandler::init(char *path)
 	mPositionSub 			= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub   		= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
 
+	//Initialise service clients
+	//mUltrasoneDisableClient = mNodeHandle.serviceClient<mobile_base::disableUltrasone>("/disableUltrasoneService", true);
+
 	mLock = false;
 
 	mLeftMotor.init(path);
 	mRightMotor.init(path);
 
 	//Initialise distances from ultrasone sensors
-	for (int i = 0; i < SensorFeedback::SENSOR_COUNT; i++)
-		mSensorData[i] = SensorFeedback::ULTRASONE_MAX_RANGE;
+	for (int sensor = 0; sensor < SensorFeedback::SENSOR_COUNT; sensor++)
+		mSensorData[sensor] = SensorFeedback::ULTRASONE_MAX_RANGE;
+
+	//mCurrentUltrasoneState = 0;
 
 	ROS_INFO("Initialising completed.");
 }
@@ -213,6 +203,8 @@ int main(int argc, char **argv)
 	while(ros::ok())
 	{
 		motorHandler.publishRobotSpeed();
+		//motorHandler.disableUltrasoneSensors();
+
 		ros::spinOnce();
 		sleep.sleep();
 	}

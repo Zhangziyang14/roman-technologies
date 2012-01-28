@@ -51,7 +51,7 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
 {
 	if(msg.data[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] < 0 &&
-			msg.data[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < 0)
+			msg.data[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < 0 && mCurrentSpeed.linear.x > 0)
 	{
 		mobile_base::position position_msg;
 		position_msg.left   = -SAFE_DISTANCE;
@@ -59,7 +59,7 @@ void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
 		mMovement_pub.publish(position_msg);
 	}
 	else if(msg.data[SensorFeedback::SENSOR_REAR_LEFT] - mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < 0 &&
-			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0)
+			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0 && mCurrentSpeed.linear.x < 0)
 	{
 		mobile_base::position position_msg;
 		position_msg.left   = SAFE_DISTANCE;
@@ -71,6 +71,14 @@ void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
 }
 
 /**
+ * Keeps track of current speed of mobile base
+ */
+void SafeKeeper::speedFeedbackCB(const geometry_msgs::Twist &msg)
+{
+	mCurrentSpeed = msg;
+}
+
+/**
  * Initialises this controller.
  */
 void SafeKeeper::init()
@@ -78,6 +86,7 @@ void SafeKeeper::init()
 	// initialise subscribers
 	mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &SafeKeeper::bumperFeedbackCB, this);
 	mUltrasone_sub		= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &SafeKeeper::ultrasoneFeedbackCB, this);
+	mSpeed_sub			= mNodeHandle.subscribe("/speedFeedbackTopic", 10, &SafeKeeper::speedFeedbackCB, this);
 
 	// initialise publishers
 	mMovement_pub 		= mNodeHandle.advertise<mobile_base::position>("/positionTopic", 1);

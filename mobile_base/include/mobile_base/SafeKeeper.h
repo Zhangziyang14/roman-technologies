@@ -34,10 +34,13 @@ private:
 
 	ros::Subscriber mBumperFeedback_sub;		/// Subscriber to Arduino bumper sensor feedback
 	ros::Subscriber mUltrasone_sub;				/// Subscriber to Arduino ultrasone sensors feedback
+	ros::Subscriber mSpeed_sub;					/// Subscriber to current speed of mobile base
 
 	ros::Publisher  mMovement_pub;				/// Publisher to control the motors
 	BumperState 	mBumperState;				/// Keeps track of the current state for the bumpers
 	bool mDisableForward, mDisableBackward;		/// Keeps track of the front and backward buttons of the bumpers
+
+	geometry_msgs::Twist mCurrentSpeed;			/// Keeps track of the current speed of mobile base
 
 	boost::array<int16_t, 10> mSensorData;
 
@@ -47,6 +50,7 @@ public:
 	void init();
 	void bumperFeedbackCB(const std_msgs::UInt8 &msg);
 	void ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg);
+	void speedFeedbackCB(const geometry_msgs::Twist &msg);
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };

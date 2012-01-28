@@ -19,7 +19,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 rosbuild_add_executable(PS3MobileController src/PS3MobileController.cpp)
 rosbuild_add_executable(AutonomeMobileController src/AutonomeMobileController.cpp src/PathFollower.cpp src/LocalPlanner.cpp)

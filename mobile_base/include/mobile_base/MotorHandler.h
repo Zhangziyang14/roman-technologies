@@ -9,6 +9,8 @@
 
 #include <mobile_base/position.h>
 #include <mobile_base/SensorFeedback.h>
+#include <mobile_base/disableUltrasone.h>
+
 
 #define WHEEL_RADIUS 			0.1475	//[m]
 #define BASE_RADIUS 			0.25	//[m]
@@ -16,32 +18,34 @@
 
 #define ZERO_SPEED				0.0
 
-#define DISABLE_TRUE			1
-#define DISABLE_FALSE			0
+using namespace mobile_base;
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
 {
 protected:
-	ros::NodeHandle mNodeHandle;			/// ROS node handle
+	ros::NodeHandle mNodeHandle;				/// ROS node handle
 
-	ros::Subscriber mTwistSub;				/// Listens to Twist messages for movement
-	ros::Subscriber mPositionSub;			/// Listens to integer messages for positioning
-	ros::Subscriber mTweakPIDSub;			/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
-    ros::Subscriber mUltrasoneSub;          /// Listens to ultrasone distances
+	ros::Subscriber mTwistSub;					/// Listens to Twist messages for movement
+	ros::Subscriber mPositionSub;				/// Listens to integer messages for positioning
+	ros::Subscriber mTweakPIDSub;				/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
+	ros::Subscriber mUltrasoneSub;          	/// Listens to ultrasone distances
 
-    ros::Publisher mDisableUltrasonePub;	///	Disables unused ultrasone sensors
-	ros::Publisher mSpeedPub;				/// Publishes robot's speed
+	//ros::Publisher mDisableUltrasonePub;		///	Disables unused ultrasone sensors
+	ros::Publisher mSpeedPub;					/// Publishes robot's speed
 
-	geometry_msgs::Twist mCurrentSpeed;		/// Twist message containing the current speed of the robot
-	double mLeftMotorSpeed;					/// Current speeds for left wheel in rad/s
-	double mRightMotorSpeed;				/// Current speeds for right wheel in rad/s
+	//ros::ServiceClient mUltrasoneDisableClient;	/// Client for disabling ultrasone sensors
+	uint16_t mCurrentUltrasoneState;				/// Keeps track of which ultrasone sensors are disabled
 
-	Motor mLeftMotor;						/// Motor for left wheel
-	Motor mRightMotor;						/// Motor for right wheel
+	geometry_msgs::Twist mCurrentSpeed;			/// Twist message containing the current speed of the robot
+	double mLeftMotorSpeed;						/// Current speeds for left wheel in rad/s
+	double mRightMotorSpeed;					/// Current speeds for right wheel in rad/s
 
-	MotorId mMotorId;						/// Id of the motor that is currently being controlled
-	PIDParameter mPIDFocus;					/// One of the PID parameters that is to be changed on button events
+	Motor mLeftMotor;							/// Motor for left wheel
+	Motor mRightMotor;							/// Motor for right wheel
+
+	MotorId mMotorId;							/// Id of the motor that is currently being controlled
+	PIDParameter mPIDFocus;						/// One of the PID parameters that is to be changed on button events
 
 	bool mLock;
 
@@ -62,11 +66,11 @@ public:
 	void init(char *path);
 
 	void publishRobotSpeed();
-	void disableUltrasoneSensors();
+	//void disableUltrasoneSensors();
 	void moveCB(const geometry_msgs::Twist& msg);
-	void positionCB(const mobile_base::position& msg);
-	void ultrasoneCB(const mobile_base::SensorFeedback& msg);
-	void tweakCB(const mobile_base::tweak& msg);
+	void positionCB(const position& msg);
+	void ultrasoneCB(const SensorFeedback& msg);
+	void tweakCB(const tweak& msg);
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };
