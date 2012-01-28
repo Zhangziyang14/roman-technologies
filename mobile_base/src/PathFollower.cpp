@@ -26,7 +26,7 @@ double distanceToLine(geometry_msgs::Point p, geometry_msgs::Point a, geometry_m
 	if (xu * xv + yu * yv < 0)
 		return sqrt( (p.x-b.x)*(p.x-b.x) + (p.y-b.y)*(p.y-b.y) );
 
-	return fabs( (p.x*(a.y - b.y) + p.y*(b.x - a.x) + (a.x * b.y - b.x * a.y)) / sqrt((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)));
+	return fabs((p.x*(a.y - b.y) + p.y*(b.x - a.x) + (a.x * b.y - b.x * a.y)) / sqrt((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)));
 }
 
 float distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
@@ -62,7 +62,7 @@ PathFollower::PathFollower(ros::NodeHandle *nodeHandle) : mLocalPlanner(nodeHand
 	mCommandPub = nodeHandle->advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	mGoalPub = nodeHandle->advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
 	mPathLengthPub = nodeHandle->advertise<std_msgs::Float32>(pathLengthTopic, 1);
-	mPathLengthPub = nodeHandle->advertise<std_msgs::UInt8>(followStateTopic, 1);
+	mFollowStatePub = nodeHandle->advertise<std_msgs::UInt8>(followStateTopic, 1);
 }
 
 
@@ -71,11 +71,13 @@ PathFollower::PathFollower(ros::NodeHandle *nodeHandle) : mLocalPlanner(nodeHand
  */
 double PathFollower::calculateDiffYaw()
 {
+	// no path, no yaw
 	if (getPathSize() == 0)
 	{
 		//ROS_INFO("No change yaw.");
 		return 0.0; // no change needed
 	}
+	// last point is only for final orientation
 	if (getPathSize() == 1)
 	{
 		//ROS_INFO("Final point yaw.");
@@ -111,7 +113,6 @@ void PathFollower::continuePath()
 	ROS_INFO("Waypoint reached.");
 	geometry_msgs::Twist msg;
 	mCommandPub.publish(msg);
-
 }
 
 /**

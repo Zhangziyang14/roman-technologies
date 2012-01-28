@@ -212,12 +212,21 @@ void Controller::updateRobotPosition()
 {
 	try
 	{
-		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), mOriginalPosition);
+		tf::StampedTransform originalPosition;
+		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), originalPosition);
+		tf::poseStampedTFToMsg(originalPosition, mOriginalPosition);
 	}
 	catch (tf::TransformException ex)
 	{
 		//ROS_ERROR("%s",ex.what());
 	}
+}
+
+void Controller::returnToOriginalPosition()
+{
+	mLock = LOCK_PATH;
+	moveBase(mOriginalPosition);
+	waitForLock();
 }
 
 /**
@@ -299,6 +308,7 @@ uint8_t Controller::get(int object)
 	if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 	{
 		ROS_ERROR("Failed to find object, quitting script.");
+		returnToOriginalPosition();
 		return head::Emotion::SAD;
 	}
 
@@ -325,6 +335,7 @@ uint8_t Controller::get(int object)
 		if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 		{
 			ROS_ERROR("Failed to find object, quitting script.");
+			returnToOriginalPosition();
 			return head::Emotion::SAD;
 		}
 
@@ -349,16 +360,27 @@ uint8_t Controller::get(int object)
 	setGripper(false);
 
 	//Move forward to grab the object
-	/*mLock = LOCK_BASE;
-	positionBase(GRAB_TARGET_DISTANCE);
-	waitForLock();*/
 	double drive_time = positionBaseSpeed(GRAB_TARGET_TIME, GRAB_TARGET_SPEED);
 	if (drive_time >= GRAB_TARGET_TIME)
 	{
 		ROS_ERROR("Been driving forward too long!");
-		return head::Emotion::SAD;
+
+		expressEmotion(head::Emotion::SAD);
+		positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
+
+		// no more attempts left, we are sad
+		if (attempt_nr >= MAX_GRAB_ATTEMPTS)
+		{
+			ROS_ERROR("No more grab attempts left.");
+			returnToOriginalPosition();
+			return head::Emotion::SAD;
+		}
+
+		expressEmotion(head::Emotion::NEUTRAL);
+		get(object, attempt_nr + 1);
 	}
 
+	// little hack to allow the gripper to close
 	usleep(500000);
 
 	//Lift object
@@ -366,12 +388,7 @@ uint8_t Controller::get(int object)
 	moveArm(objectPose.pose.position.x, objectPose.pose.position.z + LIFT_OBJECT_DISTANCE);
 	waitForLock();
 
-	ROS_INFO("mLock: %d", mLock);
-
 	//Move away from table
-	/*mLock = LOCK_BASE;
-	positionBase(CLEAR_TABLE_DISTANCE);
-	waitForLock();*/
 	positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
 
 	//Move object to body
@@ -379,21 +396,10 @@ uint8_t Controller::get(int object)
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
 
-	//TODO: Move back to the owner
+	returnToOriginalPosition();
 
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
 	setFocusFace(true);
-
-	//Go back to original position
-	msg.pose.position.x = mOriginalPosition.getOrigin().getX();
-	msg.pose.position.y = mOriginalPosition.getOrigin().getY();
-	msg.pose.position.z = mOriginalPosition.getOrigin().getZ();
-	msg.pose.orientation.x = mOriginalPosition.getRotation().getX();
-	msg.pose.orientation.y = mOriginalPosition.getRotation().getY();
-	msg.pose.orientation.z = mOriginalPosition.getRotation().getZ();
-	msg.pose.orientation.w = mOriginalPosition.getRotation().getW();
-	msg.header.stamp = ros::Time::now();
-	moveBase(msg);
 
 	//Deliver the juice
 

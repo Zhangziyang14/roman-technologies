@@ -63,6 +63,8 @@
 
 #define GRAB_OBJECT_Z_OFFSET 0.05
 
+#define MAX_GRAB_ATTEMPTS 3
+
 enum commandValue
 {
 	NOTHING = -1,
@@ -127,7 +129,7 @@ private:
 	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
-	tf::StampedTransform mOriginalPosition;			/// Keeps track of the original position of the robot in the map
+	geometry_msgs::Pose mOriginalPosition;			/// Keeps track of the original position of the robot in the map
 	geometry_msgs::Pose mGoal;						/// Stores the goal postion
 
 	double mDistanceToGoal;							/// Distance to the goal
@@ -160,7 +162,7 @@ public:
 	void setGripper(bool open);
 	void expressEmotion(uint8_t emotion);
 
-	uint8_t get(int object);
+	uint8_t get(int object, uint8 attempt_nr = 1);
 	uint8_t wakeUp();
 	uint8_t sleep();
 	uint8_t	release();
