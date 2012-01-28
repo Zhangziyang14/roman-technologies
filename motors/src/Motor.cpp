@@ -73,19 +73,7 @@ void Motor::setLSpeed(double speed, double acceleration)
 void Motor::setSpeed(double speed)
 {
 	assertMode(CM_SPEED_MODE);
-	if(speed == 0.0)
-		brake();
-    else
-    	motor_->setSpeed(speed);
-}
-
-/**
-  * Sets speed of the motor when in SPEED_MODE
- */
-void Motor::brake()
-{
-	assertMode(CM_SPEED_MODE);
-    motor_->setSpeed(0);
+    motor_->setSpeed(speed);
 }
 
 /**
@@ -225,9 +213,6 @@ int Motor::getStatus()
 	this->update();
 	return motor_->presentStatus();
 }
-
-
-
 
 /**
  * Initalize Motor and its attributes.

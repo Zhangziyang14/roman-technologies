@@ -56,15 +56,13 @@ void MotorHandler::disableUltrasoneSensors()
  */
 void MotorHandler::positionCB(const mobile_base::position& msg)
 {
-	mRightMotor.brake();
-	mLeftMotor.brake();
+	mRightMotor.setSpeed(0.0);
+	mLeftMotor.setSpeed(0.0);
 
 	double currentRightPosition = mRightMotor.getPosition();
 	double currentLeftPosition = mLeftMotor.getPosition();
 
 	mLock = true;
-	mRightMotor.setMode(CM_POSITION_MODE);
-	mLeftMotor.setMode(CM_POSITION_MODE);
 
 	//ROS_INFO("left: %f, right: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", msg.left, msg.right, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
 	if((msg.left > 0 && msg.right > 0  && mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] > msg.left*100 && mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] > msg.left*100) ||

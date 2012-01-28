@@ -50,7 +50,7 @@ PathFollower::PathFollower(ros::NodeHandle *nodeHandle) : mLocalPlanner(nodeHand
 	nodeHandle->param<std::string>("follow_state_topic", followStateTopic, "/follow_state");
 	nodeHandle->param<double>("min_angular_speed", mMinAngularSpeed, 0.1);
 	nodeHandle->param<double>("max_angular_speed", mMaxAngularSpeed, 0.4);
-	nodeHandle->param<double>("min_linear_speed", mMinLinearSpeed, 0.2);
+	nodeHandle->param<double>("min_linear_speed", mMinLinearSpeed, 0.1);
 	nodeHandle->param<double>("max_linear_speed", mMaxLinearSpeed, 0.3);
 	nodeHandle->param<double>("angular_adjustment_speed", mAngularAdjustmentSpeed, 0.05);
 	nodeHandle->param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.2);
@@ -199,10 +199,11 @@ void PathFollower::updatePath()
 		goal.header.stamp = ros::Time::now();
 		mGoalPub.publish(goal);
 		clearPath();
+		return;
 	}
 
 	// Did we turn away too much? Set state back to turning so we can correct it.
-	if (fabs(diffYaw) > mYawTolerance)
+	if (mFollowState != FOLLOW_STATE_TURNING && fabs(diffYaw) > mYawTolerance)
 	{
 		ROS_INFO("Yaw too far away from target, turning back.");
 		mFollowState = FOLLOW_STATE_TURNING;
@@ -230,6 +231,12 @@ void PathFollower::updatePath()
 	case FOLLOW_STATE_FORWARD:
 		//ROS_INFO("Moving.");
 
+		if (getPathSize() == 1)
+		{
+			continuePath();
+			break;
+		}
+
 		// Did we reach our waypoint? Then continue to the next waypoint.
 		if (reachedNextPoint())
 		{
@@ -240,15 +247,13 @@ void PathFollower::updatePath()
 		command.linear.x = getScaledLinearSpeed();
 		// minor angular adjustments during forward movement.
 		command.angular.z = diffYaw > 0.0 ? mAngularAdjustmentSpeed : -mAngularAdjustmentSpeed;
+		mLocalPlanner.scaleTwist(command);
 		break;
 	default:
 		break;
 	}
 
 	publishPathLength();
-
-	mLocalPlanner.scaleTwist(command);
-
 	mCommandPub.publish(command);
 }
 

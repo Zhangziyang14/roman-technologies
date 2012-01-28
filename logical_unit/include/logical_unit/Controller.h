@@ -153,6 +153,7 @@ public:
 	void moveArm(double x, double z);
 	void moveArm(const geometry_msgs::PoseStamped msg);
 	void moveBase(geometry_msgs::PoseStamped &stamped_goal);
+	void returnToOriginalPosition();
 	void moveHead(double x, double z);
 	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y);
 	void setFocusFace(bool active);

@@ -109,7 +109,6 @@ public:
     void setMode(ControlMode mode);
     void setEncoderCount(int resolution);
     void setSpeed(double speed);
-    void brake();
     void stopAtPosition(double current_position);
     void setLSpeed(double speed, double acceleration);
     void setPosition(double position);
