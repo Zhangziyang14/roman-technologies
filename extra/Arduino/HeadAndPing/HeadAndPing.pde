@@ -12,17 +12,6 @@
 #include <std_msgs/Bool.h>
 #include <head/RGB.h>
 #include <FlexiTimer2.h>
-#include <head/Eyebrows.h>
-#include <Servo.h>
-
-#define EYEBROW_LEFT A3
-#define EYEBROW_RIGHT A1
-#define EYEBROW_LIFT A0
-
-#define LIFT_LOWER_LIMIT 94
-#define LIFT_UPPER_LIMIT 130
-#define EYEBROW_LOWER_LIMIT 60
-#define EYEBROW_UPPER_LIMIT 120
 
 int r, g, b;				// current RGB values
 int old_r, old_g, old_b;	// previous set RGB values (used for smooth transitions between RGB commands)
@@ -31,14 +20,6 @@ int max_r, max_g, max_b;	// upper RGB limit
 unsigned long start_time;			// time at which breathing started
 unsigned long breath_time;			// time a breath cycle takes
 boolean transition_rgb;				// determines whether we are transitioning from old_r/g/b to min_r/g/b
-
-  int old_left_eb_angle, old_right_eb_angle, old_lift_angle;
-  int new_left_eb_angle, new_right_eb_angle, new_lift_angle;
-  unsigned long start_time;
-  unsigned int left_eb_angle_time;
-  unsigned int right_eb_angle_time;
-  unsigned int lift_time;
-  
 
 #define TRANSITION_TIME 500
 
@@ -56,11 +37,6 @@ std_msgs::UInt16 ping_msg;
 //ROS
 ros::NodeHandle nh;
 ros::Publisher ping_pub("/pingFeedbackTopic", &ping_msg);
-
-Servo eyebrowLeft; 
-Servo eyebrowRight;
-Servo lift;
- 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                   RGB Section
@@ -209,117 +185,6 @@ void activatePingCB(const std_msgs::Bool& msg)
 
 ros::Subscriber<std_msgs::Bool> ping_sub("/pingActivateTopic", &activatePingCB);
 
-
- /** EYEBROWS
- * Updates eyebrow angles if necessary
- */
-void updateEyebrowEvent()
-{
-	unsigned long now = millis();
-	double scale = 0.0;
-
-	int left_eb_angle = 0;
-	int right_eb_angle = 0;
-	int lift_angle = 0;
-
-	// are we set on a timer?
-	if (left_eb_angle_time)
-	{
-		// did our time end?
-		if (now - start_time > left_eb_angle_time)
-		{
-			left_eb_angle_time = 0;
-			left_eb_angle = new_left_eb_angle;
-		}
-		else
-		{
-			// scale by time passed
-			scale = double(now - start_time) / double(left_eb_angle_time);
-			left_eb_angle = old_left_eb_angle + scale * (new_left_eb_angle - old_left_eb_angle);
-		}
-
-		eyebrowLeft.write(left_eb_angle);
-	}
-
-	// are we set on a timer?
-	if (right_eb_angle_time)
-	{
-	    // did our time end?
-	    if (now - start_time > right_eb_angle_time)
-	    {
-	      right_eb_angle_time = 0;
-	      right_eb_angle = new_right_eb_angle;
-	    }
-	    else
-  	    {
-  		// scale by time passed
-		scale = double(now - start_time) / double(right_eb_angle_time);
-	        right_eb_angle = old_right_eb_angle + scale * (new_right_eb_angle - old_right_eb_angle);
-	    }
-
-	    eyebrowRight.write(right_eb_angle);
-	}
-
-	// are we set on a timer?
-	if (lift_time)
-	{
-	    // did our time end?
-	    if (now - start_time > lift_time)
-	    {
-                lift_time = 0;
-	        lift_angle = new_lift_angle;
-	    }
-	    else
-	    {
-	    // scale by time passed
-	    scale = double(now - start_time) / double(lift_time);
-	    lift_angle = old_lift_angle + scale * (new_lift_angle - old_lift_angle);
-	    }
-
-	lift.write(lift_angle);
-	}
-}
-  
- /**
- * message order: lift left right
- */
-void setEyebrowCB(const head::Eyebrows &msg)
-{
-	old_left_eb_angle = new_left_eb_angle;
-	old_right_eb_angle = new_right_eb_angle;
-	old_lift_angle = new_lift_angle;
-
-	new_left_eb_angle = msg.left;
-	new_right_eb_angle = msg.right;
-	new_lift_angle = msg.lift;
-
-	left_eb_angle_time = max(1, msg.left_time);
-	right_eb_angle_time = max(1, msg.right_time);
-	lift_time = max(1, msg.lift_time);
-
-    if (new_left_eb_angle > EYEBROW_UPPER_LIMIT)
-		new_left_eb_angle = EYEBROW_UPPER_LIMIT;
-	else if (new_left_eb_angle < EYEBROW_LOWER_LIMIT)
-		new_left_eb_angle = EYEBROW_LOWER_LIMIT;
-
-	if (new_right_eb_angle > EYEBROW_UPPER_LIMIT)
-		new_right_eb_angle = EYEBROW_UPPER_LIMIT;
-	else if (new_right_eb_angle < EYEBROW_LOWER_LIMIT)
-		new_right_eb_angle = EYEBROW_LOWER_LIMIT;  
-
-	if (new_lift_angle > LIFT_UPPER_LIMIT)
-		new_lift_angle = LIFT_UPPER_LIMIT;
-	else if (new_lift_angle < LIFT_LOWER_LIMIT)
-		new_lift_angle = LIFT_LOWER_LIMIT;
-	
-
-	start_time = millis();
-}
-
-//Subscriber to eyebrow commands from eyebrowTopic
-ros::Subscriber<head::Eyebrows> servo_sub("/eyebrowTopic", &setEyebrowCB);
-
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                       setup & loop Section
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -353,26 +218,6 @@ void setup()
 	pingActivated = false;
 	nh.advertise(ping_pub);
 	nh.subscribe(ping_sub);
-
- //eyebrow init
-    old_left_eb_angle = 0;
-    old_right_eb_angle = 0;
-    old_lift_angle = 0;
-    new_left_eb_angle = 0;
-    new_right_eb_angle = 0;
-    new_lift_angle = 0;
-    left_eb_angle_time = 0;    
-    right_eb_angle_time = 0;
-    lift_time = 0;
-    start_time = 0;
-
-    eyebrowLeft.attach(EYEBROW_LEFT);
-    eyebrowRight.attach(EYEBROW_RIGHT);
-    lift.attach(EYEBROW_LIFT);
-    lift.write(150);
-    delay(500);
-
-    FlexiTimer2::set(150, 1.0/1000, updateEyebrowEvent); // call every 150ms
 
 	FlexiTimer2::set(15, 1.0/1000, updateRGBEvent); // call every 15ms
 	FlexiTimer2::start();

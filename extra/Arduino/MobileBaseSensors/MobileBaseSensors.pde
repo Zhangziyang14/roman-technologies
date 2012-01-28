@@ -47,7 +47,6 @@ ros::NodeHandle nh;
 
 //declare outgoing messages
 mobile_base::SensorFeedback sensor_msg;
-mobile_base::SensorFeedback disable_sensor_msg;
 std_msgs::UInt8 bump_msg;
 
 //topic to publish ultrasone sensor data on
@@ -62,17 +61,6 @@ unsigned int left_eb_angle_time;
 unsigned int right_eb_angle_time;
 unsigned int lift_time;
 
-/**
- * message order: lift left right
- */
-void disableSensorCB(const mobile_base::SensorFeedback &msg)
-{
-	disable_sensor_msg = msg;
-}
-
-//Subscriber to disable sensors
-ros::Subscriber<mobile_base::SensorFeedback> sensor_disable_sub("sensorDisableTopic", &disableSensorCB);
-
 void readSensors()
 {
 	for (int i = 0; i < 2; i++)
@@ -80,20 +68,16 @@ void readSensors()
 		//trigger sensors
 		for (int sensor = 0; sensor < SensorFeedback::SENSOR_COUNT; sensor = sensor + 2)
 		{
-			if(disable_sensor_msg.data[sensor] != 0)
-				doSRF02Pulse(SENSOR_ADDRESS(sensor));
+			doSRF02Pulse(SENSOR_ADDRESS(sensor));
 		}
 
-		//wait for sound to return
+		//wait for	if (left_eb_angle_time) sound to return
 		delay(70);
 
 		//read sensor values
 		for (int sensor = 0; sensor < SensorFeedback::SENSOR_COUNT; sensor = sensor + 2)
 		{
-			if(disable_sensor_msg.data[sensor] != 0)
-				sensor_msg.data[sensor] = windowFilter(readSRF02(SENSOR_ADDRESS(sensor)));
-			else
-				sensor_msg.data[sensor] = mobile_base::SensorFeedback::ULTRASONE_MAX_RANGE;
+			sensor_msg.data[sensor] = windowFilter(readSRF02(SENSOR_ADDRESS(sensor)));
 		}
 	}
 
@@ -306,7 +290,6 @@ void setup()
 	lift_time = 0;
 	start_time = 0;
 	nh.subscribe(servo_sub);
-        nh.subscribe(sensor_disable_sub);
 	eyebrowLeft.attach(EYEBROW_LEFT);
 	eyebrowRight.attach(EYEBROW_RIGHT);
 	lift.attach(EYEBROW_LIFT);
