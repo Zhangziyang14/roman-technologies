@@ -40,17 +40,18 @@
 #define VIEW_OBJECTS_ANGLE	0.4
 #define FOCUS_FACE_ANGLE (-0.2)
 
-#define TARGET_YAW_THRESHOLD 0.05
-#define TARGET_DISTANCE_THRESHOLD 0.1
-#define TARGET_DISTANCE 0.95
-// #define GRAB_TARGET_DISTANCE 0.4
-#define GRAB_TARGET_SPEED 0.1
-#define GRAB_TARGET_TIME 5.0
-#define CLEAR_TABLE_DISTANCE (-0.4)
-#define LIFT_OBJECT_DISTANCE 0.05
-
 #define LOCK_STARTUP_TIME	 0.5
+
+#define TARGET_YAW_THRESHOLD 0.05
+#define TABLE_DISTANCE_THRESHOLD 0.1
+#define TABLE_DISTANCE 0.7
+#define GRAB_TARGET_SPEED 0.1
+#define EXTRA_GRAB_TIME 2.0
+#define LIFT_OBJECT_DISTANCE 0.05
 #define FIND_OBJECT_DURATION 5.0
+#define GRAB_OBJECT_Z_OFFSET 0.05
+#define MAX_GRAB_ATTEMPTS 3
+#define ARM_LENGTH 0.8
 
 #define COLA_ID 18904
 #define JUICE_ID 18906
@@ -60,10 +61,6 @@
 #define HEAD_FREE_THRESHOLD 0.001
 #define BASE_FREE_THRESHOLD 0.001
 #define ARM_FREE_THRESHOLD 0.001
-
-#define GRAB_OBJECT_Z_OFFSET 0.05
-
-#define MAX_GRAB_ATTEMPTS 3
 
 enum commandValue
 {
@@ -159,7 +156,7 @@ public:
 	void setFocusFace(bool active);
 	void rotateBase(float angle);
 	void positionBase(float dist);
-	double positionBaseSpeed(double time, double lin_speed);
+	double positionBaseSpeed(double time, double lin_speed, bool gripperStop = false);
 	void setGripper(bool open);
 	void expressEmotion(uint8_t emotion);
 

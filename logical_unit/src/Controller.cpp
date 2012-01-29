@@ -58,7 +58,7 @@ void Controller::positionBase(float dist)
 	mPositionBasePublisher.publish(msg);
 }
 
-double Controller::positionBaseSpeed(double time, double lin_speed)
+double Controller::positionBaseSpeed(double time, double lin_speed, bool gripperStop)
 {
 	double start_time = ros::Time::now().toSec();
 
@@ -67,7 +67,7 @@ double Controller::positionBaseSpeed(double time, double lin_speed)
 
 	ros::Rate sleep_rate(50);
 	mGripperStop = false;
-	while (ros::ok() && ros::Time::now().toSec() - start_time < time && mGripperStop == false)
+	while (ros::ok() && ros::Time::now().toSec() - start_time < time && (gripperStop == false || mGripperStop == false))
 	{
 		mBaseSpeedPublisher.publish(msg);
 		sleep_rate.sleep();
@@ -230,6 +230,7 @@ void Controller::updateRobotPosition()
 
 void Controller::returnToOriginalPosition()
 {
+	return;
 	mLock = LOCK_PATH;
 	moveBase(mOriginalPosition.pose);
 	waitForLock();
@@ -293,9 +294,9 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 	//Go to the table
 	updateRobotPosition();
 
-	moveBase(mGoal);
+	/*moveBase(mGoal);
 	mLock = LOCK_PATH;
-	waitForLock();
+	waitForLock();*/
 
 	ROS_INFO("Reached Goal");
 
@@ -315,14 +316,14 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 	}
 
 	double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
+	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
 	{
-		if (fabs(TARGET_DISTANCE - objectPose.pose.position.y) > TARGET_DISTANCE_THRESHOLD)
+		if (fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
 		{
-			ROS_INFO("Moving by %lf. Distance: %lf", objectPose.pose.position.y - TARGET_DISTANCE, objectPose.pose.position.y);
+			ROS_INFO("Moving by %lf. Distance: %lf", min_y - TABLE_DISTANCE, min_y);
 
 			mLock = LOCK_BASE;
-			positionBase(objectPose.pose.position.y - TARGET_DISTANCE);
+			positionBase(min_y - TABLE_DISTANCE);
 			waitForLock();
 		}
 		else
@@ -345,13 +346,10 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 	}
 
 	ROS_INFO("yaw: %lf", yaw);
-	ROS_INFO("distance: %lf", fabs(TARGET_DISTANCE - objectPose.pose.position.y));
+	ROS_INFO("distance: %lf", fabs(TABLE_DISTANCE - min_y));
 
 	//Move arm to object and grab it
-	objectPose.pose.position.x = 0.0;
-	mLock = LOCK_ARM;
-	moveArm(MIN_ARM_X_VALUE, objectPose.pose.position.z);
-	waitForLock();
+	objectPose.pose.position.x = 0.0; // we are straight ahead of the object, so this should be 0.0 (it is most likely already close to 0.0)
 	mLock = LOCK_ARM;
 	moveArm(objectPose);
 	waitForLock();
@@ -362,13 +360,19 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 	setGripper(false);
 
 	//Move forward to grab the object
-	double drive_time = positionBaseSpeed(GRAB_TARGET_TIME, GRAB_TARGET_SPEED);
-	if (drive_time >= GRAB_TARGET_TIME)
+	double expected_drive_time = (objectPose.pose.position.y - ARM_LENGTH) / GRAB_TARGET_SPEED;
+	double drive_time = positionBaseSpeed(expected_drive_time + EXTRA_GRAB_TIME, GRAB_TARGET_SPEED, true);
+	if (drive_time >= expected_drive_time + EXTRA_GRAB_TIME)
 	{
 		ROS_ERROR("Been driving forward too long!");
 
 		expressEmotion(head::Emotion::SAD);
 		positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
+
+		//Move object to body
+		mLock = LOCK_ARM;
+		moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+		waitForLock();
 
 		// no more attempts left, we are sad
 		if (attempt_nr >= MAX_GRAB_ATTEMPTS)
@@ -379,7 +383,7 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 		}
 
 		expressEmotion(head::Emotion::NEUTRAL);
-		get(object, attempt_nr + 1);
+		return get(object, attempt_nr + 1);
 	}
 
 	// little hack to allow the gripper to close
@@ -563,11 +567,11 @@ void Controller::init()
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
-	/*if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
+	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
 
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
-		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);*/
+		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
 
 	//Store goal position
 
@@ -615,6 +619,8 @@ int main(int argc, char **argv)
 	int sleep_rate;
 	controller.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
 	ros::Rate sleep(sleep_rate);
+
+	controller.expressEmotion(controller.get(COLA_ID));
 
 	while (ros::ok())
 	{

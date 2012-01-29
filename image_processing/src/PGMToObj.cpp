@@ -17,9 +17,15 @@ void addFace(std::ofstream *file, int v1, int v2, int v3, int v4)
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "PGMToObj");
-	std::ofstream objFile("out.obj");
 
-	std::ifstream fin("map.yaml");
+	if (argc != 2)
+	{
+		ROS_ERROR("Invalid number of arguments. Usage: rosrun image_processing PGMToObj <filename>.yaml");
+		return 0;
+	}
+
+	std::ofstream objFile("out.obj");
+	std::ifstream fin(argv[1]);
 	if (fin.fail())
 	{
 		ROS_ERROR("Failed to open YAML file.");

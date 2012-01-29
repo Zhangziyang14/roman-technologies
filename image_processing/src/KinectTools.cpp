@@ -21,7 +21,7 @@
 /**
  * Converts an IplImage to a LaserScan. Based on pointcloud_to_laserscan package.
  */
-sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud)
+sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage *cloud, bool emptyScan)
 {
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
 
@@ -39,39 +39,42 @@ sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud)
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	output->ranges.assign(ranges_size, output->range_max + 1.0);
 
-	for (int row = 0; row < cloud.height; row++)
+	if (emptyScan == false)
 	{
-		for (int col = 0; col < cloud.width; col++)
+		for (int row = 0; row < cloud->height; row++)
 		{
-			cv::Point3f p = getPointFromCloud(col, row, &cloud);
+			for (int col = 0; col < cloud->width; col++)
+			{
+				cv::Point3f p = getPointFromCloud(col, row, cloud);
 
-			if (p.x == 0 || p.y == 0 || p.z == 0)
-			{
-				//ROS_INFO("rejected for zero point");
-				continue;
-			}
-			if ( std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z) )
-			{
-				//ROS_INFO("rejected for nan in point(%f, %f, %f)\n", p.x, p.y, p.z);
-				continue;
-			}
-			if (-p.y > MAX_HEIGHT || -p.y < MIN_HEIGHT)
-			{
-				//ROS_INFO("rejected for height %f not in range (%f, %f)\n", p.x, MIN_HEIGHT, MAX_HEIGHT);
-				continue;
-			}
+				if (p.x == 0 || p.y == 0 || p.z == 0)
+				{
+					//ROS_INFO("rejected for zero point");
+					continue;
+				}
+				if ( std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z) )
+				{
+					//ROS_INFO("rejected for nan in point(%f, %f, %f)\n", p.x, p.y, p.z);
+					continue;
+				}
+				if (-p.y > MAX_HEIGHT || -p.y < MIN_HEIGHT)
+				{
+					//ROS_INFO("rejected for height %f not in range (%f, %f)\n", p.x, MIN_HEIGHT, MAX_HEIGHT);
+					continue;
+				}
 
-			double angle = -atan2(p.x, p.z);
-			if (angle < output->angle_min || angle > output->angle_max)
-			{
-				//ROS_INFO("rejected for angle %f not in range (%f, %f)\n", angle, output->angle_min, output->angle_max);
-				continue;
+				double angle = -atan2(p.x, p.z);
+				if (angle < output->angle_min || angle > output->angle_max)
+				{
+					//ROS_INFO("rejected for angle %f not in range (%f, %f)\n", angle, output->angle_min, output->angle_max);
+					continue;
+				}
+				int index = (angle - output->angle_min) / output->angle_increment;
+				//printf ("index xyz( %f %f %f) angle %f index %d\n", x, y, z, angle, index);
+				double range_sq = p.z*p.z + p.x*p.x;
+				if (output->ranges[index] * output->ranges[index] > range_sq)
+					output->ranges[index] = sqrt(range_sq);
 			}
-			int index = (angle - output->angle_min) / output->angle_increment;
-			//printf ("index xyz( %f %f %f) angle %f index %d\n", x, y, z, angle, index);
-			double range_sq = p.z*p.z + p.x*p.x;
-			if (output->ranges[index] * output->ranges[index] > range_sq)
-				output->ranges[index] = sqrt(range_sq);
 		}
 	}
 

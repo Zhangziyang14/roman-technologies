@@ -3,12 +3,14 @@
 #include <image_transport/image_transport.h>
 
 // forward declarations of some needed functions
-sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage &cloud);
+sensor_msgs::LaserScanPtr iplImageToLaserScan(IplImage *cloud, bool emptyScan);
 sensor_msgs::ImagePtr iplImageToImage(IplImage *image);
 IplImage *imageToSharedIplImage(sensor_msgs::ImagePtr image);
 pcl::PointCloud<pcl::PointXYZ>::Ptr iplImageToPointCloud(IplImage *image);
 sensor_msgs::PointCloud2Ptr iplImageToRegisteredPointCloud2(IplImage *pc, IplImage *rgb);
 sensor_msgs::PointCloud2Ptr iplImageToPointCloud2(IplImage *image);
+
+bool gSendEmptyLaserscan = false;
 
 /**
  * Constantly grabs images from the Kinect and performs operations on these images if necessary.
@@ -34,17 +36,13 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 
 	sensor_msgs::ImagePtr imageMsg;
 
-	int sleep_rate;
-	nh.param<int>("node_sleep_rate", sleep_rate, 50);
-	ros::Rate sleep(sleep_rate);
-
 	while (quit == false && ros::ok())
 	{
 		cv::Mat image, pointCloud;
 		//IplImage iplImage;
 
 		// is it required to capture a laserscan ?
-		publishLaserscan = laser_pub.getNumSubscribers() != 0;
+		publishLaserscan = gSendEmptyLaserscan == false && laser_pub.getNumSubscribers() != 0;
 		// is it required to capture a pointcloud with rgb data ?
 		publishRGBCloud = rgbcloud_pub.getNumSubscribers() != 0;
 		// is it required to convert to point clouds and publish ?
@@ -72,9 +70,9 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 			IplImage pc = pointCloud;
 
 			// SLAM / AMCL
-			if (publishLaserscan)
+			if (publishLaserscan || gSendEmptyLaserscan)
 			{
-				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(pc);
+				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(&pc, gSendEmptyLaserscan);
 				if (laserscan)
 					laser_pub.publish(laserscan);
 			}
@@ -98,7 +96,6 @@ void kinectLoop(cv::VideoCapture *capture, ros::NodeHandle &nh)
 			}
 		}
 
-		sleep.sleep();
 		ros::spinOnce();
 	}
 }
@@ -133,6 +130,7 @@ int main(int argc, char* argv[])
 			"FRAME_HEIGHT\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FRAME_HEIGHT) << std::endl <<
 			"FPS\t" << capture.get(CV_CAP_OPENNI_IMAGE_GENERATOR+CV_CAP_PROP_FPS) << std::endl;
 
+	n.param<bool>("/Kinect/send_empty_laserscan", gSendEmptyLaserscan, false);
 	kinectLoop(&capture, n);
 	return 0;
 }
