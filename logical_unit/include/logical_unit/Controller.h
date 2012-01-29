@@ -31,6 +31,9 @@
 #define MAX_ARM_X_VALUE (0.20)
 #define MIN_ARM_X_VALUE (-0.3595)
 
+#define DELIVER_ARM_X_VALUE 0.0
+#define DELIVER_ARM_Z_VALUE 0.0
+
 #define HEAD_INIT_X  0.0
 #define HEAD_INIT_Z  0.0
 
@@ -112,6 +115,7 @@ private:
 	ros::Subscriber mBaseSpeedSubscriber;			/// Listens to base motor speeds
 	ros::Subscriber mArmSpeedSubscriber;			/// Listens to arm motor speeds
 	ros::Subscriber mGripperStateSubscriber;		/// Listens to gripper state
+	ros::Subscriber mPathFollowStateSubscriber;		/// Listens to state of PathFollower
 
 	ros::Publisher mGripperCommandPublisher;		/// Publishes commands to gripper Ultrasone controller
 	ros::Publisher mBaseGoalPublisher;				/// Publishes goal commands to PathPlanner
@@ -160,7 +164,7 @@ public:
 	void setGripper(bool open);
 	void expressEmotion(uint8_t emotion);
 
-	uint8_t get(int object, uint8_t attempt_nr = 1);
+	uint8_t get(int object);
 	uint8_t wakeUp();
 	uint8_t sleep();
 	uint8_t	release();

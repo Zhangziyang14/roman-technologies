@@ -50,6 +50,11 @@ void UltrasoneController::readSensorDataCB(const std_msgs::UInt16& msg)
 	if (msg.data < CLOSE_GRIPPER_DISTANCE && mGripperState != GS_CLOSED)
 	{
 		setGripper(false);
+
+		// and stop the ping sensor
+		std_msgs::Bool bool_msg;
+		bool_msg.data = false;
+		mPingCommand_pub.publish(bool_msg);
 	}
 }
 

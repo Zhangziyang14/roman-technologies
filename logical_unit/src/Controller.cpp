@@ -230,7 +230,8 @@ void Controller::updateRobotPosition()
 
 void Controller::returnToOriginalPosition()
 {
-	return;
+	moveHead(0.0, 0.0);
+
 	mLock = LOCK_PATH;
 	moveBase(mOriginalPosition.pose);
 	waitForLock();
@@ -283,7 +284,7 @@ uint8_t Controller::respond()
 /*
  * Method for getting juice
  */
-uint8_t Controller::get(int object, uint8_t attempt_nr)
+uint8_t Controller::get(int object)
 {
 	float min_y = 0.f;
 
@@ -294,9 +295,10 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 	//Go to the table
 	updateRobotPosition();
 
-	/*moveBase(mGoal);
+	moveHead(0.0, 0.0);
 	mLock = LOCK_PATH;
-	waitForLock();*/
+	moveBase(mGoal);
+	waitForLock();
 
 	ROS_INFO("Reached Goal");
 
@@ -308,33 +310,11 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 
 	//Start object recognition process
 	geometry_msgs::PoseStamped objectPose;
-	if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
+	double drive_time = 0.0;
+
+	uint8_t attempts = 0;
+	for (attempts = 0; attempts < MAX_GRAB_ATTEMPTS; attempts++)
 	{
-		ROS_ERROR("Failed to find object, quitting script.");
-		returnToOriginalPosition();
-		return head::Emotion::SAD;
-	}
-
-	double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-	while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
-	{
-		if (fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
-		{
-			ROS_INFO("Moving by %lf. Distance: %lf", min_y - TABLE_DISTANCE, min_y);
-
-			mLock = LOCK_BASE;
-			positionBase(min_y - TABLE_DISTANCE);
-			waitForLock();
-		}
-		else
-		{
-			ROS_INFO("Rotating by %lf.", yaw);
-
-			mLock = LOCK_BASE;
-			rotateBase(yaw);
-			waitForLock();
-		}
-
 		if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 		{
 			ROS_ERROR("Failed to find object, quitting script.");
@@ -342,48 +322,80 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 			return head::Emotion::SAD;
 		}
 
-		yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-	}
-
-	ROS_INFO("yaw: %lf", yaw);
-	ROS_INFO("distance: %lf", fabs(TABLE_DISTANCE - min_y));
-
-	//Move arm to object and grab it
-	objectPose.pose.position.x = 0.0; // we are straight ahead of the object, so this should be 0.0 (it is most likely already close to 0.0)
-	mLock = LOCK_ARM;
-	moveArm(objectPose);
-	waitForLock();
-
-	//Be ready to grab object
-	setGripper(true);
-	usleep(1000000);
-	setGripper(false);
-
-	//Move forward to grab the object
-	double expected_drive_time = (objectPose.pose.position.y - ARM_LENGTH) / GRAB_TARGET_SPEED;
-	double drive_time = positionBaseSpeed(expected_drive_time + EXTRA_GRAB_TIME, GRAB_TARGET_SPEED, true);
-	if (drive_time >= expected_drive_time + EXTRA_GRAB_TIME)
-	{
-		ROS_ERROR("Been driving forward too long!");
-
-		expressEmotion(head::Emotion::SAD);
-		positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
-
-		//Move object to body
-		mLock = LOCK_ARM;
-		moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
-		waitForLock();
-
-		// no more attempts left, we are sad
-		if (attempt_nr >= MAX_GRAB_ATTEMPTS)
+		double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
+		while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
 		{
-			ROS_ERROR("No more grab attempts left.");
-			returnToOriginalPosition();
-			return head::Emotion::SAD;
+			if (fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
+			{
+				ROS_INFO("Moving by %lf. Distance: %lf", min_y - TABLE_DISTANCE, min_y);
+
+				mLock = LOCK_BASE;
+				positionBase(min_y - TABLE_DISTANCE);
+				waitForLock();
+			}
+			else
+			{
+				ROS_INFO("Rotating by %lf.", yaw);
+
+				mLock = LOCK_BASE;
+				rotateBase(yaw);
+				waitForLock();
+			}
+
+			if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
+			{
+				ROS_ERROR("Failed to find object, quitting script.");
+				returnToOriginalPosition();
+				return head::Emotion::SAD;
+			}
+
+			yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
 		}
 
-		expressEmotion(head::Emotion::NEUTRAL);
-		return get(object, attempt_nr + 1);
+		ROS_INFO("yaw: %lf", yaw);
+		ROS_INFO("distance: %lf", fabs(TABLE_DISTANCE - min_y));
+
+		//Move arm to object and grab it
+		objectPose.pose.position.x = 0.0; // we are straight ahead of the object, so this should be 0.0 (it is most likely already close to 0.0)
+		mLock = LOCK_ARM;
+		moveArm(objectPose);
+		waitForLock();
+
+		//Be ready to grab object
+		setGripper(true);
+		usleep(1000000);
+		setGripper(false);
+
+		//Move forward to grab the object
+		double expected_drive_time = (objectPose.pose.position.y - ARM_LENGTH) / GRAB_TARGET_SPEED;
+		drive_time = positionBaseSpeed(expected_drive_time + EXTRA_GRAB_TIME, GRAB_TARGET_SPEED, true);
+		if (drive_time >= expected_drive_time + EXTRA_GRAB_TIME)
+		{
+			ROS_ERROR("Been driving forward too long!");
+
+			// open gripper again
+			setGripper(true);
+
+			expressEmotion(head::Emotion::SAD);
+			positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
+
+			//Move object to body
+			mLock = LOCK_ARM;
+			moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+			waitForLock();
+
+			expressEmotion(head::Emotion::NEUTRAL);
+		}
+		else
+			break;
+	}
+
+	// no more attempts left, we are sad
+	if (attempts >= MAX_GRAB_ATTEMPTS)
+	{
+		ROS_ERROR("No more grab attempts left.");
+		returnToOriginalPosition();
+		return head::Emotion::SAD;
 	}
 
 	// little hack to allow the gripper to close
@@ -405,9 +417,19 @@ uint8_t Controller::get(int object, uint8_t attempt_nr)
 	returnToOriginalPosition();
 
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
-	setFocusFace(true);
 
 	//Deliver the juice
+	mLock = LOCK_ARM;
+	moveArm(DELIVER_ARM_X_VALUE, DELIVER_ARM_Z_VALUE);
+	waitForLock();
+
+	usleep(5000000);
+	setGripper(true);
+
+	moveHead(FOCUS_FACE_ANGLE - 0.1, 0.0);
+	usleep(500000);
+	moveHead(FOCUS_FACE_ANGLE, 0.0);
+	setFocusFace(true);
 
 	return head::Emotion::HAPPY;
 }
@@ -515,9 +537,11 @@ void Controller::speechCB(const audio_processing::speech& msg)
  */
 void Controller::navigationStateCB(const std_msgs::UInt8& msg)
 {
-	ROS_INFO("Received navigation update: %d", msg.data);
 	if(mLock == LOCK_PATH && msg.data == 3) // finished
+	{
+		ROS_INFO("Unlocking path.");
 		mLock = LOCK_NONE;
+	}
 }
 
 /**
@@ -556,6 +580,7 @@ void Controller::init()
 	mBaseSpeedSubscriber		= mNodeHandle.subscribe("/speedFeedbackTopic", 1, &Controller::baseSpeedCB, this);
 	mArmSpeedSubscriber			= mNodeHandle.subscribe("/armJointSpeedFeedbackTopic", 1, &Controller::armSpeedCB, this);
 	mGripperStateSubscriber		= mNodeHandle.subscribe("/gripper_state", 1, &Controller::gripperStateCB, this);
+	mPathFollowStateSubscriber	= mNodeHandle.subscribe("/follow_state", 1, &Controller::navigationStateCB, this);
 
 	//initialise publishers
 	mBaseGoalPublisher 			= mNodeHandle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
