@@ -8,7 +8,7 @@
   <node pkg="household_objects_database" name="objects_database_node" 
         type="objects_database_node" respawn="true" output="screen"/>
 
-  <include file="$(find tabletop_object_detector)/launch/tabletop_complete.launch"/>
+  <include file="$(find image_processing)/launch/tabletop_complete.launch"/>
 
   <node pkg="image_processing" name="ObjectRecognition" type="ObjectRecognition" respawn="true" output="screen"/>
 
