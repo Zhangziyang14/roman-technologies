@@ -55,15 +55,18 @@
 #define GRAB_OBJECT_Z_OFFSET 0.05
 #define MAX_GRAB_ATTEMPTS 3
 #define ARM_LENGTH 0.8
-
-#define COLA_ID 18904
-#define JUICE_ID 18906
-
 #define NEUTRAL_AROUSAL	1
 
 #define HEAD_FREE_THRESHOLD 0.001
 #define BASE_FREE_THRESHOLD 0.001
 #define ARM_FREE_THRESHOLD 0.001
+
+enum drinks
+{
+COLA_ID = 18904,
+FANTA_ID,
+JUICE_ID,
+};
 
 enum commandValue
 {
@@ -76,6 +79,7 @@ enum commandValue
 	COLA,
 	RELEASE,
 	SLEEP,
+	FANTA,
 };
 
 enum Emotions

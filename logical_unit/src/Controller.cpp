@@ -111,6 +111,8 @@ void Controller::moveArm(const geometry_msgs::PoseStamped msg)
 
 void Controller::moveBase(geometry_msgs::Pose &goal)
 {
+	setFocusFace(false);
+	moveHead(0.0, 0.0);
 	ROS_INFO("Publishing path goal.");
 	geometry_msgs::PoseStamped stamped_goal;
 	stamped_goal.pose = goal;
@@ -423,13 +425,13 @@ uint8_t Controller::get(int object)
 	moveArm(DELIVER_ARM_X_VALUE, DELIVER_ARM_Z_VALUE);
 	waitForLock();
 
-	usleep(5000000);
+	/*usleep(5000000);
 	setGripper(true);
 
 	moveHead(FOCUS_FACE_ANGLE - 0.1, 0.0);
 	usleep(500000);
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
-	setFocusFace(true);
+	setFocusFace(true);*/
 
 	return head::Emotion::HAPPY;
 }
@@ -496,6 +498,12 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			//Start initiating actions to get the juice
 			ROS_INFO("Getting juice...");
 			expressEmotion(get(JUICE_ID));
+			break;
+
+		case FANTA:
+			//Start initiating actions to get the juice
+			ROS_INFO("Getting fanta...");
+			expressEmotion(get(FANTA_ID));
 			break;
 
 		case COKE:
@@ -570,6 +578,9 @@ void Controller::init()
 	stringToValue["juice"]   = JUICE;
 	stringToValue["release"] = RELEASE;
 	stringToValue["sleep"]	 = SLEEP;
+	stringToValue["fanta"]	 = FANTA;
+
+
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 
@@ -645,7 +656,7 @@ int main(int argc, char **argv)
 	controller.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
 	ros::Rate sleep(sleep_rate);
 
-	controller.expressEmotion(controller.get(COLA_ID));
+	//controller.expressEmotion(controller.get(COLA_ID));
 
 	while (ros::ok())
 	{

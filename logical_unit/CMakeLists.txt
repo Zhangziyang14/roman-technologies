@@ -21,7 +21,7 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
 
-#rosbuild_add_executable(OdometryTracker src/OdometryTracker.cpp)
+rosbuild_add_executable(OdometryTracker src/OdometryTracker.cpp)
 rosbuild_add_executable(PathPlanner src/PathPlanner.cpp)
 rosbuild_add_executable(Controller src/Controller.cpp)
 #rosbuild_add_executable(InitPosition src/InitPosition.cpp)
