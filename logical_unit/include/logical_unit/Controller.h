@@ -157,7 +157,7 @@ public:
 
 	virtual ~Controller(){ mNodeHandle.shutdown();}
 
-	void init();
+	void init(const char *goalPath);
 	void updateRobotPosition();
 	void moveArm(double x, double z);
 	void moveArm(const geometry_msgs::PoseStamped msg);

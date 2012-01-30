@@ -1,0 +1,5 @@
+<launch>
+	<arg name="goal_file" default="$(find logical_unit)/config/goal.yaml"/>
+	<node pkg="logical_unit" name="Controller" type="Controller" args="$(arg goal_file)" output="screen"/>
+</launch>
+

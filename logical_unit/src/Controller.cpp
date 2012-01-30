@@ -667,7 +667,7 @@ void Controller::baseGoalCB(const std_msgs::Float32& msg)
 /**
  * Initialise Controller
  */
-void Controller::init()
+void Controller::init(const char *goalPath)
 {
 	//initialise Nero in sleep mode
 	mWakeUp = false;
@@ -685,8 +685,6 @@ void Controller::init()
 	stringToValue["give"]	 = GIVE;
 	stringToValue["sleep"]	 = SLEEP;
 	stringToValue["fanta"]	 = FANTA;
-
-
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 
@@ -720,7 +718,7 @@ void Controller::init()
 
 	signal(SIGUSR1, stopHandler);
 
-	std::ifstream fin("config/goal.yaml");
+	std::ifstream fin(goalPath);
 	if (fin.fail())
 	{
 		ROS_ERROR("Failed to open YAML file.");
@@ -756,9 +754,16 @@ int main(int argc, char **argv)
 {
 	// init ros and pathfinder
 	ros::init(argc, argv, "controller");
+	
+	if (argc !=2)
+	{
+		ROS_ERROR("Invalid use of Controller. Usage: rosrun logical_unit Controller <path_to_goal_yaml>");
+		return 0;
+	}
+
 	Controller controller;
 
-	controller.init();
+	controller.init(argv[1]);
 	//controller.expressEmotion(controller.get(JUICE_ID));
 
 	int sleep_rate;
