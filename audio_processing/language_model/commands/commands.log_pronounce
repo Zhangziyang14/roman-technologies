@@ -6,8 +6,10 @@ COULD - Main
 DELICIOUS - Main 
 DRINK - Main 
 EVA - Main 
+FANTA - Main 
 FETCH - Main 
 GET - Main 
+GIVE - Main 
 GO - Main 
 GOOD - Main 
 GREAT - Main 
@@ -16,8 +18,8 @@ pronounce: verbosity is 1
 JUICE - Morpheme: JUICE 
 NICE - Main 
 NOT - Main 
+OPEN - Main 
 PLEASE - Main 
-RELEASE - Main 
 RETRIEVE - Main 
 ROBOT - Main 
 SLEEP - Main 

@@ -30,6 +30,9 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	else if(msg.data.find("juice") != string::npos)
 			processed_msg.command = "juice";
 
+	else if(msg.data.find("fanta") != string::npos)
+			processed_msg.command = "fanta";
+
 	else if(msg.data.find("drink") != string::npos)
 			processed_msg.command = "drink";
 
@@ -45,9 +48,14 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	else if(msg.data.find("sleep") != string::npos)
 		processed_msg.command = "sleep";
 
-	else if(msg.data.find("release") != string::npos)
-		processed_msg.command = "release";
+	else if(msg.data.find("open") != string::npos)
+		processed_msg.command = "open";
 
+	else if(msg.data.find("give") != string::npos)
+			processed_msg.command = "give";
+
+	else if(msg.data.find("stop") != string::npos)
+			processed_msg.command = "stop";
 	else
 		processed_msg.command = "";
 
