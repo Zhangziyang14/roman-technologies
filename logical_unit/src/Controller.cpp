@@ -378,11 +378,41 @@ uint8_t Controller::get(int object)
 	uint8_t attempts = 0;
 	for (attempts = 0; attempts < MAX_GRAB_ATTEMPTS; attempts++)
 	{
-		if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
+		uint8_t i = 0;
+		for (i = 0; i < 3; i++)
 		{
-			ROS_ERROR("Failed to find object, quitting script.");
-			returnToOriginalPosition();
-			return head::Emotion::SAD;
+			mLock = LOCK_HEAD;
+			switch (i)
+			{
+			case 0: moveHead(VIEW_OBJECTS_ANGLE, 0.0); break;
+			case 1: moveHead(MIN_VIEW_ANGLE, 0.0); break;
+			case 2: moveHead(MAX_VIEW_ANGLE, 0.0); break;
+			}
+			waitForLock();
+
+			if (findObject(object, objectPose, min_y) && objectPose.pose.position.y != 0.0)
+			{
+				// object found with turned head? rotate base
+				if (i != 0)
+				{
+					mLock = LOCK_BASE;
+					moveHead(VIEW_OBJECTS_ANGLE, 0.0);
+					switch (i)
+					{
+					case 1: rotateBase(MIN_VIEW_ANGLE); break;
+					case 2: rotateBase(MAX_VIEW_ANGLE); break;
+					}
+					waitForLock();
+
+					if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
+					{
+						ROS_ERROR("Failed to find object, quitting script.");
+						returnToOriginalPosition();
+						return head::Emotion::SAD;
+					}
+				}
+				break;
+			}
 		}
 
 		double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);

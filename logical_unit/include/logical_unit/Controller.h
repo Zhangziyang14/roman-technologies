@@ -42,6 +42,8 @@
 #define HEAD_SLEEP_Z  -0.6
 
 #define VIEW_OBJECTS_ANGLE	0.4
+#define MIN_VIEW_ANGLE (-0.35)
+#define MAX_VIEW_ANGLE 0.35
 #define FOCUS_FACE_ANGLE (-0.2)
 
 #define LOCK_STARTUP_TIME	 0.5
