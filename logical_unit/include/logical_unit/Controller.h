@@ -25,6 +25,7 @@
 #include "arm/armJointPos.h"
 #include "head/Emotion.h"
 #include "image_processing/SetActive.h"
+#include <signal.h>
 
 #define MIN_ARM_Z_VALUE (-0.321)
 #define MAX_ARM_Z_VALUE (0.1725)
@@ -77,8 +78,10 @@ enum commandValue
 	JUICE,
 	COKE,
 	COLA,
-	RELEASE,
 	SLEEP,
+	STOP,
+	OPEN,
+	GIVE,
 	FANTA,
 };
 
@@ -146,6 +149,7 @@ private:
 	bool mWakeUp;									/// Keeps track of whether Nero is listening to commands or not
 	Locks mLock;									/// Checks whether the Controller is blocked or not and keeps track of which node it is being blocked by
 
+	bool mBusy;										/// Check whether Eva is busy with something or not
 	bool mGripperStop;
 
 public:
@@ -173,6 +177,7 @@ public:
 	uint8_t sleep();
 	uint8_t	release();
 	uint8_t respond();
+	uint8_t stop();
 
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);

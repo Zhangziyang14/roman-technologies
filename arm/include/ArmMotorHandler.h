@@ -38,6 +38,7 @@
 #include <ros/ros.h>
 #include <motors/Motor.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Bool.h>
 #include "arm/armJointPos.h"
 
 class ArmMotorHandler
@@ -52,9 +53,10 @@ protected:
 	ros::Publisher mArmPosFeedbackPub;		/// Publishes current position of the arm in joint space
 	ros::Publisher mArmSpeedFeedbackPub;	/// Publishes current speeds of the arm
 
-	ros::Subscriber mShoulderAngleSub;		/// Listen for shoulder angles
-	ros::Subscriber mSideJointAngleSub;		/// Listen for sideJoint angles
-	ros::Subscriber mArmJointPosSub;		/// Listen for armJointPos messages (containing both angles in one message)
+	ros::Subscriber mShoulderAngleSub;		/// Listens to shoulder angles
+	ros::Subscriber mSideJointAngleSub;		/// Listens to sideJoint angles
+	ros::Subscriber mArmJointPosSub;		/// Listens to armJointPos messages (containing both angles in one message)
+	ros::Subscriber mStopSubscriber;		/// Listens to stop commands from Controller
 
 	Motor mShoulderMotor;					/// Motor for left wheel
 	Motor mSideMotor;						/// Motor for right wheel
@@ -87,6 +89,7 @@ public:
 	void shoulderCB(const std_msgs::Float64& msg);
 	void sideJointCB(const std_msgs::Float64& msg);
 	void armPosCB(const arm::armJointPos& msg);
+	void stopCB(const std_msgs::Bool& msg);
 	void publishArmPosition();
 	void publishArmSpeed();
 

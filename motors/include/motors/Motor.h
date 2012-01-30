@@ -82,10 +82,12 @@ public:
 class Motor
 {
 protected:
-    MotorId mMotorId;      /// Motor id (left, right or arm motor)
+    MotorId mMotorId;     	/// Motor id (left, right or arm motor)
     CDxlGeneric *motor_;    /// Motor interface
     LxSerial serial_port_;  /// Serial port interface
     ControlMode cmode;      /// Keeps track of what ControlMode the motor is in at the moment 
+
+    bool mLock;				/// Keeps track of whether setMode is locked or not
 
 public:
     /// Constructor
@@ -134,6 +136,8 @@ public:
     int getLog();
     int getID();
     int ping();
+
+    void lock(bool lock);
 
     int getStatus();
     inline bool checkPort(){ return serial_port_.is_port_open(); };

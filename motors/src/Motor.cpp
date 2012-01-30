@@ -16,12 +16,17 @@ double &PID::operator[](PIDParameter p)
 	assert(false); // something went terribad
 }
 
+void Motor::lock(bool lock)
+{
+	mLock = lock;
+}
+
 /**
   * Sets the mode of the motor
  */
 void Motor::setMode(ControlMode mode)
 {
-	if (cmode == mode)
+	if (cmode == mode || mLock)
 		return; // already in this mode, nothing needs to be done
 
 	cmode = mode;

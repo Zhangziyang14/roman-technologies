@@ -26,6 +26,21 @@ int main(int argc, char **argv)
 }
 
 /**
+ * Stops all motors and locks them until unlock command is received
+ */
+void ArmMotorHandler::stopCB(const std_msgs::Bool &msg)
+{
+	if(msg.data)
+	{
+		mShoulderMotor.setMode(CM_STOP_MODE);
+		mSideMotor.setMode(CM_STOP_MODE);
+	}
+
+	mShoulderMotor.lock(msg.data);
+	mSideMotor.lock(msg.data);
+}
+
+/**
  * Publishes the current positions of both motors
  */
 void ArmMotorHandler::publishArmPosition()
@@ -100,6 +115,7 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
 		mSideJointAngleSub 	= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
 		mArmJointPosSub		= mNodeHandle.subscribe("/armJointPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
+		mStopSubscriber		= mNodeHandle.subscribe("/emergencyStop", 1, &ArmMotorHandler::stopCB, this);
 
 		mShoulderMotor.setMode(CM_POSITION_MODE);
 		mSideMotor.setMode(CM_POSITION_MODE);

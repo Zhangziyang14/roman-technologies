@@ -3,8 +3,10 @@
 #include "mobile_base/SensorFeedback.h"
 #include <head/Eyebrows.h>
 #include <std_msgs/UInt8.h>
+#include <mobile_base/disableUltrasone.h>
 #include <Wire.h>
 #include <Servo.h>
+#include <DigiServ.h>
 #include <FlexiTimer2.h>
 
 #define EYEBROW_LEFT A3
@@ -15,6 +17,10 @@
 #define LIFT_UPPER_LIMIT 130
 #define EYEBROW_LOWER_LIMIT 60
 #define EYEBROW_UPPER_LIMIT 120
+
+#define PIN_POT		A0
+#define PIN_MOTOR_L	5
+#define PIN_MOTOR_R	6
 
 #define SENSOR_ADDRESS(x) (0x70 + x)
 
@@ -41,7 +47,9 @@ const unsigned short bumperPin[BUMPER_COUNT] =
 
 Servo eyebrowLeft;
 Servo eyebrowRight;
-Servo lift;
+
+PID pid = {5.0, 0.0, 10.0, 255};
+DigiServ digi_lift(PIN_MOTOR_L, PIN_MOTOR_R, PIN_POT, pid);
 
 ros::NodeHandle nh;
 
@@ -61,27 +69,34 @@ unsigned int left_eb_angle_time;
 unsigned int right_eb_angle_time;
 unsigned int lift_time;
 
+//uint16_t enableUltrasoneMask;
+
 void readSensors()
 {
 	for (int i = 0; i < 2; i++)
 	{
 		//trigger sensors
-		for (int sensor = 0; sensor < SensorFeedback::SENSOR_COUNT; sensor = sensor + 2)
+		for (int sensor = i; sensor < SensorFeedback::SENSOR_RIGHT; sensor = sensor + 2)
 		{
-			doSRF02Pulse(SENSOR_ADDRESS(sensor));
+                        //if(enableUltrasoneMask & (1 << sensor))
+			  doSRF02Pulse(0x70 + sensor);
 		}
 
-		//wait for	if (left_eb_angle_time) sound to return
+		//wait for sound to return
 		delay(70);
 
 		//read sensor values
-		for (int sensor = 0; sensor < SensorFeedback::SENSOR_COUNT; sensor = sensor + 2)
+		for (int sensor = i; sensor < SensorFeedback::SENSOR_RIGHT; sensor = sensor + 2)
 		{
-			sensor_msg.data[sensor] = windowFilter(readSRF02(SENSOR_ADDRESS(sensor)));
+                        //if(enableUltrasoneMask & (1 << sensor))
+			  sensor_msg.data[sensor] = windowFilter(readSRF02(0x70 + sensor));
+                        //else
+                          //sensor_msg.data[sensor] = SensorFeedback::ULTRASONE_MAX_RANGE;
 		}
 	}
 
-	feedback_pub.publish(&sensor_msg);
+feedback_pub.publish(&sensor_msg);
+delay(100);
 }
 
 /*
@@ -148,7 +163,15 @@ void bumperHit()
 	bumper_pub.publish(&bump_msg);
 	digitalWrite(13, LOW);
 }
+/*
+void disableCB(const mobile_base::disableUltrasone::Request & req, mobile_base::disableUltrasone::Response & res)
+{
+  enableUltrasoneMask = req.disable;
+}*/
 
+/*
+ros::ServiceServer<mobile_base::disableUltrasone::Request, mobile_base::disableUltrasone::Response> disableUltrasoneServer("/disableUltrasoneService",&disableCB);
+*/
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                  EYEBROW Section
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +187,7 @@ void updateEyebrowEvent()
 
 	int left_eb_angle = 0;
 	int right_eb_angle = 0;
-	int lift_angle = 0;
+	int lift_angle = old_lift_angle;
 
 	// are we set on a timer?
 	if (left_eb_angle_time)
@@ -217,11 +240,11 @@ void updateEyebrowEvent()
 		{
 			// scale by time passed
 			scale = double(now - start_time) / double(lift_time);
-			lift_angle = old_lift_angle + scale * (new_lift_angle - old_lift_angle);
+			lift_angle = scale * (new_lift_angle - old_lift_angle);
 		}
-
-		lift.write(lift_angle);
 	}
+
+        digi_lift.setAngle(lift_angle);
 }
 
 /**
@@ -241,7 +264,7 @@ void setEyebrowCB(const head::Eyebrows &msg)
 	right_eb_angle_time = max(1, msg.right_time);
 	lift_time = max(1, msg.lift_time);
 
-    if (new_left_eb_angle > EYEBROW_UPPER_LIMIT)
+        if (new_left_eb_angle > EYEBROW_UPPER_LIMIT)
 		new_left_eb_angle = EYEBROW_UPPER_LIMIT;
 	else if (new_left_eb_angle < EYEBROW_LOWER_LIMIT)
 		new_left_eb_angle = EYEBROW_LOWER_LIMIT;
@@ -281,20 +304,21 @@ void setup()
 	//eyebrow init
 	old_left_eb_angle = 0;
 	old_right_eb_angle = 0;
-	old_lift_angle = 0;
+	old_lift_angle = LIFT_LOWER_LIMIT;
 	new_left_eb_angle = 0;
 	new_right_eb_angle = 0;
-	new_lift_angle = 0;
+	new_lift_angle = LIFT_LOWER_LIMIT;
 	left_eb_angle_time = 0;
 	right_eb_angle_time = 0;
 	lift_time = 0;
 	start_time = 0;
 	nh.subscribe(servo_sub);
-	eyebrowLeft.attach(EYEBROW_LEFT);
-	eyebrowRight.attach(EYEBROW_RIGHT);
-	lift.attach(EYEBROW_LIFT);
-	lift.write(150);
-	delay(500);
+	
+        //eyebrowLeft.attach(EYEBROW_LEFT);
+	//eyebrowRight.attach(EYEBROW_RIGHT);
+	//lift.attach(EYEBROW_LIFT);
+	//lift.write(150);
+	//delay(500);
 
 	FlexiTimer2::set(150, 1.0/1000, updateEyebrowEvent); // call every 150ms
 	FlexiTimer2::start();

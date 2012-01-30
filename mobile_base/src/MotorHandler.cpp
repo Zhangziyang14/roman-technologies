@@ -145,12 +145,26 @@ void MotorHandler::tweakCB(const mobile_base::tweak& msg)
 /**
  *	Reads distances from ultrasone sensors
  */
-//TODO: Turn off the unused ultrasone sensors in arduino code
 void MotorHandler::ultrasoneCB(const mobile_base::SensorFeedback& msg)
 {
 	mSensorData = msg.data;
 	//ROS_INFO("left %d, frontLeft %d, frontCenterLeft %d, frontLeftCenter %d, frontRightCenter %d, frontCenterRight %d, right %d", mLeft, mFrontLeft, mFrontCenterLeft, mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mRight);
 	//ROS_INFO("rearLeft %d, rearRight %d", mRearLeft, mRearRight);
+}
+
+/**
+ * Stops all motors and locks them until unlock command is received
+ */
+void MotorHandler::stopCB(const std_msgs::Bool &msg)
+{
+	if(msg.data)
+	{
+		mRightMotor.setMode(CM_STOP_MODE);
+		mLeftMotor.setMode(CM_STOP_MODE);
+	}
+
+	mRightMotor.lock(msg.data);
+	mLeftMotor.lock(msg.data);
 }
 
 /**
@@ -167,6 +181,7 @@ void MotorHandler::init(char *path)
 	mTwistSub 				= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
 	mPositionSub 			= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub   		= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);
+	mStopSubscriber			= mNodeHandle.subscribe("/emergencyStop", 1, &MotorHandler::stopCB, this);
 
 	//Initialise service clients
 	//mUltrasoneDisableClient = mNodeHandle.serviceClient<mobile_base::disableUltrasone>("/disableUltrasoneService", true);

@@ -10,6 +10,9 @@
 /// Maps incoming string to a commandValue for use in switch-case in main function
 static std::map<std::string, commandValue> stringToValue;
 
+/// Publishes stop command to every MotorHandler
+ros::Publisher *stopPublisher;
+
 bool waitForServiceClient(ros::NodeHandle *nodeHandle, const char *serviceName)
 {
 	//wait for client
@@ -46,6 +49,11 @@ void Controller::expressEmotion(uint8_t emotion)
  */
 void Controller::rotateBase(float angle)
 {
+	//Make sure that setMode() for the base is unlocked
+	std_msgs::Bool bool_msg;
+	bool_msg.data = false;
+	stopPublisher->publish(bool_msg);
+
 	std_msgs::Float32 msg;
 	msg.data = angle;
 	mRotateBasePublisher.publish(msg);
@@ -53,6 +61,11 @@ void Controller::rotateBase(float angle)
 
 void Controller::positionBase(float dist)
 {
+	//Make sure that setMode() for the base is unlocked
+	std_msgs::Bool bool_msg;
+	bool_msg.data = false;
+	stopPublisher->publish(bool_msg);
+
 	std_msgs::Float32 msg;
 	msg.data = dist;
 	mPositionBasePublisher.publish(msg);
@@ -93,6 +106,11 @@ void Controller::setGripper(bool open)
  */
 void Controller::moveArm(double x, double z)
 {
+	//Make sure that setMode() for arm is unlocked
+	std_msgs::Bool bool_msg;
+	bool_msg.data = false;
+	stopPublisher->publish(bool_msg);
+
 	ROS_INFO("Moving arm to %lf, %lf", x, z);
 	geometry_msgs::Pose pose_msg;
 	pose_msg.position.x = x;
@@ -106,13 +124,28 @@ void Controller::moveArm(double x, double z)
  */
 void Controller::moveArm(const geometry_msgs::PoseStamped msg)
 {
+	//Make sure that setMode() for arm is unlocked
+	std_msgs::Bool bool_msg;
+	bool_msg.data = false;
+	stopPublisher->publish(bool_msg);
+
 	mArmPositionPublisher.publish(msg.pose);
 }
 
+/**
+ * Moves the base to a given goal
+ */
 void Controller::moveBase(geometry_msgs::Pose &goal)
 {
+
+	//Make sure that setMode() for base is unlocked
+	std_msgs::Bool bool_msg;
+	bool_msg.data = false;
+	stopPublisher->publish(bool_msg);
+
 	setFocusFace(false);
 	moveHead(0.0, 0.0);
+
 	ROS_INFO("Publishing path goal.");
 	geometry_msgs::PoseStamped stamped_goal;
 	stamped_goal.pose = goal;
@@ -120,6 +153,7 @@ void Controller::moveBase(geometry_msgs::Pose &goal)
 	stamped_goal.header.stamp = ros::Time::now();
 	mBaseGoalPublisher.publish(stamped_goal);
 }
+
 /**
  * Sends a Pose command to AutonomeHeadController
  */
@@ -134,7 +168,7 @@ void Controller::moveHead(double x, double z)
 }
 
 /**
- *	Sends the id of the object to recognize to ObjectRecognition
+ *	Sends the id of the object to recognise to ObjectRecognition
  */
 bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y)
 {
@@ -273,13 +307,39 @@ uint8_t Controller::sleep()
 }
 
 /**
+ *	Publishes stop command to MotorHandlers for base and arm.
+ *	If an extra MotorHandler is added that needs to be stopped asynchronously, make sure that it listens to the topic /emergencyStop
+ */
+void stopHandler(int signum)
+{
+	ROS_INFO("Resetting everything");
+	std_msgs::Bool bool_msg;
+	bool_msg.data = true;
+
+	stopPublisher->publish(bool_msg);
+}
+
+/**
+ * Stops with everything and respond
+ */
+uint8_t Controller::stop()
+{
+	raise(SIGUSR1);
+	signal(SIGUSR1, stopHandler);
+	mBusy = false;
+	return respond();
+}
+
+/**
  * Respond to the user
  */
 uint8_t Controller::respond()
 {
+	mBusy = true;
 	moveHead(HEAD_INIT_X, HEAD_INIT_Z);
 	setFocusFace(true);
 
+	mBusy = false;
 	return head::Emotion::SURPRISED;
 }
 
@@ -288,6 +348,8 @@ uint8_t Controller::respond()
  */
 uint8_t Controller::get(int object)
 {
+	mBusy = true;
+
 	float min_y = 0.f;
 
 	mLock = LOCK_ARM;
@@ -433,6 +495,8 @@ uint8_t Controller::get(int object)
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
 	setFocusFace(true);*/
 
+	mBusy = false;
+
 	return head::Emotion::HAPPY;
 }
 
@@ -441,10 +505,13 @@ uint8_t Controller::get(int object)
  */
 uint8_t Controller::release()
 {
+	mBusy = true;
 	setGripper(true);
 
 	//Reset arousal and listen to feedback
 	mArousal = NEUTRAL_AROUSAL;
+
+	//TODO: wait for feedback
 
 	if(mArousal > NEUTRAL_AROUSAL)
 		return head::Emotion::HAPPY;
@@ -455,7 +522,9 @@ uint8_t Controller::release()
 		//Move away from client
 		return head::Emotion::NEUTRAL;
 	}
+	mBusy = false;
 }
+
 /**
  * Listens to user commands and executes them
  */
@@ -484,20 +553,25 @@ void Controller::speechCB(const audio_processing::speech& msg)
 				ROS_INFO("I'm already awake");
 			break;
 
-		case EVA:
-			ROS_INFO("Responding...");
-			expressEmotion(respond());
-			break;
-
 		case BEER:
-			ROS_INFO("Responding with surprise");
-			expressEmotion(head::Emotion::SURPRISED);
+			if(!mBusy)
+			{
+				ROS_INFO("Responding with surprise");
+				expressEmotion(head::Emotion::SURPRISED);
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case JUICE:
 			//Start initiating actions to get the juice
-			ROS_INFO("Getting juice...");
-			expressEmotion(get(JUICE_ID));
+			if(!mBusy)
+			{
+				ROS_INFO("Getting juice...");
+				expressEmotion(get(JUICE_ID));
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case FANTA:
@@ -508,15 +582,45 @@ void Controller::speechCB(const audio_processing::speech& msg)
 
 		case COKE:
 		case COLA:
-			//Start initiating actions to get the juice
-			ROS_INFO("Getting coke...");
-			expressEmotion(get(COLA_ID));
+			if(!mBusy)
+			{
+				//Start initiating actions to get the juice
+				ROS_INFO("Getting coke...");
+				expressEmotion(get(COLA_ID));
+			}
+			else
+				ROS_INFO("Dont' disturb me, I'm busy");
 			break;
 
-		case RELEASE:
-			//Start initiating actions to get the juice
-			ROS_INFO("Getting coke...");
-			expressEmotion(release());
+		case OPEN:
+		case GIVE:
+			if(!mBusy)
+			{
+				//Start initiating actions to get the juice
+				ROS_INFO("Getting coke...");
+				expressEmotion(release());
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
+			break;
+
+		case EVA:
+		{
+			if(!mBusy)
+			{
+				//Start initiating actions to get the juice
+				ROS_INFO("Responding...");
+				expressEmotion(respond());
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
+			break;
+		}
+
+		case STOP:
+			//Stop with whatever Eva is doing and respond
+			ROS_INFO("Stopping with everything and respond");
+			expressEmotion(stop());
 			break;
 
 		case SLEEP:
@@ -572,11 +676,13 @@ void Controller::init()
 	stringToValue[""]		 = NOTHING;
 	stringToValue["wake up"] = WAKE_UP;
 	stringToValue["eva"]	 = EVA;
+	stringToValue["stop"]	 = STOP;
 	stringToValue["beer"]	 = BEER;
 	stringToValue["cola"]	 = COLA;
 	stringToValue["coke"]	 = COKE;
 	stringToValue["juice"]   = JUICE;
-	stringToValue["release"] = RELEASE;
+	stringToValue["open"] 	 = OPEN;
+	stringToValue["give"]	 = GIVE;
 	stringToValue["sleep"]	 = SLEEP;
 	stringToValue["fanta"]	 = FANTA;
 
@@ -602,6 +708,7 @@ void Controller::init()
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
 
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
@@ -610,6 +717,8 @@ void Controller::init()
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
 
 	//Store goal position
+
+	signal(SIGUSR1, stopHandler);
 
 	std::ifstream fin("config/goal.yaml");
 	if (fin.fail())

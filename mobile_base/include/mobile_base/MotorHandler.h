@@ -6,6 +6,7 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <mobile_base/tweak.h>
+#include <std_msgs/Bool.h>
 
 #include <mobile_base/position.h>
 #include <mobile_base/SensorFeedback.h>
@@ -31,6 +32,7 @@ protected:
 	ros::Subscriber mPositionSub;				/// Listens to integer messages for positioning
 	ros::Subscriber mTweakPIDSub;				/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
 	ros::Subscriber mUltrasoneSub;          	/// Listens to ultrasone distances
+	ros::Subscriber mStopSubscriber;				/// Listens to stop commands from the Controller
 
 	//ros::Publisher mDisableUltrasonePub;		///	Disables unused ultrasone sensors
 	ros::Publisher mSpeedPub;					/// Publishes robot's speed
@@ -71,6 +73,7 @@ public:
 	void moveCB(const geometry_msgs::Twist& msg);
 	void positionCB(const position& msg);
 	void ultrasoneCB(const SensorFeedback& msg);
+	void stopCB(const std_msgs::Bool& msg);
 	void tweakCB(const tweak& msg);
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
