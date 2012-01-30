@@ -64,6 +64,8 @@
 #define BASE_FREE_THRESHOLD 0.001
 #define ARM_FREE_THRESHOLD 0.001
 
+#define DISTANCE_TO_PERSON	(-2.5)
+
 enum drinks
 {
 COLA_ID = 18904,

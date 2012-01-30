@@ -542,12 +542,11 @@ uint8_t Controller::release()
 
 	double currentTime = ros::Time::now().toSec();
 
-
 	int sleep_rate;
 	mNodeHandle.param<int>("node_sleep_rate", sleep_rate, 50);
 	ros::Rate sleep(sleep_rate);
 
-	while(ros::ok() && currentTime - ros::Time::now().toSec() > 30 && mArousal != NEUTRAL_AROUSAL)
+	while(ros::ok() && currentTime - ros::Time::now().toSec() > 30 && mArousal == NEUTRAL_AROUSAL)
 	{
 		sleep.sleep();
 		ros::spinOnce();
@@ -564,6 +563,7 @@ uint8_t Controller::release()
 	else
 	{
 		setFocusFace(false);
+		positionBase(DISTANCE_TO_PERSON);
 		return head::Emotion::NEUTRAL;
 	}
 }
