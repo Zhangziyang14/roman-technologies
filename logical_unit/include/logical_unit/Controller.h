@@ -87,6 +87,7 @@ enum commandValue
 	OPEN,
 	GIVE,
 	FANTA,
+	THANK_YOU,
 };
 
 enum Emotions

@@ -56,6 +56,9 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 
 	else if(msg.data.find("stop") != string::npos)
 			processed_msg.command = "stop";
+
+	else if(msg.data.find("thank you") != string::npos)
+			processed_msg.command = "thank";
 	else
 		processed_msg.command = "";
 
@@ -78,8 +81,8 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	if(msg.data.find("nice") != string::npos)
 		arousal += 1;
 
-	if(msg.data.find("thank you") != string::npos)
-		arousal += 1;
+	//if(msg.data.find("thank you") != string::npos)
+		//arousal += 1;
 
 	if(msg.data.find("bad") != string::npos || msg.data.find("not") != string::npos)
 		arousal = arousal >= 1 ? arousal *-1 : arousal;

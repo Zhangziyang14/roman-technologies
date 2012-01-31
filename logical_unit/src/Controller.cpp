@@ -536,7 +536,7 @@ uint8_t Controller::release()
 {
 	mBusy = true;
 	setGripper(true);
-
+	/*
 	//Reset arousal and listen to feedback
 	mArousal = NEUTRAL_AROUSAL;
 
@@ -565,7 +565,8 @@ uint8_t Controller::release()
 		setFocusFace(false);
 		positionBase(DISTANCE_TO_PERSON);
 		return head::Emotion::NEUTRAL;
-	}
+	}*/
+	return head::Emotion::HAPPY;
 }
 
 /**
@@ -635,11 +636,9 @@ void Controller::speechCB(const audio_processing::speech& msg)
 				ROS_INFO("Dont' disturb me, I'm busy");
 			break;
 
-		case OPEN:
-		case GIVE:
+		case THANK_YOU:
 			if(!mBusy)
 			{
-				//Start initiating actions to get the juice
 				ROS_INFO("Getting coke...");
 				expressEmotion(release());
 			}
@@ -648,7 +647,6 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			break;
 
 		case EVA:
-		{
 			if(!mBusy)
 			{
 				//Start initiating actions to get the juice
@@ -658,7 +656,6 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			else
 				ROS_INFO("Don't disturb me, I'm busy");
 			break;
-		}
 
 		case STOP:
 			//Stop with whatever Eva is doing and respond
@@ -728,6 +725,7 @@ void Controller::init(const char *goalPath)
 	stringToValue["give"]	 = GIVE;
 	stringToValue["sleep"]	 = SLEEP;
 	stringToValue["fanta"]	 = FANTA;
+	stringToValue["thank"]	 = THANK_YOU;
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 
@@ -797,7 +795,7 @@ int main(int argc, char **argv)
 {
 	// init ros and pathfinder
 	ros::init(argc, argv, "controller");
-	
+
 	if (argc !=2)
 	{
 		ROS_ERROR("Invalid use of Controller. Usage: rosrun logical_unit Controller <path_to_goal_yaml>");
