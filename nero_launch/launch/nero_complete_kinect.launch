@@ -1,0 +1,14 @@
+<launch>
+  <!-- start focus face -->
+  <include file="$(find image_processing)/launch/focus_face.launch"/>
+
+  <!-- start audio processing -->
+  <!-- include file="$(find audio_processing)/launch/speech.launch"/ -->
+  <include file="$(find audio_processing)/launch/soundplayer.launch"/>
+
+  <!-- start navigation -->
+  <include file="$(find logical_unit)/launch/navigation.launch"/>
+
+  <!-- start object recognition -->
+  <include file="$(find image_processing)/launch/object_recognition.launch"/>
+</launch>

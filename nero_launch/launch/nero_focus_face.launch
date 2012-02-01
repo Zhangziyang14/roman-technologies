@@ -1,0 +1,5 @@
+<launch>
+	<include file="$(find image_processing)/launch/focus_face.launch"/>
+	<include file="$(find image_processing)/launch/kinect.launch"/>
+	<include file="$(find head)/launch/head.launch"/>
+</launch>
