@@ -15,7 +15,7 @@ void AutonomeMobileController::spin()
 
 	while (ros::ok())
 	{
-		mPathFollower.updatePath();
+		mPathHandler.updatePath();
 
 		refreshRate.sleep();
 		ros::spinOnce();

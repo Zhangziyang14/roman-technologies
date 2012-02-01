@@ -256,6 +256,7 @@ void Motor::init(char *path)
     motor_->init(false);
     setMode(CM_STOP_MODE);
     setEncoderCount(DEFAULT_ENCODER_COUNT);		//NB: this overrides the 3mxel default
+    mLock = false;
 
     delete config;
     std::cout << "Motor " << mMotorId << " initialising completed." << std::endl;

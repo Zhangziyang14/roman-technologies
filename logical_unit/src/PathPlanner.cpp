@@ -163,7 +163,7 @@ void PathPlanner::planPath(geometry_msgs::PoseStamped start, geometry_msgs::Pose
 	for (int i = 0; i < straightPathCount; i++)
 	{
 		geometry_msgs::PoseStamped p;
-		p.header.frame_id = "/odom";
+		p.header.frame_id = "/map";
 		p.header.stamp = ros::Time::now();
 		p.pose.position.x = straightPath[i*3];
 		p.pose.position.y = straightPath[i*3 + 2];
@@ -192,7 +192,7 @@ void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
 	}
 
 	nav_msgs::Path path;
-	path.header.frame_id = "/odom";
+	path.header.frame_id = "/map";
 
 	geometry_msgs::PoseStamped start, end;
 	start.pose.position.x = robotPosition.getOrigin().getX();

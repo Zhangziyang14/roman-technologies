@@ -50,8 +50,8 @@ PathFollower::PathFollower(ros::NodeHandle *nodeHandle) : mLocalPlanner(nodeHand
 	nodeHandle->param<std::string>("follow_state_topic", followStateTopic, "/follow_state");
 	nodeHandle->param<double>("min_angular_speed", mMinAngularSpeed, 0.1);
 	nodeHandle->param<double>("max_angular_speed", mMaxAngularSpeed, 0.4);
-	nodeHandle->param<double>("min_linear_speed", mMinLinearSpeed, 0.1);
-	nodeHandle->param<double>("max_linear_speed", mMaxLinearSpeed, 0.3);
+	nodeHandle->param<double>("min_linear_speed", mMinLinearSpeed, 0.2);
+	nodeHandle->param<double>("max_linear_speed", mMaxLinearSpeed, 0.5);
 	nodeHandle->param<double>("angular_adjustment_speed", mAngularAdjustmentSpeed, 0.05);
 	nodeHandle->param<double>("final_yaw_tolerance", mFinalYawTolerance, 0.2);
 	nodeHandle->param<double>("yaw_tolerance", mYawTolerance, 0.25 * M_PI);

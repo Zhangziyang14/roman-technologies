@@ -13,7 +13,7 @@
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Float32.h>
 #include <mobile_base/MotorHandler.h>
-#include <mobile_base/PathFollower.h>
+#include <mobile_base/PathHandler.h>
 #include <mobile_base/position.h>
 
 /// Controller for teleoperation
@@ -27,11 +27,11 @@ protected:
 	ros::Subscriber mTurnSub;		/// Listens to turning commands
 
 	int mRefreshRate;				/// Rate at which the path gets updated
-	PathFollower mPathFollower;		/// Handles received paths
+	PathHandler mPathHandler;		/// Handles received paths
 
 public:
 	/// Constructor
-	AutonomeMobileController(): mNodeHandle(""), mPathFollower(&mNodeHandle)
+	AutonomeMobileController(): mNodeHandle(""), mPathHandler(&mNodeHandle)
 	{
 		mNodeHandle.param<int>("refresh_rate", mRefreshRate, 5);
 	};
