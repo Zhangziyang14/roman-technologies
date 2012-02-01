@@ -12,7 +12,6 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt16.h"
 #include "std_msgs/UInt8.h"
-#include "std_msgs/Empty.h"
 
 #define OPEN_GRIPPER_DISTANCE 100 // mm
 #define CLOSE_GRIPPER_DISTANCE 70 // mm
@@ -58,12 +57,12 @@ public:
         mNodeHandle.shutdown();
     }
 
-    inline void setGripper(bool open)
+    inline void setGripper(bool open, bool close_timed = false)
     {
     	gripper::MotorControl mc_msg;
     	mc_msg.value = open ? AUTOMATIC_GRIPPER_TORQUE : -AUTOMATIC_GRIPPER_TORQUE;
     	mc_msg.modeStr = "torque";
-    	mc_msg.waitTime = open ? 1000 : 0;
+    	mc_msg.waitTime = open || close_timed ? 1000 : 0;
 
     	mGripperState = open ? GS_OPEN : GS_CLOSED;
 
@@ -86,7 +85,6 @@ public:
     void publish(gripper::MotorControl mc);
 
     /// Opens the gripper
-    void openCB(const std_msgs::Empty& msg);
     void commandCB(const std_msgs::Bool& msg);
 
     inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };

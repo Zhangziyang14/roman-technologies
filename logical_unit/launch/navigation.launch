@@ -1,7 +1,7 @@
 <launch>
     <arg name="scan_topic" default="narrow_scan" />
-    <arg name="map_file" default="$(find logical_unit)/map/3me-hallway.yaml" />
-    <arg name="navmesh_file" default="$(find logical_unit)/navigation/3me-hallway.bin" />
+    <arg name="map_file" default="$(find logical_unit)/map/home_studio.yaml" />
+    <arg name="navmesh_file" default="$(find logical_unit)/navigation/home_studio.bin" />
 	
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 	

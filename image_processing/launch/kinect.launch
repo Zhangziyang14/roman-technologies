@@ -5,6 +5,6 @@
 	<node pkg="tf" type="static_transform_publisher" name="head_to_arm" args="0.135 -0.08 -0.095 0 0 0 head_frame arm_frame 100" />
 
 	<node pkg="image_processing" name="Kinect" type="Kinect" respawn="true">
-		<param name="send_empty_laserscan" value="true"/>
+		<param name="send_empty_laserscan" value="false"/>
 	</node>
 </launch>

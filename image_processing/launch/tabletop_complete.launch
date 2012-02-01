@@ -5,12 +5,12 @@
 	<arg name="tabletop_segmentation_points_input" default="/camera/depth_registered/points" />
 
 	<!-- segmentation -->
-	<include file="$(find tabletop_object_detector)/launch/tabletop_segmentation.launch">
+	<include file="$(find image_processing)/launch/tabletop_segmentation.launch">
 	  <arg name="tabletop_segmentation_points_in" value="$(arg tabletop_segmentation_points_input)" />
 	</include>
 
 	<!-- object recognition -->
-	<include file="$(find tabletop_object_detector)/launch/tabletop_object_recognition.launch"/>
+	<include file="$(find image_processing)/launch/tabletop_object_recognition.launch"/>
 
 	<!--complete node -->
 	<node pkg="tabletop_object_detector" name="tabletop_complete_node" type="tabletop_complete_node"

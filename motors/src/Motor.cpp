@@ -244,6 +244,7 @@ void Motor::init(char *path)
 
     // initialize the motor
     motor_->setConfig(config->setID(mMotorId));
+    mLock = false;
 
     /*ros::Rate init_rate(1);
     	while (ros::ok() && motor_->init() != DXL_SUCCESS)

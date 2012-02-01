@@ -58,14 +58,14 @@ void Controller::init()
     mGripper_pub = mNodeHandle.advertise<std_msgs::UInt8>("/gripper_state", 1);
 
 	// initialize subscribers
-    mOpen_sub	= mNodeHandle.subscribe("/openGripperTopic", 1, &Controller::openCB, this);
+    mOpen_sub	= mNodeHandle.subscribe("/cmd_gripper_state", 1, &Controller::commandCB, this);
 
     ROS_INFO("Controller initialised");
 }
 
-void Controller::openCB(const std_msgs::Empty& msg)
+void Controller::commandCB(const std_msgs::Bool& msg)
 {
-	setGripper(true);
+	setGripper(msg.data, true);
 }
 
 /**

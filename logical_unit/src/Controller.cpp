@@ -566,6 +566,13 @@ uint8_t Controller::release()
 		positionBase(DISTANCE_TO_PERSON);
 		return head::Emotion::NEUTRAL;
 	}*/
+	usleep(1000000);
+	std_msgs::Bool bool_msg;
+	bool_msg.data = false;
+	
+	mGripperClosePublisher.publish(bool_msg);
+	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+	
 	return head::Emotion::HAPPY;
 }
 
@@ -598,24 +605,24 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			break;
 
 		case BEER:
-			if(!mBusy)
-			{
+//			if(!mBusy)
+//			{
 				ROS_INFO("Responding with surprise");
 				expressEmotion(head::Emotion::SURPRISED);
-			}
-			else
-				ROS_INFO("Don't disturb me, I'm busy");
+//			}
+//			else
+//				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case JUICE:
-			//Start initiating actions to get the juice
-			if(!mBusy)
-			{
+//			//Start initiating actions to get the juice
+//			if(!mBusy)
+//			{
 				ROS_INFO("Getting juice...");
 				expressEmotion(get(JUICE_ID));
-			}
-			else
-				ROS_INFO("Don't disturb me, I'm busy");
+//			}
+//			else
+//				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case FANTA:
@@ -626,35 +633,35 @@ void Controller::speechCB(const audio_processing::speech& msg)
 
 		case COKE:
 		case COLA:
-			if(!mBusy)
-			{
+//			if(!mBusy)
+//			{
 				//Start initiating actions to get the juice
 				ROS_INFO("Getting coke...");
 				expressEmotion(get(COLA_ID));
-			}
-			else
-				ROS_INFO("Dont' disturb me, I'm busy");
+//			}
+//			else
+//				ROS_INFO("Dont' disturb me, I'm busy");
 			break;
 
 		case THANK_YOU:
-			if(!mBusy)
-			{
+//			if(!mBusy)
+//			{
 				ROS_INFO("Getting coke...");
 				expressEmotion(release());
-			}
-			else
-				ROS_INFO("Don't disturb me, I'm busy");
+//			}
+//			else
+//				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case EVA:
-			if(!mBusy)
-			{
+//			if(!mBusy)
+//			{
 				//Start initiating actions to get the juice
 				ROS_INFO("Responding...");
 				expressEmotion(respond());
-			}
-			else
-				ROS_INFO("Don't disturb me, I'm busy");
+//			}
+//			else
+//				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case STOP:
@@ -745,10 +752,12 @@ void Controller::init(const char *goalPath)
 	mRotateBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_turn", 1);
 	mPositionBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_position", 1);
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
+	mGripperClosePublisher		= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper_state", 1);
+
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
-
+	
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
 

@@ -137,7 +137,7 @@ private:
 	ros::Publisher mPositionBasePublisher;			/// Publishes position for base
 	ros::Publisher mEmotionPublisher;				/// Publishes emotions for the head
 	ros::Publisher mBaseSpeedPublisher;				/// Publishes twist messages for the mobile base
-
+	ros::Publisher mGripperClosePublisher;	
 	ros::ServiceClient mFindObjectClient;			/// Service client for finding the object
 	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
 
