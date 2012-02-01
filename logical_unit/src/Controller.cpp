@@ -326,11 +326,29 @@ uint8_t Controller::stop()
 	raise(SIGUSR1);
 	signal(SIGUSR1, stopHandler);
 	mBusy = false;
-	return respond();
+	return head::Emotion::SURPRISED;
+}
+/**
+ *
+ */
+void Controller::waitAfterRespond()
+{
+	int sleep_rate;
+	mNodeHandle.param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	double currentTime = ros::Time::now().toSec();
+	while(ros::ok() && ros::Time::now().toSec() - currentTime > 30)
+	{
+		sleep.sleep();
+		ros::spinOnce();
+	}
+
+	respondedSurprised = false;
 }
 
 /**
- * Respond to the user
+ * Respond to the user surprised
  */
 uint8_t Controller::respond()
 {
@@ -339,6 +357,7 @@ uint8_t Controller::respond()
 	setFocusFace(true);
 
 	mBusy = false;
+	respondedSurprised = true;
 	return head::Emotion::SURPRISED;
 }
 
@@ -535,8 +554,17 @@ uint8_t Controller::get(int object)
 uint8_t Controller::release()
 {
 	mBusy = true;
+	//open gripper
 	setGripper(true);
-	/*
+	usleep(1000000);
+
+	//Close gripper and move arm back
+	std_msgs::Bool bool_msg;
+	bool_msg.data = true;
+
+	mGripperClosePublisher.publish(bool_msg);
+	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
+
 	//Reset arousal and listen to feedback
 	mArousal = NEUTRAL_AROUSAL;
 
@@ -546,12 +574,12 @@ uint8_t Controller::release()
 	mNodeHandle.param<int>("node_sleep_rate", sleep_rate, 50);
 	ros::Rate sleep(sleep_rate);
 
-	while(ros::ok() && currentTime - ros::Time::now().toSec() > 30 && mArousal == NEUTRAL_AROUSAL)
+	//wait for feedback
+	while(ros::ok() && ros::Time::now().toSec() - currentTime > 30 && mArousal == NEUTRAL_AROUSAL)
 	{
 		sleep.sleep();
 		ros::spinOnce();
 	}
-
 	mBusy = false;
 
 	if(mArousal > NEUTRAL_AROUSAL)
@@ -559,21 +587,12 @@ uint8_t Controller::release()
 
 	else if(mArousal < NEUTRAL_AROUSAL)
 		return head::Emotion::SAD;
-
 	else
 	{
 		setFocusFace(false);
 		positionBase(DISTANCE_TO_PERSON);
 		return head::Emotion::NEUTRAL;
-	}*/
-	usleep(1000000);
-	std_msgs::Bool bool_msg;
-	bool_msg.data = false;
-	
-	mGripperClosePublisher.publish(bool_msg);
-	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
-	
-	return head::Emotion::HAPPY;
+	}
 }
 
 /**
@@ -604,64 +623,64 @@ void Controller::speechCB(const audio_processing::speech& msg)
 				ROS_INFO("I'm already awake");
 			break;
 
+		case EVA:
 		case BEER:
-//			if(!mBusy)
-//			{
-				ROS_INFO("Responding with surprise");
-				expressEmotion(head::Emotion::SURPRISED);
-//			}
-//			else
-//				ROS_INFO("Don't disturb me, I'm busy");
+			if(!mBusy)
+			{
+				if(!respondedSurprised)
+				{
+					ROS_INFO("Responding with surprise");
+					expressEmotion(respond());
+					waitAfterRespond();
+				}
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case JUICE:
-//			//Start initiating actions to get the juice
-//			if(!mBusy)
-//			{
+			//Start initiating actions to get the juice
+			if(!mBusy)
+			{
 				ROS_INFO("Getting juice...");
 				expressEmotion(get(JUICE_ID));
-//			}
-//			else
-//				ROS_INFO("Don't disturb me, I'm busy");
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case FANTA:
 			//Start initiating actions to get the juice
-			ROS_INFO("Getting fanta...");
-			expressEmotion(get(FANTA_ID));
+			if(!mBusy)
+			{
+				ROS_INFO("Getting fanta...");
+				expressEmotion(get(FANTA_ID));
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case COKE:
 		case COLA:
-//			if(!mBusy)
-//			{
+			if(!mBusy)
+			{
 				//Start initiating actions to get the juice
 				ROS_INFO("Getting coke...");
 				expressEmotion(get(COLA_ID));
-//			}
-//			else
-//				ROS_INFO("Dont' disturb me, I'm busy");
+			}
+			else
+				ROS_INFO("Dont' disturb me, I'm busy");
 			break;
 
-		case THANK_YOU:
-//			if(!mBusy)
-//			{
+		case GIVE:
+		case GOT:
+			if(!mBusy)
+			{
 				ROS_INFO("Getting coke...");
 				expressEmotion(release());
-//			}
-//			else
-//				ROS_INFO("Don't disturb me, I'm busy");
-			break;
-
-		case EVA:
-//			if(!mBusy)
-//			{
-				//Start initiating actions to get the juice
-				ROS_INFO("Responding...");
-				expressEmotion(respond());
-//			}
-//			else
-//				ROS_INFO("Don't disturb me, I'm busy");
+			}
+			else
+				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
 		case STOP:
@@ -686,7 +705,6 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			ROS_INFO("No commands");
 		default:
 			break;
-
 		}
 	}
 }
@@ -728,11 +746,10 @@ void Controller::init(const char *goalPath)
 	stringToValue["cola"]	 = COLA;
 	stringToValue["coke"]	 = COKE;
 	stringToValue["juice"]   = JUICE;
-	stringToValue["open"] 	 = OPEN;
 	stringToValue["give"]	 = GIVE;
+	stringToValue["got"]	 = GOT;
 	stringToValue["sleep"]	 = SLEEP;
 	stringToValue["fanta"]	 = FANTA;
-	stringToValue["thank"]	 = THANK_YOU;
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 
@@ -757,7 +774,7 @@ void Controller::init(const char *goalPath)
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
-	
+
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
 

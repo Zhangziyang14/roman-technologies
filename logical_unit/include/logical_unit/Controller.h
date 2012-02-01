@@ -84,10 +84,9 @@ enum commandValue
 	COLA,
 	SLEEP,
 	STOP,
-	OPEN,
 	GIVE,
+	GOT,
 	FANTA,
-	THANK_YOU,
 };
 
 enum Emotions
@@ -155,7 +154,8 @@ private:
 	Locks mLock;									/// Checks whether the Controller is blocked or not and keeps track of which node it is being blocked by
 
 	bool mBusy;										/// Check whether Eva is busy with something or not
-	bool mGripperStop;
+	bool respondedSurprised;						/// Check whether Eva responded surprised
+	bool mGripperStop;								/// Stops the base when gripper is closed
 
 public:
 	Controller() : mNodeHandle(""){}
@@ -194,6 +194,7 @@ public:
 	void gripperStateCB(const std_msgs::UInt8 &msg);
 
 	void waitForLock();
+	void waitAfterRespond();
 
 	inline void convertQuaternion(geometry_msgs::Quaternion &q1, tf::Quaternion q2)
 	{
