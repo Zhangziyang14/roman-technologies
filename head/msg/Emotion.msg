@@ -1,5 +1,6 @@
 head/RGB rgb
 head/Eyebrows eyebrows
+uint32 time
 
 uint8 NEUTRAL = 0
 uint8 HAPPY = 1

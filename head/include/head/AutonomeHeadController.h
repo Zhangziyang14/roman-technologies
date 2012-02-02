@@ -22,7 +22,8 @@ protected:
 
 	ros::Subscriber mEmotion_sub;
 	ros::Subscriber mCommand_sub;
-	u_int8_t mCurrentEmotion;
+	uint8_t mCurrentEmotion;
+	double mReturnNeutralTime;
 
 	head::Emotion mNeutral;
 	head::Emotion mHappy;
@@ -46,6 +47,7 @@ public:
 	void headCommandCB(const head::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();
+	void update();
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };

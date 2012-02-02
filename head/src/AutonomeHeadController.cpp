@@ -1,6 +1,6 @@
 #include "head/AutonomeHeadController.h"
 
-void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint8_t min_b, uint8_t max_r, uint8_t max_g, uint8_t max_b, uint32_t breath_time, int left_eyebrow, int right_eyebrow, int lift, uint32_t left_time, uint32_t right_time, uint32_t lift_time)
+void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint8_t min_b, uint8_t max_r, uint8_t max_g, uint8_t max_b, uint32_t breath_time, int left_eyebrow, int right_eyebrow, int lift, uint32_t left_time, uint32_t right_time, uint32_t lift_time, uint32_t neutral_time)
 {
 	emotion.rgb.min_r = min_r;
 	emotion.rgb.min_g = min_g;
@@ -15,16 +15,19 @@ void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint
 	emotion.eyebrows.right_time = right_time;
 	emotion.eyebrows.lift = lift;
 	emotion.eyebrows.lift_time = lift_time;
+	emotion.time = neutral_time;
 }
 
 AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 {
-	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0);
-	constructEmotion(mHappy,   50, 250, 30,   255, 150, 30,   1500,   90, 90, 120,   0, 0, 0);
-	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0);
-	constructEmotion(mSurprised,   255, 120, 20,   255, 100, 0,   1000,   90, 90, 140,   0, 0, 0);
-	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0);
-	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0,   0);
+	constructEmotion(mHappy,   255, 255, 255,   255, 150, 30,   500,   90, 90, 120,   0, 0, 0,   2000);
+	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0,   2000);
+	constructEmotion(mSurprised,   255, 255, 255,   150, 150, 150,   500,   90, 90, 140,   0, 0, 0,   2000);
+	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0,   2000);
+	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0,   0);
+
+	mReturnNeutralTime = 0.0;
 
 	ROS_INFO("AutonomeHeadController initialised.");
 }
@@ -41,6 +44,8 @@ void AutonomeHeadController::setExpression(head::Emotion emotion)
 	sound_msg.data = mCurrentEmotion;
 
 	mSounds_pub.publish(sound_msg);
+
+	mReturnNeutralTime = emotion.time ? ros::Time::now().toSec() + double(emotion.time) / 1000.0 : 0.0;
 }
 
 /**
@@ -97,6 +102,12 @@ void AutonomeHeadController::headCommandCB(const head::PitchYaw &msg)
 	mHead_movement_pub.publish(msg);
 }
 
+void AutonomeHeadController::update()
+{
+	if (mReturnNeutralTime && ros::Time::now().toSec() > mReturnNeutralTime)
+		setExpression(mNeutral);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -111,6 +122,7 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
+		headController.update();
 		sleep.sleep();
 		ros::spinOnce();
 	}
