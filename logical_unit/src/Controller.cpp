@@ -39,6 +39,9 @@ void Controller::gripperStateCB(const std_msgs::UInt8 &msg)
 
 void Controller::expressEmotion(uint8_t emotion)
 {
+	//std_msgs::UInt8 msg;
+	//msg.data = emotion;
+	//mEmotionPublisher.publish(msg);
 	std_msgs::UInt8 msg;
 	msg.data = emotion;
 	mEmotionPublisher.publish(msg);
@@ -329,7 +332,7 @@ uint8_t Controller::stop()
 	return head::Emotion::SURPRISED;
 }
 /**
- *
+ * Wait after being surprised, before becoming surprised again..
  */
 void Controller::waitAfterRespond()
 {
@@ -338,7 +341,7 @@ void Controller::waitAfterRespond()
 	ros::Rate sleep(sleep_rate);
 
 	double currentTime = ros::Time::now().toSec();
-	while(ros::ok() && ros::Time::now().toSec() - currentTime > 30)
+	while(ros::ok() && ros::Time::now().toSec() - currentTime < 30)
 	{
 		sleep.sleep();
 		ros::spinOnce();
@@ -554,6 +557,7 @@ uint8_t Controller::get(int object)
 uint8_t Controller::release()
 {
 	mBusy = true;
+
 	//open gripper
 	setGripper(true);
 	usleep(1000000);
@@ -567,30 +571,35 @@ uint8_t Controller::release()
 
 	//Reset arousal and listen to feedback
 	mArousal = NEUTRAL_AROUSAL;
-
+	
 	double currentTime = ros::Time::now().toSec();
-
+	
 	int sleep_rate;
 	mNodeHandle.param<int>("node_sleep_rate", sleep_rate, 50);
 	ros::Rate sleep(sleep_rate);
 
 	//wait for feedback
-	while(ros::ok() && ros::Time::now().toSec() - currentTime > 30 && mArousal == NEUTRAL_AROUSAL)
+	while(ros::ok() && ros::Time::now().toSec() - currentTime < 30 && mArousal == NEUTRAL_AROUSAL)
 	{
 		sleep.sleep();
 		ros::spinOnce();
 	}
-	mBusy = false;
-
+	
 	if(mArousal > NEUTRAL_AROUSAL)
+	{
+		mBusy = false;
 		return head::Emotion::HAPPY;
-
+	}
 	else if(mArousal < NEUTRAL_AROUSAL)
+	{
+		mBusy = false;
 		return head::Emotion::SAD;
+	}
 	else
 	{
 		setFocusFace(false);
 		positionBase(DISTANCE_TO_PERSON);
+		mBusy = false;
 		return head::Emotion::NEUTRAL;
 	}
 }
@@ -676,7 +685,7 @@ void Controller::speechCB(const audio_processing::speech& msg)
 		case GOT:
 			if(!mBusy)
 			{
-				ROS_INFO("Getting coke...");
+				ROS_INFO("Giving retrived object...");
 				expressEmotion(release());
 			}
 			else
@@ -736,6 +745,8 @@ void Controller::init(const char *goalPath)
 {
 	//initialise Nero in sleep mode
 	mWakeUp = false;
+	mBusy = false;
+	respondedSurprised = false;
 
 	//initialise map
 	stringToValue[""]		 = NOTHING;
@@ -771,7 +782,7 @@ void Controller::init(const char *goalPath)
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 	mGripperClosePublisher		= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper_state", 1);
 
-	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
+	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_sound", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
 

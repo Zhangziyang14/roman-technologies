@@ -4,7 +4,7 @@
 	<param name="port_type" value="RS485_FTDI" />
 	<param name="baud_rate" value="921600" />
   </node>
-  <!-- node ns="arduino_zero" name="nero_arduino_zero" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_zero" output="screen" /-->
+  <!--node ns="arduino_zero" name="nero_arduino_zero" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_zero" output="screen" /-->
   <!-- node ns="arduino_uno" name="nero_arduino_uno" pkg="rosserial_python" type="serial_node.py" args="/dev/roman/arduino_uno" output="screen" /-->
 
   <!-- start mobile base -->
