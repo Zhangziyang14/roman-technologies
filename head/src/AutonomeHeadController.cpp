@@ -21,9 +21,9 @@ AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 {
 	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0);
 	constructEmotion(mHappy,   50, 250, 30,   255, 150, 30,   1500,   90, 90, 120,   0, 0, 0);
-	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   0, 0, 0);
-	constructEmotion(mSurprised,   255, 120, 20,   255, 100, 0,   1000,   60, 120, 140,   0, 0, 0);
-	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   90, 90, 120,   0, 0, 0);
+	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0);
+	constructEmotion(mSurprised,   255, 120, 20,   255, 100, 0,   1000,   90, 90, 140,   0, 0, 0);
+	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0);
 	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0);
 
 	ROS_INFO("AutonomeHeadController initialised.");

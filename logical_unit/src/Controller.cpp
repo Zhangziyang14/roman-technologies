@@ -703,8 +703,8 @@ void Controller::speechCB(const audio_processing::speech& msg)
 			{
 				//Go to sleep
 				ROS_INFO("Going to sleep...");
-				expressEmotion(sleep());
 				setFocusFace(false);
+				expressEmotion(sleep());
 			}
 			else
 				ROS_INFO("I'm already sleeping...");
@@ -824,7 +824,8 @@ void Controller::init(const char *goalPath)
 	ROS_INFO("x: %f, y: %f, yaw: %f", mGoal.position.x, mGoal.position.y, yaw);
 
 	usleep(1000000);
-	expressEmotion(head::Emotion::SLEEP);
+
+	sleep();
 	ROS_INFO("Initialised Controller");
 }
 

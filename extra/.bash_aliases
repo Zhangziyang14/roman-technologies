@@ -27,3 +27,15 @@ alias turn_right='rostopic pub /cmd_mobile_turn" std_msgs/Float32 -- -0.78539816
 alias focus_face_on='rosservice call /set_focus_face true'
 alias focus_face_off='rosservice call /set_focus_face false'
 
+alias wake_up='rostopic pub /processedSpeechTopic audio_processing/speech "wake up" 0'
+alias sleep='rostopic pub /processedSpeechTopic audio_processing/speech "sleep" 0'
+alias juice='rostopic pub /processedSpeechTopic audio_processing/speech "juice" 0'
+alias cola='rostopic pub /processedSpeechTopic audio_processing/speech "cola" 0'
+alias happy='rostopic pub /cmd_emotion std_msgs/UInt8 1'
+alias sad='rostopic pub /cmd_emotion std_msgs/UInt8 2'
+alias surprised='rostopic pub /cmd_emotion std_msgs/UInt8 3'
+alias neutral='rostopic pub /cmd_emotion std_msgs/UInt8 0'
+
+
+
+

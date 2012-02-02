@@ -39,7 +39,7 @@
 #define HEAD_INIT_Z  0.0
 
 #define HEAD_SLEEP_X  0.0
-#define HEAD_SLEEP_Z  -0.6
+#define HEAD_SLEEP_Z  0.8
 
 #define VIEW_OBJECTS_ANGLE	0.4
 #define MIN_VIEW_ANGLE (-0.35)
