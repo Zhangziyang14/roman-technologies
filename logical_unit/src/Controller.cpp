@@ -407,8 +407,8 @@ uint8_t Controller::get(int object)
 			switch (i)
 			{
 			case 0: moveHead(VIEW_OBJECTS_ANGLE, 0.0); break;
-			case 1: moveHead(MIN_VIEW_ANGLE, 0.0); break;
-			case 2: moveHead(MAX_VIEW_ANGLE, 0.0); break;
+			case 1: moveHead(VIEW_OBJECTS_ANGLE, MIN_VIEW_ANGLE); break;
+			case 2: moveHead(VIEW_OBJECTS_ANGLE, MAX_VIEW_ANGLE); break;
 			}
 			waitForLock();
 
@@ -723,7 +723,7 @@ void Controller::speechCB(const audio_processing::speech& msg)
  */
 void Controller::navigationStateCB(const std_msgs::UInt8& msg)
 {
-	if(mLock == LOCK_PATH && msg.data == 3) // finished
+	if(mLock == LOCK_PATH && msg.data == 2) // finished
 	{
 		ROS_INFO("Unlocking path.");
 		mLock = LOCK_NONE;
