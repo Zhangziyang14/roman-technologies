@@ -105,7 +105,11 @@ void AutonomeHeadController::headCommandCB(const head::PitchYaw &msg)
 void AutonomeHeadController::update()
 {
 	if (mReturnNeutralTime && ros::Time::now().toSec() > mReturnNeutralTime)
-		setExpression(mNeutral);
+	{
+		std_msgs::UInt8 msg;
+		msg.data = head::Emotion::NEUTRAL;
+		expressEmotionCB(msg);
+	}
 }
 
 int main(int argc, char **argv)
