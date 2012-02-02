@@ -788,7 +788,7 @@ void Controller::init(const char *goalPath)
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
 	mGripperClosePublisher		= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper_state", 1);
 
-	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_sound", 1, true);
+	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
 	mSetPathingServer			= mNodeHandle.advertiseService("/set_pathing", &Controller::setPathingCB, this);

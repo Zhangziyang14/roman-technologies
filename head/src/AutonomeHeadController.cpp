@@ -21,10 +21,11 @@ void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint
 AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 {
 	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0,   0);
-	constructEmotion(mHappy,   255, 255, 255,   255, 150, 30,   500,   90, 90, 120,   0, 0, 0,   2000);
-	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0,   2000);
-	constructEmotion(mSurprised,   255, 255, 255,   150, 150, 150,   500,   90, 90, 140,   0, 0, 0,   2000);
-	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0,   2000);
+	constructEmotion(mHappy,   255, 255, 150,   255, 150, 30,   800,   90, 90, 120,   0, 0, 0,   2500);
+	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0,   2500);
+	constructEmotion(mSurprised,   255, 255, 255,   150, 150, 150,   250,   90, 90, 140,   0, 0, 0,   2500);
+	constructEmotion(mSurprisedInitial, 255, 255, 255,   150, 150, 150,   250,   90, 90, 140,   0, 0, 0, 0);
+	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0,   2500);
 	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0,   0);
 
 	mReturnNeutralTime = 0.0;
@@ -35,15 +36,18 @@ AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 /**
  * Sets the expression to the given emotion
  */
-void AutonomeHeadController::setExpression(head::Emotion emotion)
+void AutonomeHeadController::setExpression(head::Emotion emotion, int soundId)
 {
 	mRGB_pub.publish(emotion.rgb);
 	mEyebrows_pub.publish(emotion.eyebrows);
 
-	std_msgs::UInt8 sound_msg;
-	sound_msg.data = mCurrentEmotion;
+	if (soundId >= 0)
+	{
+		std_msgs::UInt8 sound_msg;
+		sound_msg.data = uint8_t(soundId);
 
-	mSounds_pub.publish(sound_msg);
+		mSounds_pub.publish(sound_msg);
+	}
 
 	mReturnNeutralTime = emotion.time ? ros::Time::now().toSec() + double(emotion.time) / 1000.0 : 0.0;
 }
@@ -53,16 +57,14 @@ void AutonomeHeadController::setExpression(head::Emotion emotion)
  */
 void AutonomeHeadController::expressEmotionCB(const std_msgs::UInt8 &msg)
 {
-	mCurrentEmotion = msg.data;
-
-	switch(mCurrentEmotion)
+	switch(msg.data)
 	{
-	case head::Emotion::NEUTRAL:	setExpression(mNeutral); break;
-	case head::Emotion::HAPPY:		setExpression(mHappy); break;
-	case head::Emotion::SAD: 		setExpression(mSad); break;
-	case head::Emotion::SURPRISED:	setExpression(mSurprised); break;
-	case head::Emotion::ERROR: 		setExpression(mError); break;
-	case head::Emotion::SLEEP:		setExpression(mSleep); break;
+	case head::Emotion::NEUTRAL:	setExpression(mNeutral, msg.data); break;
+	case head::Emotion::HAPPY:		setExpression(mHappy, msg.data); break;
+	case head::Emotion::SAD: 		setExpression(mSad, msg.data); break;
+	case head::Emotion::SURPRISED:	setExpression(mSurprised, msg.data); break;//setExpression(mSurprisedInitial, msg.data); usleep(1000000); setExpression(mSurprised); break;
+	case head::Emotion::ERROR: 		setExpression(mError, msg.data); break;
+	case head::Emotion::SLEEP:		setExpression(mSleep, msg.data); break;
 
 	default:
 		setExpression(mNeutral);

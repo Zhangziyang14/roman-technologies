@@ -22,13 +22,13 @@ protected:
 
 	ros::Subscriber mEmotion_sub;
 	ros::Subscriber mCommand_sub;
-	uint8_t mCurrentEmotion;
 	double mReturnNeutralTime;
 
 	head::Emotion mNeutral;
 	head::Emotion mHappy;
 	head::Emotion mSad;
 	head::Emotion mSurprised;
+	head::Emotion mSurprisedInitial;
 	head::Emotion mError;
 	head::Emotion mSleep;
 
@@ -43,7 +43,7 @@ public:
 		mNodeHandle.shutdown();
 	};
 
-	void setExpression(head::Emotion emotion);
+	void setExpression(head::Emotion emotion, int soundId = -1);
 	void headCommandCB(const head::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();
