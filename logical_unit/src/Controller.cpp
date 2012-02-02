@@ -377,15 +377,18 @@ uint8_t Controller::get(int object)
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
 
-	//Go to the table
-	updateRobotPosition();
+	if (mPathingEnabled)
+	{
+		//Go to the table
+		updateRobotPosition();
 
-	moveHead(0.0, 0.0);
-	mLock = LOCK_PATH;
-	moveBase(mGoal);
-	waitForLock();
+		moveHead(0.0, 0.0);
+		mLock = LOCK_PATH;
+		moveBase(mGoal);
+		waitForLock();
 
-	ROS_INFO("Reached Goal");
+		ROS_INFO("Reached Goal");
+	}
 
 	//Aim Kinect to the table
 	setFocusFace(false);
@@ -429,7 +432,8 @@ uint8_t Controller::get(int object)
 					if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 					{
 						ROS_ERROR("Failed to find object, quitting script.");
-						returnToOriginalPosition();
+						if (mPathingEnabled)
+							returnToOriginalPosition();
 						return head::Emotion::SAD;
 					}
 				}
@@ -460,7 +464,8 @@ uint8_t Controller::get(int object)
 			if (findObject(object, objectPose, min_y) == false || objectPose.pose.position.y == 0.0)
 			{
 				ROS_ERROR("Failed to find object, quitting script.");
-				returnToOriginalPosition();
+				if (mPathingEnabled)
+					returnToOriginalPosition();
 				return head::Emotion::SAD;
 			}
 
@@ -509,7 +514,8 @@ uint8_t Controller::get(int object)
 	if (attempts >= MAX_GRAB_ATTEMPTS)
 	{
 		ROS_ERROR("No more grab attempts left.");
-		returnToOriginalPosition();
+		if (mPathingEnabled)
+			returnToOriginalPosition();
 		return head::Emotion::SAD;
 	}
 
@@ -529,7 +535,8 @@ uint8_t Controller::get(int object)
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 	waitForLock();
 
-	returnToOriginalPosition();
+	if (mPathingEnabled)
+		returnToOriginalPosition();
 
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
 
@@ -537,14 +544,6 @@ uint8_t Controller::get(int object)
 	mLock = LOCK_ARM;
 	moveArm(DELIVER_ARM_X_VALUE, DELIVER_ARM_Z_VALUE);
 	waitForLock();
-
-	/*usleep(5000000);
-	setGripper(true);
-
-	moveHead(FOCUS_FACE_ANGLE - 0.1, 0.0);
-	usleep(500000);
-	moveHead(FOCUS_FACE_ANGLE, 0.0);
-	setFocusFace(true);*/
 
 	mBusy = false;
 
@@ -738,6 +737,12 @@ void Controller::baseGoalCB(const std_msgs::Float32& msg)
 	mDistanceToGoal = msg.data;
 }
 
+bool Controller::setPathingCB(logical_unit::SetPathing::Request &req, logical_unit::SetPathing::Response &res)
+{
+	mPathingEnabled = req.enable;
+	return true;
+}
+
 /**
  * Initialise Controller
  */
@@ -747,6 +752,7 @@ void Controller::init(const char *goalPath)
 	mWakeUp = false;
 	mBusy = false;
 	respondedSurprised = false;
+	mPathingEnabled = true;
 
 	//initialise map
 	stringToValue[""]		 = NOTHING;
@@ -785,6 +791,7 @@ void Controller::init(const char *goalPath)
 	mEmotionPublisher			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_sound", 1, true);
 	mBaseSpeedPublisher			= mNodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
+	mSetPathingServer			= mNodeHandle.advertiseService("/set_pathing", &Controller::setPathingCB, this);
 
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
 		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);

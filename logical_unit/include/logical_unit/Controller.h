@@ -25,6 +25,7 @@
 #include "arm/armJointPos.h"
 #include "head/Emotion.h"
 #include "image_processing/SetActive.h"
+#include "logical_unit/SetPathing.h"
 #include <signal.h>
 
 #define MIN_ARM_Z_VALUE (-0.321)
@@ -127,6 +128,7 @@ private:
 	ros::Subscriber mArmSpeedSubscriber;			/// Listens to arm motor speeds
 	ros::Subscriber mGripperStateSubscriber;		/// Listens to gripper state
 	ros::Subscriber mPathFollowStateSubscriber;		/// Listens to state of PathFollower
+	ros::ServiceServer mSetPathingServer;			/// Enables or disables pathing while getting an object
 
 	ros::Publisher mGripperCommandPublisher;		/// Publishes commands to gripper Ultrasone controller
 	ros::Publisher mBaseGoalPublisher;				/// Publishes goal commands to PathPlanner
@@ -156,6 +158,7 @@ private:
 	bool mBusy;										/// Check whether Eva is busy with something or not
 	bool respondedSurprised;						/// Check whether Eva responded surprised
 	bool mGripperStop;								/// Stops the base when gripper is closed
+	bool mPathingEnabled;
 
 public:
 	Controller() : mNodeHandle(""){}
@@ -192,6 +195,7 @@ public:
 	void armSpeedCB(const arm::armJointPos &msg);
 	void objectPositionCB(const geometry_msgs::PoseStamped& msg);
 	void gripperStateCB(const std_msgs::UInt8 &msg);
+	bool setPathingCB(logical_unit::SetPathing::Request &req, logical_unit::SetPathing::Response &res);
 
 	void waitForLock();
 	void waitAfterRespond();

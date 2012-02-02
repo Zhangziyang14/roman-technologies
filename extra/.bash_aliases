@@ -36,6 +36,5 @@ alias sad='rostopic pub /cmd_emotion std_msgs/UInt8 2'
 alias surprised='rostopic pub /cmd_emotion std_msgs/UInt8 3'
 alias neutral='rostopic pub /cmd_emotion std_msgs/UInt8 0'
 
-
-
-
+alias pathing_enable='rosservice call /set_pathing true'
+alias pathing_disable='rosservice call /set_pathing false'
