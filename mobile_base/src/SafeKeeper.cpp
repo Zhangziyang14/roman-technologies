@@ -42,6 +42,28 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 	mDisableBackward = false;
 
 	mBumperState = BUMPER_NONE;
+
+	if (position_msg.left && position_msg.right)
+	{
+		if (mBumperStartTime == 0.0)
+			mBumperStartTime = ros::Time::now().toSec();
+
+		if (ros::Time::now().toSec() - mBumperStartTime > ERROR_STATE_BUMPER_TIME)
+		{
+			mBumperStartTime = ros::Time::now().toSec();
+			mBumperCount = 0;
+		}
+
+		mBumperCount++;
+		if (mBumperCount >= ERROR_STATE_BUMPER_COUNT)
+		{
+			std_msgs::UInt8 msg;
+			msg.data = head::Emotion::ERROR;
+			mEmotion_pub.publish(msg);
+			mBumperCount = 0;
+			mBumperStartTime = ros::Time::now().toSec();
+		}
+	}
 }
 
 /**
@@ -90,6 +112,7 @@ void SafeKeeper::init()
 
 	// initialise publishers
 	mMovement_pub 		= mNodeHandle.advertise<mobile_base::position>("/positionTopic", 1);
+	mEmotion_pub		= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1);
 
 	mDisableForward	 	= false;
 	mDisableBackward 	= false;
