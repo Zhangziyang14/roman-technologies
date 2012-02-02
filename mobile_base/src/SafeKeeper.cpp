@@ -76,16 +76,16 @@ void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
 			msg.data[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < 0 && mCurrentSpeed.linear.x > 0)
 	{
 		mobile_base::position position_msg;
-		position_msg.left   = -SAFE_DISTANCE;
-		position_msg.right  = -SAFE_DISTANCE;
+		position_msg.left   = 0;
+		position_msg.right  = 0;
 		mMovement_pub.publish(position_msg);
 	}
-	else if(msg.data[SensorFeedback::SENSOR_REAR_LEFT] - mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < 0 &&
-			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0 && mCurrentSpeed.linear.x < 0)
+	else if((msg.data[SensorFeedback::SENSOR_REAR_LEFT] - mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < 0 ||
+			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0) && mCurrentSpeed.linear.x < 0)
 	{
 		mobile_base::position position_msg;
-		position_msg.left   = SAFE_DISTANCE;
-		position_msg.right  = SAFE_DISTANCE;
+		position_msg.left   = 0;
+		position_msg.right  = 0;
 		mMovement_pub.publish(position_msg);
 	}
 

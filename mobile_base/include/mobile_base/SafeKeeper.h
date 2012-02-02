@@ -39,6 +39,7 @@ private:
 	ros::Subscriber mUltrasone_sub;				/// Subscriber to Arduino ultrasone sensors feedback
 	ros::Subscriber mSpeed_sub;					/// Subscriber to current speed of mobile base
 
+	ros::Publisher mStopPublisher;				/// Stop motors
 	ros::Publisher  mMovement_pub;				/// Publisher to control the motors
 	ros::Publisher	mEmotion_pub;				///
 	BumperState 	mBumperState;				/// Keeps track of the current state for the bumpers
