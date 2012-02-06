@@ -14,6 +14,7 @@
   <depend package="head"/>
   <depend package="arm"/>
   <depend package="image_processing"/>
+  <depend package="joy"/>
 
   <export>
         <rosdoc config="rosdoc.yaml" />
