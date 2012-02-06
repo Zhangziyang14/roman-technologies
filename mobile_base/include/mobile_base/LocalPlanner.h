@@ -10,7 +10,7 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <mobile_base/SensorFeedback.h>
+#include <nero_msgs/SensorFeedback.h>
 
 #define WHEEL_RADIUS 							0.1475	//[m]
 #define BASE_RADIUS 							0.25	//[m]
@@ -44,7 +44,7 @@ private:
 
 
 	void speedCB(const geometry_msgs::Twist& msg);
-	void ultrasoneCB(const mobile_base::SensorFeedback& msg);
+	void ultrasoneCB(const nero_msgs::SensorFeedback& msg);
 
 	//Scale the speed of a motor based on the measured distance
 	inline double scaleSpeed(double speed, double avoidance_impact, double avoidance_distance, int measured_distance)

@@ -5,11 +5,10 @@
 #include <motors/Motor.h>
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
-#include <mobile_base/tweak.h>
 #include <std_msgs/Bool.h>
 
-#include <mobile_base/position.h>
-#include <mobile_base/SensorFeedback.h>
+#include <nero_msgs/MotorPosition.h>
+#include <nero_msgs/SensorFeedback.h>
 //#include <mobile_base/disableUltrasone.h>
 
 
@@ -20,8 +19,6 @@
 #define ZERO_SPEED				0.0
 #define DEFAULT_ACCELERATION	2
 
-using namespace mobile_base;
-
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
 {
@@ -30,7 +27,6 @@ protected:
 
 	ros::Subscriber mTwistSub;					/// Listens to Twist messages for movement
 	ros::Subscriber mPositionSub;				/// Listens to integer messages for positioning
-	ros::Subscriber mTweakPIDSub;				/// Listens to Int messages, the integers represent the pressed DPAD button on the PS3 controller
 	ros::Subscriber mUltrasoneSub;          	/// Listens to ultrasone distances
 	ros::Subscriber mStopSubscriber;				/// Listens to stop commands from the Controller
 
@@ -48,7 +44,6 @@ protected:
 	Motor mRightMotor;							/// Motor for right wheel
 
 	MotorId mMotorId;							/// Id of the motor that is currently being controlled
-	PIDParameter mPIDFocus;						/// One of the PID parameters that is to be changed on button events
 
 	bool mLock;
 
@@ -56,7 +51,7 @@ protected:
 
 public:
 	/// Constructor
-	MotorHandler() : mNodeHandle("~"), mLeftMotor(MID_LEFT), mRightMotor(MID_RIGHT), mMotorId(MID_LEFT), mPIDFocus(PID_PARAM_I) { }
+	MotorHandler() : mNodeHandle("~"), mLeftMotor(MID_LEFT), mRightMotor(MID_RIGHT), mMotorId(MID_LEFT) { }
 
 	/// Destructor
 	/** Delete motor interface, close serial port, and shut down node handle */
@@ -71,10 +66,9 @@ public:
 	void publishRobotSpeed();
 	//void disableUltrasoneSensors();
 	void moveCB(const geometry_msgs::Twist& msg);
-	void positionCB(const position& msg);
-	void ultrasoneCB(const SensorFeedback& msg);
+	void positionCB(const nero_msgs::MotorPosition& msg);
+	void ultrasoneCB(const nero_msgs::SensorFeedback& msg);
 	void stopCB(const std_msgs::Bool& msg);
-	void tweakCB(const tweak& msg);
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };

@@ -1,5 +1,5 @@
-head/RGB rgb
-head/Eyebrows eyebrows
+nero_msgs/RGB rgb
+nero_msgs/Eyebrows eyebrows
 uint32 time
 
 uint8 NEUTRAL = 0

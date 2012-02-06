@@ -1,6 +1,6 @@
 #include "ros/ros.h"
-#include "arm/IK.h"
-#include "arm/armJointPos.h"
+#include "nero_msgs/InverseKinematica.h"
+#include "nero_msgs/ArmJoint.h"
 #include <geometry_msgs/Pose.h>
 
 #define UPPER_ARM_LENGTH 	0.36		//Length of upper arm in [m]
@@ -54,7 +54,7 @@ double calculateCurrentZPosition(double alpha)
 /*
  * Solves inverse kinematics for the arm at request, returns joint positions for arm motors.
  */
-bool solveIK(arm::IK::Request& request, arm::IK::Response& response)
+bool solveIK(nero_msgs::InverseKinematica::Request& request, nero_msgs::InverseKinematica::Response& response)
 {
 	response.configuration.upper_joint 	= calculateShoulderJointPosition(request.target.position.z);
 	response.configuration.wrist_joint 	= calculateWristJointPosition(request.target.position.x);
@@ -64,7 +64,7 @@ bool solveIK(arm::IK::Request& request, arm::IK::Response& response)
 /*
  * Solves forward kinematics for the arm, calculates coordinates in the gripper's configuration space with the current joint positions.
  */
-void ForwardKinematicsCB(const arm::armJointPos &msg)
+void ForwardKinematicsCB(const nero_msgs::ArmJoint &msg)
 {
 	geometry_msgs::Pose coordinate_msg;
 	currentZ = calculateCurrentZPosition(msg.upper_joint);

@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 #include <motors/Motor.h>
-#include <gripper/MotorControl.h>
+#include <nero_msgs/GripperControl.h>
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
@@ -29,7 +29,7 @@ public:
     /** \param path path to shared_serial node */
     void init(char *path);
 
-    void gripperCB(const gripper::MotorControl& mc);
+    void gripperCB(const nero_msgs::GripperControl &mc);
 };    
 
 #endif /* __MOTORHANDLER_H */

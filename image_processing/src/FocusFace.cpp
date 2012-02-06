@@ -18,7 +18,7 @@
 #include "ros/ros.h"
 #include <image_transport/image_transport.h>
 
-#include "head/PitchYaw.h"
+#include "nero_msgs/PitchYaw.h"
 
 #include "image_processing/SetActive.h"
 
@@ -31,7 +31,7 @@ cv::CascadeClassifier gCascade;
 ros::Publisher *kinect_motor_pub = NULL;
 ros::Subscriber *image_sub = NULL;
 ros::NodeHandle *nh = NULL;
-head::PitchYaw gCurrentOrientation;
+nero_msgs::PitchYaw gCurrentOrientation;
 bool active = false;
 bool gLock = false;
 
@@ -127,7 +127,7 @@ void detectAndDraw(pcl::PointCloud<pcl::PointXYZRGB> *cloud, cv::Mat& img, cv::C
     	pcl::PointXYZRGB p = cloud->at(minPoint.x, minPoint.y);
     	if (p.z)
     	{
-    		head::PitchYaw msg;
+    		nero_msgs::PitchYaw msg;
     		double pitch = atan(p.y / p.z);
     		double yaw = -atan(p.x / p.z);
 
@@ -196,7 +196,7 @@ int main( int argc, char* argv[] )
 
 	ros::Subscriber head_position_sub = nh->subscribe("/headPositionFeedbackTopic", 1, &headPositionCb);
 	ros::Subscriber head_speed_sub = nh->subscribe("/headSpeedFeedbackTopic", 1, &headSpeedCb);
-	kinect_motor_pub = new ros::Publisher(nh->advertise<head::PitchYaw>("/cmd_head_position", 1));
+	kinect_motor_pub = new ros::Publisher(nh->advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1));
 	ros::ServiceServer active_server = nh->advertiseService("/set_focus_face", &setActiveCB);
 
 	gCurrentOrientation.pitch = 0.f;

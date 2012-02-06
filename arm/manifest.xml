@@ -10,6 +10,7 @@
   <depend package="roscpp" />
   <depend package="motors" />
   <depend package="geometry_msgs" />
+  <depend package="nero_msgs" />
   <url>http://ros.org/wiki/arm</url>
 
 </package>

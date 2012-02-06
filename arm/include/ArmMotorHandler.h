@@ -39,7 +39,7 @@
 #include <motors/Motor.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
-#include "arm/armJointPos.h"
+#include "nero_msgs/ArmJoint.h"
 
 class ArmMotorHandler
 {
@@ -88,7 +88,7 @@ public:
 	/** Subscriber callbacks **/
 	void shoulderCB(const std_msgs::Float64& msg);
 	void sideJointCB(const std_msgs::Float64& msg);
-	void armPosCB(const arm::armJointPos& msg);
+	void armPosCB(const nero_msgs::ArmJoint& msg);
 	void stopCB(const std_msgs::Bool& msg);
 	void publishArmPosition();
 	void publishArmSpeed();

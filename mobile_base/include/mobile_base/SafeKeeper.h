@@ -9,11 +9,11 @@
 #define SAFEKEEPER_H_
 
 #include <ros/ros.h>
-#include <mobile_base/BaseMotorControl.h>
-#include <mobile_base/SensorFeedback.h>
-#include <mobile_base/position.h>
+#include <nero_msgs/SensorFeedback.h>
+#include <nero_msgs/MotorPosition.h>
 #include <std_msgs/UInt8.h>
-#include <head/Emotion.h>
+#include <nero_msgs/Emotion.h>
+#include <geometry_msgs/Twist.h>
 
 #define ERROR_STATE_BUMPER_COUNT 6
 #define ERROR_STATE_BUMPER_TIME 60.0
@@ -57,7 +57,7 @@ public:
 
 	void init();
 	void bumperFeedbackCB(const std_msgs::UInt8 &msg);
-	void ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg);
+	void ultrasoneFeedbackCB(const nero_msgs::SensorFeedback& msg);
 	void speedFeedbackCB(const geometry_msgs::Twist &msg);
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };

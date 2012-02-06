@@ -3,11 +3,11 @@
 
 #include <ros/ros.h>
 #include <std_msgs/UInt8.h>
-#include <head/PitchYaw.h>
+#include <nero_msgs/PitchYaw.h>
 #include <iostream>
-#include "head/Emotion.h"
-#include "head/RGB.h"
-#include "head/Eyebrows.h"
+#include "nero_msgs/Emotion.h"
+#include "nero_msgs/RGB.h"
+#include "nero_msgs/Eyebrows.h"
 #include <stdint.h>
 
 class AutonomeHeadController
@@ -24,13 +24,12 @@ protected:
 	ros::Subscriber mCommand_sub;
 	double mReturnNeutralTime;
 
-	head::Emotion mNeutral;
-	head::Emotion mHappy;
-	head::Emotion mSad;
-	head::Emotion mSurprised;
-	head::Emotion mSurprisedInitial;
-	head::Emotion mError;
-	head::Emotion mSleep;
+	nero_msgs::Emotion mNeutral;
+	nero_msgs::Emotion mHappy;
+	nero_msgs::Emotion mSad;
+	nero_msgs::Emotion mSurprised;
+	nero_msgs::Emotion mError;
+	nero_msgs::Emotion mSleep;
 
 public:
 	//Constructor
@@ -43,8 +42,8 @@ public:
 		mNodeHandle.shutdown();
 	};
 
-	void setExpression(head::Emotion emotion, int soundId = -1);
-	void headCommandCB(const head::PitchYaw &msg);
+	void setExpression(nero_msgs::Emotion emotion, int soundId = -1);
+	void headCommandCB(const nero_msgs::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
 	void init();
 	void update();

@@ -1,6 +1,6 @@
 #include <mobile_base/MotorHandler.h>
 
-using namespace mobile_base;
+using namespace nero_msgs;
 
 /**
  * Publishes the linear and angular speed of the robot
@@ -39,7 +39,7 @@ void MotorHandler::disableUltrasoneSensors()
 /**
  * Controls the motors based on the received position.
  */
-void MotorHandler::positionCB(const mobile_base::position& msg)
+void MotorHandler::positionCB(const nero_msgs::MotorPosition& msg)
 {
 	mRightMotor.setSpeed(0.0);
 	mLeftMotor.setSpeed(0.0);
@@ -103,49 +103,9 @@ void MotorHandler::moveCB(const geometry_msgs::Twist& msg)
 }
 
 /**
- * Called when a Twist message is received over the motor topic.
- */
-void MotorHandler::tweakCB(const mobile_base::tweak& msg)
-{
-	Motor *motor = mMotorId == MID_LEFT ? &mLeftMotor : &mRightMotor;
-
-	// scale the current P-I-D value
-	if (msg.scaleUp || msg.scaleDown)
-	{
-		motor->mPID[mPIDFocus] += msg.scaleDown ? -PID_TWEAK_STEP : PID_TWEAK_STEP;
-		motor->mPID[mPIDFocus] = std::max(0.0, motor->mPID[mPIDFocus]);
-		motor->updatePID();
-		motor->printPID();
-	}
-
-	// toggle the P-I-D focus
-	if (msg.toggleForward || msg.toggleBackward)
-	{
-		// toggle through P-I-D
-		mPIDFocus = PIDParameter(mPIDFocus + (msg.toggleBackward ? -1 : 1));
-		mPIDFocus = PIDParameter(mPIDFocus == -1 ? PID_PARAM_MAX - 1 : mPIDFocus % PID_PARAM_MAX);
-
-		switch (mPIDFocus)
-		{
-		case PID_PARAM_P: ROS_INFO("P"); break;
-		case PID_PARAM_I: ROS_INFO("I"); break;
-		case PID_PARAM_D: ROS_INFO("D"); break;
-		default: break;
-		}
-	}
-
-	// change selected motor?
-	if (msg.motorID)
-	{
-		mMotorId = MotorId(msg.motorID);
-		ROS_INFO("SWITCHED TO %s MOTOR", mMotorId == MID_LEFT ? "LEFT" : "RIGHT");
-	}
-}
-
-/**
  *	Reads distances from ultrasone sensors
  */
-void MotorHandler::ultrasoneCB(const mobile_base::SensorFeedback& msg)
+void MotorHandler::ultrasoneCB(const nero_msgs::SensorFeedback& msg)
 {
 	mSensorData = msg.data;
 	//ROS_INFO("left %d, frontLeft %d, frontCenterLeft %d, frontLeftCenter %d, frontRightCenter %d, frontCenterRight %d, right %d", mLeft, mFrontLeft, mFrontCenterLeft, mFrontLeftCenter, mFrontRightCenter, mFrontCenterRight, mRight);
@@ -177,7 +137,6 @@ void MotorHandler::init(char *path)
 	mSpeedPub 				= mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
 
 	//Initialise subscribers
-	mTweakPIDSub 			= mNodeHandle.subscribe("/tweakTopic", 10, &MotorHandler::tweakCB, this);
 	mTwistSub 				= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
 	mPositionSub 			= mNodeHandle.subscribe("/positionTopic", 10, &MotorHandler::positionCB, this);
 	mUltrasoneSub   		= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &MotorHandler::ultrasoneCB, this);

@@ -14,7 +14,7 @@
 #include <std_msgs/Float32.h>
 #include <mobile_base/MotorHandler.h>
 #include <mobile_base/PathHandler.h>
-#include <mobile_base/position.h>
+#include <nero_msgs/MotorPosition.h>
 
 /// Controller for teleoperation
 class AutonomeMobileController

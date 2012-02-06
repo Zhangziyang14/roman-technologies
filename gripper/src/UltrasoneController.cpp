@@ -41,8 +41,8 @@ void UltrasoneController::readSensorDataCB(const std_msgs::UInt16& msg)
 	ROS_INFO("I heard: [%d]", msg.data);
 
 	// default message, open the gripper
-	gripper::MotorControl mc;
-	mc.modeStr = "torque";
+	nero_msgs::GripperControl mc;
+	mc.mode = CM_TORQUE_MODE;
 	mc.value = AUTOMATIC_GRIPPER_TORQUE;
 	mc.waitTime = GRIPPER_WAIT_TIME;
 

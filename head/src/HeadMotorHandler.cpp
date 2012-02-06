@@ -37,7 +37,7 @@ void HeadMotorHandler::publishHeadSpeed()
 /**
  * Controls the motors based on the received position.
  */
-void HeadMotorHandler::positionCB(const head::PitchYaw &msg)
+void HeadMotorHandler::positionCB(const nero_msgs::PitchYaw &msg)
 {
 	ROS_INFO("Position CB");
 	double pitch	= msg.pitch;
@@ -71,8 +71,8 @@ void HeadMotorHandler::positionCB(const head::PitchYaw &msg)
 void HeadMotorHandler::init(char *path)
 {
 	//Initialise publishers
-	mPositionPub	= mNodeHandle.advertise<head::PitchYaw>("/headPositionFeedbackTopic", 1);
-	mSpeedPub		= mNodeHandle.advertise<head::PitchYaw>("/headSpeedFeedbackTopic", 1);
+	mPositionPub	= mNodeHandle.advertise<nero_msgs::PitchYaw>("/headPositionFeedbackTopic", 1);
+	mSpeedPub		= mNodeHandle.advertise<nero_msgs::PitchYaw>("/headSpeedFeedbackTopic", 1);
 
 	//Initialise subscribers
 	mPositionSub	= mNodeHandle.subscribe("/headPositionTopic", 10, &HeadMotorHandler::positionCB, this);

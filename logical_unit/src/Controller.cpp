@@ -162,7 +162,7 @@ void Controller::moveBase(geometry_msgs::Pose &goal)
 void Controller::moveHead(double x, double z)
 {
 	ROS_INFO("Moving head to pitch: %lf, yaw: %lf", x, z);
-	head::PitchYaw head_msg;
+	nero_msgs::PitchYaw head_msg;
 	head_msg.pitch = x;
 	head_msg.yaw = z;
 
@@ -174,7 +174,7 @@ void Controller::moveHead(double x, double z)
  */
 bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y)
 {
-	image_processing::FindObject find_call;
+	nero_msgs::FindObject find_call;
 	find_call.request.objectId = object_id;
 
 	double timer = ros::Time::now().toSec();
@@ -204,7 +204,7 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 
 void Controller::setFocusFace(bool active)
 {
-	image_processing::SetActive active_call;
+	nero_msgs::SetActive active_call;
 	active_call.request.active = active;
 	mSetFaceFocusClient.call(active_call);
 
@@ -214,7 +214,7 @@ void Controller::setFocusFace(bool active)
 /**
  *	Listens to the speed of the head and releases lock if necessary
  */
-void Controller::headSpeedCB(const head::PitchYaw &msg)
+void Controller::headSpeedCB(const nero_msgs::PitchYaw &msg)
 {
 	if (mLock == LOCK_HEAD && fabs(msg.pitch) < HEAD_FREE_THRESHOLD && fabs(msg.yaw) < HEAD_FREE_THRESHOLD)
 	{
@@ -238,7 +238,7 @@ void Controller::baseSpeedCB(const geometry_msgs::Twist &msg)
 /**
  *	Listens to the speed of the base and releases lock if necessary
  */
-void Controller::armSpeedCB(const arm::armJointPos &msg)
+void Controller::armSpeedCB(const nero_msgs::ArmJoint &msg)
 {
 	if (mLock == LOCK_ARM && fabs(msg.upper_joint) < ARM_FREE_THRESHOLD && fabs(msg.wrist_joint) < ARM_FREE_THRESHOLD)
 	{
@@ -295,7 +295,7 @@ uint8_t Controller::wakeUp()
 {
 	mWakeUp = true;
 	moveHead(HEAD_INIT_X, HEAD_INIT_Z);
-	return head::Emotion::NEUTRAL;
+	return nero_msgs::Emotion::NEUTRAL;
 }
 
 /**
@@ -305,7 +305,7 @@ uint8_t Controller::sleep()
 {
 	mWakeUp = false;
 	moveHead(HEAD_SLEEP_X, HEAD_SLEEP_Z);
-	return head::Emotion::SLEEP;
+	return nero_msgs::Emotion::SLEEP;
 }
 
 /**
@@ -329,7 +329,7 @@ uint8_t Controller::stop()
 	raise(SIGUSR1);
 	signal(SIGUSR1, stopHandler);
 	mBusy = false;
-	return head::Emotion::SURPRISED;
+	return nero_msgs::Emotion::SURPRISED;
 }
 /**
  * Wait after being surprised, before becoming surprised again..
@@ -361,16 +361,11 @@ uint8_t Controller::respond()
 
 	mBusy = false;
 	respondedSurprised = true;
-	return head::Emotion::SURPRISED;
+	return nero_msgs::Emotion::SURPRISED;
 }
 
-/*
- * Method for getting juice
- */
-uint8_t Controller::get(int object)
+bool Controller::grab(int object)
 {
-	mBusy = true;
-
 	float min_y = 0.f;
 
 	mLock = LOCK_ARM;
@@ -434,13 +429,15 @@ uint8_t Controller::get(int object)
 						ROS_ERROR("Failed to find object, quitting script.");
 						if (mPathingEnabled)
 							returnToOriginalPosition();
-						return head::Emotion::SAD;
+						return nero_msgs::Emotion::SAD;
 					}
 				}
 				break;
 			}
 		}
 
+		// found an object, now rotate base to face the object directly and
+		// create enough space between the robot and the table for the arm to move up
 		double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
 		while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
 		{
@@ -466,7 +463,7 @@ uint8_t Controller::get(int object)
 				ROS_ERROR("Failed to find object, quitting script.");
 				if (mPathingEnabled)
 					returnToOriginalPosition();
-				return head::Emotion::SAD;
+				return nero_msgs::Emotion::SAD;
 			}
 
 			yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
@@ -496,7 +493,7 @@ uint8_t Controller::get(int object)
 			// open gripper again
 			setGripper(true);
 
-			expressEmotion(head::Emotion::SAD);
+			expressEmotion(nero_msgs::Emotion::SAD);
 			positionBaseSpeed(drive_time, -GRAB_TARGET_SPEED);
 
 			//Move object to body
@@ -504,7 +501,7 @@ uint8_t Controller::get(int object)
 			moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
 			waitForLock();
 
-			expressEmotion(head::Emotion::NEUTRAL);
+			expressEmotion(nero_msgs::Emotion::NEUTRAL);
 		}
 		else
 			break;
@@ -516,7 +513,7 @@ uint8_t Controller::get(int object)
 		ROS_ERROR("No more grab attempts left.");
 		if (mPathingEnabled)
 			returnToOriginalPosition();
-		return head::Emotion::SAD;
+		return nero_msgs::Emotion::SAD;
 	}
 
 	// little hack to allow the gripper to close
@@ -547,7 +544,7 @@ uint8_t Controller::get(int object)
 
 	mBusy = false;
 
-	return head::Emotion::HAPPY;
+	return nero_msgs::Emotion::HAPPY;
 }
 
 /**
@@ -587,26 +584,26 @@ uint8_t Controller::release()
 	if(mArousal > NEUTRAL_AROUSAL)
 	{
 		mBusy = false;
-		return head::Emotion::HAPPY;
+		return nero_msgs::Emotion::HAPPY;
 	}
 	else if(mArousal < NEUTRAL_AROUSAL)
 	{
 		mBusy = false;
-		return head::Emotion::SAD;
+		return nero_msgs::Emotion::SAD;
 	}
 	else
 	{
 		setFocusFace(false);
 		positionBase(DISTANCE_TO_PERSON);
 		mBusy = false;
-		return head::Emotion::NEUTRAL;
+		return nero_msgs::Emotion::NEUTRAL;
 	}
 }
 
 /**
  * Listens to user commands and executes them
  */
-void Controller::speechCB(const audio_processing::speech& msg)
+void Controller::speechCB(const nero_msgs::SpeechCommand& msg)
 {
 	mSpeech		 = msg.command;
 	mArousal 	 = msg.arousal;
@@ -711,6 +708,7 @@ void Controller::speechCB(const audio_processing::speech& msg)
 
 		case NOTHING:
 			ROS_INFO("No commands");
+			break;
 		default:
 			break;
 		}
@@ -737,9 +735,9 @@ void Controller::baseGoalCB(const std_msgs::Float32& msg)
 	mDistanceToGoal = msg.data;
 }
 
-bool Controller::setPathingCB(logical_unit::SetPathing::Request &req, logical_unit::SetPathing::Response &res)
+bool Controller::setPathingCB(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
-	mPathingEnabled = req.enable;
+	mPathingEnabled = req.active;
 	return true;
 }
 
@@ -782,7 +780,7 @@ void Controller::init(const char *goalPath)
 	//initialise publishers
 	mBaseGoalPublisher 			= mNodeHandle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
 	mArmPositionPublisher 		= mNodeHandle.advertise<geometry_msgs::Pose>("/cmd_arm_position", 1);
-	mHeadPositionPublisher		= mNodeHandle.advertise<head::PitchYaw>("/cmd_head_position", 1);
+	mHeadPositionPublisher		= mNodeHandle.advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1);
 	mRotateBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_turn", 1);
 	mPositionBasePublisher		= mNodeHandle.advertise<std_msgs::Float32>("/cmd_mobile_position", 1);
 	mGripperCommandPublisher	= mNodeHandle.advertise<std_msgs::Bool>("/cmd_gripper", 1);
@@ -794,10 +792,10 @@ void Controller::init(const char *goalPath)
 	mSetPathingServer			= mNodeHandle.advertiseService("/set_pathing", &Controller::setPathingCB, this);
 
 	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
-		mFindObjectClient		= mNodeHandle.serviceClient<image_processing::FindObject>("/cmd_object_recognition", true);
+		mFindObjectClient		= mNodeHandle.serviceClient<nero_msgs::FindObject>("/cmd_object_recognition", true);
 
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
-		mSetFaceFocusClient		= mNodeHandle.serviceClient<image_processing::SetActive>("/set_focus_face", true);
+		mSetFaceFocusClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
 
 	//Store goal position
 

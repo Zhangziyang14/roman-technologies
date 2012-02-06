@@ -7,7 +7,7 @@
 
 #include "mobile_base/SafeKeeper.h"
 
-using namespace mobile_base;
+using namespace nero_msgs;
 
 /**
  * Checks whether robot collided with something and determines if forward or backward motion should be disabled
@@ -15,7 +15,7 @@ using namespace mobile_base;
  */
 void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 {
-	mobile_base::position position_msg;
+	nero_msgs::MotorPosition position_msg;
 	// did the robot collide with something in the front?
 	mDisableForward = msg.data == BUMPER_FRONT;
 
@@ -58,7 +58,7 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 		if (mBumperCount >= ERROR_STATE_BUMPER_COUNT)
 		{
 			std_msgs::UInt8 msg;
-			msg.data = head::Emotion::ERROR;
+			msg.data = nero_msgs::Emotion::ERROR;
 			mEmotion_pub.publish(msg);
 			mBumperCount = 0;
 			mBumperStartTime = ros::Time::now().toSec();
@@ -70,12 +70,12 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
  * Listens to ultrasone sensor data and stops the base when something suddenly gets in the way of the base.
  * Also moves the base a bit back from where it came.
  */
-void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
+void SafeKeeper::ultrasoneFeedbackCB(const nero_msgs::SensorFeedback& msg)
 {
 	if(msg.data[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] < 0 &&
 			msg.data[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] - mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] < 0 && mCurrentSpeed.linear.x > 0)
 	{
-		mobile_base::position position_msg;
+		nero_msgs::MotorPosition position_msg;
 		position_msg.left   = 0;
 		position_msg.right  = 0;
 		mMovement_pub.publish(position_msg);
@@ -83,7 +83,7 @@ void SafeKeeper::ultrasoneFeedbackCB(const mobile_base::SensorFeedback& msg)
 	else if((msg.data[SensorFeedback::SENSOR_REAR_LEFT] - mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < 0 ||
 			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0) && mCurrentSpeed.linear.x < 0)
 	{
-		mobile_base::position position_msg;
+		nero_msgs::MotorPosition position_msg;
 		position_msg.left   = 0;
 		position_msg.right  = 0;
 		mMovement_pub.publish(position_msg);
@@ -111,7 +111,7 @@ void SafeKeeper::init()
 	mSpeed_sub			= mNodeHandle.subscribe("/speedFeedbackTopic", 10, &SafeKeeper::speedFeedbackCB, this);
 
 	// initialise publishers
-	mMovement_pub 		= mNodeHandle.advertise<mobile_base::position>("/positionTopic", 1);
+	mMovement_pub 		= mNodeHandle.advertise<nero_msgs::MotorPosition>("/positionTopic", 1);
 	mEmotion_pub		= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_emotion", 1);
 
 	mDisableForward	 	= false;

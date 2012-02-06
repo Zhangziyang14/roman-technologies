@@ -21,9 +21,7 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-rosbuild_add_executable(PS3Controller src/PS3Controller.cpp src/Controller.cpp)
 rosbuild_add_executable(UltrasoneController src/UltrasoneController.cpp src/Controller.cpp)
-rosbuild_add_executable(TemperatureListener src/TemperatureListener.cpp)
 rosbuild_add_executable(MotorHandler src/MotorHandler)
 
 #common commands for building c++ executables and libraries

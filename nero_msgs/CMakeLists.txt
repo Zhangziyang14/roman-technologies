@@ -21,10 +21,6 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
 
-rosbuild_add_executable(AutonomeMobileController src/AutonomeMobileController.cpp src/PathHandler.cpp src/LocalPlanner.cpp)
-rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp)
-rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
-
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)

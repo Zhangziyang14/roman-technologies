@@ -9,7 +9,7 @@
 #define HEADMOTORHANDLER_H_
 
 #include <ros/ros.h>
-#include <head/PitchYaw.h>
+#include <nero_msgs/PitchYaw.h>
 #include <motors/DynamixelMotor.h>
 #include <tf/transform_broadcaster.h>
 
@@ -32,8 +32,8 @@ protected:
 
 	ros::Publisher mSpeedPub;				/// Publishes current speed of the head
 	ros::Publisher mPositionPub;			/// Publishes current head position
-	head::PitchYaw mCurrentPose;			/// Keeps track of the current pose of the head
-	head::PitchYaw mCurrentSpeed;			/// Keeps track of the current speed of the head
+	nero_msgs::PitchYaw mCurrentPose;		/// Keeps track of the current pose of the head
+	nero_msgs::PitchYaw mCurrentSpeed;		/// Keeps track of the current speed of the head
 
 	DynamixelMotor mPitch;					/// Dynamixel motor for tilting the head
 	DynamixelMotor mYaw;					/// Dynamixel motor for panning the head
@@ -57,7 +57,7 @@ public:
 	/// Initialise node
 	void init(char *path);
 
-	void positionCB(const head::PitchYaw &msg);
+	void positionCB(const nero_msgs::PitchYaw &msg);
 	void publishHeadPosition();
 	void publishHeadSpeed();
 

@@ -38,20 +38,11 @@ enum ControlMode
 	CM_TORQUE_MODE,						// uses one motor and encoder with torque controller
 	CM_SEA_MODE,						// uses one motor and two encoders with SEA controller
 	CM_PWM_MODE,						// uses one motor and encoder with PWM controller, no PID, just PWM !!
-
-	CM_EXT_INIT_MODE = EXTERNAL_INIT,	// reset counter on external io pulse, turn motor with given torque in M3XL_DESIRED_TORQUE_L
+	CM_INDEX_INIT,
+	CM_EXT_INIT_MODE,					// reset counter on external io pulse, turn motor with given torque in M3XL_DESIRED_TORQUE_L
 
     CM_STOP_MODE = 12,					// do nothing, no actuated motors
     CM_TEST_MODE,       				// for general testing
-};
-
-enum PIDParameter
-{
-	PID_PARAM_NONE = -1,
-	PID_PARAM_P,
-	PID_PARAM_I,
-	PID_PARAM_D,
-	PID_PARAM_MAX,
 };
 
 enum MotorId
@@ -65,17 +56,15 @@ enum MotorId
 };
 
 /// Class that contains PID values and some perhaps limited functions
-class PID
+union PID
 {
-public:
-	PID() : p(0.0), i(0.0), d(0.0) {}
-	PID(double proportional, double integral, double derivative) : p(proportional), i(integral), d(derivative) {}
-
-	double &operator[](PIDParameter p);
-
-	double p;
-	double i;
-	double d;
+	struct
+	{
+		float p;
+		float i;
+		float d;
+	};
+	float pid[3];
 };
 
 /// Listens to motor commands and handles them accordingly.

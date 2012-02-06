@@ -15,6 +15,7 @@
   <depend package="arm"/>
   <depend package="image_processing"/>
   <depend package="joy"/>
+  <depend package="nero_msgs"/>
 
   <export>
         <rosdoc config="rosdoc.yaml" />

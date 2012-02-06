@@ -6,7 +6,7 @@
  */
 #include <mobile_base/LocalPlanner.h>
 
-using namespace mobile_base;
+using namespace nero_msgs;
 
 LocalPlanner::LocalPlanner(ros::NodeHandle *nodeHandle)
 {
@@ -34,7 +34,7 @@ void LocalPlanner::speedCB(const geometry_msgs::Twist &msg)
 /**s
  *	Reads distances from ultrasone sensors
  */
-void LocalPlanner::ultrasoneCB(const mobile_base::SensorFeedback& msg)
+void LocalPlanner::ultrasoneCB(const nero_msgs::SensorFeedback& msg)
 {
 	mSensorData = msg.data;
 

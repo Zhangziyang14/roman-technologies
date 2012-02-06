@@ -5,7 +5,8 @@
 #include <numeric>
 #include <sstream>
 #include <CDxlGeneric.h>
-#include <gripper/MotorControl.h>
+#include <nero_msgs/GripperControl.h>
+#include <motors/Motor.h>
 
 #include "sensor_msgs/JointState.h"
 #include "sensor_msgs/Joy.h"
@@ -59,9 +60,9 @@ public:
 
     inline void setGripper(bool open, bool close_timed = false)
     {
-    	gripper::MotorControl mc_msg;
+    	nero_msgs::GripperControl mc_msg;
     	mc_msg.value = open ? AUTOMATIC_GRIPPER_TORQUE : -AUTOMATIC_GRIPPER_TORQUE;
-    	mc_msg.modeStr = "torque";
+    	mc_msg.mode = CM_TORQUE_MODE;
     	mc_msg.waitTime = open || close_timed ? 1000 : 0;
 
     	mGripperState = open ? GS_OPEN : GS_CLOSED;
@@ -82,7 +83,7 @@ public:
     virtual void init();
 
     /// Publish MotorControl message
-    void publish(gripper::MotorControl mc);
+    void publish(nero_msgs::GripperControl mc);
 
     /// Opens the gripper
     void commandCB(const std_msgs::Bool& msg);

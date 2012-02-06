@@ -17,7 +17,7 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	// Arousal > 1 is the happy state
 	// Arousal < 1 is the sad state
 
-	audio_processing::speech processed_msg;
+	nero_msgs::SpeechCommand processed_msg;
 	int arousal = 1;
 
 	//Listen to calls or commands from user, can be replaced by more efficient and more extensive checks
@@ -101,7 +101,7 @@ void SpeechRecognition::init()
 	mSpeechSubscriber = mNodeHandle.subscribe("/recognizer/output", 1, &SpeechRecognition::speechCB, this);
 
 	//Initialise publishers
-	mProcessedSpeechPublisher = mNodeHandle.advertise<audio_processing::speech>("/processedSpeechTopic", 1);
+	mProcessedSpeechPublisher = mNodeHandle.advertise<nero_msgs::SpeechCommand>("/processedSpeechTopic", 1);
 
 	ROS_INFO("Initialised SpeechRecognition");
 }

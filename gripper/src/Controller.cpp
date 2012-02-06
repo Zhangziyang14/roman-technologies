@@ -53,7 +53,7 @@ void Controller::UpdateJoints()
 void Controller::init()
 {
     // intialise publishers
-    mMotor_pub   = mNodeHandle.advertise<gripper::MotorControl>("/gripperMotorTopic", 10);
+    mMotor_pub   = mNodeHandle.advertise<nero_msgs::GripperControl>("/gripperMotorTopic", 10);
     mJoint_pub   = mNodeHandle.advertise<sensor_msgs::JointState>("/joint_states", 10);
     mGripper_pub = mNodeHandle.advertise<std_msgs::UInt8>("/gripper_state", 1);
 
@@ -71,9 +71,9 @@ void Controller::commandCB(const std_msgs::Bool& msg)
 /**
   * Publish the given MotorControl message if possible and change visualization in rviz
  */
-void Controller::publish(gripper::MotorControl mc)
+void Controller::publish(nero_msgs::GripperControl mc)
 {
-    if (mc.modeStr.empty() == false)
+    if (mc.mode == CM_NONE)
     {
         if (mGripperState != GS_OPEN && mc.value > 0.f)
         {
@@ -87,11 +87,6 @@ void Controller::publish(gripper::MotorControl mc)
             mGripperState = GS_CLOSED;
             UpdateJoints();
         }
-
-        // print the message for debugging
-        std::stringstream ss("");
-        ss << mc.modeStr << " " << mc.value << " " << mc.waitTime;
-        ROS_INFO("message: %s", ss.str().c_str());
 
         // publish the message to the motor handler
         mMotor_pub.publish(mc);

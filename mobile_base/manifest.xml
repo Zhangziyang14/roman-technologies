@@ -11,7 +11,7 @@
   <depend package="std_msgs"/>
   <depend package="tf"/>
   <depend package="nav_msgs"/>
-  <depend package="head"/>
+  <depend package="nero_msgs"/>
 
 </package>
 

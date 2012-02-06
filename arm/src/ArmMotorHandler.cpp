@@ -1,93 +1,5 @@
 #include <ArmMotorHandler.h>
 
-int main(int argc, char **argv)
-{
-	ros::init(argc, argv, "ArmMotorHandler");
-
-	char *path=NULL;
-	if (argc == 2)
-		path = argv[1];
-
-	ArmMotorHandler armHandler(path);
-
-	int sleep_rate;
-	armHandler.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
-	ros::Rate sleep(sleep_rate);
-
-	while(ros::ok())
-	{
-		armHandler.publishArmPosition();
-		armHandler.publishArmSpeed();
-		ros::spinOnce();
-		sleep.sleep();
-	}
-
-	return 0;
-}
-
-/**
- * Stops all motors and locks them until unlock command is received
- */
-void ArmMotorHandler::stopCB(const std_msgs::Bool &msg)
-{
-	if(msg.data)
-	{
-		mShoulderMotor.setMode(CM_STOP_MODE);
-		mSideMotor.setMode(CM_STOP_MODE);
-	}
-
-	mShoulderMotor.lock(msg.data);
-	mSideMotor.lock(msg.data);
-}
-
-/**
- * Publishes the current positions of both motors
- */
-void ArmMotorHandler::publishArmPosition()
-{
-	mCurrentShoulderJointPos = getShoulderAngle();
-	mCurrentSideJointPos 	 = getSideJointAngle();
-
-	arm::armJointPos joint_msg;
-
-	joint_msg.upper_joint 	= mCurrentShoulderJointPos;
-	joint_msg.wrist_joint 	= mCurrentSideJointPos;
-
-	mArmPosFeedbackPub.publish(joint_msg);
-}
-
-/**
- * Publishes the current speeds of both motors
- */
-void ArmMotorHandler::publishArmSpeed()
-{
-	mCurrentShoulderJointSpeed 	 = getShoulderSpeed();
-	mCurrentSideJointSpeed	 	 = getSideJointSpeed();
-
-	arm::armJointPos speed_msg;
-
-	speed_msg.upper_joint 	= mCurrentShoulderJointSpeed;
-	speed_msg.wrist_joint 	= mCurrentSideJointSpeed;
-
-	mArmSpeedFeedbackPub.publish(speed_msg);
-}
-
-/** threemxl run callback
- *
- * Keeps the threemxl awake so it does not interrupt setPos() commands
- * Not needed anymore since publishRobotSpeed always talks to threemxl, so watchdog won't kick in anymore
-
-void ArmMotorHandler::Run()
-{
-	while(ros::ok())
-	{
-		mShoulderMotor.update();
-		mSideMotor.update();
-		usleep(500000);
-	}
-}
- */
-
 /** Constructor
  *
  * @param	char*	path	path that will be passed to Motor::init()
@@ -108,8 +20,8 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		ROS_INFO("ArmMotorHandler successfully initialised");
 
 		//Initialise publishers
-		mArmPosFeedbackPub		= mNodeHandle.advertise<arm::armJointPos>("/armJointPositionFeedbackTopic", 1);
-		mArmSpeedFeedbackPub	= mNodeHandle.advertise<arm::armJointPos>("/armJointSpeedFeedbackTopic", 1);
+		mArmPosFeedbackPub		= mNodeHandle.advertise<nero_msgs::ArmJoint>("/armJointPositionFeedbackTopic", 1);
+		mArmSpeedFeedbackPub	= mNodeHandle.advertise<nero_msgs::ArmJoint>("/armJointSpeedFeedbackTopic", 1);
 
 		// Initialise subscribers
 		mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
@@ -161,6 +73,53 @@ bool ArmMotorHandler::init()
 	if(mShoulderMotor.getStatus() != M3XL_STATUS_INIT_DONE)
 		ROS_ERROR("Error: %s", C3mxl::translateErrorCode(mShoulderMotor.getStatus()));
 	return (mShoulderMotor.getStatus() == M3XL_STATUS_INIT_DONE);
+}
+
+/**
+ * Stops all motors and locks them until unlock command is received
+ */
+void ArmMotorHandler::stopCB(const std_msgs::Bool &msg)
+{
+	if(msg.data)
+	{
+		mShoulderMotor.setMode(CM_STOP_MODE);
+		mSideMotor.setMode(CM_STOP_MODE);
+	}
+
+	mShoulderMotor.lock(msg.data);
+	mSideMotor.lock(msg.data);
+}
+
+/**
+ * Publishes the current positions of both motors
+ */
+void ArmMotorHandler::publishArmPosition()
+{
+	mCurrentShoulderJointPos = getShoulderAngle();
+	mCurrentSideJointPos 	 = getSideJointAngle();
+
+	nero_msgs::ArmJoint joint_msg;
+
+	joint_msg.upper_joint 	= mCurrentShoulderJointPos;
+	joint_msg.wrist_joint 	= mCurrentSideJointPos;
+
+	mArmPosFeedbackPub.publish(joint_msg);
+}
+
+/**
+ * Publishes the current speeds of both motors
+ */
+void ArmMotorHandler::publishArmSpeed()
+{
+	mCurrentShoulderJointSpeed 	 = getShoulderSpeed();
+	mCurrentSideJointSpeed	 	 = getSideJointSpeed();
+
+	nero_msgs::ArmJoint speed_msg;
+
+	speed_msg.upper_joint 	= mCurrentShoulderJointSpeed;
+	speed_msg.wrist_joint 	= mCurrentSideJointSpeed;
+
+	mArmSpeedFeedbackPub.publish(speed_msg);
 }
 
 void ArmMotorHandler::setShoulderAngle(double angle)
@@ -246,8 +205,33 @@ void ArmMotorHandler::sideJointCB(const std_msgs::Float64& msg)
  * 												the shoulder and the sideJoint
  * @return	void
  */
-void ArmMotorHandler::armPosCB(const arm::armJointPos& msg)
+void ArmMotorHandler::armPosCB(const nero_msgs::ArmJoint& msg)
 {
 	setShoulderAngle(msg.upper_joint);
 	setSideJointAngle(msg.wrist_joint);
+}
+
+int main(int argc, char **argv)
+{
+	ros::init(argc, argv, "ArmMotorHandler");
+
+	char *path=NULL;
+	if (argc == 2)
+		path = argv[1];
+
+	ArmMotorHandler armHandler(path);
+
+	int sleep_rate;
+	armHandler.getNodeHandle()->param<int>("node_sleep_rate", sleep_rate, 50);
+	ros::Rate sleep(sleep_rate);
+
+	while(ros::ok())
+	{
+		armHandler.publishArmPosition();
+		armHandler.publishArmSpeed();
+		ros::spinOnce();
+		sleep.sleep();
+	}
+
+	return 0;
 }

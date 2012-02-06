@@ -25,7 +25,7 @@ void AutonomeMobileController::spin()
 void AutonomeMobileController::init()
 {
 	//Initialise Publishers
-	mPositionPub = mNodeHandle.advertise<mobile_base::position>("/positionTopic", 1);
+	mPositionPub = mNodeHandle.advertise<nero_msgs::MotorPosition>("/positionTopic", 1);
 
 	//Initialise Subscribers
 	mPositionSub = mNodeHandle.subscribe("/cmd_mobile_position", 1, &AutonomeMobileController::positionCB, this);
@@ -39,7 +39,7 @@ void AutonomeMobileController::init()
  */
 void AutonomeMobileController::positionCB(const std_msgs::Float32& msg)
 {
-	mobile_base::position pos_msg;
+	nero_msgs::MotorPosition pos_msg;
 
 	pos_msg.left = msg.data;
 	pos_msg.right = msg.data;
@@ -52,7 +52,7 @@ void AutonomeMobileController::positionCB(const std_msgs::Float32& msg)
  */
 void AutonomeMobileController::turnCB(const std_msgs::Float32& msg)
 {
-	mobile_base::position pos_msg;
+	nero_msgs::MotorPosition pos_msg;
 
 	// turning with the clock = negative
 	pos_msg.left = -1 * msg.data * BASE_RADIUS;

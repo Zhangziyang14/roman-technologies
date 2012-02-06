@@ -1,2 +1,0 @@
-bool disableForward
-bool disableBackward

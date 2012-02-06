@@ -1,21 +1,5 @@
 #include <motors/Motor.h>
 
-/**
- * Square bracket operator so it can be used as a sort of array.
- */
-double &PID::operator[](PIDParameter p)
-{
-	switch (p)
-	{
-	case PID_PARAM_P: return this->p;
-	case PID_PARAM_I: return this->i;
-	case PID_PARAM_D: return this->d;
-	default: break;
-	}
-
-	assert(false); // something went terribad
-}
-
 void Motor::lock(bool lock)
 {
 	mLock = lock;
@@ -34,16 +18,16 @@ void Motor::setMode(ControlMode mode)
 	std::cout << "Changed to ";
     switch (mode)
     {
-    case SPEED_MODE: std::cout << "speed"; break;
-    case TORQUE_MODE: std::cout << "torque"; break;
-    case EXTERNAL_INIT: std::cout << "external init"; break;
-    case CURRENT_MODE: std::cout << "current"; break;
-    case STOP_MODE: std::cout << "stop"; break;
-    case POSITION_MODE: std::cout << "position"; break;
-    case SEA_MODE: std::cout << "sea"; break;
-    case PWM_MODE: std::cout << "pwm"; break;
-    case TEST_MODE: std::cout << "test"; break;
-    default : break;
+    case CM_SPEED_MODE: std::cout << "speed"; break;
+    case CM_TORQUE_MODE: std::cout << "torque"; break;
+    case CM_EXT_INIT_MODE: std::cout << "external init"; break;
+    case CM_CURRENT_MODE: std::cout << "current"; break;
+    case CM_STOP_MODE: std::cout << "stop"; break;
+    case CM_POSITION_MODE: std::cout << "position"; break;
+    case CM_SEA_MODE: std::cout << "sea"; break;
+    case CM_PWM_MODE: std::cout << "pwm"; break;
+    case CM_TEST_MODE: std::cout << "test"; break;
+    default : std::cout << "unknown"; break;
     }
     std::cout << " mode." << std::endl;
 }

@@ -4,7 +4,7 @@
  */
 void AutonomeArmController::cmdCB(const geometry_msgs::Pose &msg)
 {
-	arm::IK srv;
+	nero_msgs::InverseKinematica srv;
 
 	//Listen to command
 	srv.request.target = msg;
@@ -40,7 +40,7 @@ void AutonomeArmController::cmdCB(const geometry_msgs::Pose &msg)
 	}
 	//Call trajectory planner service?
 
-	arm::armJointPos cmd_msg;
+	nero_msgs::ArmJoint cmd_msg;
 
 	//Send command to Motorhandler
 	cmd_msg.upper_joint = srv.response.configuration.upper_joint;
@@ -62,10 +62,10 @@ void AutonomeArmController::armPositionFeedbackCB(const geometry_msgs::Pose &msg
  */
 void AutonomeArmController::init()
 {
-	mJointCommandPublisher			= mNodeHandle.advertise<arm::armJointPos>("/armJointPositionTopic", 10);
+	mJointCommandPublisher			= mNodeHandle.advertise<nero_msgs::ArmJoint>("/armJointPositionTopic", 10);
 	//mCurrentPositionSubscriber 	= mNodeHandle.subscribe("/armCoordinatePositionFeedbackTopic", 1, &AutonomeArmController::armPositionFeedbackCB, this);
 	mCommandSubscriber 				= mNodeHandle.subscribe("/cmd_arm_position", 1, &AutonomeArmController::cmdCB, this);
-	mKinematicsClient 				= mNodeHandle.serviceClient<arm::IK>("IK");
+	mKinematicsClient 				= mNodeHandle.serviceClient<nero_msgs::InverseKinematica>("IK");
 	ROS_INFO("AutonomeArmController initialised");
 }
 

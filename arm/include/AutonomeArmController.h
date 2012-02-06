@@ -6,9 +6,9 @@
 #endif
 
 #include <ros/ros.h>
-#include "arm/armJointPos.h"
+#include "nero_msgs/ArmJoint.h"
 #include <geometry_msgs/Pose.h>
-#include "arm/IK.h"
+#include "nero_msgs/InverseKinematica.h"
 
 #define MIN_Z_VALUE (-0.321)
 #define MAX_Z_VALUE (0.1725)
@@ -20,7 +20,6 @@ class AutonomeArmController
 protected:
 	ros::NodeHandle mNodeHandle;				//ROS node handler
 	ros::Publisher mJointCommandPublisher;		//Publishes commands for ArmMotorHandler
-	//ros::Subscriber mCurrentPositionSubscriber;	//Listens to current positions in coordinates of configuration space
 	ros::Subscriber mCommandSubscriber;			//Listens to commands in coordinates
 	ros::ServiceClient mKinematicsClient;		//Client to call for service to calculate inverse kinematics
 

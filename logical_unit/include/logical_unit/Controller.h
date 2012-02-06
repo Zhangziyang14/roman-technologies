@@ -11,7 +11,7 @@
 #include <ros/ros.h>
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Float32.h>
-#include <audio_processing/speech.h>
+#include <nero_msgs/SpeechCommand.h>
 #include <std_msgs/Bool.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -20,12 +20,11 @@
 #include "yaml-cpp/yaml.h"
 #include "fstream"
 #include <map>
-#include "image_processing/FindObject.h"
-#include "head/PitchYaw.h"
-#include "arm/armJointPos.h"
-#include "head/Emotion.h"
-#include "image_processing/SetActive.h"
-#include "logical_unit/SetPathing.h"
+#include "nero_msgs/FindObject.h"
+#include "nero_msgs/PitchYaw.h"
+#include "nero_msgs/ArmJoint.h"
+#include "nero_msgs/Emotion.h"
+#include "nero_msgs/SetActive.h"
 #include <signal.h>
 
 #define MIN_ARM_Z_VALUE (-0.321)
@@ -69,9 +68,9 @@
 
 enum drinks
 {
-COLA_ID = 18904,
-FANTA_ID,
-JUICE_ID,
+	COLA_ID = 18904,
+	FANTA_ID,
+	JUICE_ID,
 };
 
 enum commandValue
@@ -180,6 +179,7 @@ public:
 	void setGripper(bool open);
 	void expressEmotion(uint8_t emotion);
 
+	bool grab(int object);
 	uint8_t get(int object);
 	uint8_t wakeUp();
 	uint8_t sleep();
@@ -189,13 +189,13 @@ public:
 
 	void navigationStateCB(const std_msgs::UInt8& msg);
 	void baseGoalCB(const std_msgs::Float32& msg);
-	void speechCB(const audio_processing::speech& msg);
-	void headSpeedCB(const head::PitchYaw &msg);
+	void speechCB(const nero_msgs::SpeechCommand& msg);
+	void headSpeedCB(const nero_msgs::PitchYaw &msg);
 	void baseSpeedCB(const geometry_msgs::Twist &msg);
-	void armSpeedCB(const arm::armJointPos &msg);
+	void armSpeedCB(const nero_msgs::ArmJoint &msg);
 	void objectPositionCB(const geometry_msgs::PoseStamped& msg);
 	void gripperStateCB(const std_msgs::UInt8 &msg);
-	bool setPathingCB(logical_unit::SetPathing::Request &req, logical_unit::SetPathing::Response &res);
+	bool setPathingCB(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 
 	void waitForLock();
 	void waitAfterRespond();

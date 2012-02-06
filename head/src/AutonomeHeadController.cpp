@@ -1,6 +1,6 @@
 #include "head/AutonomeHeadController.h"
 
-void constructEmotion(head::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint8_t min_b, uint8_t max_r, uint8_t max_g, uint8_t max_b, uint32_t breath_time, int left_eyebrow, int right_eyebrow, int lift, uint32_t left_time, uint32_t right_time, uint32_t lift_time, uint32_t neutral_time)
+void constructEmotion(nero_msgs::Emotion &emotion, uint8_t min_r, uint8_t min_g, uint8_t min_b, uint8_t max_r, uint8_t max_g, uint8_t max_b, uint32_t breath_time, int left_eyebrow, int right_eyebrow, int lift, uint32_t left_time, uint32_t right_time, uint32_t lift_time, uint32_t neutral_time)
 {
 	emotion.rgb.min_r = min_r;
 	emotion.rgb.min_g = min_g;
@@ -24,7 +24,6 @@ AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 	constructEmotion(mHappy,   255, 255, 150,   255, 150, 30,   800,   90, 90, 120,   0, 0, 0,   2500);
 	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0,   2500);
 	constructEmotion(mSurprised,   255, 255, 255,   150, 150, 150,   250,   90, 90, 140,   0, 0, 0,   2500);
-	constructEmotion(mSurprisedInitial, 255, 255, 255,   150, 150, 150,   250,   90, 90, 140,   0, 0, 0, 0);
 	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0,   2500);
 	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0,   0);
 
@@ -36,7 +35,7 @@ AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 /**
  * Sets the expression to the given emotion
  */
-void AutonomeHeadController::setExpression(head::Emotion emotion, int soundId)
+void AutonomeHeadController::setExpression(nero_msgs::Emotion emotion, int soundId)
 {
 	mRGB_pub.publish(emotion.rgb);
 	mEyebrows_pub.publish(emotion.eyebrows);
@@ -59,15 +58,16 @@ void AutonomeHeadController::expressEmotionCB(const std_msgs::UInt8 &msg)
 {
 	switch(msg.data)
 	{
-	case head::Emotion::NEUTRAL:	setExpression(mNeutral, msg.data); break;
-	case head::Emotion::HAPPY:		setExpression(mHappy, msg.data); break;
-	case head::Emotion::SAD: 		setExpression(mSad, msg.data); break;
-	case head::Emotion::SURPRISED:	setExpression(mSurprised, msg.data); break;//setExpression(mSurprisedInitial, msg.data); usleep(1000000); setExpression(mSurprised); break;
-	case head::Emotion::ERROR: 		setExpression(mError, msg.data); break;
-	case head::Emotion::SLEEP:		setExpression(mSleep, msg.data); break;
+	case nero_msgs::Emotion::NEUTRAL:	setExpression(mNeutral, msg.data); break;
+	case nero_msgs::Emotion::HAPPY:		setExpression(mHappy, msg.data); break;
+	case nero_msgs::Emotion::SAD: 		setExpression(mSad, msg.data); break;
+	case nero_msgs::Emotion::SURPRISED:	setExpression(mSurprised, msg.data); break;
+	case nero_msgs::Emotion::ERROR: 	setExpression(mError, msg.data); break;
+	case nero_msgs::Emotion::SLEEP:		setExpression(mSleep, msg.data); break;
 
 	default:
 		setExpression(mNeutral);
+		break;
 	}
 }
 
@@ -82,12 +82,12 @@ void AutonomeHeadController::init()
 	mCommand_sub = mNodeHandle.subscribe("/cmd_head_position",1, &AutonomeHeadController::headCommandCB, this);
 
 	// initialise publishers
-	mRGB_pub 			= mNodeHandle.advertise<head::RGB>("/rgbTopic", 1, true);
-	mEyebrows_pub 		= mNodeHandle.advertise<head::Eyebrows>("/eyebrowTopic", 1, true);
+	mRGB_pub 			= mNodeHandle.advertise<nero_msgs::RGB>("/rgbTopic", 1, true);
+	mEyebrows_pub 		= mNodeHandle.advertise<nero_msgs::Eyebrows>("/eyebrowTopic", 1, true);
 	mSounds_pub			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_sound", 1, true);
-	mHead_movement_pub 	= mNodeHandle.advertise<head::PitchYaw>("/headPositionTopic", 1, true);
+	mHead_movement_pub 	= mNodeHandle.advertise<nero_msgs::PitchYaw>("/headPositionTopic", 1, true);
 
-	head::PitchYaw msg;
+	nero_msgs::PitchYaw msg;
 	msg.pitch = 0.0;
 	msg.yaw = 0.0;
 	mHead_movement_pub.publish(msg);
@@ -99,7 +99,7 @@ void AutonomeHeadController::init()
 /**
  * Listens to head commands and streams them to HeadMotorHandler
  */
-void AutonomeHeadController::headCommandCB(const head::PitchYaw &msg)
+void AutonomeHeadController::headCommandCB(const nero_msgs::PitchYaw &msg)
 {
 	mHead_movement_pub.publish(msg);
 }
@@ -109,7 +109,7 @@ void AutonomeHeadController::update()
 	if (mReturnNeutralTime && ros::Time::now().toSec() > mReturnNeutralTime)
 	{
 		std_msgs::UInt8 msg;
-		msg.data = head::Emotion::NEUTRAL;
+		msg.data = nero_msgs::Emotion::NEUTRAL;
 		expressEmotionCB(msg);
 	}
 }

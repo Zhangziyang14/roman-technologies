@@ -12,7 +12,7 @@
 #include <std_msgs/String.h>
 #include <iostream>
 #include <string>
-#include <audio_processing/speech.h>
+#include <nero_msgs/SpeechCommand.h>
 
 class SpeechRecognition
 {
