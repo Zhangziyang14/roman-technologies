@@ -1,0 +1,9 @@
+int32 objectId
+---
+geometry_msgs/PoseStamped pose
+float32 min_y
+float32 table_z
+
+int32 FAILED = 1
+int32 SUCCESS = 2
+int32 result
