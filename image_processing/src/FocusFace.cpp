@@ -20,7 +20,7 @@
 
 #include "nero_msgs/PitchYaw.h"
 
-#include "image_processing/SetActive.h"
+#include "nero_msgs/SetActive.h"
 
 // forward declaration
 IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
@@ -35,7 +35,7 @@ nero_msgs::PitchYaw gCurrentOrientation;
 bool active = false;
 bool gLock = false;
 
-void headSpeedCb(const head::PitchYaw &msg)
+void headSpeedCb(const nero_msgs::PitchYaw &msg)
 {
 	bool tmpLock = gLock;
 	gLock = fabs(msg.pitch) > STOP_SPEED_TOLERANCE || fabs(msg.yaw) > STOP_SPEED_TOLERANCE;
@@ -48,7 +48,7 @@ void headSpeedCb(const head::PitchYaw &msg)
 	}
 }
 
-void headPositionCb(const head::PitchYaw &msg)
+void headPositionCb(const nero_msgs::PitchYaw &msg)
 {
 	gCurrentOrientation = msg;
 }
@@ -174,7 +174,7 @@ void imageCb(const sensor_msgs::PointCloud2Ptr &image)
 	cvReleaseImage(&iplImg);
 }
 
-bool setActiveCB(image_processing::SetActive::Request &req, image_processing::SetActive::Response &res)
+bool setActiveCB(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
 	if (active && req.active == false)
 	{
