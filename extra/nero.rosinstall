@@ -33,3 +33,11 @@
 - svn:
     local-name: pocketsphinx
     uri: http://albany-ros-pkg.googlecode.com/svn/trunk/rharmony/pocketsphinx
+
+- svn:
+    local-name: ps3joy
+    uri: https://code.ros.org/svn/ros-pkg/stacks/joystick_drivers/trunk/ps3joy
+
+- svn:
+    local-name: joy
+    uri: https://code.ros.org/svn/ros-pkg/stacks/joystick_drivers/trunk/joy
