@@ -27,7 +27,7 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		mSideJointAngleSub 		= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
 		mArmJointPosSub			= mNodeHandle.subscribe("/armJointPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
 		mStopSubscriber			= mNodeHandle.subscribe("/emergencyStop", 1, &ArmMotorHandler::stopCB, this);
-		mArmJointSpeedSub		= mNodeHandle.subscribe("arm/cmd_vel", 1, &ArmMotorHandler::speedCB, this);
+		mArmJointSpeedSub		= mNodeHandle.subscribe("/arm/cmd_vel", 1, &ArmMotorHandler::speedCB, this);
 
 		mShoulderMotor.setMode(CM_POSITION_MODE);
 		mSideMotor.setMode(CM_POSITION_MODE);
@@ -86,6 +86,19 @@ void ArmMotorHandler::publishArmPosition()
 
 	joint_msg.upper_joint 	= mCurrentShoulderJointPos;
 	joint_msg.wrist_joint 	= mCurrentSideJointPos;
+
+
+	if((mCurrentShoulderJointSpeed > 0 && mCurrentShoulderJointPos  > SHOULDERMOTOR_MAX_ANGLE) ||
+			(mCurrentShoulderJointSpeed < 0 && mCurrentShoulderJointPos < SHOULDERMOTOR_MIN_ANGLE))
+	{
+		mShoulderMotor.setSpeed(0.0);
+	}
+
+	if((mCurrentSideJointSpeed > 0 && mCurrentSideJointPos > SIDEJOINT_MAX_ANGLE) ||
+			(mCurrentSideJointSpeed < 0 && mCurrentSideJointPos < SIDEJOINT_MIN_ANGLE))
+	{
+		mSideMotor.setSpeed(0.0);
+	}
 
 	mArmPosFeedbackPub.publish(joint_msg);
 }
@@ -194,20 +207,17 @@ void ArmMotorHandler::speedCB(const nero_msgs::ArmJoint& msg)
 	double upper_joint = msg.upper_joint;
 	double wrist_joint = msg.wrist_joint;
 
-	if(upper_joint > 0 && mCurrentShoulderJointPos - SHOULDERMOTOR_MAX_ANGLE < SHOULDER_SAFETY_TRESHOLD)
-		upper_joint = 0.0;
+	if((upper_joint > 0 && mCurrentShoulderJointPos  < SHOULDERMOTOR_MAX_ANGLE) ||
+			(upper_joint < 0 && mCurrentShoulderJointPos > SHOULDERMOTOR_MIN_ANGLE) || upper_joint == 0)
+	{
+		mShoulderMotor.setSpeed(upper_joint);
+	}
 
-	if(upper_joint < 0 && mCurrentShoulderJointPos - SHOULDERMOTOR_MIN_ANGLE < SHOULDER_SAFETY_TRESHOLD)
-		upper_joint = 0.0;
-
-	if(wrist_joint > 0 && mCurrentShoulderJointPos - SIDEJOINT_MAX_ANGLE < SIDE_SAFETY_TRESHOLD)
-		wrist_joint = 0.0;
-
-	if(wrist_joint < 0 && mCurrentShoulderJointPos - SIDEJOINT_MIN_ANGLE < SIDE_SAFETY_TRESHOLD)
-		wrist_joint = 0.0;
-
-	mShoulderMotor.setSpeed(upper_joint);
-	mSideMotor.setSpeed(wrist_joint);
+	if((wrist_joint > 0 && mCurrentSideJointPos < SIDEJOINT_MAX_ANGLE) ||
+			(wrist_joint < 0 && mCurrentSideJointPos > SIDEJOINT_MIN_ANGLE) || wrist_joint == 0)
+	{
+		mSideMotor.setSpeed(wrist_joint);
+	}
 }
 
 
