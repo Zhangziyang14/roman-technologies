@@ -9,6 +9,8 @@
 #include "std_msgs/UInt8.h"
 #include "nero_msgs/Emotion.h"
 #include "nero_msgs/SpeechCommand.h"
+#include "nero_msgs/ArmJoint.h"
+#include "nero_msgs/PitchYaw.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Twist.h"
 #include "std_msgs/Bool.h"
@@ -17,12 +19,21 @@
 #define MAX_LINEAR_SPEED 0.2
 #define MAX_ANGULAR_SPEED 0.2
 
+#define MAX_ARM_SPEED 0.2
+#define MAX_HEAD_SPEED 0.2
+
 ros::Publisher *emotion_pub;
 ros::Publisher *arm_pub;
+ros::Publisher *arm_speed_pub;
 ros::Publisher *gripper_pub;
 ros::Publisher *gripper_state_pub;
 ros::Publisher *speech_pub;
 ros::Publisher *speed_pub;
+ros::Publisher *head_speed_pub;
+
+bool sent_arm_speed = false;
+bool sent_base_speed = false;
+bool sent_head_speed = false;
 
 enum PS3Key
 {
@@ -60,17 +71,61 @@ void joyCB(const sensor_msgs::Joy& msg)
 	std_msgs::Bool boolmsg;
 	geometry_msgs::Pose posemsg;
 	geometry_msgs::Twist speedmsg;
+	nero_msgs::ArmJoint armspeedmsg;
+	nero_msgs::PitchYaw headspeedmsg;
 
 	if (pressedKey != PS3_NONE && msg.buttons[pressedKey] == 0)
 		pressedKey = PS3_NONE;
 
-	if (msg.buttons[PS3_RIGHT_STICK])
+	// arm speeds
+	if (msg.axes[2] || msg.axes[3])
+	{
+		armspeedmsg.wrist_joint = msg.axes[2] * MAX_ARM_SPEED;
+		armspeedmsg.upper_joint = msg.axes[3] * MAX_ARM_SPEED;
+		arm_speed_pub->publish(armspeedmsg);
+		sent_arm_speed = true;
+	}
+	else if (sent_arm_speed)
+	{
+		sent_arm_speed = false;
+		armspeedmsg.wrist_joint = 0.0;
+		armspeedmsg.upper_joint = 0.0;
+		arm_speed_pub->publish(armspeedmsg);
+	}
+
+	// base speeds
+	if (msg.axes[0] || msg.axes[1])
 	{
 		speedmsg.linear.x = msg.axes[1] * MAX_LINEAR_SPEED;
 		speedmsg.angular.z = msg.axes[0] * MAX_ANGULAR_SPEED;
 		speed_pub->publish(speedmsg);
+		sent_base_speed = true;
 	}
-	else if (pressedKey == PS3_NONE)
+	else if (sent_base_speed)
+	{
+		sent_base_speed = false;
+		speedmsg.linear.x = 0.0;
+		speedmsg.angular.z = 0.0;
+		speed_pub->publish(speedmsg);
+	}
+
+	// head speeds
+	/*if (msg.axes[4] || msg.axes[5] || msg.axes[6] || msg.axes[7])
+	{
+		headspeedmsg.pitch = (msg.axes[4] - msg.axes[6]) * MAX_HEAD_SPEED;
+		headspeedmsg.yaw = (msg.axes[5] - msg.axes[7]) * MAX_HEAD_SPEED;
+		head_speed_pub->publish(headspeedmsg);
+		sent_head_speed = true;
+	}
+	else if (sent_head_speed)
+	{
+		sent_head_speed = false;
+		headspeedmsg.pitch = 0.0;
+		headspeedmsg.yaw = 0.0;
+		speed_pub->publish(headspeedmsg);
+	}*/
+
+	if (pressedKey == PS3_NONE)
 	{
 		for(size_t i = 0; i < msg.buttons.size(); i++)
 		{
@@ -161,8 +216,10 @@ int main( int argc, char* argv[] )
 	gripper_pub = new ros::Publisher(nh.advertise<std_msgs::Bool>("/cmd_gripper", 1));
 	gripper_state_pub = new ros::Publisher(nh.advertise<std_msgs::Bool>("/cmd_gripper_state", 1));
 	arm_pub = new ros::Publisher(nh.advertise<geometry_msgs::Pose>("/cmd_arm_position", 1));
+	arm_speed_pub = new ros::Publisher(nh.advertise<nero_msgs::ArmJoint>("/arm/cmd_vel", 1));
 	speech_pub = new ros::Publisher(nh.advertise<nero_msgs::SpeechCommand>("/processedSpeechTopic", 1));
 	speed_pub = new ros::Publisher(nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1));
+	head_speed_pub = new ros::Publisher(nh.advertise<nero_msgs::PitchYaw>("/head/cmd_vel", 1));
 	pressedKey = PS3_NONE;
 
 	ros::spin();
