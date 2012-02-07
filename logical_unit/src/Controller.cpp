@@ -365,8 +365,9 @@ uint8_t Controller::respond()
 	return nero_msgs::Emotion::SURPRISED;
 }
 
-bool Controller::grab(int object)
+uint8_t Controller::get(int object)
 {
+	mBusy = true;
 	float min_y = 0.f;
 
 	mLock = LOCK_ARM;

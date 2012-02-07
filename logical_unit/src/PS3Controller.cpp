@@ -7,8 +7,8 @@
 
 #include "ros/ros.h"
 #include "std_msgs/UInt8.h"
-#include "head/Emotion.h"
-#include "audio_processing/speech.h"
+#include "nero_msgs/Emotion.h"
+#include "nero_msgs/SpeechCommand.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Twist.h"
 #include "std_msgs/Bool.h"
@@ -56,7 +56,7 @@ PS3Key pressedKey;
 void joyCB(const sensor_msgs::Joy& msg)
 {
 	std_msgs::UInt8 uint8msg;
-	audio_processing::speech speechmsg;
+	nero_msgs::SpeechCommand speechmsg;
 	std_msgs::Bool boolmsg;
 	geometry_msgs::Pose posemsg;
 	geometry_msgs::Twist speedmsg;
@@ -83,22 +83,22 @@ void joyCB(const sensor_msgs::Joy& msg)
 			{
 			case PS3_X:
 				ROS_INFO("Publishing happy state.");
-				uint8msg.data = head::Emotion::HAPPY;
+				uint8msg.data = nero_msgs::Emotion::HAPPY;
 				emotion_pub->publish(uint8msg);
 				break;
 			case PS3_S:
 				ROS_INFO("Publishing sad state.");
-				uint8msg.data = head::Emotion::SAD;
+				uint8msg.data = nero_msgs::Emotion::SAD;
 				emotion_pub->publish(uint8msg);
 				break;
 			case PS3_O:
 				ROS_INFO("Publishing surprised state.");
-				uint8msg.data = head::Emotion::SURPRISED;
+				uint8msg.data = nero_msgs::Emotion::SURPRISED;
 				emotion_pub->publish(uint8msg);
 				break;
 			case PS3_T:
 				ROS_INFO("Publishing error state.");
-				uint8msg.data = head::Emotion::ERROR;
+				uint8msg.data = nero_msgs::Emotion::ERROR;
 				emotion_pub->publish(uint8msg);
 				break;
 
@@ -161,7 +161,7 @@ int main( int argc, char* argv[] )
 	gripper_pub = new ros::Publisher(nh.advertise<std_msgs::Bool>("/cmd_gripper", 1));
 	gripper_state_pub = new ros::Publisher(nh.advertise<std_msgs::Bool>("/cmd_gripper_state", 1));
 	arm_pub = new ros::Publisher(nh.advertise<geometry_msgs::Pose>("/cmd_arm_position", 1));
-	speech_pub = new ros::Publisher(nh.advertise<audio_processing::speech>("/processedSpeechTopic", 1));
+	speech_pub = new ros::Publisher(nh.advertise<nero_msgs::SpeechCommand>("/processedSpeechTopic", 1));
 	speed_pub = new ros::Publisher(nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1));
 	pressedKey = PS3_NONE;
 
