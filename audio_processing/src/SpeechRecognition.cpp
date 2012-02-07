@@ -27,11 +27,11 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	else if(msg.data.find("eva") != string::npos)
 			processed_msg.command = "eva";
 
+	else if(msg.data.find("break") != string::npos)
+			processed_msg.command = "break";
+
 	else if(msg.data.find("juice") != string::npos)
 			processed_msg.command = "juice";
-
-	else if(msg.data.find("fanta") != string::npos)
-			processed_msg.command = "fanta";
 
 	else if(msg.data.find("drink") != string::npos)
 			processed_msg.command = "drink";
@@ -48,17 +48,14 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 	else if(msg.data.find("sleep") != string::npos)
 		processed_msg.command = "sleep";
 
-	else if(msg.data.find("open") != string::npos)
-		processed_msg.command = "open";
+	else if(msg.data.find("got it") != string::npos)
+		processed_msg.command = "got";
 
 	else if(msg.data.find("give") != string::npos)
 			processed_msg.command = "give";
 
 	else if(msg.data.find("stop") != string::npos)
 			processed_msg.command = "stop";
-
-	else if(msg.data.find("thank you") != string::npos)
-			processed_msg.command = "thank";
 	else
 		processed_msg.command = "";
 
@@ -68,6 +65,9 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 
 	if(msg.data.find("thanks") != string::npos)
 		arousal += 1;
+
+	if(msg.data.find("thank you") != string::npos)
+			arousal += 1;
 
 	if(msg.data.find("great") != string::npos)
 		arousal += 1;
@@ -80,9 +80,6 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 
 	if(msg.data.find("nice") != string::npos)
 		arousal += 1;
-
-	//if(msg.data.find("thank you") != string::npos)
-		//arousal += 1;
 
 	if(msg.data.find("bad") != string::npos || msg.data.find("not") != string::npos)
 		arousal = arousal >= 1 ? arousal *-1 : arousal;

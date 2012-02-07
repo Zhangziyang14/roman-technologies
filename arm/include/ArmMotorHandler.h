@@ -35,6 +35,9 @@
 #define SHOULDERMOTOR_START_POS			(-1.1)	//
 #define SIDEJOINT_START_POS				(1.5)	// joint is at this position after being initialized
 
+#define SHOULDER_SAFETY_TRESHOLD		0.05
+#define SIDE_SAFETY_TRESHOLD			0.05
+
 #include <ros/ros.h>
 #include <motors/Motor.h>
 #include <std_msgs/Float64.h>
@@ -57,6 +60,7 @@ protected:
 	ros::Subscriber mSideJointAngleSub;		/// Listens to sideJoint angles
 	ros::Subscriber mArmJointPosSub;		/// Listens to armJointPos messages (containing both angles in one message)
 	ros::Subscriber mStopSubscriber;		/// Listens to stop commands from Controller
+	ros::Subscriber	mArmJointSpeedSub;		/// Listens to speed commands for the arm
 
 	Motor mShoulderMotor;					/// Motor for left wheel
 	Motor mSideMotor;						/// Motor for right wheel
@@ -90,6 +94,7 @@ public:
 	void sideJointCB(const std_msgs::Float64& msg);
 	void armPosCB(const nero_msgs::ArmJoint& msg);
 	void stopCB(const std_msgs::Bool& msg);
+	void speedCB(const nero_msgs::ArmJoint& msg);
 	void publishArmPosition();
 	void publishArmSpeed();
 

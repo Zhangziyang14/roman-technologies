@@ -331,6 +331,7 @@ uint8_t Controller::stop()
 	mBusy = false;
 	return nero_msgs::Emotion::SURPRISED;
 }
+
 /**
  * Wait after being surprised, before becoming surprised again..
  */
@@ -654,17 +655,6 @@ void Controller::speechCB(const nero_msgs::SpeechCommand& msg)
 				ROS_INFO("Don't disturb me, I'm busy");
 			break;
 
-		case FANTA:
-			//Start initiating actions to get the juice
-			if(!mBusy)
-			{
-				ROS_INFO("Getting fanta...");
-				expressEmotion(get(FANTA_ID));
-			}
-			else
-				ROS_INFO("Don't disturb me, I'm busy");
-			break;
-
 		case COKE:
 		case COLA:
 			if(!mBusy)
@@ -764,7 +754,7 @@ void Controller::init(const char *goalPath)
 	stringToValue["give"]	 = GIVE;
 	stringToValue["got"]	 = GOT;
 	stringToValue["sleep"]	 = SLEEP;
-	stringToValue["fanta"]	 = FANTA;
+	stringToValue["break"]	 = BREAK;
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);
 

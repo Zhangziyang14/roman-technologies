@@ -13,7 +13,6 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 	mSideMotor.init(path);
 	mSideMotor.setEncoderCount(SIDEMOTOR_ENCODER_COUNT * SIDEMOTOR_CORRECTION_FACTOR);
 
-
 	// initialize arm to zero position (joints will move to their zero-switches)
 	if(init())
 	{
@@ -24,10 +23,11 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 		mArmSpeedFeedbackPub	= mNodeHandle.advertise<nero_msgs::ArmJoint>("/armJointSpeedFeedbackTopic", 1);
 
 		// Initialise subscribers
-		mShoulderAngleSub	= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
-		mSideJointAngleSub 	= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
-		mArmJointPosSub		= mNodeHandle.subscribe("/armJointPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
-		mStopSubscriber		= mNodeHandle.subscribe("/emergencyStop", 1, &ArmMotorHandler::stopCB, this);
+		mShoulderAngleSub		= mNodeHandle.subscribe("/ShoulderTopic", 10, &ArmMotorHandler::shoulderCB, this);
+		mSideJointAngleSub 		= mNodeHandle.subscribe("/SideJointTopic", 10, &ArmMotorHandler::sideJointCB, this);
+		mArmJointPosSub			= mNodeHandle.subscribe("/armJointPositionTopic", 10, &ArmMotorHandler::armPosCB, this);
+		mStopSubscriber			= mNodeHandle.subscribe("/emergencyStop", 1, &ArmMotorHandler::stopCB, this);
+		mArmJointSpeedSub		= mNodeHandle.subscribe("arm/cmd_vel", 1, &ArmMotorHandler::speedCB, this);
 
 		mShoulderMotor.setMode(CM_POSITION_MODE);
 		mSideMotor.setMode(CM_POSITION_MODE);
@@ -44,7 +44,6 @@ ArmMotorHandler::ArmMotorHandler(char *path) : mNodeHandle("~"), mShoulderMotor(
 	else
 		ROS_WARN("Error initializing ArmMotorHandler: failed to determine arm position. Please make sure the arm is not at its limits and try again.");
 }
-
 
 bool ArmMotorHandler::init()
 {
@@ -73,21 +72,6 @@ bool ArmMotorHandler::init()
 	if(mShoulderMotor.getStatus() != M3XL_STATUS_INIT_DONE)
 		ROS_ERROR("Error: %s", C3mxl::translateErrorCode(mShoulderMotor.getStatus()));
 	return (mShoulderMotor.getStatus() == M3XL_STATUS_INIT_DONE);
-}
-
-/**
- * Stops all motors and locks them until unlock command is received
- */
-void ArmMotorHandler::stopCB(const std_msgs::Bool &msg)
-{
-	if(msg.data)
-	{
-		mShoulderMotor.setMode(CM_STOP_MODE);
-		mSideMotor.setMode(CM_STOP_MODE);
-	}
-
-	mShoulderMotor.lock(msg.data);
-	mSideMotor.lock(msg.data);
 }
 
 /**
@@ -175,6 +159,22 @@ void ArmMotorHandler::setSideJointAngle(double angle)
 /* * * * * Callbacks * * * * */
 
 
+
+/**
+ * Stops all motors and locks them until unlock command is received
+ */
+void ArmMotorHandler::stopCB(const std_msgs::Bool &msg)
+{
+	if(msg.data)
+	{
+		mShoulderMotor.setMode(CM_STOP_MODE);
+		mSideMotor.setMode(CM_STOP_MODE);
+	}
+
+	mShoulderMotor.lock(msg.data);
+	mSideMotor.lock(msg.data);
+}
+
 /** ShoulderTopic callback
  *
  * @param 	const std_msgs::Float64		msg		ros message containing the wished shoulder position
@@ -184,6 +184,30 @@ void ArmMotorHandler::setSideJointAngle(double angle)
 void ArmMotorHandler::shoulderCB(const std_msgs::Float64& msg)
 {
 	setShoulderAngle(msg.data);
+}
+
+/**
+ * Listens to speed commands and controls the motors in speed mode
+ */
+void ArmMotorHandler::speedCB(const nero_msgs::ArmJoint& msg)
+{
+	double upper_joint = msg.upper_joint;
+	double wrist_joint = msg.wrist_joint;
+
+	if(upper_joint > 0 && mCurrentShoulderJointPos - SHOULDERMOTOR_MAX_ANGLE < SHOULDER_SAFETY_TRESHOLD)
+		upper_joint = 0.0;
+
+	if(upper_joint < 0 && mCurrentShoulderJointPos - SHOULDERMOTOR_MIN_ANGLE < SHOULDER_SAFETY_TRESHOLD)
+		upper_joint = 0.0;
+
+	if(wrist_joint > 0 && mCurrentShoulderJointPos - SIDEJOINT_MAX_ANGLE < SIDE_SAFETY_TRESHOLD)
+		wrist_joint = 0.0;
+
+	if(wrist_joint < 0 && mCurrentShoulderJointPos - SIDEJOINT_MIN_ANGLE < SIDE_SAFETY_TRESHOLD)
+		wrist_joint = 0.0;
+
+	mShoulderMotor.setSpeed(upper_joint);
+	mSideMotor.setSpeed(wrist_joint);
 }
 
 

@@ -22,6 +22,9 @@
 #define YAW_OFFSET			(-1)
 #define PITCH_OFFSET		(-0.5)
 
+#define PITCH_SAFETY_TRESHOLD	0.05
+#define YAW_SAFETY_TRESHOLD		0.05
+
 class HeadMotorHandler
 {
 
@@ -29,6 +32,7 @@ protected:
 	ros::NodeHandle mNodeHandle;			/// ROS node handle
 
 	ros::Subscriber mPositionSub;			/// Listens to pose messages for positioning of the head
+	ros::Subscriber mSpeedSub;			/// Listens to pose messages for positioning of the head
 
 	ros::Publisher mSpeedPub;				/// Publishes current speed of the head
 	ros::Publisher mPositionPub;			/// Publishes current head position
@@ -60,6 +64,7 @@ public:
 	void positionCB(const nero_msgs::PitchYaw &msg);
 	void publishHeadPosition();
 	void publishHeadSpeed();
+	void speedCB(const nero_msgs::PitchYaw &msg);
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };

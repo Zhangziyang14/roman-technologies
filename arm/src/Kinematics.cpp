@@ -6,7 +6,7 @@
 #define UPPER_ARM_LENGTH 	0.36		//Length of upper arm in [m]
 #define WRIST_LENGTH 		0.18		//Length of wrist in [m]
 #define EFFECTOR_ORIGIN 	0.18		//Offset in [m] from wrist to the point 3 [cm] in front of the gripper
-
+#define MID_ARM_LENGTH		0.18		//Length of the link in the middle that stays horizontal
 ros::Publisher *coordinate_publisher;
 double currentX, currentY, currentZ;
 
@@ -40,7 +40,7 @@ double calculateCurrentXPosition(double beta)
  */
 double calculateCurrentYPosition(double alpha, double beta)
 {
-	return std::cos(alpha)*UPPER_ARM_LENGTH+std::cos(beta)*(WRIST_LENGTH+EFFECTOR_ORIGIN);
+	return std::cos(alpha)*UPPER_ARM_LENGTH + MID_ARM_LENGTH + std::cos(beta)*(WRIST_LENGTH+EFFECTOR_ORIGIN);
 }
 
 /*

@@ -7,8 +7,6 @@
 
 #include <head/HeadMotorHandler.h>
 
-//TODO: INITIALISE AND STOP HEAD SAFELY
-
 /**
  * Publishes head's current position
  */
@@ -37,17 +35,41 @@ void HeadMotorHandler::publishHeadSpeed()
 /**
  * Controls the motors based on the received position.
  */
-void HeadMotorHandler::positionCB(const nero_msgs::PitchYaw &msg)
+void HeadMotorHandler::speedCB(const nero_msgs::PitchYaw &msg)
 {
-	ROS_INFO("Position CB");
+	ROS_INFO("Speed CB");
 	double pitch	= msg.pitch;
 	double yaw 		= msg.yaw;
 
 	if (isnan(pitch) || isnan(yaw))
 	{
-		ROS_WARN("Received nan in positionCb.");
+		ROS_WARN("Received nan in speedCb.");
 		return;
 	}
+
+	if(mCurrentPose.pitch - PITCH_UPPER_LIMIT < PITCH_SAFETY_TRESHOLD && pitch < 0)
+		pitch = 0.0;
+
+	if(mCurrentPose.pitch - PITCH_LOWER_LIMIT < PITCH_SAFETY_TRESHOLD && pitch > 0)
+		pitch = 0.0;
+
+	if(mCurrentPose.yaw - YAW_UPPER_LIMIT < YAW_SAFETY_TRESHOLD && yaw > 0)
+		yaw = 0.0;
+
+	if(mCurrentPose.yaw - YAW_LOWER_LIMIT < YAW_SAFETY_TRESHOLD && yaw < 0)
+		yaw = 0.0;
+
+	mPitch.setSpeed(pitch);
+	mYaw.setSpeed(yaw);
+}
+
+/**
+ * Controls the motors based on the received position.
+ */
+void HeadMotorHandler::positionCB(const nero_msgs::PitchYaw &msg)
+{
+	double pitch	= msg.pitch;
+	double yaw 		= msg.yaw;
 
 	if(msg.pitch > PITCH_UPPER_LIMIT)
 		pitch = PITCH_UPPER_LIMIT;
@@ -76,6 +98,7 @@ void HeadMotorHandler::init(char *path)
 
 	//Initialise subscribers
 	mPositionSub	= mNodeHandle.subscribe("/headPositionTopic", 10, &HeadMotorHandler::positionCB, this);
+	mSpeedSub		= mNodeHandle.subscribe("head/cmd_vel", 10, &HeadMotorHandler::speedCB, this);
 
 	mPitch.init(path);
 	mYaw.init(path);

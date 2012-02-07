@@ -86,7 +86,7 @@ enum commandValue
 	STOP,
 	GIVE,
 	GOT,
-	FANTA,
+	BREAK,
 };
 
 enum Emotions

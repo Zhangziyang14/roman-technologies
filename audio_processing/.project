@@ -47,7 +47,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>/home/hans/roman-technologies/audio_processing</value>
+					<value>/home/kelvin/wilson/roman-technologies/audio_processing</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>
@@ -55,7 +55,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.environment</key>
-					<value>VERBOSE=1|ROS_ROOT=/opt/ros/electric/ros|ROS_PACKAGE_PATH=/home/hans/roman-technologies:/home/hans/ros:/opt/ros/electric/stacks:/home/hans/ros/pocketsphinx:/home/hans/ros/rosserial:/home/hans/ros/pr2_msgs:/home/hans/ros/rgbd_assembler:/home/hans/ros/motion_planning_common:/home/hans/ros/tabletop_object_perception:/home/hans/ros/object_manipulation:/home/hans/ros/database_interface:/home/hans/ros/dbl-ros-pkg-dev|PYTHONPATH=/opt/ros/electric/ros/core/roslib/src:|PATH=/opt/ros/electric/ros/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games|</value>
+					<value>VERBOSE=1|ROS_ROOT=/opt/ros/electric/ros|ROS_PACKAGE_PATH=/home/kelvin/ros/pocketsphinx:/home/kelvin/wilson/roman-technologies:/home/kelvin/ros/robotis:/home/kelvin/ros/pr2_object_manipulation_launch:/home/kelvin/ros/planning_environment_msgs:/home/kelvin/ros/move_arm_msgs:/home/kelvin/ros/object_manipulator:/home/kelvin/ros/object_recognition:/home/kelvin/ros/pr2_arm_navigation_config:/home/kelvin/ros/point_cloud_converter:/home/kelvin/ros/pr2_arm_navigation_perception:/home/kelvin/ros/rgbd_assembler:/home/kelvin/ros/rviz_interaction_tools:/home/kelvin/ros/pr2_tabletop_manipulation_launch:/home/kelvin/ros/database_interface:/home/kelvin/ros/household_objects_database:/home/kelvin/ros/collision_environment_msgs:/home/kelvin/ros/object_manipulation_msgs:/home/kelvin/ros/openni_kinect:/home/kelvin/ros/arm_navigation_experimental:/home/kelvin/ros/household_objects_database_msgs:/home/kelvin/ros/tabletop_object_perception:/home/kelvin/ros/octomap_mapping:/home/kelvin/ros/sbpl_arm_planning:/home/kelvin/ros/geometric_shapes_msgs:/home/kelvin/ros/mapping_msgs:/home/kelvin/ros/motion_planning_msgs:/home/kelvin/ros/posedetection_msgs:/home/kelvin/ros/openrave_planning:/home/kelvin/ros/openrave:/home/kelvin/ros/arm_navigation:/home/kelvin/ros/robot_model_tutorials:/home/kelvin/ros/pkgs/tum-ros-pkg/knowledge:/home/kelvin/ros/stacks/ccny_vision:/home/kelvin/ros/stacks/roboearth:/home/kelvin/ros/rosserial:/home/kelvin/ros/ps3joy:/home/kelvin/ros/dbl-ros-pkg-dev:/opt/ros/electric/stacks|PYTHONPATH=/opt/ros/electric/ros/core/roslib/src:|PATH=/opt/ros/electric/ros/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games|</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.enableFullBuild</key>
@@ -83,7 +83,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.build.location</key>
-					<value>/home/hans/roman-technologies/audio_processing</value>
+					<value>/home/kelvin/wilson/roman-technologies/audio_processing</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.autoBuildTarget</key>
@@ -107,11 +107,4 @@
 		<nature>org.eclipse.cdt.make.core.ScannerConfigNature</nature>
 		<nature>org.eclipse.cdt.core.cnature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>[Subprojects]</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

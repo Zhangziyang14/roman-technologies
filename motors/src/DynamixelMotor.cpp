@@ -8,6 +8,14 @@
 #include <motors/DynamixelMotor.h>
 
 /**
+  * Sets speed of the motor when in SPEED_MODE
+ */
+void DynamixelMotor::setSpeed(double speed)
+{
+    motor_->setSpeed(speed);
+}
+
+/**
   * Gets speed of the motor
  */
 double DynamixelMotor::getRotationSpeed()

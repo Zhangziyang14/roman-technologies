@@ -88,10 +88,10 @@ void AutonomeHeadController::init()
 	mHead_movement_pub 	= mNodeHandle.advertise<nero_msgs::PitchYaw>("/headPositionTopic", 1, true);
 
 	nero_msgs::PitchYaw msg;
-	msg.pitch = 0.0;
+	msg.pitch = 0.8;
 	msg.yaw = 0.0;
 	mHead_movement_pub.publish(msg);
-	setExpression(mNeutral);
+	setExpression(mSleep);
 
 	ROS_INFO("AutonomeHeadController initialised");
 }

@@ -48,6 +48,7 @@ public:
     int update();
     double getRotationSpeed();
     void setPosition(double position);
+    void setSpeed(double speed);
     double getPosition();
     void setAngleLimits(double lower, double upper);
     double getAngleLowerLimit();
