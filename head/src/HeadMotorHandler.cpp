@@ -15,7 +15,19 @@ void HeadMotorHandler::publishHeadPosition()
 	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
 	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
 	mPositionPub.publish(mCurrentPose);
+/*
+	if((mCurrentSpeed.pitch < 0 && mCurrentPose.pitch  > PITCH_LOWER_LIMIT) ||
+			(mCurrentSpeed.pitch > 0 && mCurrentPose.pitch < PITCH_UPPER_LIMIT))
+	{
+		mPitch.setSpeed(0.0);
+	}
 
+	if((mCurrentSpeed.yaw < 0 && mCurrentPose.yaw  > YAW_LOWER_LIMIT) ||
+			(mCurrentSpeed.yaw > 0 && mCurrentPose.yaw < YAW_UPPER_LIMIT))
+	{
+		mYaw.setSpeed(0.0);
+	}
+*/
 	btQuaternion orientation;
 	orientation.setRPY(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
 	mKinectTF.setRotation(orientation);
@@ -37,7 +49,6 @@ void HeadMotorHandler::publishHeadSpeed()
  */
 void HeadMotorHandler::speedCB(const nero_msgs::PitchYaw &msg)
 {
-	ROS_INFO("Speed CB");
 	double pitch	= msg.pitch;
 	double yaw 		= msg.yaw;
 
@@ -47,20 +58,17 @@ void HeadMotorHandler::speedCB(const nero_msgs::PitchYaw &msg)
 		return;
 	}
 
-	if(mCurrentPose.pitch - PITCH_UPPER_LIMIT < PITCH_SAFETY_TRESHOLD && pitch < 0)
-		pitch = 0.0;
+	if((pitch > 0 && mCurrentPose.pitch < PITCH_UPPER_LIMIT) ||
+			(pitch < 0 && mCurrentPose.pitch > PITCH_LOWER_LIMIT) || pitch == 0)
+	{
+		mPitch.setSpeed(pitch);
+	}
 
-	if(mCurrentPose.pitch - PITCH_LOWER_LIMIT < PITCH_SAFETY_TRESHOLD && pitch > 0)
-		pitch = 0.0;
-
-	if(mCurrentPose.yaw - YAW_UPPER_LIMIT < YAW_SAFETY_TRESHOLD && yaw > 0)
-		yaw = 0.0;
-
-	if(mCurrentPose.yaw - YAW_LOWER_LIMIT < YAW_SAFETY_TRESHOLD && yaw < 0)
-		yaw = 0.0;
-
-	mPitch.setSpeed(pitch);
-	mYaw.setSpeed(yaw);
+	if((yaw > 0 && mCurrentPose.yaw < YAW_UPPER_LIMIT) ||
+			(yaw < 0 && mCurrentPose.yaw > YAW_LOWER_LIMIT) || pitch == 0)
+	{
+		mPitch.setSpeed(yaw);
+	}
 }
 
 /**
@@ -98,7 +106,7 @@ void HeadMotorHandler::init(char *path)
 
 	//Initialise subscribers
 	mPositionSub	= mNodeHandle.subscribe("/headPositionTopic", 10, &HeadMotorHandler::positionCB, this);
-	mSpeedSub		= mNodeHandle.subscribe("head/cmd_vel", 10, &HeadMotorHandler::speedCB, this);
+	//mSpeedSub		= mNodeHandle.subscribe("head/cmd_vel", 10, &HeadMotorHandler::speedCB, this);
 
 	mPitch.init(path);
 	mYaw.init(path);

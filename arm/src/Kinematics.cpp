@@ -32,7 +32,7 @@ double calculateWristJointPosition(double x)
  */
 double calculateCurrentXPosition(double beta)
 {
-	return std::sin(beta)*(WRIST_LENGTH + EFFECTOR_ORIGIN);
+	return std::sin(-beta)*(WRIST_LENGTH + EFFECTOR_ORIGIN);
 }
 
 /*

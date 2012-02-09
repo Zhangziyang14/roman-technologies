@@ -1,0 +1,223 @@
+% $ biblatex auxiliary file $
+% $ biblatex version 0.9 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\entry{plane}{online}{}
+  \name{author}{1}{%
+    {{Bohg}{B.}%
+     {J.}{J.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{BJ1}
+  \strng{fullhash}{BJ1}
+  \field{sortinit}{B}
+  \field{title}{Fast Plane Detector}
+  \verb{url}
+  \verb http://www.ros.org/wiki/fast\_plane\_detection
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
+\entry{braitenberg}{book}{}
+  \name{author}{1}{%
+    {{Braitenberg}{B.}%
+     {V.}{V.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {MIT Press}%
+  }
+  \strng{namehash}{BV1}
+  \strng{fullhash}{BV1}
+  \field{sortinit}{B}
+  \field{isbn}{9780262521123}
+  \field{series}{Bradford Books}
+  \field{title}{Vehicles: experiments in synthetic psychology}
+  \verb{url}
+  \verb http://books.google.nl/books?id=7KkUAT\_q\_sQC
+  \endverb
+  \field{year}{1986}
+\endentry
+
+\entry{Diepenhorst}{article}{}
+  \name{author}{3}{%
+    {{Diepenhorst}{D.}%
+     {M.}{M.}%
+     {}{}%
+     {}{}}%
+    {{T.}{T.}%
+     {Weijnen}{W.}%
+     {}{}%
+     {}{}}%
+    {{Van~Free}{V.~F.}%
+     {F.}{F.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{DMTWVFF1}
+  \strng{fullhash}{DMTWVFF1}
+  \field{sortinit}{D}
+  \field{title}{Kosteneffectiviteit van hulphonden}
+  \field{year}{2011}
+\endentry
+
+\entry{Evers}{article}{}
+  \name{author}{3}{%
+    {{Evers}{E.}%
+     {ir.~H.}{i.~H.}%
+     {}{}%
+     {}{}}%
+    {{Blijham}{B.}%
+     {ir.~N.}{i.~N.}%
+     {}{}%
+     {}{}}%
+    {{Willems}{W.}%
+     {dr.~C.}{d.~C.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{EiHBiNWdC1}
+  \strng{fullhash}{EiHBiNWdC1}
+  \field{sortinit}{E}
+  \field{title}{Zorg op afstand, literatuurstudie naar internationale
+  ontwikkelingen en kennis over effecten}
+  \field{year}{2009}
+\endentry
+
+\entry{Forlizzi}{article}{}
+  \name{author}{3}{%
+    {{Forlizzi}{F.}%
+     {J.}{J.}%
+     {}{}%
+     {}{}}%
+    {{DiSalvo}{D.}%
+     {C.}{C.}%
+     {}{}%
+     {}{}}%
+    {{Gemperle}{G.}%
+     {F.}{F.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{FJDCGF1}
+  \strng{fullhash}{FJDCGF1}
+  \field{sortinit}{F}
+  \field{title}{Assistive Robotics and an Ecology of Elders Living
+  Independently in Their Homes}
+  \verb{url}
+  \verb http://dx.doi.org/10.1080/07370024.2004.9667339
+  \endverb
+  \field{year}{2004}
+\endentry
+
+\entry{jacobian}{book}{}
+  \name{author}{3}{%
+    {{Ghosh}{G.}%
+     {B.K.}{B.}%
+     {}{}%
+     {}{}}%
+    {{Xi}{X.}%
+     {N.}{N.}%
+     {}{}%
+     {}{}}%
+    {{Tarn}{T.}%
+     {T.J.}{T.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {Academic Press}%
+  }
+  \strng{namehash}{GBXNTT1}
+  \strng{fullhash}{GBXNTT1}
+  \field{sortinit}{G}
+  \field{isbn}{9780122818455}
+  \field{series}{Academic Press series in engineering}
+  \field{title}{Control in robotics and automation: sensor-based integration}
+  \verb{url}
+  \verb http://books.google.nl/books?id=qT6tHTQoRDAC
+  \endverb
+  \field{year}{1999}
+\endentry
+
+\entry{tabletop}{online}{}
+  \name{author}{1}{%
+    {{Muja}{M.}%
+     {M.}{M.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{MM1}
+  \strng{fullhash}{MM1}
+  \field{sortinit}{M}
+  \field{title}{Tabletop Object Detector}
+  \verb{url}
+  \verb http://www.ros.org/wiki/tabletop\_object\_detector
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
+\entry{Roboearth}{article}{}
+  \name{author}{3}{%
+    {{Schie{\ss}le}{S.}%
+     {B.}{B.}%
+     {}{}%
+     {}{}}%
+    {{H\"ausermann}{H.}%
+     {K.}{K.}%
+     {}{}%
+     {}{}}%
+    {{Zweigle}{Z.}%
+     {O.}{O.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{SBHKZO1}
+  \strng{fullhash}{SBHKZO1}
+  \field{sortinit}{S}
+  \field{number}{D6.1}
+  \field{title}{Robots sharing a knowledge base for world modeling and learning
+  of actions}
+  \field{year}{2010}
+\endentry
+
+\entry{autosmiley}{online}{}
+  \name{author}{1}{%
+    {{Watson}{W.}%
+     {T.}{T.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{WT1}
+  \strng{fullhash}{WT1}
+  \field{sortinit}{W}
+  \field{title}{Autosmiley}
+  \verb{url}
+  \verb http://fffff.at/auto-smiley/
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
+\lossort
+\endlossort
+
+\endinput

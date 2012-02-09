@@ -1,0 +1,6 @@
+Problem statement:
+Eerst originele probleem noemen (die van de presentatie beetje aanpassen), dan noemen dat dat niet haalbaar was vanwege de tijd en geld. Vervolgens het huidige probleem noemen (een prototype bouwen) en vertellen dat deze paper daar verder op in gaat. (ouderen willen zelfstandiger worden en professionals effectiever laten werken).
+
+General Design komt in Technisch document te staan, daar wordt naar verwezen in het concept gedeelte van de paper
+
+Emotion display gedeelte van Bram komt in de emotion expression gedeelte in de paper, maar het gedeelte over de keywords verhuist naar concept, waar weer wordt doorverwezen naar emotion recognition.
