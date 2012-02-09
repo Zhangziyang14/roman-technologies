@@ -16,12 +16,34 @@ detection already exists \cite{autosmiley}, but this was not used in this projec
 constraints and inability to compile the program because of deprecated code.
  
 \subsection*{Emotion expression}
-blabla 
+\label{sec:Emotion expression}
+Eva displays emotions for a functional reason: to display a state of feedback that tells the user information about the 
+actions of Eva. There are three emotional states: happy, sad and novelty. In  addition to the emotional states there is a 
+neutral state. The three emotional states are designed to ensure that Eva can react in mostly every situation. The state or 
+reaction is interpreted by the user based on the context. Firstly, the happy  state allows for confirming and likewise 
+positive reactions. This state is characterized by the sentence ``yes, I will do this''. The sad state functions as a state 
+for communicating failure, disappointment or likewise negative reactions. The sad state is characterized by the sentence 
+``I cannot do this''.  Whereas the happy state signals that the behaviour is desirable and should not be changed, the sad 
+state signals undesirable behaviour that should be changed. These states are activated based on the keyword trigger from 
+the user’s voice: ``yummy'' has an inherent positive element so it triggers the positive state. The triggers that are tied 
+to the emotional states are now solely used to activate feedback, but can be used in a later stage to possibly activate a 
+passive learning process - since it is obvious if Eva should (not) change her behaviour based on the keyword.
+
+The novelty state is the third emotional state. This state signals the user that Eva wants to learn active. This is linked 
+directly to a \textit{conceptual active learning process} that is not yet implemented in Eva \pageref{sec:Concept}. This state is characterized by the sentence ``this is new for me''.
+
+The states of Eva are shown using three different elements \footnote{See Technical Document}: the movement of the eyebrows, the colouring of the sides of her head  and the sound emanating from Eva’s body. The combination of effects was chosen because it complements each other in such a way that elderly should be able to comprehend Eva even when they are suffering from an elderly ailment such as reduced vision or hearing. The lights were placed in the head. The head was created because it creates a focus of attention for the user by creating a human-like feature that stimulates interaction \cite{elderly}. The other facial features were limited to eyebrows to prevent the users from expecting too much from the robot and also to prevent the uncanny valley effect that appears when non-living things begin appearing too human \cite{uncanny}. 
+
+The lights are characterized by their colour, their intensity and their frequency in blinking. The ``startup time'' and 
+``dimming time'' are also characteristic for the lights but are somewhat linked to the frequency. Lights can be linked to 
+emotions \cite{colour-emotion} , whereas the intensity and frequency can be linked to arousal. The eyebrows have variable rotation and variable height. Eyebrow positions can also be linked to emotions, as seen in the iCat \cite{iCat}. Finally, the sounds are unique for each state. Each of the sounds was made with a design process based around non-textual vocals of related ``emotional states'': the attributes of our sounds were based on related emotions  such as content and enthusiasm for the happy state. This means that even though the actual pitch of the robot was unknown at first it could be built by using elements \cite{sounds} of the relevant related sounds.
 
 \subsection*{Eye contact}
 Eva is able to detect faces and track them with her head. This makes her look into the eyes of the person who is talking to 
 her, which stimulates user interaction. Because people are used to looking into the other's eyes during a conversation, 
-this feature provides a familiar and natural way for elderly to communicate with Eva. The face detection is done using the face detection example in OpenCV \footnote{http://opencv.willowgarage.com/wiki/FaceDetection}, which utilizes Haar-like features.
+this feature provides a familiar and natural way for elderly to communicate with Eva. The face detection is done using the 
+face detection example in OpenCV, which utilizes Haar-like features. For more information, please refer to 
+\url{http://opencv.willowgarage.com/wiki/FaceDetection} \cite{FaceDetection} .
 
 \subsection*{Commands}
 To give orders to Eva, one only needs to speak to her in English (Other languages are not yet supported). Eva uses speech 
@@ -34,19 +56,21 @@ Being able to recognize commands through speech was a necessary feature for Eva 
 with natural language. By using speech recognition, it is not needed for elderly to learn a new way to communicate with 
 Eva, which makes it easier for them to accept and to make use of Eva.
 
-\newpage
-
 \section*{Object manipulation}
 \subsection*{Object recognition}
-For object recognition, the tabletop object detector from ROS is used. This algorithm detects rotational symmetric objects on a table by segmenting clusters above the tabletop, which are compared to known models in a given database. Each cluster is then fitted to each model in the database and when a good fit is found, the position of the found object will be returned so Eva can grab the object. Because the tabletop detector only uses segments to detect objects, it can only recognize objects by form, meaning that two different products with the same form can be seen as the same object. Also, the models are inserted in the database beforehand and have to be created by the user self.
+For object recognition, the tabletop object detector from ROS is used. This algorithm detects rotational symmetric objects on a table by segmenting clusters above the tabletop, which are compared to known models in a given database. Each cluster is then fitted to each model in the database and when a good fit is found, the position of the found object will be returned so Eva can grab the object. Because the tabletop object detector only uses segments to detect objects, it can only recognize objects by form, meaning that two different products with the same form can be seen as the same object. Also, the models are inserted in the database beforehand and have to be created by the user self.
 
 To detect the tabletop, fast plane detection is used \cite{plane}, which 
 searches for planes. the biggest recognized plane will be seen as a tabletop, meaning that a wall can also be seen as a 
 tabletop if Eva is seeing one.
 
-For more information about the tabletop detector, please refer to \url{http://www.ros.org/wiki/tabletop\_object\_detector} \cite{tabletop}.
+For more information about the tabletop object detector, please refer to \url{http://www.ros.org/wiki/tabletop\_object\_detector} \cite{tabletop}.
 
-The tabletop object detector was used in this project because the results in segmenting and distinguishing the objects were better than the package used previously, namely RoboEarth \cite{Roboearth}. Although it was easier to add objects to the database of RoboEarth, the detection of objects was not reliable, thus making the tabletop object detector the better option. However, since RoboEarth is still a work in progress, it is anticipated that detection in RoboEarth happens with more success in the future, so it will be a good alternative if improvements are made.
+The tabletop object detector was used in this project because the results in segmenting and distinguishing the objects were 
+better than the package used previously, namely RoboEarth \cite{Roboearth}. Although it was easier to add objects to the 
+database of RoboEarth, the detection of objects was not reliable, thus making the tabletop object detector the better 
+option. However, since RoboEarth is still a work in progress, it is anticipated that detection in RoboEarth happens with 
+more success in the future, so it will be a good alternative if improvements are made.
 
 \subsection*{Eva's arm}
 blabla
@@ -76,8 +100,7 @@ calculates the angle for the ``wrist''. See also \ref{fig:IK0} , \ref{fig:IK1} a
 \beta = -1 * \arcsin(x_4/(L3 + L4))
 \end{equation*}
 
-Also, the following formulas are used to 
-keep track of the position of the gripper, given an angle $\alpha$ for the 
+Also, the following formulas are used to keep track of the position of the gripper, given an angle $\alpha$ for the 
 shoulder and an angle $\beta$ for the ``wrist'' link:
 
 \begin{equation*}
@@ -88,21 +111,21 @@ z = \sin(\alpha)*L1
 x = \sin(-1 * \beta)*(L3 + L4)
 \end{equation*}
 
-\begin{figure}[ht!]
+\begin{figure}[h]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/3d_zijenbovenaanzicht.png}}
 	\caption{Side and top view of the arm with calculations of the kinematics}
 	\label{fig:IK0}
 \end{figure}
 
-\begin{figure}[ht!]
+\begin{figure}[h]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/2d_bovenaanzicht.png}}
 	\caption{Top view of the arm with calculations of the kinematics}
 	\label{fig:IK1}
 \end{figure}
 
-\begin{figure}[ht!]
+\begin{figure}[h!]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/2d_zijaanzicht.png}}
 	\caption{Side view of the arm with calculations of the kinematics}
@@ -110,11 +133,11 @@ x = \sin(-1 * \beta)*(L3 + L4)
 \end{figure}
 
 \section*{Navigation}
-Navigating Eva in an environment exists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know how to execute this path as good as she can.
+Navigating Eva in an environment consists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know how to execute this path as good as she can.
 \subsection*{Map creation}
-The GMapping package in ROS was used to create a map of the environment. GMapping\footnote{http://www.openslam.org/gmapping.html} is a SLAM algorithm, which stands for \textit{Simultaneous Localization And Mapping}. The algorithm takes in laserscan and odometry data and this data is converted into a map. There is no laser present on Eva, so this data had to be substituted by Kinect data, which is an easy conversion.
+The GMapping package in ROS was used to create a map of the environment. GMapping \cite{GMapping} is a SLAM algorithm, which stands for \textit{Simultaneous Localization And Mapping}. The algorithm takes in laserscan and odometry data and this data is converted into a map. There is no laser present on Eva, so this data had to be substituted by Kinect data, which is an easy conversion.
 
-At this stage there is a map created by GMapping, but in .pgm format. Recast\footnote{http://code.google.com/p/recastnavigation/} is used to convert a map into a navigation mesh, which is later used to determine a path from point A to point B, however Recast accepts only maps of the format .obj, a 3D representation format\footnote{http://en.wikipedia.org/wiki/Wavefront\_.obj\_file}. To convert from .pgm to .obj a custom converter had to be written, more information on this can be found in the technical document. Recast is then ready to create a navigation mesh on the map. This mesh defines where Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With this Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
+At this stage there is a map created by GMapping, but in .pgm format. Recast \footnote{http://code.google.com/p/recastnavigation/} is used to convert a map into a navigation mesh, which is later used to determine a path from point A to point B, however Recast accepts only maps of the format .obj, a 3D representation format \cite{wavefront} . To convert from .pgm to .obj a custom converter had to be written, more information on this can be found in the technical document. Recast is then ready to create a navigation mesh on the map. This mesh defines where Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With this Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
 \subsection*{Global planner}
 Originally the navigation stack in ROS was used as global planner. This navigation stack however proved to be a big black box, if it didn't work it was hard to figure out why. On top of that, it required a lot of processing power. The laptop used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch this navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents requesting new paths.
 \subsubsection*{Planning}
