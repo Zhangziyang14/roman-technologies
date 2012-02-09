@@ -1,5 +1,5 @@
 # zonder extensie
-ROOT = Assignment_1
+ROOT = project_eva
 BIB = biblio
 
 $(ROOT).pdf: *.tex
