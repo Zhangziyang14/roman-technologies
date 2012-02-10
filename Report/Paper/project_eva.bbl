@@ -74,6 +74,25 @@
   \field{year}{1986}
 \endentry
 
+\entry{CBS}{online}{}
+  \name{author}{1}{%
+    {{CBS}{C.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{C1}
+  \strng{fullhash}{C1}
+  \field{sortinit}{C}
+  \field{title}{Dutch Ageing statistics}
+  \verb{url}
+  \verb http://statline.cbs.nl/StatWeb/publication/?VW=T&DM=SLNL&PA=70115ned&D1
+  \verb =0,3-4&D2=a&D3=a&HD=120210-1637&HDR=T,G1&STB=G2
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
 \entry{Diepenhorst}{article}{}
   \name{author}{3}{%
     {{Diepenhorst}{D.}%

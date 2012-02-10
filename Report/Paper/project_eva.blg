@@ -4,6 +4,11 @@ The style file: biblatex.bst
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: project_eva-blx.bib
 Database file #2: project_eva.bib.bib
+I was expecting a `,' or a `}'---line 122 of file project_eva.bib.bib
+ : 
+ : @ONLINE{iCat,
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
 Biblatex version: 0.9
 Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2523 of file biblatex.bst
@@ -102,45 +107,45 @@ Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2682 of file biblatex.bst
-You've used 18 entries,
+You've used 19 entries,
             6083 wiz_defined-function locations,
-            1229 strings with 10466 characters,
-and the built_in function-call counts, 49921 in all, are:
-= -- 1701
-> -- 1846
-< -- 498
-+ -- 525
-- -- 708
-* -- 3684
-:= -- 3153
+            1233 strings with 10613 characters,
+and the built_in function-call counts, 52526 in all, are:
+= -- 1791
+> -- 1935
+< -- 526
++ -- 544
+- -- 738
+* -- 3839
+:= -- 3302
 add.period$ -- 0
-call.type$ -- 18
-change.case$ -- 178
-chr.to.int$ -- 69
-cite$ -- 34
-duplicate$ -- 5528
-empty$ -- 5262
-format.name$ -- 1070
-if$ -- 11490
+call.type$ -- 19
+change.case$ -- 187
+chr.to.int$ -- 75
+cite$ -- 36
+duplicate$ -- 5834
+empty$ -- 5557
+format.name$ -- 1118
+if$ -- 12091
 int.to.chr$ -- 0
-int.to.str$ -- 37
+int.to.str$ -- 39
 missing$ -- 0
-newline$ -- 378
-num.names$ -- 691
-pop$ -- 5425
+newline$ -- 397
+num.names$ -- 732
+pop$ -- 5739
 preamble$ -- 1
-purify$ -- 221
+purify$ -- 231
 quote$ -- 0
-skip$ -- 3032
+skip$ -- 3195
 stack$ -- 0
-substring$ -- 544
-swap$ -- 1819
-text.length$ -- 511
+substring$ -- 568
+swap$ -- 1913
+text.length$ -- 537
 text.prefix$ -- 0
 top$ -- 1
-type$ -- 780
+type$ -- 824
 warning$ -- 0
-while$ -- 358
+while$ -- 380
 width$ -- 0
-write$ -- 359
-(There were 48 error messages)
+write$ -- 377
+(There were 49 error messages)
