@@ -2,6 +2,7 @@
 
 \usepackage{graphicx}
 \usepackage{subfig}
+\usepackage{movie15}
 \usepackage[subfigure]{tocloft}
 \usepackage{listings}
 \usepackage{wallpaper}
@@ -40,55 +41,42 @@
 
 \newcommand{\todo}[1]{\textbf{\textsc{\textcolor{red}{[#1]}}}}
 
-\chapter{Preface}
+\chapter*{Preface}
 \subfile{preface}
 \label{preface}
-\newpage
 
-\chapter{Abstract}
+\chapter*{Abstract}
 \subfile{abstract}
 \label{abstract}
 \newpage
 
 \tableofcontents
 
-\chapter{Introduction}
+\chapter*{Introduction}
 \subfile{introduction}
 \label{introduction}
-\newpage
 
-\newpage
-\chapter{Global Planner}
+\chapter*{Aesthetic design}
+\subfile{aesthetic_design}
+\label{aesthetic_design}
+
+\chapter*{Global Planner}
 \subfile{global_planner}
 \label{global_planner}
 
-\newpage
-\chapter{Object Avoidance}
+\chapter*{Object Avoidance}
 \subfile{object_avoidance}
 \label{object_avoidance}
 
-\newpage
-\chapter{Software Architecture}
+\chapter*{Software Architecture}
 \label{Software Architecture}
 \subfile{software_architecture}
 
-\newpage
-\chapter{Electronics}
+\chapter*{Electronics}
 \subfile{electronics}
 \label{electronics}
 
-\newpage
-\chapter{Arm}
-\subfile{arm}
-\label{arm}
-
-\newpage
-\chapter{Head}
-\subfile{head}
-\label{head}
-
-\newpage
-\chapter{References}
+\chapter*{References}
 \label{references}
 \subfile{references}
 
