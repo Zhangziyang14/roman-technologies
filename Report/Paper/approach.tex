@@ -11,7 +11,7 @@ recognition that works efficiently, given that the speech recognition module wor
 Pascal Wiggers}. 
 
 Another asset for simple emotion recognition would be smile detection, since it is not hard to detect smiles on human faces 
-(look for white teeth and lifted mouth corners \footnote{Advised by Dr.Joost Broekens}). An implementation of emotion 
+(look for white teeth and lifted mouth corners \footnote{Advised by Dr. Joost Broekens}). An implementation of emotion 
 detection already exists \cite{autosmiley}, but this was not used in this project due to time 
 constraints and inability to compile the program because of deprecated code.
  
@@ -58,7 +58,16 @@ Eva, which makes it easier for them to accept and to make use of Eva.
 
 \section*{Object manipulation}
 \subsection*{Object recognition}
-For object recognition, the tabletop object detector from ROS is used. This algorithm detects rotational symmetric objects on a table by segmenting clusters above the tabletop, which are compared to known models in a given database. Each cluster is then fitted to each model in the database and when a good fit is found, the position of the found object will be returned so Eva can grab the object. Because the tabletop object detector only uses segments to detect objects, it can only recognize objects by form, meaning that two different products with the same form can be seen as the same object. Also, the models are inserted in the database beforehand and have to be created by the user self.
+For object recognition, the tabletop object detector from ROS is used. This algorithm detects rotational symmetric objects on a table by segmenting clusters above the tabletop, which are compared to known models in a given database. Each cluster is then fitted to each model in the database and when a good fit is found, the position of the found object will be returned so Eva can grab the object. See figure \ref{fig:tabletop} for the results.
+
+Because the tabletop object detector only uses segments to detect objects, it can only recognize objects by form, meaning that two different products with the same form can be seen as the same object. Also, the models are inserted in the database beforehand and have to be created by the user self.
+
+\begin{figure}[h]
+	\centering
+	\mbox{\includegraphics[width=0.5\textwidth]{Images/object_detector.png}}
+	\caption{Result of the tabletop object detector. The segmented clusters are coloured and a green wire frame is drawn when an object is recognized.}
+	\label{fig:tabletop}
+\end{figure}
 
 To detect the tabletop, fast plane detection is used \cite{plane}, which 
 searches for planes. the biggest recognized plane will be seen as a tabletop, meaning that a wall can also be seen as a 
@@ -114,21 +123,21 @@ x = \sin(-1 * \beta)*(L3 + L4)
 \begin{figure}[h]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/3d_zijenbovenaanzicht.png}}
-	\caption{Side and top view of the arm with calculations of the kinematics}
+	\caption{Side and top view of the arm with calculations of the kinematics.}
 	\label{fig:IK0}
 \end{figure}
 
 \begin{figure}[h]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/2d_bovenaanzicht.png}}
-	\caption{Top view of the arm with calculations of the kinematics}
+	\caption{Top view of the arm with calculations of the kinematics.}
 	\label{fig:IK1}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/2d_zijaanzicht.png}}
-	\caption{Side view of the arm with calculations of the kinematics}
+	\caption{Side view of the arm with calculations of the kinematics.}
 	\label{fig:IK2}
 \end{figure}
 
