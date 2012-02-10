@@ -69,7 +69,7 @@
   \field{series}{Bradford Books}
   \field{title}{Vehicles: experiments in synthetic psychology}
   \verb{url}
-  \verb http://books.google.nl/books?id=7KkUAT\_q\_sQC
+  \verb http://books.google.nl/books?id=7KkUAT_q_sQC
   \endverb
   \field{year}{1986}
 \endentry
@@ -286,7 +286,7 @@
   \field{sortinit}{M}
   \field{title}{Tabletop Object Detector}
   \verb{url}
-  \verb http://www.ros.org/wiki/tabletop\_object\_detector
+  \verb http://www.ros.org/wiki/tabletop_object_detector
   \endverb
   \field{month}{02}
   \field{year}{2012}
