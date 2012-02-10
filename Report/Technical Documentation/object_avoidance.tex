@@ -1,9 +1,9 @@
 \documentclass[technical_document.tex]{subfiles}
-Object avoidance is done by listening to ultrasone sensors. Eva has 6 ultrasone sensors at the front, two sensors looking backwards and one sensor to each side. Depending on where an object is detected with the ultrasone sensors, the speed of the left or right wheel will be scaled down, so Eva will avoid the object. The scaling will have more effect when the measured distance to the object is small and will have less effect vice versa.
+Object avoidance is done using ultrasone sensors. Eva has 6 ultrasone sensors at the front, two sensors scanning backwards and one sensor to each side. Depending on where an object is detected with the ultrasone sensors, the speed of the left or right wheel will be scaled down, so Eva will avoid the object. The scaling will have more effect when the measured distance to the object is small and will have less effect if the distance is large.
 
 The following example gives more insight in how this method works. If the ultrasone sensors on the front left detect an object, then the right wheel will go slower, making Eva turn right. The same goes for the side sensors when an object is detected on the sides, for the front sensors in the middle etc.
 
-Since the sides only have one sensor each, avoiding objects on the sides is easy. Eva simply needs to turn right when something on the left is heard and turn left whenever something on the right is heard. Also, because Eva won't drive backwards while going to her goal (only when she needs to adjust her position in front of a table), the sensors at her back are only used to stop the wheels when something is detected. 
+Since the sides only have one sensor each, avoiding objects on the sides is easy. Eva simply needs to turn right when something on the left is detected and turn left whenever something on the right is detected. Also, because Eva won't drive backwards while going to her goal (only when she needs to adjust her position in front of a table), the sensors at her back are only used to stop the wheels when something is detected. 
 
 The following formula is used by the sensors on the side to scale the speeds of the wheels:
 

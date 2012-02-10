@@ -1,12 +1,12 @@
 \documentclass[technical_document.tex]{subfiles}
 \begin{document}
 
-Eva’s electrical system consists of three subsystems. First there is the power electronics part built around the battery and the DC power input. This provides the necessary power to the other subsystems: the motor electronics and the mainboard. 
+Eva\textquotesingle s electrical system consists of three subsystems. First there is the power electronics part built around the battery and the DC power input. This provides the necessary power to the other subsystems: the motor electronics and the mainboard. 
 
 \section{Power Electronics}
 
 Eva can be powered either from a $12V$ battery or a $12V DC$ power input. She has a control panel behind the front bumper from where you can switch between battery power and net power. 
-There is room for one big $17AH$ lead acid battery between Eva’s wheels as well as a smaller $7AH$ battery on the laptop level. The batteries cannot be active simultaneously. There is a switch to select the battery, which has to be used.  The main switch can shut down both battery and wall power at once.
+There is room for one big $17AH$ lead acid battery between Eva\textquotesingle s wheels as well as a smaller $7AH$ battery on the laptop level. The batteries cannot be active simultaneously. There is a switch to select the battery, which has to be used.  The main switch can shut down both battery and wall power at once.
  
  \begin{figure}[ht!]
 	\centering
@@ -18,9 +18,9 @@ There is room for one big $17AH$ lead acid battery between Eva’s wheels as well 
 \section{Motor Electronics}
 
 \subsection{Configuration}
-Eva sports a total of seven motors and three servos. Two Dynamixels actuate the head. The mobile base, the arm and the gripper have motors controlled by three 3mxl boards. The 3mxl boards are daisy chained on the RS485 bus and accessible via one USB port. A separate USB port connects the Dynamixels’ RS485 bus. 
+Eva sports a total of seven motors and three servos. Two Dynamixels actuate the head. The mobile base, the arm and the gripper have motors controlled by three 3mxl boards. The 3mxl boards are daisy chained on the RS485 bus and accessible via one USB port. A separate USB port connects the Dynamixels\textquotesingle  RS485 bus. 
 We encountered problems talking to the 3mxl and Dynamixel over one bus. So we separated them. However it should be possible to use them all on one bus while using Shared Serial in ROS.
-Table \ref{tab:motorConfiguration} shows an overview of the motors and the ID’s they listen to. The baud rate for the 3mxl serial connections is $921.6 kBaud$. The Dynamixels connect at $1.0 MBaud$.
+Table \ref{tab:motorConfiguration} shows an overview of the motors and the ID\textquotesingle s they listen to. The baud rate for the 3mxl serial connections is $921.6 kBaud$. The Dynamixels connect at $1.0 MBaud$.
 
 \begin{table}[h]
 \centering
@@ -45,21 +45,21 @@ Table \ref{tab:motorConfiguration} shows an overview of the motors and the ID’s 
 \newpage
 \subsection{Safety measures}
 The emergency stop affects the wheel and arm motors. When the emergency button is pushed the relays will cut the power to the motors and the 3mxl is signaled to stop driving the motors as well. The Elbow motor is not connected through a relay. This is something that could be improved on in the future.
-The Dynamixels are not connected to the emergency stop circuit because the head would fall down if the power supply has been broken. That could cause damages to the head. The same goes for the gripper. The gripper should not let an object slip when the emergency button is pushed.
+The Dynamixels are not connected to the emergency stop circuit because the head would fall down if the power supply has been broken. That could cause damage to the head. The same goes for the gripper. The gripper should not let an object slip when the emergency button is pushed.
 
-To protect the head from damaging it self or the body software limits are implemented. The arm has both software limits and hardware limits\ref{sec:limits}. These hardware limits are 4 microswitches mounted on the arm and electrically parallel with the emergency button. They detect when the arm is nearing it's absolute limit en trigger the emergency state in the 3mxl boards.
+To protect the head from damaging itself or the body, software limits are implemented. The arm has both software limits and hardware limits\ref{sec:limits}. These hardware limits are 4 microswitches mounted on the arm and electrically parallel with the emergency button. They detect when the arm is nearing it's absolute limit and trigger the emergency state in the 3mxl boards.
 
 The gripper provides no position feedback and the wheels are not limited in their rotation so no limits are implemented.
 
 \newpage
 \section{Mainboard}
-To power and control Eva's other features we designed an electrical main board. The board functions both as a $12V$ supplier as well as a $5V$ supplier. It controls the RGB LEDs and the servos in Eva's head. It functions also as a data acquisition board for the sensors and the bumper.
+To power and control Eva\textquotesingle s other features, we designed an electrical main board. The board functions both as a $12V$ supplier as well as a $5V$ supplier. It controls the RGB LEDs and the servos in Eva\textquotesingle s head. It functions also as a data acquisition board for the sensors and the bumper.
 Two Arduino Duemilanoves that are located at both sides of the main board provide the actual intelligence. Tabel \ref{tab:mainBoardConnectors} shows how the Arduinos are connected to the main board. $S0$ to $S4$ are jumpers which can assign 5 signals to an arbitrary Arduino. This is to give more flexibility to the Arduino pin assignment because certain Arduino libraries can cause pins to be unable to use. Figure \ref{fig:MBS} shows the entire main board schematic.
 
 
  \begin{figure}[ht!]
 	\centering
-	\mbox{\includegraphics[scale=1.1]{Images/MainBoard_Specs.png}}
+	\mbox{\includegraphics[scale=1.0]{Images/MainBoard_Specs.png}}
 	\caption{Main board layout}
 	\label{fig:main_board_layout}
 \end{figure}
@@ -150,7 +150,7 @@ The  LSM2-T/10-D12N-C  DC/DC converter serves as the $5V$ power supply. This dev
 
  \newpage
 \subsection{RGB Control}
-The light in Eva's head is generated by twelve $10mm$ RGB LEDs on each side. The actual color of the LEDs is controlled by a pwm signal from the Arduino. TIP121 Darlington transistors amplify this signal to provide enough current to the 24 LEDs.
+The light in Eva\textquotesingle s head is generated by twelve $10mm$ RGB LEDs on each side. The actual color of the LEDs is controlled by a pwm signal from the Arduino. TIP121 Darlington transistors amplify this signal to provide enough current to the 24 LEDs.
 
 Each LED actually consists of three LEDs. A red one, a green one and a blue one. They all consume a maximum of $20 mA$. That sums up to $480mA$ for all the LEDs combined. The red LEDs drop $1.8V$ and the green and blue LEDs drop $3.8V$. So to limit the current two different resistor values are needed.
 
@@ -164,15 +164,15 @@ Rgreen = \frac{Vcc-Vgreen}{Igreen*24} =\frac{5-3.8}{0.020*24} = 2.5 \Omega
 Rblue = \frac{Vcc-Vblue}{Iblue*24} =\frac{5-3.8}{0.020*24} = 2.5 \Omega
 \end{equation*}
 
-Note that it is a rather naïve implementation to link all LEDs to only one resistor. Since the current through the other LEDs will increase if one of them breaks down causing others to break down as well. The proper way to implement this would be to insert a resistor before every LED.
+Note that it is a rather na\"{i}ve implementation to link all LEDs to only one resistor. Since the current through the other LEDs will increase if one of them breaks down causing others to break down as well. The proper way to implement this would be to insert a resistor before every LED.
 
-The Darlington transistors only need a small amount of current at their base. 4.7$k\Omega$ resistors are chosen to limit the base current to $1 mA$. The Darlingtons have a $h_{fe}$ of 1000 so the maximum current they can provide is 1 * 1000 = 1000 $mA$ which is enough.
+The Darlington transistors only need a small amount of current at their base. 4.7$k\Omega$ resistors are chosen to limit the base current to $1 mA$. The Darlingtons have a $h_{fe}$ of 1000, so the maximum current they can provide is 1 * 1000 = 1000 $mA$ which is enough.
 
  
  
  
 \subsection{Data Acquisition}
-Eva’s bumper detects bumps by six buttons around the mobile base that provide 4 signals: front, rear, left and right. These signals are guided through a debouncing circuit(Figure \ref{fig:DAQ}). The capacitors keep the voltage to $5V$ when the buttons are not pressed. The Schmitt Trigger converts the signal to a logical zero.
+Eva\textquotesingle s bumper detects bumps by six buttons around the mobile base that provide 4 signals: front, rear, left and right. These signals are guided through a debouncing circuit(Figure \ref{fig:DAQ}). The capacitors keep the voltage to $5V$ when the buttons are not pressed. The Schmitt Trigger converts the signal to a logical zero.
 When a button is pressed it will connect the anode side of the capacitor to the ground. This will cause the charge in the capacitor to flow away and pull the signal low. Then the Schmitt Trigger will swing its signal high.  
 
 These stable signals are fed to a 4-input OR port. The output of this OR port triggers an interrupt on the Arduino, which subsequently reads the button signals to determine which bumper has been hit. 
@@ -189,7 +189,7 @@ The Ping has to be triggered with a 5$\mu$s pulse and returns a high pulse with 
 The SRF02 sensors are all connected on an I2C bus. They are fired in two phases. First al even ones do a distance measurement then all odd sensors do theirs. This is to prevent interference of neighboring sensors.
 
 \subsection{Servos}
-The main board’s final function is to power the servos in Eva’s head and to perform as a hatch for Arduino signals controlling the servos. Also there are three vacant pins to attach more devices if desired.
+The main board\textquotesingle s final function is to power the servos in Eva\textquotesingle s head and to perform as a hatch for Arduino signals controlling the servos. Also there are three vacant pins to attach more devices if desired.
 
  \begin{figure}[ht!]
 	\centering
