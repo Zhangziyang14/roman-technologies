@@ -47,7 +47,7 @@ Table \ref{tab:motorConfiguration} shows an overview of the motors and the ID\te
 The emergency stop affects the wheel and arm motors. When the emergency button is pushed the relays will cut the power to the motors and the 3mxl is signaled to stop driving the motors as well. The Elbow motor is not connected through a relay. This is something that could be improved on in the future.
 The Dynamixels are not connected to the emergency stop circuit because the head would fall down if the power supply has been broken. That could cause damage to the head. The same goes for the gripper. The gripper should not let an object slip when the emergency button is pushed.
 
-To protect the head from damaging itself or the body, software limits are implemented. The arm has both software limits and hardware limits\ref{sec:limits}. These hardware limits are 4 microswitches mounted on the arm and electrically parallel with the emergency button. They detect when the arm is nearing it's absolute limit and trigger the emergency state in the 3mxl boards.
+To protect the head from damaging itself or the body, software limits are implemented. The arm has both software limits and hardware limits. These hardware limits are 4 microswitches mounted on the arm and electrically parallel with the emergency button. They detect when the arm is nearing it's absolute limit and trigger the emergency state in the 3mxl boards.
 
 The gripper provides no position feedback and the wheels are not limited in their rotation so no limits are implemented.
 
