@@ -82,7 +82,21 @@ option. However, since RoboEarth is still a work in progress, it is anticipated 
 more success in the future, so it will be a good alternative if improvements are made.
 
 \subsection*{Eva's arm}
-blabla
+For Eva to successfully manipulate objects, she needs an arm. This arm was designed taking into account a set of requirements and constraints. For Eva, the most important constraint was development time; to allow for some testing time, the whole arm would need to be created within a month. To create the arm within a tight budget means reducing the amount of expensive components such as motors. Another constraint is the amount of power the arm can consume. As Eva runs on batteries, it is important to minimize energy consumption, in order to maximize time between charge.
+
+ The goal for the prototype was to be able to pick up small objects weighing up to $2kg$ from a table. Not every table is the same height, and being able to reach the kitchen sink is required as well. This means the arm has to reach at least from $0.6m$ to $1.0m$ height. %TODO reference? maybe report 2?
+When picking up an object from a table, the object will not always be at the edge of the table, so the arm should be able to pick up objects that are placed at least $0.30m$ from the edge of the table. %TODO reference? maybe report 2?
+Furthermore, to avoid toppling and to be able to work efficiently, the weight of the robotic arm should be as low as possible, especially at the end of the arm. For aesthetic purposes the arm should be as compact as possible.
+
+\begin{figure}[h]
+	\centering
+	\mbox{\includegraphics[width=0.5\textwidth]{Images/armMechOverview.png}}
+	\caption{Mechanical design of Eva's arm}
+	\label{fig:armMechOverview}
+\end{figure}
+
+Summarizing the requirements, the arm should contain as few motors as possible to reduce costs, complexity and power usage. If possible, it would be preferable not to place these motors in the arm itself, to keep the arm as lightweight as possible. The arm should be able to pick a $2kg$ object from a height between $0.6m$ and $1.0m$. These requirements resulted in the arm as designed for Eva, see fig. \ref{fig:armMechOverview}.
+The arm can be folded compactly along Eva’s body when not in use, while it can be stretched pretty far when grasping an object at table height. The elbow could be driven by a third motor, or kept fixed so the lower arm is always horizontal. The last option was chosen, since adding this third motor would make the arm more complex than required for the first prototype. The arm can move up and down, move sideways and is connected to the body on a position at shoulder hight. This combination gives the arm a humanoid look, but this was not intentional. It is just a result of the requirements described earlier.
 
 \subsection*{Inverse kinematics}
 As mentioned in the previous section, Eva's arm uses two motors to position the gripper: one for moving the arm sideways 
@@ -143,14 +157,18 @@ x = \sin(-1 * \beta)*(L3 + L4)
 
 \section*{Navigation}
 Navigating Eva in an environment consists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know how to execute this path as good as she can.
+
 \subsection*{Map creation}
 The GMapping package in ROS was used to create a map of the environment. GMapping \cite{GMapping} is a SLAM algorithm, which stands for \textit{Simultaneous Localization And Mapping}. The algorithm takes in laserscan and odometry data and this data is converted into a map. There is no laser present on Eva, so this data had to be substituted by Kinect data, which is an easy conversion.
 
 At this stage there is a map created by GMapping, but in .pgm format. Recast \footnote{http://code.google.com/p/recastnavigation/} is used to convert a map into a navigation mesh, which is later used to determine a path from point A to point B, however Recast accepts only maps of the format .obj, a 3D representation format \cite{wavefront} . To convert from .pgm to .obj a custom converter had to be written, more information on this can be found in the technical document. Recast is then ready to create a navigation mesh on the map. This mesh defines where Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With this Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
+
 \subsection*{Global planner}
 Originally the navigation stack in ROS was used as global planner. This navigation stack however proved to be a big black box, if it didn't work it was hard to figure out why. On top of that, it required a lot of processing power. The laptop used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch this navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents requesting new paths.
+
 \subsubsection*{Planning}
 Calculating paths on the generated navigation mesh is done using Detour, which is supplied together with Recast. Detour is handed a starting location (the position of Eva) and a goal location. Using the navigation mesh supplied earlier, a path is calculated (ideally exactly on the goal location, but if this is not on the navigation mesh or unreachable, it gets as close as possible). The path is described by waypoints, where the number of waypoints can be increased, making the path smoother.
+
 \subsubsection*{Executing a path}
 Originally Eva would strictly follow this path. What this means is that she would keep rotating until she was facing the path, then drive forward until she reached a waypoint and then rotate again until she faced the next waypoint. This looked very unnatural and very static. 
 
