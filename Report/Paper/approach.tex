@@ -1,9 +1,9 @@
 \documentclass[project_eva.tex]{subfiles}
 \begin{document}
 
-\section*{Interaction}
+\subsection*{Interaction}
 
-\subsection*{Emotion recognition}
+\subsubsection*{Emotion recognition}
 Eva is able to recognize ``emotions'' in the words spoken by the user, this is done with speech recognition \footnote{See 
 Technical Document}. By comparing the recognized words with a list of positively and negatively loaded words, Eva is able to distinguish positive and negative feedback. This is the simplest form of emotion recognition that works efficiently, given that the speech recognition module works good enough \footnote{Advised by Dr. ir. Pascal Wiggers}. 
 
@@ -12,7 +12,7 @@ Another asset for simple emotion recognition would be smile detection, since it 
 detection already exists \cite{autosmiley}, but this was not used in this project due to time 
 constraints and inability to compile the program because of deprecated code.
  
-\subsection*{Emotion expression}
+\subsubsection*{Emotion expression}
 \label{sec:Emotion expression}
 Eva displays emotions for a functional reason: to display a state of feedback that tells the user information about the 
 actions of Eva. There are three emotional states: happy, sad and novelty. In  addition to the emotional states there is a 
@@ -35,7 +35,7 @@ The lights are characterized by their colour, their intensity and their frequenc
 ``dimming time'' are also characteristic for the lights but are somewhat linked to the frequency. Lights can be linked to 
 emotions \cite{colour-emotion} , whereas the intensity and frequency can be linked to arousal. The eyebrows have variable rotation and variable height. Eyebrow positions can also be linked to emotions, as seen in the iCat \cite{iCat}. Finally, the sounds are unique for each state. Each of the sounds was made with a design process based around non-textual vocals of related ``emotional states'': the attributes of our sounds were based on related emotions  such as content and enthusiasm for the happy state. This means that even though the actual pitch of the robot was unknown at first it could be built by using elements \cite{sounds} of the relevant related sounds.
 
-\subsection*{Eye contact}
+\subsubsection*{Eye contact}
 Eva is able to detect faces and track them with her head. This makes her look into the eyes of the person who is talking to 
 her, which stimulates user interaction. Because people are used to looking into the other\textquotesingle
 s eyes during a conversation, 
@@ -43,7 +43,7 @@ this feature provides a familiar and natural way for elderly to communicate with
 face detection example in OpenCV, which utilizes Haar-like features. For more information, please refer to 
 \url{http://opencv.willowgarage.com/wiki/FaceDetection} \cite{FaceDetection} .
 
-\subsection*{Commands}
+\subsubsection*{Commands}
 To give orders to Eva, one only needs to speak to her in English (Other languages are not yet supported). Eva uses speech 
 recognition to listen to the spoken sentences and searches for keywords, which correspond to certain actions. An example 
 would be getting juice whenever the word ``juice'' is heard in a sentence. This is done because the current technology for 
@@ -54,8 +54,8 @@ Being able to recognize commands through speech was a necessary feature for Eva 
 with natural language. By using speech recognition, it is not needed for elderly to learn a new way to communicate with 
 Eva, which makes it easier for them to accept and to make use of Eva.
 
-\section*{Object manipulation}
-\subsection*{Object recognition}
+\subsection*{Object manipulation}
+\subsubsection*{Object recognition}
 For object recognition, the tabletop object detector from ROS is used. This algorithm detects rotational symmetric objects on a table by segmenting clusters above the tabletop, which are compared to known models in a given database. Each cluster is then fitted to each model in the database and when a good fit is found, the position of the found object will be returned so Eva can grab the object. See figure \ref{fig:tabletop} for the results.
 
 Because the tabletop object detector only uses segments to detect objects, it can only recognize objects by form, meaning that two different products with the same form can be seen as the same object. Also, the models are inserted in the database beforehand and have to be created by the user.
@@ -78,7 +78,7 @@ database of RoboEarth, the detection of objects was not reliable, thus making th
 option. However, since RoboEarth is still a work in progress, it is anticipated that detection in RoboEarth happens with 
 more success in the future, so it will be a good alternative if improvements are made.
 
-\subsection*{Eva\textquotesingle s arm}
+\subsubsection*{Eva\textquotesingle s arm}
 For Eva to successfully manipulate objects, she needs an arm. This arm was designed taking into account a set of requirements and constraints. The most important constraint was development time; to allow for some testing time, the whole arm would need to be created within a month. To create the arm within a tight budget means reducing the amount of expensive components such as motors. Another constraint is the amount of power the arm can consume. As Eva runs on batteries, it is important to minimize energy consumption, in order to maximize time between charge.
 
 The goal for the prototype was to pick up small objects weighing up to $2kg$ from a table. Not every table is the same height and reaching a kitchen sink is required as well. This means the arm has to reach at least from $0.6m$ to $1.0m$ height. %TODO reference? maybe report 2?
@@ -95,7 +95,7 @@ Furthermore, to avoid toppling and to work efficiently, the weight of the roboti
 Summarizing the requirements, the arm should contain as few motors as possible to reduce costs, complexity and power usage. If possible, it would be preferable not to place these motors in the arm itself, to keep the arm as lightweight as possible. The arm should be able to pick a $2kg$ object from a height between $0.6m$ and $1.0m$. These requirements resulted in the arm as designed for Eva, see fig. \ref{fig:armMechOverview}.
 The arm can be folded compactly along Eva\textquotesingle s body when not in use, while it can be stretched pretty far when grasping an object at table height. The elbow could be driven by a third motor, or kept fixed so the lower arm is always horizontal. The last option was chosen, since adding this third motor would make the arm more complex than required for the first prototype. The arm can move up and down, move sideways and is connected to the body on a position at shoulder hight. This combination gives the arm a humanoid look, but this was not intentional. It is just a result of the requirements described earlier.
 
-\subsection*{Inverse kinematics}
+\subsubsection*{Inverse kinematics}
 As mentioned in the previous section, Eva\textquotesingle s arm uses two motors to position the gripper: one for moving the 
 arm sideways 
 and one for moving the arm in height. In order to position the gripper to a desired position, inverse kinematics are used 
@@ -155,12 +155,12 @@ x = \sin(-1 * \beta)*(L3 + L4)
 	\label{fig:IK1}
 \end{figure}
 
-\section*{Navigation}
+\subsection*{Navigation}
 Navigating Eva in an environment consists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out 
 the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know 
 how to execute this path as good as she can.
 
-\subsection*{Map creation}
+\subsubsection*{Map creation}
 The GMapping package in ROS was used to create a map of the environment. GMapping \cite{GMapping} is a SLAM algorithm, 
 which stands for \textit{Simultaneous Localization And Mapping}. The algorithm takes in laserscan and odometry data and 
 this data is converted into a map. There is no laser present on Eva, so this data had to be substituted by Kinect data, 
@@ -173,7 +173,7 @@ format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to b
 Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With 
 this information, Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
 
-\subsection*{Global planner}
+\subsubsection*{Global planner}
 Originally the navigation stack in ROS was used as global planner. This navigation stack however proved to be a big black 
 box; if it did not work, it was hard to figure out why. On top of that, it required a lot of processing power. The laptop 
 used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and 
@@ -209,7 +209,7 @@ Eva. For this figure, Eva was artificially pushed away to test how well she woul
 	\label{fig:global_path}
 \end{figure}
 
-\subsection*{Object avoidance}
+\subsubsection*{Object avoidance}
 Object avoidance is needed for Eva to keep herself safe, but also to keep the environment safe from her. Eva uses ultrasone 
 sensors to detect objects in her environment and scales the speeds of her wheels according to the distance to the 
 detected object and the position of this object. Eva has six sensors in front, two in the back and one on each side. The 
