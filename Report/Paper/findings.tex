@@ -4,6 +4,8 @@
 Besides findings based on Eva's performance in the home care environment and at the symposium, several findings are mentioned that are from tests in the office environment where Eva was developed. A list of findings is presented below:
 
 \begin{itemize}
+\item Eva tracks the face of the nearest person, she cannot distinguish the person who is actually talking to her, so she cannot serve a specific person. An improvement would be to make Eva recognize distinct faces.
+
 \item Speech recognition suffered from ambient noise, causing lost and false positive commands. A solution would be to train the speech model better, or choose a different speech package. 
 \item No gripper feedback was implemented. This caused Eva to think she had grasped an object while she was holding nothing in some cases. This can be solved by using camera feedback of the Kinect; Eva could use the Kinect to see whether she grabbed the correct object or not.
 \item Eva just moves her arm to the position of the found object, without taking the environment into account. An improvement would be to add a motion planner that also checks for possible collisions of Eva with her environment.
