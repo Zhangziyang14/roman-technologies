@@ -1,19 +1,6 @@
 \documentclass[project_eva.tex]{subfiles}
 \begin{document}
 
-The fetch and carry test in an ideal domestic environment was passed by Eva. The result is shown in this video\ref{VIDEO}. However more testing in other environments pointed out some design and implementation flaws.
 
-\begin{itemize}
-\item Speech recognition suffered from ambient noise, causing lost and false positive commands. A solution would be to train the speech model better, or choose a different speech package. 
-\item The eyebrows were unable to lift - due to a servo failure - causing the novelty emotion to not convey properly. A higher quality motor should be mounted in the head to move the eyebrows up and down.
-\item Stable navigation was impaired by the h-bridges driving the wheels. They cut off the power above $3A$ resulting in shocking motion. A solution would be to power the motors at $24V$.
-\item No gripper feedback was implemented. This caused Eva to think she had grasped an object while she was holding nothing in some cases.
-\item Object avoidance has not been tested combined with the path planning. 
-\item When a lot of objects were present on the table, tabletop object detector performed considerably slower. A more efficient way is to segment by RGB first and secondly fit the remaining clusters with the database. Also it would be better to track the objects after detection instead of constantly detecting.
-\item Also when the table was placed directly against a wall, the tabletop object detector could classify the wall plane as a tabletop.
-\item An improvement on the interaction would be to add confirmations from Eva after receiving a command.
-\item To make Eva appear less static is to provide a larger number of samples per emotion.
-\end{itemize}
- 
 
 \end{document}

@@ -53,8 +53,9 @@ The gripper provides no position feedback and the wheels are not limited in thei
 
 \newpage
 \section{Mainboard}
-To power and control Eva\textquotesingle s other features, we designed an electrical main board. The board functions both as a $12V$ supplier as well as a $5V$ supplier. It controls the RGB LEDs and the servos in Eva\textquotesingle s head. It functions also as a data acquisition board for the sensors and the bumper.
-Two Arduino Duemilanoves that are located at both sides of the main board provide the actual intelligence. Tabel \ref{tab:mainBoardConnectors} shows how the Arduinos are connected to the main board. $S0$ to $S4$ are jumpers which can assign 5 signals to an arbitrary Arduino. This is to give more flexibility to the Arduino pin assignment because certain Arduino libraries can cause pins to be unable to use. Figure \ref{fig:MBS} shows the entire main board schematic.
+
+Besides the motors others parts have to be controlled as well. Eva's head is full of Electronics: three servo's and 24 RGB LEDs. Eva is also geared up with 10 Ultrasonic sensors around the base, four bumper sensors and the ultrasonic Ping sensor at the gripper.  All the electronics necessary to control these parts are combined in the main board located in the back of Eva. The board also functions both as a $12V$ supplier and as a $5V$ supplier.
+Two Arduino Duemilanoves that are located at both sides of the main board provide the actual intelligence. Tabel \ref{tab:mainBoardConnectors} shows how the Arduinos are connected to the main board. $S0$ to $S4$ are jumpers which can assign 5 signals to an arbitrary Arduino. This is to give more flexibility to the Arduino pin assignment because certain Arduino libraries can cause pins to be unable to use. To make the whole more compact, the two Arduino chips could be integrated in the board design. To accommodate these chips serial to USB converter chips and USB connectors are needed. Figure \ref{fig:MBS} shows the entire main board schematic.
 
 
  \begin{figure}[ht!]
