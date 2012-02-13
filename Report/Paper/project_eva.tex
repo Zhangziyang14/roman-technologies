@@ -1,8 +1,6 @@
 \documentclass[a4paper,10pt,titlepage,twocolumn]{report}
-
-\usepackage[style=numeric]{biblatex}
 \bibliography{project_eva.bib}
-
+\usepackage[style=numeric]{biblatex}
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage[subfigure]{tocloft}
@@ -32,6 +30,7 @@
 \setcounter{tocdepth}{3}
 \frenchspacing
 \begin{document}
+
 \subfile{frontpage}
 \newpage
 
@@ -52,8 +51,8 @@
 \subfile{abstract}
 \label{abstract}
 
-\section*{Introduction}
-\label{Introduction}
+\section*{Problem statement}
+\label{problem}
 \subfile{problem}
 
 \section*{Concept}
@@ -64,13 +63,9 @@
 \label{approach}
 \subfile{approach}
 
-\section*{Simulation}
-\label{simulation}
-\subfile{simulation}
-
-\section*{Findings}
-\label{findings}
-\subfile{findings}
+\section*{Test}
+\label{test}
+\subfile{test}
 
 \section*{Conclusion}
 \label{conclusion}
