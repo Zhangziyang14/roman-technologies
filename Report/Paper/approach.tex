@@ -85,8 +85,9 @@ The arm can be folded compactly along Eva\textquotesingle s body when not in use
 
 \subsubsection*{Inverse kinematics}
 At first, the Arm navigation stack of ROS was used to position the arm of Eva. However, this stack could not be used in 
-the end because it requires an urdf model of the arm \cite{urdf}, which could not be made for Eva\textquotesingle s arm (It was not 
-possible to create a link that always stays horizontal). As mentioned in the previous section, Eva\textquotesingle s arm uses two motors to position the gripper: one for moving the arm sideways and one for moving the arm in height. In order to position the gripper to a desired position, inverse kinematics are used to calculate the joint positions of the motors for a given coordinate in the coordinate frame of the arm. On the other hand, forward kinematics are used to calculate the current position of the arm, which is used as feedback for positioning the gripper. 
+the end because it requires an urdf model of the arm \cite{urdf}, which could not be made for Eva\textquotesingle s arm (It was not possible to create a link that always stays horizontal). Also, the Arm navigation stack was over complex for our purposes, so in the end the inverse kinematics were calculated by ourselves. \footnote{Advised by Drs. W. Caarls} 
+
+As mentioned in the previous section, Eva\textquotesingle s arm uses two motors to position the gripper: one for moving the arm sideways and one for moving the arm in height. In order to position the gripper to a desired position, inverse kinematics are used to calculate the joint positions of the motors for a given coordinate in the coordinate frame of the arm. On the other hand, forward kinematics are used to calculate the current position of the arm, which is used as feedback for positioning the gripper. 
 
 Although this is a deprecated way to position the gripper because of the complexity of inverse kinematics  (Nowadays, 
 jacobians \cite{jacobian} [p. 65-69] are used to solve the inverse twist 
