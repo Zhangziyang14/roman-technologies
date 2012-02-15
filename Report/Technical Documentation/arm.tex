@@ -98,7 +98,7 @@ These were the most important points. The further down the arm, the smaller the 
 
 \section{Drive train}
 
-So far the mechanical working of the arm has been discussed. After the strength calculations the arm is confirmed to meet its requirements. However, when moving the arm or holding it up with a heavy load in its gripper, a substantial force will act on the timing belts. See fig. \ref{fig:overviewLegenda} for an overview of the drive train components.
+So far the mechanical working of the arm has been discussed. After the strength calculations the arm is confirmed to meet its requirements. However, when moving the arm or holding it up with a heavy load in its gripper, a substantial force will act on the timing belts and other drive train components. This section will discuss the selection of each of these components. See fig. \ref{fig:overviewLegenda} for an overview of the drive train.
 
 
 \begin{figure}[ht!]
@@ -107,8 +107,64 @@ So far the mechanical working of the arm has been discussed. After the strength 
 	\caption{Overview of Eva\textquotesingle{}s arm}
 	\label{fig:overviewLegenda}
 \end{figure}
+
+
+\subsection{driving the shoulder}
  
+ For driving the shoulder joint, the required torque is at its maximum when the arm is fully stretched. As shown in fig. \ref{fig:driveTrain_shoulder} the required moment is 25Nm, assuming an object weighing $2kg$. To achieve this moment a motor and transmission had to be chosen. A motor\footnote{Motor 2 in fig. \ref{fig:overviewLegenda}} with a maximum torque of $5.6Nm$ was already available, as well as an $AT5-GenIII 10*680$ timing belt\footnote{Belt 1 in fig. \ref{fig:overviewLegenda}}. Some calculations were made to select a set of pulleys with the required transmission ratio, which ideally would be $1:4.5$ ($5.6Nm / 25Nm \approx 4.5$). The biggest pulley available had 60 teeth, so a pulley with 13 teeth would be optimal. However, with too few teeth in mesh with the timing belt, the tension on the timing belt\textquotesingle{}s tooth would be too large.
+ 
+For each of the timing belts, the required belt width was calculated using formula \ref{eq:b_tooth}. The total tension on each belt was also checked to confirm the selected belt would be sufficiently strong.
 
+\begin{equation}
+\label{eq:b_tooth}
+b_{tooth} = T/(z_{1}*z_{e}*M_{spec})
+\end{equation}
+Where $b_{tooth}$ is the required belt width ($m$), $T$ is the pulley torque ($Nm$), $z_{1}$ the amount of teeth on the smallest pulley, $z_{e}$ the number of teeth in mesh and $M_{spec}$ the specific torque ($Nm$), supplied by the belt manufacturer. Since a $10mm$ wide belt had to be used\footnote{The shaft of the available motor was not long enough to properly fit a wider pulley}, the smallest pulley suitable for this belt size was a pulley with 20 teeth, resulting in a transmission ratio of $20:60$. The tension on the belt would be $T / r_{pulley} = 5.6Nm / 15.3*10^{-3}m = 366N$. Since this belt is capable of handling a tension force of $787N$, the belt is strong enough.
 
+\begin{figure}[ht!]
+	\centering
+	\mbox{\includegraphics[scale=0.5]{Images/driveTrain_shoulder.png}}
+	\caption{Calculating the moment on Eva\textquotesingle{}s shoulder}
+	\label{fig:driveTrain_shoulder}
+\end{figure}
 
+However, since the transmission ratio now is $1:3$ instead of $1:4.5$, the motor can only provide $16.8Nm$ to the shoulder joint. This means that the object which is picked up can have a maximum weight of 992 grams. This is half of the weight of the design constrain we defined on the begin of this project\footnote{The goal for the arm was to be capable of lifting objects up to $2kg$}. For this prototype 992 grams is enough, because it is more than the weight of the drinks Eva serves.
+
+\subsection{Keeping it horizontal}
+
+The transmission which is used to keep the lower arm horizontal consists of two pulleys and a timing belt\footnote{Belt 2 in fig. \ref{fig:overviewLegenda}}. The momentum on this timing belt is mainly caused by the weight of the object. Fig. \ref{fig:driveTrain_elbow} shows the calculation of this momentum.
+
+\begin{figure}[ht!]
+	\centering
+	\mbox{\includegraphics[scale=0.5]{Images/driveTrain_elbow.png}}
+	\caption{Calculating the moment on Eva\textquotesingle{}s elbow}
+	\label{fig:driveTrain_elbow}
+\end{figure}
+
+The momentum in the transmission is $11.5Nm$. To select a suitable set of pulleys and timing belt, formula \ref{eq:b_tooth} was again used. To keep the arm compact, the pulleys should be as small as possible, while capable of transferring the torque mentioned. The smallest pulleys available meeting the requirements were AT-3 pulleys with 32 teeth. In combination with an AT3-GenIII 10*816 belt they would be the perfect transmission. 
+
+By accident a regular AT-3 belt was ordered instead of the slightly stronger AT3-GenIII timing belt. This means the allowed torque is slightly below $11.5Nm$, resulting in a maximum allowable object weight  of 1560 grams. It is below $2kg$, but as mentioned before, the shoulder transmission is the bottle neck, only being capable of lifting 992 grams.
+Therefore the selected belt was considered good enough. To improve Eva\textquotesingle{}s arm, incorporating a GenIII timing belt would be reccomended.
+
+\subsection{Moving the arm sideways}
+
+In the design we made the decision to put the motor\footnote{Motor 1 in fig. \ref{fig:overviewLegenda}}, which is needed to move the arm sideways, in the body. So a transmission is needed from the body to the sideJoint. This transmission consists of two transmissions by timing belts\footnote{Belt 3 and 4 in fig. \ref{fig:overviewLegenda}} and one transmission by a set of bevel gears\footnote{see fig. \ref{fig:overviewLegenda}}. To calculate the torque which the motor has to deliver we made a calculation of the sideways movement of the arm, gripper and object. The biggest torque which the motor has to deliver is estimated to be caused by the drivetrain and friction between the parts of the lowerarm and the sideJoint. This is very difficult to determine, so we first made a calculation of the moment which is cause by the inertia. The lower arm, gripper and object were simplified to a rectangle and a circle, as in the calculations in fig. \ref{fig:driveTrain_sideJoint}.
+
+\begin{figure}[ht!]
+	\centering
+	\mbox{\includegraphics[scale=0.5]{Images/driveTrain_sideJoint.png}}
+	\caption{Calculating the moment required to move the arm sideways}
+	\label{fig:driveTrain_sideJoint}
+\end{figure}
+
+We assumed a maximum angular velocity of $5 rad/s^2$. This resulted in a momentum of $0.75Nm$. This moment should be delivered by the bevel gears. Therefore a set of bevel gears with an allowed torque of at least $0.75Nm$ had to be selected. The chosen bevel gear is capable of providing torque up to $0.84Nm$. As the transmission ratio of this set of gears is 1:2, the torque on the smaller gear is $0.38Nm$. This is the torque that needs to be transferred from the motor, via timing belts 3 and 4 in fig. \ref{fig:overviewLegenda}. These timing belts would need to be strong enough to transfer a torque between $0.38Nm$ and $0.8Nm$, depending on how much friction would act on the drivetrain. The pulleys had to be the same diameter as those connected to belt 2 in fig. \ref{fig:overviewLegenda}, as a slightly different size would result in a different belt length that would not be available. Because of these relatively big pulleys, the tension on the belts is very low. Therefore even the smallest width of 6mm turned out to be sufficient. An overview of all drivetrain components and their load is visible in fig. \ref{table:belts}.
+
+%TODO >>INSERT BELTS TABLE<<
+
+Trough the lost torque which would be caused by transmission friction of the timing belts, gears and by other friction, the required motor torque was estimated to be $0.8Nm$. So we had to pick a motor which has a minimum torque of 0.8 Nm. A suitable B\"{u}hler motor had to be selected, because they were affordable and the delivery time would be pretty fast. 
+A list of candidates for this motor was made, as shown in fig. \ref{table:motors}.
+
+%TODO >>INSERT MOTORS TABLE<<
+
+A tradeoff between energy consumption, available torque and speed resulted in selecting the B\"{u}hler 1.61.077.414 gearbox motor. It has a holding torque above 0.8Nm, is fast enough and does not consume too much current. To allow accurate closed-loop control of the sideways motion, a fitting encoder was ordered as well.
 \end{document}
