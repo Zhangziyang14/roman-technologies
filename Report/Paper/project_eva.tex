@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt,titlepage,twocolumn]{report}
+\documentclass[a4paper,10pt,twocolumn]{article}
 
 \usepackage[style=numeric]{biblatex}
 \bibliography{project_eva.bib} 
@@ -15,7 +15,6 @@
 \usepackage{hyperref}
 \usepackage{subfiles}
 \usepackage{parskip}
-\usepackage{eurosym}
 \usepackage{amsmath}
 %\usepackage[titles]{tocloft}
 
@@ -23,34 +22,24 @@
 \usepackage{pdfpages}
 \usepackage{ulem} % doorgelijndetekst met \sout{ ... }
 
-\setlength{\cftbeforechapskip}{2ex}
-\setlength{\cftbeforesecskip}{0.5ex}
-\setlength{\footnotesep}{0.5cm}
-\setlength{\skip\footins}{2cm}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 \frenchspacing
 \begin{document}
-\subfile{frontpage}
-\newpage
-
 \pagenumbering{roman}
 
-\newpage
 \pagenumbering{arabic}
 
 \newcommand{\todo}[1]{\textbf{\textsc{\textcolor{red}{[#1]}}}}
+\title{Project Eva}
+\author{Hans Gaiser, Ingmar Jager, Jelle ten Kate, Wilson Ko, Bram van der Veen, Sjors de Wit}
+\date{\today}
 
-\chapter*{Preface}
-\subfile{preface}
-\label{preface}
 
-\newpage
+\maketitle
 
-\section*{Abstract}
 \subfile{abstract}
-\label{abstract}
 
 \section*{Problem statement}
 \label{problem}
@@ -76,9 +65,7 @@
 \label{conclusion}
 \subfile{conclusion}
 
-\section*{Postface}
-\label{postface}
-\subfile{postface}
+\newpage
 
 \printbibliography
 

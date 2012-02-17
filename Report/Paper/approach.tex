@@ -2,9 +2,10 @@
 \begin{document}
 
 \subsection*{Interaction}
+Since Eva is a robot prototype for serving elderly people, she needs to be able to interact with them. Eva interacts with people by listening to them and by reading their emotions, but also by communicating towards the them.
 
 \subsubsection*{Emotion recognition}
-Eva is able to recognize ``emotions'' in the words spoken by the user, this is done with speech recognition \footnote{See Technical Document}. Emotion recognition is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
+Eva is able to recognize ``emotions'' in the words spoken by the user, this is done with speech recognition. Emotion recognition is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
 
 Recognition by words is the simplest form of emotion recognition that works efficiently, given that the speech recognition module works good enough \footnote{Advised by Dr. ir. Pascal Wiggers}. This is done by comparing the recognized words with a list of positively and negatively loaded words, Eva is able to distinguish positive and negative feedback.
 
@@ -39,7 +40,7 @@ linked
 directly to a \textit{conceptual active learning process} that is not yet implemented in Eva \pageref{sec:Concept}. This 
 state is characterized by the sentence ``this is new for me''.
 
-The states of Eva are shown using three different elements \footnote{See Technical Document}: the movement of the 
+The states of Eva are shown using three different elements \footnote{See Technical Document, page 10}: the movement of the 
 eyebrows, the colouring of the sides of her head  and the sound emanating from Eva’s body. The combination of effects was 
 chosen because it complements each other in such a way that elderly should be able to comprehend Eva even when they are 
 suffering from an elderly ailment such as reduced vision or hearing. The lights were placed in the head. The head was 
@@ -220,7 +221,7 @@ which is an easy conversion.
 At this stage there is a map created by GMapping, but in PGM format (similar to the image bitmap format). Recast 
 \footnote{http://code.google.com/p/recastnavigation/} is used to convert a map into a navigation mesh, which is later used 
 to determine a path from point A to point B, however Recast accepts only maps of the format OBJ: a 3D representation 
-format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to be written\footnote{See technical document}. Recast is then ready to create a navigation mesh on the map. This mesh defines where 
+format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to be written\footnote{See Technical Document, page 27}. Recast is then ready to create a navigation mesh on the map. This mesh defines where 
 Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With 
 this information, Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
 

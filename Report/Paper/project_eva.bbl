@@ -1,5 +1,5 @@
 % $ biblatex auxiliary file $
-% $ biblatex version 0.9 $
+% $ biblatex version 1.4 $
 % Do not modify the above lines!
 %
 % This is an auxiliary file used by the 'biblatex' package.
@@ -17,8 +17,9 @@
 \endgroup
 
 \entry{FaceDetection}{online}{}
-  \name{author}{1}{%
-    {{AbhinayE}{A.}%
+  \name{author}{1}{}{%
+    {{}%
+     {AbhinayE}{A.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -35,8 +36,9 @@
 \endentry
 
 \entry{plane}{online}{}
-  \name{author}{1}{%
-    {{Bohg}{B.}%
+  \name{author}{1}{}{%
+    {{}%
+     {Bohg}{B.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
@@ -53,8 +55,9 @@
 \endentry
 
 \entry{braitenberg}{book}{}
-  \name{author}{1}{%
-    {{Braitenberg}{B.}%
+  \name{author}{1}{}{%
+    {{}%
+     {Braitenberg}{B.}%
      {V.}{V.}%
      {}{}%
      {}{}}%
@@ -75,8 +78,9 @@
 \endentry
 
 \entry{CBS}{online}{}
-  \name{author}{1}{%
-    {{CBS}{C.}%
+  \name{author}{1}{}{%
+    {{}%
+     {CBS}{C.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -94,16 +98,19 @@
 \endentry
 
 \entry{Diepenhorst}{article}{}
-  \name{author}{3}{%
-    {{Diepenhorst}{D.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Diepenhorst}{D.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
-    {{T.}{T.}%
+    {{}%
+     {T.}{T.}%
      {Weijnen}{W.}%
      {}{}%
      {}{}}%
-    {{Van~Free}{V.~F.}%
+    {{}%
+     {Van~Free}{V.~F.}%
      {F.}{F.}%
      {}{}%
      {}{}}%
@@ -116,16 +123,19 @@
 \endentry
 
 \entry{Evers}{article}{}
-  \name{author}{3}{%
-    {{Evers}{E.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Evers}{E.}%
      {ir.~H.}{i.~H.}%
      {}{}%
      {}{}}%
-    {{Blijham}{B.}%
+    {{}%
+     {Blijham}{B.}%
      {ir.~N.}{i.~N.}%
      {}{}%
      {}{}}%
-    {{Willems}{W.}%
+    {{}%
+     {Willems}{W.}%
      {dr.~C.}{d.~C.}%
      {}{}%
      {}{}}%
@@ -139,16 +149,19 @@
 \endentry
 
 \entry{Forlizzi}{article}{}
-  \name{author}{3}{%
-    {{Forlizzi}{F.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Forlizzi}{F.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{DiSalvo}{D.}%
+    {{}%
+     {DiSalvo}{D.}%
      {C.}{C.}%
      {}{}%
      {}{}}%
-    {{Gemperle}{G.}%
+    {{}%
+     {Gemperle}{G.}%
      {F.}{F.}%
      {}{}%
      {}{}}%
@@ -165,16 +178,19 @@
 \endentry
 
 \entry{jacobian}{book}{}
-  \name{author}{3}{%
-    {{Ghosh}{G.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Ghosh}{G.}%
      {B.K.}{B.}%
      {}{}%
      {}{}}%
-    {{Xi}{X.}%
+    {{}%
+     {Xi}{X.}%
      {N.}{N.}%
      {}{}%
      {}{}}%
-    {{Tarn}{T.}%
+    {{}%
+     {Tarn}{T.}%
      {T.J.}{T.}%
      {}{}%
      {}{}}%
@@ -195,21 +211,23 @@
 \endentry
 
 \entry{GMapping}{article}{}
-  \name{author}{3}{%
-    {{Grisetti}{G.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Grisetti}{G.}%
      {G.}{G.}%
      {}{}%
      {}{}}%
-    {{Stachniss}{S.}%
+    {{}%
+     {Stachniss}{S.}%
      {C.}{C.}%
      {}{}%
      {}{}}%
-    {{Burgard}{B.}%
+    {{}%
+     {Burgard}{B.}%
      {W.}{W.}%
      {}{}%
      {}{}}%
   }
-  \field{journaltitle}{Robotics, IEEE Transactions on}
   \keyw{Rao-Blackwellized particle filters;grid mapping;mobile robots;particle
   depletion;simultaneous localization and mapping problem;SLAM (robots);mobile
   robots;particle filtering (numerical methods);}
@@ -225,22 +243,24 @@
   \field{title}{Improved Techniques for Grid Mapping With Rao-Blackwellized
   Particle Filters}
   \field{volume}{23}
+  \field{journaltitle}{Robotics, IEEE Transactions on}
   \field{year}{2007}
   \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{colour-emotion}{article}{}
-  \name{author}{2}{%
-    {{Kaya}{K.}%
+  \name{author}{2}{}{%
+    {{}%
+     {Kaya}{K.}%
      {Naz}{N.}%
      {}{}%
      {}{}}%
-    {{Epps}{E.}%
+    {{}%
+     {Epps}{E.}%
      {Helen~H.}{H.~H.}%
      {}{}%
      {}{}}%
   }
-  \field{journaltitle}{College Student Journal}
   \keyw{College Students; Emotional Response; Student Attitudes; Color;
   Psychological Patterns; Dimensional Preference;}
   \strng{namehash}{KNEHH1}
@@ -252,17 +272,20 @@
   \field{title}{Relationship between Color and Emotion: A Study of College
   Students}
   \field{volume}{38}
+  \field{journaltitle}{College Student Journal}
   \field{year}{2004}
   \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{elderly}{article}{}
-  \name{author}{2}{%
-    {{Kemna}{K.}%
+  \name{author}{2}{}{%
+    {{}%
+     {Kemna}{K.}%
      {S.}{S.}%
      {}{}%
      {}{}}%
-    {{Does}{D.}%
+    {{}%
+     {Does}{D.}%
      {K.}{K.}%
      {}{}%
      {}{}}%
@@ -276,16 +299,19 @@
 \endentry
 
 \entry{urdf}{online}{}
-  \name{author}{3}{%
-    {{Meeussen}{M.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Meeussen}{M.}%
      {W.}{W.}%
      {}{}%
      {}{}}%
-    {{Hsu}{H.}%
+    {{}%
+     {Hsu}{H.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{Diankov}{D.}%
+    {{}%
+     {Diankov}{D.}%
      {R.}{R.}%
      {}{}%
      {}{}}%
@@ -302,13 +328,13 @@
 \endentry
 
 \entry{uncanny}{article}{}
-  \name{author}{1}{%
-    {{Mori}{M.}%
+  \name{author}{1}{}{%
+    {{}%
+     {Mori}{M.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
   }
-  \field{journaltitle}{Energy}
   \strng{namehash}{MM1}
   \strng{fullhash}{MM1}
   \field{sortinit}{M}
@@ -316,12 +342,14 @@
   \field{pages}{33\bibrangedash 35}
   \field{title}{The Uncanny Valley}
   \field{volume}{7}
+  \field{journaltitle}{Energy}
   \field{year}{1970}
 \endentry
 
 \entry{tabletop}{online}{}
-  \name{author}{1}{%
-    {{Muja}{M.}%
+  \name{author}{1}{}{%
+    {{}%
+     {Muja}{M.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
@@ -338,8 +366,9 @@
 \endentry
 
 \entry{sounds}{online}{}
-  \name{author}{1}{%
-    {{Nave}{N.}%
+  \name{author}{1}{}{%
+    {{}%
+     {Nave}{N.}%
      {R.}{R.}%
      {}{}%
      {}{}}%
@@ -356,16 +385,19 @@
 \endentry
 
 \entry{Roboearth}{article}{}
-  \name{author}{3}{%
-    {{Schie{\ss}le}{S.}%
+  \name{author}{3}{}{%
+    {{}%
+     {Schie{\ss}le}{S.}%
      {B.}{B.}%
      {}{}%
      {}{}}%
-    {{H\"ausermann}{H.}%
+    {{}%
+     {H\"ausermann}{H.}%
      {K.}{K.}%
      {}{}%
      {}{}}%
-    {{Zweigle}{Z.}%
+    {{}%
+     {Zweigle}{Z.}%
      {O.}{O.}%
      {}{}%
      {}{}}%
@@ -380,8 +412,9 @@
 \endentry
 
 \entry{iCat}{online}{}
-  \name{author}{1}{%
-    {{site}{s.}%
+  \name{author}{1}{}{%
+    {{}%
+     {site}{s.}%
      {}{}%
      {iCat~community}{i.~c.}%
      {}{}}%
@@ -398,8 +431,9 @@
 \endentry
 
 \entry{autosmiley}{online}{}
-  \name{author}{1}{%
-    {{Watson}{W.}%
+  \name{author}{1}{}{%
+    {{}%
+     {Watson}{W.}%
      {}{}%
      {}{}%
      {}{}}%
