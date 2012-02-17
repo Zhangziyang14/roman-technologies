@@ -4,17 +4,14 @@
 \subsection*{Interaction}
 Since Eva is a robot prototype for serving elderly people, she needs to be able to interact with them. Eva interacts with people by listening to them and by reading their emotions, but also by communicating towards the them.
 
-\subsubsection*{Emotion recognition}
-Eva is able to recognize ``emotions'' in the words spoken by the user, this is done with speech recognition. Emotion recognition is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
+\subsubsection*{Affect Detection}
+Eva is able to recognize the level of ``affection'' in the words spoken by the user, this is done with speech recognition. Emotion recognition is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
 
-Recognition by words is the simplest form of emotion recognition that works efficiently, given that the speech recognition module works good enough \footnote{Advised by Dr. ir. Pascal Wiggers}. This is done by comparing the recognized words with a list of positively and negatively loaded words, Eva is able to distinguish positive and negative feedback.
-
-Another asset for simple emotion recognition would be smile detection, since it is not hard to detect smiles on human faces (look for white teeth and lifted mouth corners \footnote{Advised by Dr.ir. D.J. Broekens }). An implementation of emotion detection already exists \cite{autosmiley}, but this was not used in this project due to time 
-constraints and inability to compile the program because of deprecated code.
+Recognition by words is the simplest form of emotion recognition that works efficiently, given that the speech recognition module works good enough \cite{affection} . This is done by comparing the recognized words with a list of positively and negatively loaded words, Eva is able to distinguish positive and negative feedback.
  
 \subsubsection*{Emotion expression}
 \label{sec:Emotion expression}
-Eva communmicates using emotional states. A system based on a modest amount of expressions would reduce the time needed 
+Eva communicates using emotional states. A system based on a modest amount of expressions would reduce the time needed 
 to program the system. The fictional robot examples of Wall-E and R2D2 show this by using emotional expressions in a 
 substantial array of different situations. The emotions also present a manner of communication that humans are already 
 accustomed to. This allows the communication to be comprehensible for users; this rules out that users have
