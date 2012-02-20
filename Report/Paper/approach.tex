@@ -5,42 +5,29 @@
 Since Eva is a robot prototype for serving elderly people, she needs to be able to interact with them. Eva interacts with people by listening to them and by reading their emotions, but also by communicating towards the them.
 
 \subsubsection*{Affect Detection}
-Eva is able to recognize the level of ``affection'' in the words spoken by the user, this is done with speech recognition. Emotion recognition is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
+Eva is able to recognize the level of affection in the words spoken by the user, this is done with speech recognition. Affect detection is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
 
-Recognition by words is the simplest form of emotion recognition that works efficiently, given that the speech recognition module works good enough \cite{affection} . This is done by comparing the recognized words with a list of positively and negatively loaded words, Eva is able to distinguish positive and negative feedback.
+Detection by words is the simplest form of affect detection that works efficiently, given that the speech recognition module works good enough \cite{affection} . This is done by comparing the recognized words with a list of positively and negatively loaded words, Eva is able to distinguish positive and negative feedback.
  
 \subsubsection*{Emotion expression}
 \label{sec:Emotion expression}
 Eva communicates using emotional states. A system based on a modest amount of expressions would reduce the time needed 
 to program the system. The fictional robot examples of Wall-E and R2D2 show this by using emotional expressions in a 
-substantial array of different situations. The emotions also present a manner of communication that humans are already 
-accustomed to. This allows the communication to be comprehensible for users; this rules out that users have
-to learn an entire new language. The current emotional elements for Eva were chosen because they form a package that is
-understandable for the target group. Even users suffering from ailments of old age such as reduced hearing and vision 
-should understand Eva. 
+substantial array of different situations. Emotions also present a manner of communication that humans are already 
+accustomed to. This allows the communication to be comprehensible for users. The current emotional elements for Eva were chosen because they form a package that is understandable for the target group. Even users suffering from ailments of old age such as reduced hearing and vision should understand Eva. 
 
 Eva displays emotions for a functional reason: to display a state of feedback that tells the user information about the 
 actions of Eva. There are three emotional states: happy, sad and novelty. In  addition to the emotional states there is a 
 neutral state. The three emotional states are designed to ensure that Eva can react in most situations. The state or 
 reaction is interpreted by the user based on the context. Firstly, the happy  state allows for confirming and likewise 
-positive reactions. This state is characterized by the sentence ``yes, I will do this''. The sad state functions as a 
-state for communicating failure, disappointment or likewise negative reactions. The sad state is characterized by the 
-sentence ``I cannot do this''.  Whereas the happy state signals that the behaviour is desirable and should not be 
-changed, the sad state signals undesirable behaviour that should be changed. These states are activated based on the 
-keyword triggered from the user \textquotesingle s voice: ``yummy'' has an inherent positive element so it triggers the 
-positive state. The triggers that are tied to the emotional states are now solely used to activate feedback, but can be 
-used in a later stage to possibly activate a passive learning process - since it is obvious if Eva should (not) change 
-her behaviour based on the keyword.
+positive reactions. The intended meaning of this state is ``yes, I will do this''. The sad state functions as a state for communicating failure, disappointment or likewise negative reactions. The intended meaning of the sad state  is ``I cannot do this''. These states are activated based on the keyword triggered from the user \textquotesingle s voice: ``yummy'' has an inherent positive element so it triggers the positive state.
 
 The novelty state is the third emotional state. This state signals the user that Eva wants to learn active. This is 
 linked 
 directly to a \textit{conceptual active learning process} that is not yet implemented in Eva \pageref{sec:Concept}. This 
 state is characterized by the sentence ``this is new for me''.
 
-The states of Eva are shown using three different elements \footnote{See Technical Document, page 10}: the movement of the 
-eyebrows, the colouring of the sides of her head  and the sound emanating from Eva’s body. The combination of effects was 
-chosen because it complements each other in such a way that elderly should be able to comprehend Eva even when they are 
-suffering from an elderly ailment such as reduced vision or hearing. The lights were placed in the head. The head was 
+The states of Eva are shown using three different elements \cite{Tech}: the movement of the eyebrows, the colouring of the sides of her head  and the sound emanating from Eva\textquote s body. The combination of effects was chosen because it complements each other in such a way that elderly should be able to comprehend Eva even when they are suffering from an elderly ailment such as reduced vision or hearing. The lights were placed in the head. The head was 
 created because it creates a focus of attention for the user by creating a human-like feature that stimulates interaction 
 \cite{elderly}. The other facial features were limited to eyebrows to prevent the users from expecting too much from the 
 robot and also to prevent the uncanny valley effect that appears when non-living things begin appearing too human 
@@ -125,7 +112,7 @@ For aesthetic purposes the arm has to be as compact as possible.
 \begin{figure}[h]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/armMechOverview.png}}
-	\caption{Mechanical design of Eva's arm}
+	\caption{Mechanical design of Eva\textquotesingle s arm}
 	\label{fig:armMechOverview}
 \end{figure}
 
@@ -145,7 +132,7 @@ the requirements described earlier.
 At first, the Arm navigation stack of ROS was used to position the arm of Eva. However, this stack could not be used in 
 the end because it requires an urdf model of the arm \cite{urdf}, which could not be made for Eva\textquotesingle s arm 
 (It was not possible to create a link that always stays horizontal). Also, the Arm navigation stack was over complex for 
-our purposes, so in the end the inverse kinematics were calculated by ourselves. \footnote{Advised by Drs. W. Caarls} 
+our purposes, so in the end the inverse kinematics were calculated by ourselves.  
 
 As mentioned in the previous section, Eva\textquotesingle s arm uses two motors to position the gripper: one for moving 
 the arm sideways and one for moving the arm in height. In order to position the gripper to a desired position, inverse 
@@ -183,7 +170,7 @@ z = \sin(\alpha)*L1
 x = \sin(-1 * \beta)*(L3 + L4)
 \end{equation*}
 
-\begin{figure}[h!]
+\begin{figure}[h]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/3d_zijenbovenaanzicht.png}}
 	\caption{Side and top view of the arm with calculations of the kinematics.}
@@ -197,7 +184,7 @@ x = \sin(-1 * \beta)*(L3 + L4)
 	\label{fig:IK2}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\centering
 	\mbox{\includegraphics[width=0.5\textwidth]{Images/2d_bovenaanzicht.png}}
 	\caption{Top view of the arm with calculations of the kinematics.}
@@ -205,9 +192,14 @@ x = \sin(-1 * \beta)*(L3 + L4)
 \end{figure}
 
 \subsection*{Navigation}
-Navigating Eva in an environment consists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out 
-the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know 
-how to execute this path as good as she can.
+Navigating Eva in an environment consists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know how to execute this path as good as she can.
+
+\subsubsection*{Object avoidance}
+Object avoidance is needed for Eva to keep herself safe, but also to keep the environment safe from her. Eva uses ultrasone 
+sensors to detect objects in her environment and scales the speeds of her wheels according to the distance to the 
+detected object and the position of this object. Eva has six sensors in front, two in the back and one on each side. The 
+sensors in the front are used in units. So if Eva hears an object on the left, she will go right and vice 
+versa. In essence, Eva avoids objects as a Braitenberg vehicle \cite{braitenberg} [p. 8]. For more information about object avoidance, see the technical document\cite{Tech} .
 
 \subsubsection*{Map creation}
 The GMapping package in ROS was used to create a map of the environment. GMapping \cite{GMapping} is a SLAM algorithm, 
@@ -216,31 +208,18 @@ this data is converted into a map. There is no laser present on Eva, so this dat
 which is an easy conversion.
 
 At this stage there is a map created by GMapping, but in PGM format (similar to the image bitmap format). Recast 
-\footnote{http://code.google.com/p/recastnavigation/} is used to convert a map into a navigation mesh, which is later used 
-to determine a path from point A to point B, however Recast accepts only maps of the format OBJ: a 3D representation 
-format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to be written\footnote{See Technical Document, page 27}. Recast is then ready to create a navigation mesh on the map. This mesh defines where 
-Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With 
-this information, Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
+\footnote{http://code.google.com/p/recastnavigation/} is used to convert a map into a navigation mesh, which is later used to determine a path from point A to point B, however Recast accepts only maps of the format OBJ: a 3D representation 
+format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to be written \cite{Tech} . Recast is then ready to create a navigation mesh on the map. This mesh defines where Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With this information, Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
 
 \subsubsection*{Global planner}
-Originally the navigation stack in ROS was used as global planner. This navigation stack however proved to be a big black 
-box; if it did not work, it was hard to figure out why. On top of that, it required a lot of processing power. The laptop 
-used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and 
-because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to 
-scratch the ROS navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, 
-because most of the calculation is done before navigating and it is optimized to be functional in games with many agents constantly requesting new paths.
+Originally the navigation stack in ROS was used as global planner. This navigation stack however proved to be a big black box; if it did not work, it was hard to figure out why. On top of that, it required a lot of processing power. The laptop used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch the ROS navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents constantly requesting new paths.
 
 \subsubsection*{Planning}
-Calculating paths on the generated navigation mesh is done using Detour, which is supplied together with Recast. Detour is 
-handed a starting location (the position of Eva) and a goal location. Using the navigation mesh supplied earlier, a path is 
-calculated (ideally exactly on the goal location, but if this is not on the navigation mesh or unreachable, it gets as 
-close as possible). The path is described by waypoints, where the number of waypoints can be increased, making the path 
-smoother.
+Calculating paths on the generated navigation mesh is done using Detour, which is supplied together with Recast. Detour is handed a starting location (the position of Eva) and a goal location. Using the navigation mesh supplied earlier, a path is calculated (ideally exactly on the goal location, but if this is not on the navigation mesh or unreachable, it gets as close as possible). The path is described by waypoints, where the number of waypoints can be increased, making the path smoother.
 
 \subsubsection*{Executing a path}
 Originally Eva would strictly follow this path. What this means is that she would keep rotating until she was facing the 
-path, then drive forward until she reached a waypoint and then rotate again until she faced the next waypoint. This looked 
-very unnatural and very static. 
+path, then drive forward until she reached a waypoint and then rotate again until she faced the next waypoint. This looked very unnatural and very static. 
 
 For this reason a new way to execute the path was designed. This enabled Eva to deviate from the path just slightly, enough 
 to take corners while still driving forward. The idea behind this new way of executing the path, is that Eva looks a 
@@ -258,13 +237,5 @@ Eva. For this figure, Eva was artificially pushed away to test how well she woul
 	\label{fig:global_path}
 \end{figure}
 
-\subsubsection*{Object avoidance}
-Object avoidance is needed for Eva to keep herself safe, but also to keep the environment safe from her. Eva uses ultrasone 
-sensors to detect objects in her environment and scales the speeds of her wheels according to the distance to the 
-detected object and the position of this object. Eva has six sensors in front, two in the back and one on each side. The 
-sensors in the front are used in units (see figure). So if Eva hears an object on the left, she will go right and vice 
-versa. In essence, Eva avoids objects as a Braitenberg vehicle 
-\cite{braitenberg} [p. 8]. For more information about object avoidance, see the 
-technical document.
 
 \end{document}

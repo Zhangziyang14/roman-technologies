@@ -1,5 +1,5 @@
 % $ biblatex auxiliary file $
-% $ biblatex version 1.4 $
+% $ biblatex version 0.9 $
 % Do not modify the above lines!
 %
 % This is an auxiliary file used by the 'biblatex' package.
@@ -17,9 +17,8 @@
 \endgroup
 
 \entry{FaceDetection}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {AbhinayE}{A.}%
+  \name{author}{1}{%
+    {{AbhinayE}{A.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -36,9 +35,8 @@
 \endentry
 
 \entry{plane}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Bohg}{B.}%
+  \name{author}{1}{%
+    {{Bohg}{B.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
@@ -55,9 +53,8 @@
 \endentry
 
 \entry{braitenberg}{book}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Braitenberg}{B.}%
+  \name{author}{1}{%
+    {{Braitenberg}{B.}%
      {V.}{V.}%
      {}{}%
      {}{}}%
@@ -77,10 +74,27 @@
   \field{year}{1986}
 \endentry
 
+\entry{Joost}{article}{}
+  \name{author}{1}{%
+    {{Broekens}{B.}%
+     {D.J.}{D.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{BD1}
+  \strng{fullhash}{BD1}
+  \field{sortinit}{B}
+  \field{title}{Robot Learning From Feedback}
+  \verb{url}
+  \verb https://code.google.com/p/roman-technologies
+  \endverb
+  \field{year}{2012}
+  \warn{\item Invalid format of field 'month'}
+\endentry
+
 \entry{CBS}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {CBS}{C.}%
+  \name{author}{1}{%
+    {{CBS}{C.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -97,20 +111,44 @@
   \field{year}{2012}
 \endentry
 
+\entry{bimodal}{inproceedings}{}
+  \name{author}{2}{%
+    {{De~Silva}{D.~S.}%
+     {L.C.}{L.}%
+     {}{}%
+     {}{}}%
+    {{Pei}{P.}%
+     {C.N}{C.}%
+     {}{}%
+     {}{}}%
+  }
+  \keyw{HMM;audio;bimodal emotion recognition;classification;emotional
+  speech;facial expressions;hidden Markov models;rule-based system;statistical
+  techniques;video;face recognition;hidden Markov models;knowledge based
+  systems;pattern classification;speech recognition;statistical analysis;}
+  \strng{namehash}{DSLPC1}
+  \strng{fullhash}{DSLPC1}
+  \field{sortinit}{D}
+  \field{booktitle}{Automatic Face and Gesture Recognition}
+  \verb{doi}
+  \verb 10.1109/AFGR.2000.840655
+  \endverb
+  \field{pages}{332 \bibrangedash 335}
+  \field{title}{Bimodal emotion recognition}
+  \field{year}{2000}
+\endentry
+
 \entry{Diepenhorst}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Diepenhorst}{D.}%
+  \name{author}{3}{%
+    {{Diepenhorst}{D.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
-    {{}%
-     {T.}{T.}%
+    {{T.}{T.}%
      {Weijnen}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Van~Free}{V.~F.}%
+    {{Van~Free}{V.~F.}%
      {F.}{F.}%
      {}{}%
      {}{}}%
@@ -123,19 +161,16 @@
 \endentry
 
 \entry{Evers}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Evers}{E.}%
+  \name{author}{3}{%
+    {{Evers}{E.}%
      {ir.~H.}{i.~H.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Blijham}{B.}%
+    {{Blijham}{B.}%
      {ir.~N.}{i.~N.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Willems}{W.}%
+    {{Willems}{W.}%
      {dr.~C.}{d.~C.}%
      {}{}%
      {}{}}%
@@ -149,19 +184,16 @@
 \endentry
 
 \entry{Forlizzi}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Forlizzi}{F.}%
+  \name{author}{3}{%
+    {{Forlizzi}{F.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {DiSalvo}{D.}%
+    {{DiSalvo}{D.}%
      {C.}{C.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Gemperle}{G.}%
+    {{Gemperle}{G.}%
      {F.}{F.}%
      {}{}%
      {}{}}%
@@ -177,20 +209,55 @@
   \field{year}{2004}
 \endentry
 
+\entry{Tech}{article}{}
+  \name{author}{6}{%
+    {{Gaiser}{G.}%
+     {J.H.}{J.}%
+     {}{}%
+     {}{}}%
+    {{Jager}{J.}%
+     {I.}{I.}%
+     {}{}%
+     {}{}}%
+    {{Kate}{K.}%
+     {J.D.}{J.}%
+     {ten}{t.}%
+     {}{}}%
+    {{Ko}{K.}%
+     {W.K.H.}{W.}%
+     {}{}%
+     {}{}}%
+    {{Veen}{V.}%
+     {B.}{B.}%
+     {van~der}{v.~d.}%
+     {}{}}%
+    {{Wit}{W.}%
+     {S.}{S.}%
+     {de}{d.}%
+     {}{}}%
+  }
+  \strng{namehash}{GJ+1}
+  \strng{fullhash}{GJJIKJtKWVBvdWSd1}
+  \field{sortinit}{G}
+  \field{title}{Design of a Robot Prototype for the Domestic Healthcare Sector}
+  \verb{url}
+  \verb https://code.google.com/p/roman-technologies
+  \endverb
+  \field{year}{2012}
+  \warn{\item Invalid format of field 'month'}
+\endentry
+
 \entry{jacobian}{book}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Ghosh}{G.}%
+  \name{author}{3}{%
+    {{Ghosh}{G.}%
      {B.K.}{B.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Xi}{X.}%
+    {{Xi}{X.}%
      {N.}{N.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Tarn}{T.}%
+    {{Tarn}{T.}%
      {T.J.}{T.}%
      {}{}%
      {}{}}%
@@ -211,23 +278,21 @@
 \endentry
 
 \entry{GMapping}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Grisetti}{G.}%
+  \name{author}{3}{%
+    {{Grisetti}{G.}%
      {G.}{G.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Stachniss}{S.}%
+    {{Stachniss}{S.}%
      {C.}{C.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Burgard}{B.}%
+    {{Burgard}{B.}%
      {W.}{W.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{Robotics, IEEE Transactions on}
   \keyw{Rao-Blackwellized particle filters;grid mapping;mobile robots;particle
   depletion;simultaneous localization and mapping problem;SLAM (robots);mobile
   robots;particle filtering (numerical methods);}
@@ -243,24 +308,22 @@
   \field{title}{Improved Techniques for Grid Mapping With Rao-Blackwellized
   Particle Filters}
   \field{volume}{23}
-  \field{journaltitle}{Robotics, IEEE Transactions on}
   \field{year}{2007}
   \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{colour-emotion}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Kaya}{K.}%
+  \name{author}{2}{%
+    {{Kaya}{K.}%
      {Naz}{N.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Epps}{E.}%
+    {{Epps}{E.}%
      {Helen~H.}{H.~H.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{College Student Journal}
   \keyw{College Students; Emotional Response; Student Attitudes; Color;
   Psychological Patterns; Dimensional Preference;}
   \strng{namehash}{KNEHH1}
@@ -272,20 +335,17 @@
   \field{title}{Relationship between Color and Emotion: A Study of College
   Students}
   \field{volume}{38}
-  \field{journaltitle}{College Student Journal}
   \field{year}{2004}
   \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{elderly}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Kemna}{K.}%
+  \name{author}{2}{%
+    {{Kemna}{K.}%
      {S.}{S.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Does}{D.}%
+    {{Does}{D.}%
      {K.}{K.}%
      {}{}%
      {}{}}%
@@ -299,19 +359,16 @@
 \endentry
 
 \entry{urdf}{online}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Meeussen}{M.}%
+  \name{author}{3}{%
+    {{Meeussen}{M.}%
      {W.}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Hsu}{H.}%
+    {{Hsu}{H.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Diankov}{D.}%
+    {{Diankov}{D.}%
      {R.}{R.}%
      {}{}%
      {}{}}%
@@ -328,13 +385,13 @@
 \endentry
 
 \entry{uncanny}{article}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Mori}{M.}%
+  \name{author}{1}{%
+    {{Mori}{M.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{Energy}
   \strng{namehash}{MM1}
   \strng{fullhash}{MM1}
   \field{sortinit}{M}
@@ -342,14 +399,12 @@
   \field{pages}{33\bibrangedash 35}
   \field{title}{The Uncanny Valley}
   \field{volume}{7}
-  \field{journaltitle}{Energy}
   \field{year}{1970}
 \endentry
 
 \entry{tabletop}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Muja}{M.}%
+  \name{author}{1}{%
+    {{Muja}{M.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
@@ -366,9 +421,8 @@
 \endentry
 
 \entry{sounds}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Nave}{N.}%
+  \name{author}{1}{%
+    {{Nave}{N.}%
      {R.}{R.}%
      {}{}%
      {}{}}%
@@ -385,19 +439,16 @@
 \endentry
 
 \entry{Roboearth}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Schie{\ss}le}{S.}%
+  \name{author}{3}{%
+    {{Schie{\ss}le}{S.}%
      {B.}{B.}%
      {}{}%
      {}{}}%
-    {{}%
-     {H\"ausermann}{H.}%
+    {{H\"ausermann}{H.}%
      {K.}{K.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Zweigle}{Z.}%
+    {{Zweigle}{Z.}%
      {O.}{O.}%
      {}{}%
      {}{}}%
@@ -412,9 +463,8 @@
 \endentry
 
 \entry{iCat}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {site}{s.}%
+  \name{author}{1}{%
+    {{site}{s.}%
      {}{}%
      {iCat~community}{i.~c.}%
      {}{}}%
@@ -430,10 +480,54 @@
   \warn{\item Invalid format of field 'month'}
 \endentry
 
+\entry{affection}{incollection}{}
+  \name{author}{2}{%
+    {{Vidrascu}{V.}%
+     {L.}{L.}%
+     {}{}%
+     {}{}}%
+    {{Devillers}{D.}%
+     {L.}{L.}%
+     {}{}%
+     {}{}}%
+  }
+  \name{editor}{3}{%
+    {{Tao}{T.}%
+     {Jianhua}{J.}%
+     {}{}%
+     {}{}}%
+    {{Tan}{T.}%
+     {Tieniu}{T.}%
+     {}{}%
+     {}{}}%
+    {{Picard}{P.}%
+     {Rosalind}{R.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {Springer Berlin / Heidelberg}%
+  }
+  \strng{namehash}{VLDL1}
+  \strng{fullhash}{VLDL1}
+  \field{sortinit}{V}
+  \field{booktitle}{Affective Computing and Intelligent Interaction}
+  \field{isbn}{978-3-540-29621-8}
+  \field{note}{10.1007/11573548_95}
+  \field{pages}{739\bibrangedash 746}
+  \field{series}{Lecture Notes in Computer Science}
+  \field{title}{Real-Life Emotion Representation and Detection in Call Centers
+  Data}
+  \verb{url}
+  \verb http://dx.doi.org/10.1007/11573548_95
+  \endverb
+  \field{volume}{3784}
+  \field{year}{2005}
+\endentry
+
 \entry{autosmiley}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Watson}{W.}%
+  \name{author}{1}{%
+    {{Watson}{W.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -457,6 +551,55 @@
   \endverb
   \field{month}{02}
   \field{year}{2012}
+\endentry
+
+\entry{smile}{article}{}
+  \name{author}{5}{%
+    {{Whitehill}{W.}%
+     {J.}{J.}%
+     {}{}%
+     {}{}}%
+    {{Littlewort}{L.}%
+     {G.}{G.}%
+     {}{}%
+     {}{}}%
+    {{Fasel}{F.}%
+     {I.}{I.}%
+     {}{}%
+     {}{}}%
+    {{Bartlett}{B.}%
+     {M.}{M.}%
+     {}{}%
+     {}{}}%
+    {{Movellan}{M.}%
+     {J.}{J.}%
+     {}{}%
+     {}{}}%
+  }
+  \field{journaltitle}{Pattern Analysis and Machine Intelligence}
+  \keyw{automatic facial expression recognition research;feature
+  representation;human-level expression recognition accuracy;illumination
+  conditions;image databases;image registration;machine learning
+  approaches;practical smile detection;training data set;face recognition;image
+  registration;image representation;learning (artificial intelligence);object
+  detection;visual databases;Algorithms;Artificial
+  Intelligence;Biometry;Computer Simulation;Face;Humans;Image Enhancement;Image
+  Interpretation, Computer-Assisted;Models, Biological;Pattern Recognition,
+  Automated;Reproducibility of Results;Sensitivity and
+  Specificity;Smiling;Subtraction Technique;}
+  \strng{namehash}{WJ+1}
+  \strng{fullhash}{WJLGFIBMMJ1}
+  \field{sortinit}{W}
+  \verb{doi}
+  \verb 10.1109/TPAMI.2009.42
+  \endverb
+  \field{issn}{0162-8828}
+  \field{number}{11}
+  \field{pages}{2106 \bibrangedash 2111}
+  \field{title}{Toward Practical Smile Detection}
+  \field{volume}{31}
+  \field{year}{2009}
+  \warn{\item Invalid format of field 'month'}
 \endentry
 
 \lossort
