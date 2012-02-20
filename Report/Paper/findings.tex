@@ -1,23 +1,29 @@
 \documentclass[project_eva.tex]{subfiles}
 \begin{document}
 
-Besides findings based on Eva's performance in the home care environment and at the symposium, several findings are mentioned that are from tests in the office environment where Eva was developed. A list of findings is presented below:
+Besides findings based on Eva\textquotesingle s performance in the home care environment and at the symposium, several findings are mentioned that are from tests in the office environment where Eva was developed. A list of findings is presented below:
 
 \begin{itemize}
 \item Eva tracks the face of the nearest person, she cannot distinguish the person who is actually talking to her, so she cannot serve a specific person. An improvement would be to make Eva recognize distinct faces or at the very least recognize that someone is talking(mouth movement) and looking.
 
 \item Speech recognition suffered from ambient noise, causing lost and false positive commands. A solution would be to train the speech model better, or choose a different speech package, or even a combination of sign reading and lip reading when sounds is not reliable enough.
+
 \item No gripper feedback was implemented. This caused Eva to think she had grasped an object while she was holding nothing in some cases. This can be solved by using camera feedback of the Kinect; Eva could use the Kinect to see whether she grabbed the correct object or not.
+
 \item Eva just moves her arm to the position of the found object, without taking the environment into account. An improvement would be to add a motion planner that also checks for possible collisions of Eva with her environment. However, this will also introduce slower movement onset and possibly slower movement as the planner has to keep analyzing if objects are in the way.
 
 \item  At some occasions Eva accidentally grasped the wrong object. This was due unstable navigation. Stable navigation was impaired by the h-bridges driving the wheels. They cut off the power above $3A$ resulting in shocking motion. A solution would be to power the motors at $24V$. The navigation could also be improved by reducing the slip  that results in inaccurate positioning. This could be done by replacing the current wheels by other wheels such as omni-directional wheels.
-\item The global planner and local planner both operated fine separatly. They did not work in conjunction however.  The exact cause was 
 
+\item The global planner and local planner both operated fine separately. However, more research is needed to make make them work in conjunction.
 
-\item When a lot of objects were present on the table, tabletop object detector performed considerably slower. A more efficient way is to segment by RGB first and secondly fit the remaining clusters with the database. Also it would be better to track the objects after detection instead of constantly detecting.
+\item When a lot of objects were present on the table, tabletop object detector performed considerably slower. A more efficient way is to segment by RGB first and secondly fit the remaining clusters with the database. Also it would be better to track the objects after detection instead of constantly detecting. Alternatively one could separate the scanning for objects from nearest to farthest(using the z-coordinates of the Kinect), eliminating many objects at once.
+
 \item At times it was unclear whether Eva would perform an action or not. She did not give feedback if she understood a command. An improvement on the interaction would be to add confirmations from Eva after receiving a command.
+
 \item Eva repeats the same sound for one emotion each time. This results in a static way of expressing behavior.To make Eva appear less static it is advised to provide a larger number of sound-samples per emotion.
-\item Eva was tested with one child (3 year) at the Hightech meets Design symposium. The child immediately recognized the sad state when it was shown. The happy state was positively recognized when shown for the second time, suggesting that this state may of yet not be clear enough.  During the testing the eyebrows could not be tilted to fit the emotional state. The novelty state expression is heavily influenced by the tilting of the eyebrows. This is why the novelty state was not shown at the demo and there are no findings on this state. Additional testing testing the emotions after the eyebrows are repaired is advised. This is also useful for fine-tuning the emotions (color, sounds, etc.) and statistically confirming that the emotional states are operating as they should.
+
+\item Eva was tested with one child (3 years old) at the Hightech meets Design symposium. The child immediately recognized the sad state when it was shown. The happy state was positively recognized when shown for the second time, suggesting that this state may of yet not be clear enough.  During the testing the eyebrows could not be tilted to fit the emotional state. The novelty state expression is heavily influenced by the tilting of the eyebrows. This is why the novelty state was not shown at the demo and there are no findings on this state. Additional testing testing the emotions after the eyebrows are repaired is advised. This is also useful for fine-tuning the emotions (color, sounds, etc.) and statistically confirming that the emotional states are operating as they should.
+The child also understood the interaction with Eva with respect to giving and taking an object from the Eva\textquotesingle s hand. The first try was a success, and the child was able to give a bottle to Eva, and take a bottle from Eva without help.
 \end{itemize}
 
 
