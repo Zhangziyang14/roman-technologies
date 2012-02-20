@@ -4,6 +4,12 @@
 \subsection*{Interaction}
 Eva uses simulation of affectiveness as a clear non-expert way of interacting \cite{Thomaz} . This allows the user to communicate with Eva in a natural way.  This results in a lower learning curve and makes Eva more accessible for the user. Eva signals for interaction by gaining eye-contact with the user. Eva interacts using a combination of lights, sounds and facial movement to cope with potential ailments of old age  such as reduced hearing and vision . For receiving and understanding information from the user, Eva uses keyword-based voice recognition. 
 
+\subsubsection*{Eye contact}
+Since looking at a person\textquotesingle s face is a signal that one pays attention. So making Eva look into 
+people\textquotesingle s eyes provides a familiar and natural way for elderly to interact with her. 
+Eva\textsinglequote s head is equipped with a Microsoft Kinect$\rm {}^{TM}$. This enables her to detect faces and track them with her head.  Face detection is done using the face detection example in OpenCV, which utilizes Haar-like features. 
+For more information, please refer to \url{http://opencv.willowgarage.com/wiki/FaceDetection} \cite{FaceDetection} .
+
 \subsubsection*{Affect Detection}
 Eva is able to recognize the level of affection in the words spoken by the user, this is done with speech recognition. Affect detection is necessary for Eva to fully understand what the user is saying, because a message can convey different meanings when loaded with a different emotion.
 
@@ -42,12 +48,6 @@ of related ``emotional states'': the attributes of our sounds were based on rela
 enthusiasm for the happy state. This means that even though the actual pitch of the robot was unknown at first it could 
 be built by using elements \cite{sounds} of the relevant related sounds.
 
-\subsubsection*{Eye contact}
-Because people are used to looking into the other\textquotesingle s eyes during a conversation, making Eva look into 
-their eyes provides a familiar and natural way for elderly to communicate with Eva. Eva is able to detect faces and 
-track them with her head. This makes her look into the eyes of the person who is talking to her, which stimulates user 
-interaction. The face detection is done using the face detection example in OpenCV, which utilizes Haar-like features. 
-For more information, please refer to \url{http://opencv.willowgarage.com/wiki/FaceDetection} \cite{FaceDetection} .
 
 \subsubsection*{Commands}
 Being able to recognize commands through speech was a necessary feature for Eva because elder people are used to speaking 
@@ -66,7 +66,7 @@ arm to the object and closes her gripper when she is close enough.
 
 \subsubsection*{Object recognition}
 For object recognition, the tabletop object detector from ROS is used. This algorithm detects rotational symmetric 
-objects on a table by segmenting clusters above the tabletop, which are compared to known models in a given database. 
+objects on a table by segmenting clusters above the tabletop, using the depth perception of the Kinect. These clusters are compared to known models in a given database. 
 Each cluster is then fitted to each model in the database and when a good fit is found, the position of the found object 
 will be returned so Eva can grab the object. See figure \ref{fig:tabletop} for the results.
 
@@ -212,7 +212,10 @@ At this stage there is a map created by GMapping, but in PGM format (similar to 
 format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to be written \cite{Tech} . Recast is then ready to create a navigation mesh on the map. This mesh defines where Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With this information, Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
 
 \subsubsection*{Global planner}
-Originally the navigation stack in ROS was used as global planner. This navigation stack however proved to be a big black box; if it did not work, it was hard to figure out why. On top of that, it required a lot of processing power. The laptop used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch the ROS navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents constantly requesting new paths.
+Originally the navigation stack in ROS was used as global planner. 
+
+
+This navigation stack however proved to be a big black box; if it did not work, it was hard to figure out why. On top of that, it required a lot of processing power. The laptop used in Eva could not handle this navigation quickly enough and was sometimes behind on reality. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch the ROS navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents constantly requesting new paths.
 
 \subsubsection*{Planning}
 Calculating paths on the generated navigation mesh is done using Detour, which is supplied together with Recast. Detour is handed a starting location (the position of Eva) and a goal location. Using the navigation mesh supplied earlier, a path is calculated (ideally exactly on the goal location, but if this is not on the navigation mesh or unreachable, it gets as close as possible). The path is described by waypoints, where the number of waypoints can be increased, making the path smoother.
