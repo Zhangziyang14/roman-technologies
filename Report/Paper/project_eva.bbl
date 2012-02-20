@@ -480,6 +480,37 @@
   \warn{\item Invalid format of field 'month'}
 \endentry
 
+\entry{Thomaz}{article}{}
+  \name{author}{2}{%
+    {{Thomaz}{T.}%
+     {Andrea~L.}{A.~L.}%
+     {}{}%
+     {}{}}%
+    {{Breazeal}{B.}%
+     {Cynthia}{C.}%
+     {}{}%
+     {}{}}%
+  }
+  \field{journaltitle}{Artificial Intelligence}
+  \keyw{Human–robot interaction}
+  \strng{namehash}{TALBC1}
+  \strng{fullhash}{TALBC1}
+  \field{sortinit}{T}
+  \verb{doi}
+  \verb 10.1016/j.artint.2007.09.009
+  \endverb
+  \field{issn}{0004-3702}
+  \field{number}{6–7}
+  \field{pages}{716 \bibrangedash  737}
+  \field{title}{Teachable robots: Understanding human teaching behavior to
+  build more effective robot learners}
+  \verb{url}
+  \verb http://www.sciencedirect.com/science/article/pii/S000437020700135X
+  \endverb
+  \field{volume}{172}
+  \field{year}{2008}
+\endentry
+
 \entry{affection}{incollection}{}
   \name{author}{2}{%
     {{Vidrascu}{V.}%
