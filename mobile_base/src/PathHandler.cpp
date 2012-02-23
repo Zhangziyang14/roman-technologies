@@ -37,8 +37,7 @@ double distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
 {
 	double dx = a.x - b.x;
 	double dy = a.y - b.y;
-	double dz = a.z - b.z;
-	return sqrt(dx*dx + dy*dy + dz*dz);
+	return sqrt(dx*dx + dy*dy);
 }
 
 /**
@@ -46,11 +45,12 @@ double distanceBetweenPoints(geometry_msgs::Point a, geometry_msgs::Point b)
  */
 PathHandler::PathHandler(ros::NodeHandle *nodeHandle) : mCurrentPathIndex(0), mFollowState(FOLLOW_STATE_IDLE)
 {
-	std::string localPathTopic, pathTopic, goalTopic, followStateTopic;
+	std::string localPathTopic, pathTopic, goalTopic, followStateTopic, laserScanTopic;
 	nodeHandle->param<std::string>("path_topic", pathTopic, "/global_path");
 	nodeHandle->param<std::string>("local_path_topic", localPathTopic, "/local_path");
 	nodeHandle->param<std::string>("goal_topic", goalTopic, "/move_base_simple/goal");
 	nodeHandle->param<std::string>("follow_state_topic", followStateTopic, "/follow_state");
+	nodeHandle->param<std::string>("scan_topic", laserScanTopic, "/scan");
 	nodeHandle->param<double>("min_angular_speed", mMinAngularSpeed, 0.2);
 	nodeHandle->param<double>("max_angular_speed", mMaxAngularSpeed, 0.3);
 	nodeHandle->param<double>("min_linear_speed", mMinLinearSpeed, 0.2);
@@ -62,6 +62,7 @@ PathHandler::PathHandler(ros::NodeHandle *nodeHandle) : mCurrentPathIndex(0), mF
 	nodeHandle->param<double>("max_angle_linear_scale", mMaxAngleLinearScale, M_PI / 6.0);
 
 	mPathSub = nodeHandle->subscribe(pathTopic, 1, &PathHandler::pathCb, this);
+	mLaserScanSub = nodeHandle->subscribe(laserScanTopic, 1, &PathHandler::scanCb, this);
 	mCommandPub = nodeHandle->advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	mGoalPub = nodeHandle->advertise<geometry_msgs::PoseStamped>(goalTopic, 1);
 	mFollowStatePub = nodeHandle->advertise<std_msgs::UInt8>(followStateTopic, 1);
@@ -200,7 +201,7 @@ void PathHandler::updatePath()
 		robotPos.y = mRobotPosition.getOrigin().y();
 		geometry_msgs::Point closestOnPath = closestPointOnLine(robotPos, mPath[mCurrentPathIndex].position, mPath[mCurrentPathIndex + 1].position);
 
-		ROS_INFO("robotPos[%lf, %lf], closestOnPath[%lf, %lf]", robotPos.x, robotPos.y, closestOnPath.x, closestOnPath.y);
+		//ROS_INFO("robotPos[%lf, %lf], closestOnPath[%lf, %lf]", robotPos.x, robotPos.y, closestOnPath.x, closestOnPath.y);
 
 		if (distanceBetweenPoints(closestOnPath, robotPos) > mResetDistanceTolerance)
 		{
@@ -213,23 +214,23 @@ void PathHandler::updatePath()
 
 		geometry_msgs::Point pointOnPath = getPointOnPathWithDist(closestOnPath, mLookForwardDistance);
 
-		ROS_INFO("closestOnPath[%lf, %lf], pointOnPath[%lf, %lf]", closestOnPath.x, closestOnPath.y, pointOnPath.x, pointOnPath.y);
+		//ROS_INFO("closestOnPath[%lf, %lf], pointOnPath[%lf, %lf]", closestOnPath.x, closestOnPath.y, pointOnPath.x, pointOnPath.y);
 
 		double angle = angleTo(pointOnPath);
 
-		double robotYaw = tf::getYaw(mRobotPosition.getRotation()); // only used for printing
+		/*double robotYaw = tf::getYaw(mRobotPosition.getRotation()); // only used for printing
 		ROS_INFO("Follow state: %d Robot pos: (%lf, %lf, %lf). Target pos: (%lf, %lf, %lf). RobotYaw: %lf. FocusYaw: %lf", mFollowState, mRobotPosition.getOrigin().getX(),
 				mRobotPosition.getOrigin().getY(), mRobotPosition.getOrigin().getZ(), pointOnPath.x,
-				pointOnPath.y, pointOnPath.z, robotYaw, angle);
+				pointOnPath.y, pointOnPath.z, robotYaw, angle);*/
 
-		ROS_INFO("Angle to path: %f", angle);
+		//ROS_INFO("Angle to path: %f", angle);
 
 		command.linear.x = getScaledLinearSpeed(angle);
 		command.angular.z = getScaledAngularSpeed(angle);
 
 		if (distanceBetweenPoints(closestOnPath, mPath[mCurrentPathIndex + 1].position) < mDistanceTolerance)
 		{
-			ROS_INFO("Moving to next line segment on path.");
+			//ROS_INFO("Moving to next line segment on path.");
 			mCurrentPathIndex++;
 		}
 
@@ -241,7 +242,7 @@ void PathHandler::updatePath()
 		btVector3 orientation = btVector3(cos(yaw), sin(yaw), 0.0).rotate(btVector3(0,0,1), -tf::getYaw(mRobotPosition.getRotation()));
 		double angle = atan2(orientation.getY(), orientation.getX());
 
-		ROS_INFO("Angle to final orientation: %f", angle);
+		//ROS_INFO("Angle to final orientation: %f", angle);
 
 		if (fabs(angle) > mFinalYawTolerance)
 			command.angular.z = getScaledAngularSpeed(angle, true);
@@ -297,4 +298,44 @@ void PathHandler::pathCb(const nav_msgs::Path &path)
 		mPath.push_back(path.poses[i].pose);
 
 	mFollowState = FOLLOW_STATE_BUSY;
+}
+
+void PathHandler::scanCb(const sensor_msgs::LaserScan &scan)
+{
+	if (mFollowState != FOLLOW_STATE_BUSY || updateCurrentPosition() == false || getPathSize() == 0)
+		return;
+
+	uint32_t size = (scan.angle_max - scan.angle_min) / scan.angle_increment;
+	for (uint32_t i = 0; i < size; i++)
+	{
+		if (scan.ranges[i] >= scan.range_max)
+			continue;
+
+		geometry_msgs::PointStamped tmp, p;
+		tmp.header.frame_id = "/base_link";
+		tmp.header.stamp = ros::Time(0);
+		tmp.point.x = scan.ranges[i] * cosf(scan.angle_min + scan.angle_increment * i);
+		tmp.point.y = scan.ranges[i] * sinf(scan.angle_min + scan.angle_increment * i);
+
+		try
+		{
+			mTransformListener.transformPoint("/map", tmp, p);
+		}
+		catch (tf::TransformException &ex)
+		{
+			ROS_ERROR("%s",ex.what());
+			return;
+		}
+
+		for (uint32_t j = mCurrentPathIndex; j < getPathSize() - 1; j++)
+		{
+			geometry_msgs::Point closest = closestPointOnLine(p.point, mPath[j].position, mPath[j+1].position);
+			if (distanceBetweenPoints(p.point, closest) <= ROBOT_RADIUS)
+			{
+				ROS_INFO("Detected obstacle on path, resending goal. Distance: %f", distanceBetweenPoints(p.point, closest));
+				resendGoal();
+				return;
+			}
+		}
+	}
 }

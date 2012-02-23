@@ -122,6 +122,33 @@ IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image)
 	return output;
 }
 
+void imageToMat(const sensor_msgs::ImageConstPtr &image, cv::Mat &mat)
+{
+	memcpy(mat.data, &image->data[0], sizeof(uchar) * image->data.size());
+}
+
+sensor_msgs::ImagePtr matToImage(cv::Mat mat)
+{
+	sensor_msgs::ImagePtr output(new sensor_msgs::Image());
+	if (mat.type() != CV_8UC3)
+	{
+		ROS_WARN("Cannot convert non-uint8 to sensor_msgs::Image. Depth = %d", mat.type());
+		return output;
+	}
+
+	// copy header
+	output->header.stamp = ros::Time::now();
+	output->width = mat.cols;
+	output->height = mat.rows;
+	output->step = mat.cols * mat.channels();
+	output->is_bigendian = false;
+	output->encoding = "bgr8";
+
+	// copy actual data
+	output->data.assign(mat.data, mat.data + size_t(mat.cols * mat.rows * mat.channels()));
+	return output;
+}
+
 /**
  * Converts IplImage's to pcl::PointCloud. Needed for PCL algorithms.
  */

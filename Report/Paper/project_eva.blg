@@ -1,19 +1,27 @@
-This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2011)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: project_eva.aux
 The style file: biblatex.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: project_eva-blx.bib
 Database file #2: project_eva.bib
-I was expecting a `,' or a `}'---line 129 of file project_eva.bib
+I was expecting a `,' or a `}'---line 122 of file project_eva.bib
  : 
  : @ONLINE{iCat,
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
-Warning--I'm ignoring Thomaz's extra "keywords" field
---line 176 of file project_eva.bib
-Warning--I'm ignoring Thomaz's extra "keywords" field
---line 178 of file project_eva.bib
-Biblatex version: 1.4
+Biblatex version: 1.5
+Warning--Version mismatch: biblatex.bst=1.5, biblatex.sty=0.9
 Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2486 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
@@ -86,12 +94,7 @@ Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2514 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2514 of file biblatex.bst
-Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2568 of file biblatex.bst
-Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2568 of file biblatex.bst
-Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2568 of file biblatex.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
 Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2631 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
@@ -110,45 +113,45 @@ Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2631 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
 while executing---line 2631 of file biblatex.bst
-You've used 26 entries,
+You've used 19 entries,
             5995 wiz_defined-function locations,
-            1279 strings with 12810 characters,
-and the built_in function-call counts, 76048 in all, are:
-= -- 2519
-> -- 2760
-< -- 767
-+ -- 798
-- -- 1067
-* -- 5984
-:= -- 4641
+            1221 strings with 10535 characters,
+and the built_in function-call counts, 47930 in all, are:
+= -- 1581
+> -- 1717
+< -- 398
++ -- 472
+- -- 635
+* -- 3287
+:= -- 2836
 add.period$ -- 0
-call.type$ -- 26
-change.case$ -- 280
-chr.to.int$ -- 84
-cite$ -- 50
-duplicate$ -- 8633
-empty$ -- 8083
-format.name$ -- 1693
-if$ -- 17227
+call.type$ -- 19
+change.case$ -- 147
+chr.to.int$ -- 41
+cite$ -- 36
+duplicate$ -- 5560
+empty$ -- 5324
+format.name$ -- 1053
+if$ -- 10918
 int.to.chr$ -- 0
-int.to.str$ -- 55
+int.to.str$ -- 39
 missing$ -- 0
-newline$ -- 672
-num.names$ -- 1051
-pop$ -- 8008
+newline$ -- 410
+num.names$ -- 681
+pop$ -- 5822
 preamble$ -- 1
-purify$ -- 350
+purify$ -- 209
 quote$ -- 0
-skip$ -- 4513
+skip$ -- 2786
 stack$ -- 0
-substring$ -- 970
-swap$ -- 2911
-text.length$ -- 740
-text.prefix$ -- 25
+substring$ -- 472
+swap$ -- 1738
+text.length$ -- 388
+text.prefix$ -- 0
 top$ -- 1
-type$ -- 976
-warning$ -- 0
-while$ -- 518
+type$ -- 672
+warning$ -- 1
+while$ -- 296
 width$ -- 0
-write$ -- 645
-(There were 49 error messages)
+write$ -- 390
+(There were 46 error messages)

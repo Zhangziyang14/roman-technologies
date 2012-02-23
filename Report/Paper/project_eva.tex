@@ -1,7 +1,7 @@
-\documentclass[a4paper,10pt,twocolumn]{article}
+\documentclass[a4paper,10pt,titlepage,twocolumn]{report}
 
 \usepackage[style=numeric]{biblatex}
-\bibliography{project_eva.bib} 
+\bibliography{project_eva.bib}
 
 \usepackage{graphicx}
 \usepackage{subfig}
@@ -15,33 +15,44 @@
 \usepackage{hyperref}
 \usepackage{subfiles}
 \usepackage{parskip}
-\usepackage{amsmath}
 \usepackage{eurosym}
+\usepackage{amsmath}
 %\usepackage[titles]{tocloft}
 
 \usepackage{color}
 \usepackage{pdfpages}
 \usepackage{ulem} % doorgelijndetekst met \sout{ ... }
 
+\setlength{\cftbeforechapskip}{2ex}
+\setlength{\cftbeforesecskip}{0.5ex}
+\setlength{\footnotesep}{0.5cm}
+\setlength{\skip\footins}{2cm}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 \frenchspacing
 \begin{document}
+\subfile{frontpage}
+\newpage
+
 \pagenumbering{roman}
 
+\newpage
 \pagenumbering{arabic}
 
 \newcommand{\todo}[1]{\textbf{\textsc{\textcolor{red}{[#1]}}}}
-\title{Towards Affordable Socially Interactive Robots: a Pilot}
-\author{Hans Gaiser, Ingmar Jager, Jelle ten Kate, Wilson Ko, Bram van der Veen, Sjors de Wit}
-\date{\today}
 
-\maketitle
+\chapter*{Preface}
+\subfile{preface}
+\label{preface}
 
+\newpage
+
+\section*{Abstract}
 \subfile{abstract}
+\label{abstract}
 
-\section*{Introduction}
+\section*{Problem statement}
 \label{problem}
 \subfile{problem}
 
@@ -49,17 +60,13 @@
 \label{concept}
 \subfile{concept}
 
-\section*{Related Works}
-\label{related}
-\subfile{related}
-
 \section*{Approach}
 \label{approach}
 \subfile{approach}
 
-\section*{Pilot study}
-\label{simulation}
-\subfile{simulation}
+\section*{Test}
+\label{test}
+\subfile{test}
 
 \section*{Findings}
 \label{findings}
@@ -68,6 +75,10 @@
 \section*{Conclusion}
 \label{conclusion}
 \subfile{conclusion}
+
+\section*{Postface}
+\label{postface}
+\subfile{postface}
 
 \printbibliography
 

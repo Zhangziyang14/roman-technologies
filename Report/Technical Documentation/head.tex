@@ -46,24 +46,18 @@ As shown in fig. \ref{fig:eyebrow_upDown} the torque which is needed to move the
 
 \subsection{Pan / tilt mechanism}
 
-As mentioned in the paper %TODO reference to chapter / section?
-hobby servo\textquotesingle{}s did not work to pan and tilt the head so we used two RX-28 dynamixels \footnote{see $http://www.crustcrawler.com/motors/RX28/docs/RX28_Manual.pdf$} %TODO is referencing via a footnote OK?
-. These are much stronger than normal hobby servo\textquotesingle{}s and could turn more than 180 degrees if required. The dynamixels used have a holding torque of 2.78 Nm. To be sure this design would work, a few simple calculations\footnote{see sections \ref{subsection:tiltHead} and \ref{subsection:panHead}} were done to confirm these dynamixels would be suitable.
-
+The first design to pan and tilt the head consisted of one servo in the head to tilt the head and one servo in the body to pan the head. Servos with a torque rating of 0.35Nm were already available, these were estimated to be strong enough. A bracket was designed to mount the head on the body. After making and testing this mechanism it became clear the servo in the head was not strong enough and did not meet our accuracy requirements. This first design is shown in fig. \ref{fig:neck_old}.
 
 \begin{figure}[ht!]
 	\centering
-	\mbox{\includegraphics[scale=0.8]{Images/neck.png}}
-	\caption{Final design of the pan/tilt mechanism}
-	\label{fig:neck_final}
+	\mbox{\includegraphics[scale=0.3]{Images/neck_old.jpg}}
+	\caption{First design of the pan/tilt mechanism}
+	\label{fig:neck_old}
 \end{figure}
 
-To pan the head a solid aluminum plate was designed, which could be attached to an axle suspended by roller bearings. This vertical axle is attached to a dynamixel in the body, the other dynamixel is mounted on the plate. This dynamixel is placed directly next to the head and directly drives it.
-This place was chosen because the dynamixel would not fit inside the head. On the opposite side of the upper dynamixel the head is supported by a bearing. This bearing connects to an axle running all the way from the left side to the right side of the head. This design worked really well, as expected. An extra advantage of using dynamixels is the position feedback, which turned out to be a very useful for improving the face tracking performance. %TODO reference to head tracking chapter
- 
+As the first design did not meet our requirements, a more robust solution was created. The second design was aimed at creating a simple, solid solution with as little play as possible. Instead of hobby servos, we used two dynamixels in this design. These are the more professional type of servos. They are much stronger and could turn more than 180 degrees if required. The dynamixels used have a holding torque of 2.78 Nm. To be sure this second design would work, a few simple calculations were done to check if these dynamixels would be suitable.
 
 \subsubsection{Tilting the head}
-\label{subsection:tiltHead}
 
 \begin{figure}[ht!]
 	\centering
@@ -72,15 +66,12 @@ This place was chosen because the dynamixel would not fit inside the head. On th
 	\label{fig:head_tilt}
 \end{figure}
 
-Fig. \ref{fig:head_tilt} shows the torque which is required for tilting the head. The Kinect is by far the heaviest
-object in the head, which is also placed pretty far from the servo. Therefore the momentum on the neck is assumed to result mainly from the Kinect. As shown in the image, the required torque
-for lifting the Kinect is $0.44Nm$. In the first design a normal servo with a maximum torque of $0.35Nm$ was used. The calculations clearly confirm this servo was not strong enough. The available dynamixel has a holding torque of $2.78Nm$, which should be more than enough for tilting the head.
+Fig. \ref{fig:head_tilt} shows the torque which is needed for tilting the head. The Kinect is by far the heaviest object in the head, which is also placed pretty far from the servo. Therefore the momentum on the neck is assumed to result mainly from the Kinect. As shown in the image, the required torque for lifting the Kinect is 0.44 Nm. In the first design a normal servo with a maximum torque of 0.35Nm was used. The calculations clearly confirm this servo was not strong enough. The available dynamixel has a holding torque of 2.78Nm, which should be more than enough for tilting the head.
 
 \subsubsection{Panning the head}
-\label{subsection:panHead}
 
-To pan the head, the dynamixel has to overcome frictional forces and has to be strong enough to accelerate the head fast enough to be able to move the head smoothly. The frictional forces are unknown, but assumed to be very low, as the design will incorporate suitable bearings. Knowing
-the maximum dynamixel torque and approximating the geometry of the head, an approximation for the angular acceleration can be made. The moment of inertia is approximated as that of a rectangular shape with the mass of around 1kg. The real moment of inertia is probably less, but would be very hard to calculate by hand. If the dynamixel is suitable for this calculation, it is definitely suitable for moving the real head.
+To pan the head, the dynamixel has to overcome frictional forces and be strong enough to accelerate the head fast enough to be able to move the head smoothly. The frictional forces are unknown, but assumed to be very low, as the second design will incorporate suitable bearings.
+Knowing the maximum dynamixel torque and approximating the geometry of the head, an approximation for the angular acceleration can be made. The moment of inertia is approximated as that of a rectangular shape with the mass of around 1kg. The real moment of inertia is probably less, but would be very hard to calculate by hand. If the dynamixel is suitable for this calculation, it is definitely suitable for moving the real head.
 
 \begin{figure}[ht!]
 	\centering
@@ -89,8 +80,43 @@ the maximum dynamixel torque and approximating the geometry of the head, an appr
 	\label{fig:head_pan}
 \end{figure}
 
+\begin{equation*}
+M = I * \alpha
+\end{equation*}
+\begin{equation*}
+M = 2.78Nm
+\end{equation*}
+\begin{equation*}
+Inertia = (1/12) * m (a2 + b2)
+\end{equation*}
+\begin{equation*}
+M = 1kg
+\end{equation*}
+\begin{equation*}
+I = 0.0725 kg*m^2
+\end{equation*}
+\begin{equation*}
+Angular acceleration = 38.275 rad/s^2
+\end{equation*}
 
-As shown in Fig \ref{fig:head_pan} the potential angular acceleration is very high. The required acceleration would be a lot lower, because the code controlling the head limits acceleration at $2rad/s^2$. This suggests the panning dynamixel is more than strong enough. Testing confirmed this, it works really well.
+
+The real acceleration would be lower, because the dynamixel torque depends on the angular speed. However, as the head is operated at low speeds, the torque available will always be a substantial part of the $2.78Nm$. The code controlling the head would be limiting acceleration at $2 rad/s^2$, a lot lower than the acceleration the dynamixel would be capable of providing.
+As both dynamixels appear to be suitable, the design process continued. Instead of a bracket, a solid aluminum plate was designed, which could be attached to an axle suspended by roller bearings. This vertical axle is attached to a dynamixel in the body, the other dynamixel is mounted on the plate. This dynamixel is placed directly next to the head and directly drives it.
+
+\begin{figure}[ht!]
+	\centering
+	\mbox{\includegraphics[scale=0.8]{Images/neck.png}}
+	\caption{Final design of the pan/tilt mechanism}
+	\label{fig:neck_final}
+\end{figure}
+
+This place was chosen because the dynamixel would not fit inside the head, as in the first design. On the opposite side of the upper dynamixel the head is supported by a bearing. This bearing connects to an axle running all the way from the left side to the right side of the head. This design worked really well, as expected. An extra advantage of using dynamixels is the position feedback, which turned out to be a very useful feature.
+
+
+
+
+
+
 
 
 

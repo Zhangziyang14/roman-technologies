@@ -14,6 +14,9 @@
 #include "std_msgs/Float32.h"
 #include "std_msgs/UInt8.h"
 #include "nav_msgs/Path.h"
+#include "sensor_msgs/LaserScan.h"
+
+#define ROBOT_RADIUS 0.4
 
 enum FollowState
 {
@@ -29,6 +32,7 @@ private:
 	//LocalPlanner mLocalPlanner;
 
 	ros::Subscriber mPathSub;						/// Subscriber that listens to paths from PathPlanner
+	ros::Subscriber mLaserScanSub;
 	ros::Publisher mCommandPub;						/// Publishes velocity commands
 	ros::Publisher mGoalPub;						/// Re-publishes goals when a new path needs to be calculated
 	ros::Publisher mFollowStatePub;					/// Publishes the current state of the follower
@@ -64,8 +68,8 @@ private:
 
 	inline double getScaledAngularSpeed(double rotationAngle, bool minAngular = false)	/// Scales the angular speed based on the turn to be made
 	{
-		double scale = std::min(1.0, (fabs(rotationAngle) / M_PI));
-		double result = scale * (mMaxAngularSpeed - mMinAngularSpeed) + minAngular ? mMinAngularSpeed : 0.0;
+		double scale = std::min(1.0, (fabs(rotationAngle) / mMaxAngleLinearScale));
+		double result = scale * (mMaxAngularSpeed - (minAngular ? mMinAngularSpeed : 0.0)) + (minAngular ? mMinAngularSpeed : 0.0);
 		return rotationAngle < 0.0 ? -1 * result : result;
 	};
 
@@ -77,6 +81,8 @@ private:
 	bool updateCurrentPosition();
 	void publishState();
 	void publishLocalPath(double amplitude, double yaw);
+
+	void scanCb(const sensor_msgs::LaserScan &scan);
 
 	double angleTo(geometry_msgs::Point p);
 	geometry_msgs::Point getPointOnPathWithDist(geometry_msgs::Point p, double dist);

@@ -5,6 +5,30 @@
  *      Author: hans
  */
 
+/**
+ * [SELECT] 			- Sleep
+ * [START]				- Wake up
+ *
+ * [CROSS]				- Happy
+ * [SQUARE]				- Sad
+ * [CIRCLE]				- Surprised
+ * [TRIANGLE]			- Angry
+ *
+ * [UP]					- Give object
+ * [LEFT]				- Get cola
+ * [RIGHT]				- Get juice
+ * [DOWN]				- Stop
+ *
+ * [L1]					- Close gripper
+ * [L2]					- Open gripper
+ * [L3]					- Grab with gripper
+ *
+ * [R1]					- Move arm up
+ * [R2]					- Move arm down
+ *
+ * [R3 + LEFT_STICK]	- Drive
+ */
+
 #include "ros/ros.h"
 #include "std_msgs/UInt8.h"
 #include "nero_msgs/Emotion.h"
@@ -78,7 +102,7 @@ void joyCB(const sensor_msgs::Joy& msg)
 		pressedKey = PS3_NONE;
 
 	// arm speeds
-	if (msg.axes[2] || msg.axes[3])
+	/*if (msg.axes[2] || msg.axes[3])
 	{
 		armspeedmsg.wrist_joint = msg.axes[2] * MAX_ARM_SPEED;
 		armspeedmsg.upper_joint = msg.axes[3] * MAX_ARM_SPEED;
@@ -91,10 +115,10 @@ void joyCB(const sensor_msgs::Joy& msg)
 		armspeedmsg.wrist_joint = 0.0;
 		armspeedmsg.upper_joint = 0.0;
 		arm_speed_pub->publish(armspeedmsg);
-	}
+	}*/
 
 	// base speeds
-	if (msg.axes[0] || msg.axes[1])
+	if (msg.buttons[PS3_RIGHT_STICK] && (msg.axes[0] || msg.axes[1]))
 	{
 		speedmsg.linear.x = msg.axes[1] * MAX_LINEAR_SPEED;
 		speedmsg.angular.z = msg.axes[0] * MAX_ANGULAR_SPEED;
@@ -167,6 +191,30 @@ void joyCB(const sensor_msgs::Joy& msg)
 				ROS_INFO("Publishing sleep state.");
 				speechmsg.arousal = 0;
 				speechmsg.command = "sleep";
+				speech_pub->publish(speechmsg);
+				break;
+			case PS3_UP:
+				ROS_INFO("Publishing give command.");
+				speechmsg.arousal = 0;
+				speechmsg.command = "give";
+				speech_pub->publish(speechmsg);
+				break;
+			case PS3_LEFT:
+				ROS_INFO("Publishing cola command.");
+				speechmsg.arousal = 0;
+				speechmsg.command = "cola";
+				speech_pub->publish(speechmsg);
+				break;
+			case PS3_RIGHT:
+				ROS_INFO("Publishing juice command.");
+				speechmsg.arousal = 0;
+				speechmsg.command = "juice";
+				speech_pub->publish(speechmsg);
+				break;
+			case PS3_DOWN:
+				ROS_INFO("Publishing stop command.");
+				speechmsg.arousal = 0;
+				speechmsg.command = "stop";
 				speech_pub->publish(speechmsg);
 				break;
 

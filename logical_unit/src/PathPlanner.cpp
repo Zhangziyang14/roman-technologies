@@ -13,9 +13,10 @@
 PathPlanner::PathPlanner(const char *navmesh_file) :
 	mNodeHandle("~"),
 	mNavMesh(NULL),
-	mNavMeshQuery(NULL)
+	mNavMeshQuery(NULL),
+	mTileCache(NULL)
 {
-	mNavMeshPath = navmesh_file;
+	mTileCachePath = navmesh_file;
 	loadNavmesh();
 
 	mNavMeshQuery = dtAllocNavMeshQuery();
@@ -25,11 +26,13 @@ PathPlanner::PathPlanner(const char *navmesh_file) :
 	mFilter.setIncludeFlags(0xffff ^ 0x10);
 	mFilter.setExcludeFlags(0);
 
-	std::string goalTopic, pathTopic;
+	std::string goalTopic, pathTopic, scanTopic;
 	mNodeHandle.param<std::string>("goal_topic", goalTopic, "/move_base_simple/goal");
 	mNodeHandle.param<std::string>("path_topic", pathTopic, "/global_path");
-	mGoalSub = mNodeHandle.subscribe(goalTopic, 1, &PathPlanner::goalCb, this);
+	mNodeHandle.param<std::string>("scan_topic", scanTopic, "/scan");
+	mGoalSub = mNodeHandle.subscribe(goalTopic, 1, &PathPlanner::goalCB, this);
 	mPathPub = mNodeHandle.advertise<nav_msgs::Path>(pathTopic, 1);
+	mScanSub = mNodeHandle.subscribe(scanTopic, 1, &PathPlanner::scanCB, this);
 }
 
 /**
@@ -37,10 +40,9 @@ PathPlanner::PathPlanner(const char *navmesh_file) :
  */
 PathPlanner::~PathPlanner()
 {
-	if (mNavMesh)
-		dtFreeNavMesh(mNavMesh);
-	if (mNavMeshQuery)
-		dtFreeNavMeshQuery(mNavMeshQuery);
+	dtFreeNavMesh(mNavMesh);
+	dtFreeNavMeshQuery(mNavMeshQuery);
+	dtFreeTileCache(mTileCache);
 }
 
 /**
@@ -48,23 +50,23 @@ PathPlanner::~PathPlanner()
  */
 void PathPlanner::loadNavmesh()
 {
-	FILE* fp = fopen(mNavMeshPath.c_str(), "rb");
+	FILE* fp = fopen(mTileCachePath.c_str(), "rb");
 	if (fp == NULL)
 	{
-		ROS_INFO("Navmesh binary could not be found. Path: %s", mNavMeshPath.c_str());
+		ROS_INFO("Navmesh binary could not be found. Path: %s", mTileCachePath.c_str());
 		return;
 	}
 
 	// Read header.
-	NavMeshSetHeader header;
-	int bytes = fread(&header, sizeof(NavMeshSetHeader), 1, fp);
-	if (header.magic != NAVMESHSET_MAGIC)
+	TileCacheSetHeader header;
+	int bytes = fread(&header, sizeof(TileCacheSetHeader), 1, fp);
+	if (header.magic != TILECACHESET_MAGIC)
 	{
 		ROS_INFO("Magic number does not match");
 		fclose(fp);
 		return;
 	}
-	if (header.version != NAVMESHSET_VERSION)
+	if (header.version != TILECACHESET_VERSION)
 	{
 		ROS_INFO("Version number does not match");
 		fclose(fp);
@@ -80,18 +82,33 @@ void PathPlanner::loadNavmesh()
 		fclose(fp);
 		return;
 	}
-	dtStatus status = mNavMesh->init(&header.params);
+	dtStatus status = mNavMesh->init(&header.meshParams);
 	if (dtStatusFailed(status))
 	{
-		ROS_INFO("Parameters init has failed.");
+		ROS_INFO("Mesh parameters init has failed.");
 		fclose(fp);
 		return;
 	}
 
+	mTalloc = new LinearAllocator(32000);
+	mTComp = new FastLZCompressor;
+	mTmpProc = new MeshProcess;
+
+	mTileCache = dtAllocTileCache();
+	status = mTileCache->init(&header.cacheParams, mTalloc, mTComp, mTmpProc);
+	if (dtStatusFailed(status))
+	{
+		ROS_INFO("TileCache parameters init has failed.");
+		fclose(fp);
+		return;
+	}
+
+	ROS_INFO("Max objects: %d", header.cacheParams.maxObstacles);
+
 	// Read tiles.
 	for (int i = 0; i < header.numTiles; ++i)
 	{
-		NavMeshTileHeader tileHeader;
+		TileCacheTileHeader tileHeader;
 		bytes = fread(&tileHeader, sizeof(tileHeader), 1, fp);
 		if (!tileHeader.tileRef || !tileHeader.dataSize)
 			break;
@@ -101,10 +118,52 @@ void PathPlanner::loadNavmesh()
 		memset(data, 0, tileHeader.dataSize);
 		bytes = fread(data, tileHeader.dataSize, 1, fp);
 
-		mNavMesh->addTile(data, tileHeader.dataSize, DT_TILE_FREE_DATA, tileHeader.tileRef, 0);
+		dtCompressedTileRef tile = 0;
+		mTileCache->addTile(data, tileHeader.dataSize, DT_COMPRESSEDTILE_FREE_DATA, &tile);
+
+		if (tile)
+			mTileCache->buildNavMeshTile(tile, mNavMesh);
 	}
 
 	fclose(fp);
+}
+
+void PathPlanner::addObstacle(geometry_msgs::Point p)
+{
+	if (mTileCache == NULL)
+		return;
+
+	float pos[3];
+	pos[0] = p.x;
+	pos[1] = p.z;
+	pos[2] = p.y;
+	if (dtStatus status = mTileCache->addObstacle(pos, ROBOT_RADIUS, 3.0, 0) != DT_SUCCESS)
+		ROS_ERROR("Something went wrong adding an obstacle! %d", status);
+
+	//ROS_INFO("Added obstacle at (%lf, %lf).", p.x, p.y);
+}
+
+void PathPlanner::removeAllObstacles()
+{
+	if (mTileCache == NULL)
+		return;
+
+	for (int i = 0; i < mTileCache->getObstacleCount(); i++)
+	{
+		const dtTileCacheObstacle* ob = mTileCache->getObstacle(i);
+		if (ob->state == DT_OBSTACLE_EMPTY)
+			continue;
+
+		if (mTileCache->getObstacleRef(ob) == 0)
+			ROS_WARN("Warning: Obstacle ref == 0");
+		if (dtStatus status = mTileCache->removeObstacle(mTileCache->getObstacleRef(ob)) != DT_SUCCESS)
+			ROS_ERROR("Something went wrong removing an obstacle! %d", status);
+	}
+
+	// update the navmesh
+	float f = 0.05f;
+	if (dtStatus status = mTileCache->update(f, mNavMesh) != DT_SUCCESS)
+		ROS_ERROR("Something went wrong updating the tile cache! %d", status);
 }
 
 /**
@@ -173,33 +232,61 @@ void PathPlanner::planPath(geometry_msgs::PoseStamped start, geometry_msgs::Pose
 	path.poses[straightPathCount - 1].pose.orientation = end.pose.orientation;
 }
 
-/**
- * Callback for when a goal is received, calculates a path from current position to goal and publishes it.
- */
-void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
+void PathPlanner::goalCB(const geometry_msgs::PoseStamped &goal)
 {
 	ROS_INFO("Received new goal.");
 
-	tf::StampedTransform robotPosition;
-	try
+	if (updateCurrentPosition() == false)
 	{
-		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), robotPosition);
-	}
-	catch (tf::TransformException ex)
-	{
-		//ROS_ERROR("%s",ex.what());
+		ROS_ERROR("Failed to update robot position.");
 		return;
+	}
+
+	if (mLaserScan.get() != NULL)
+	{
+		// add dynamic obstacles
+		uint32_t size = (mLaserScan->angle_max - mLaserScan->angle_min) / mLaserScan->angle_increment;
+		for (uint32_t i = 0; i < size; i++)
+		{
+			if (mLaserScan->ranges[i] >= mLaserScan->range_max)
+				continue;
+
+			geometry_msgs::PointStamped tmp, p;
+			tmp.header.frame_id = "/base_link";
+			tmp.header.stamp = ros::Time(0);
+			tmp.point.x = mLaserScan->ranges[i] * cosf(mLaserScan->angle_min + mLaserScan->angle_increment * i);
+			tmp.point.y = mLaserScan->ranges[i] * sinf(mLaserScan->angle_min + mLaserScan->angle_increment * i);
+
+			try
+			{
+				mTransformListener.transformPoint("/map", tmp, p);
+			}
+			catch (tf::TransformException &ex)
+			{
+				ROS_ERROR("%s",ex.what());
+				return;
+			}
+
+			addObstacle(p.point);
+		}
+
+		// update the navmesh
+		float f = 0.05f;
+		if (mTileCache->update(f, mNavMesh) != DT_SUCCESS)
+			ROS_ERROR("Something went wrong updating the mesh.");
 	}
 
 	nav_msgs::Path path;
 	path.header.frame_id = "/map";
 
-	geometry_msgs::PoseStamped start, end;
-	start.pose.position.x = robotPosition.getOrigin().getX();
-	start.pose.position.y = robotPosition.getOrigin().getY();
-	end.pose = goal.pose;
+	geometry_msgs::PoseStamped start;
+	start.pose.position.x = mRobotPosition.getOrigin().getX();
+	start.pose.position.y = mRobotPosition.getOrigin().getY();
 
-	planPath(start, end, path);
+	planPath(start, goal, path);
+
+	if (mLaserScan.get() != NULL)
+		removeAllObstacles();
 
 	ROS_INFO("Size: %d", path.poses.size());
 	for (size_t i = 0; i < path.poses.size(); i++)
@@ -208,7 +295,31 @@ void PathPlanner::goalCb(const geometry_msgs::PoseStamped &goal)
 	}
 
 	path.header.stamp = ros::Time::now();
-	mPathPub.publish(path);
+
+	// for rviz
+	if (mPathPub.getNumSubscribers())
+		mPathPub.publish(path);
+}
+
+void PathPlanner::scanCB(const sensor_msgs::LaserScanPtr &scan)
+{
+	mLaserScan = scan;
+}
+
+bool PathPlanner::updateCurrentPosition()
+{
+	// get current position in the map
+	try
+	{
+		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
+	}
+	catch (tf::TransformException &ex)
+	{
+		//ROS_ERROR("%s",ex.what());
+		return false;
+	}
+
+	return true;
 }
 
 int main(int argc, char **argv)

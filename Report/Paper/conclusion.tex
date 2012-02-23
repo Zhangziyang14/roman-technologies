@@ -1,16 +1,19 @@
 \documentclass[project_eva.tex]{subfiles}
 \begin{document}
 
-Eva performs her fetch and carry scenario as expected. However, there are limitations on the amount of change in the 
-environment where Eva operates. All findings show that Eva operates correctly in situations with the correct 
-parameters. However, if one of the parameters changes, the performance of Eva will deteriorate. For instance, if Eva is 
-driving on a carpet instead of on a wooden floor, then she will slip more, making her drive inaccurate. Another example 
-is that Eva cannot distinguish multiple faces when a lot of people stand around her, or that she cannot recognize the 
-command well if ambient noice is present. When these limitations are surpassed issues can occur like the ones described 
-in \pageref{simulation} .
+The fetch and carry test in an ideal domestic environment was passed by Eva. The result is shown in this video\ref{VIDEO}. However more testing in other environments pointed out some design and implementation flaws.
 
-Affect detection also worked as expected, but it could be improved with simple smile detection, since it is not hard to 
-detect smiles on human faces (look for white teeth and lifted mouth corners \cite{autosmiley} \cite{smile} ). For future work, a bimodal approach \cite{bimodal} for affect detection could be used to improve Eva\textquotesingle s ability in 
-distinguishing different levels of affection. An extension to this would be emotion recognition to further improve 
-interaction. The most important change to be made to the prototype, in order to use Eva in the health care, is to stabilize Eva\textquotesingle s performance under different circumstances. Also, Eva should be able to perform tasks other than fetch and carry, so she can be of great help to her owner. Last but not least, an extension to Eva would be learning behaviour -as mentioned in the concept \pageref{concept} . This was not implemented due to time constraints. All in all, Eva is considered a success. Further research is very well possible as Eva is a good base framework with a good set of functionality for simple autonomous fetch and carry tasks. Further, as Eva is also completely controllable using remote control. Wizard of Oz studies can be carried out as of today to investigate interaction patterns to find out more about, e.g., affective interaction with Eva. 
+\begin{itemize}
+\item Speech recognition suffered from ambient noise, causing lost and false positive commands. A solution would be to train the speech model better, or choose a different speech package. 
+\item The eyebrows were unable to lift - due to a servo failure - causing the novelty emotion to not convey properly. A higher quality motor should be mounted in the head to move the eyebrows up and down.
+\item Stable navigation was impaired by the h-bridges driving the wheels. They cut off the power above $3A$ resulting in shocking motion. A solution would be to power the motors at $24V$.
+\item No gripper feedback was implemented. This caused Eva to think she had grasped an object while she was holding nothing in some cases.
+\item Object avoidance has not been tested combined with the path planning. 
+\item When a lot of objects were present on the table, tabletop object detector performed considerably slower. A more efficient way is to segment by RGB first and secondly fit the remaining clusters with the database. Also it would be better to track the objects after detection instead of constantly detecting.
+\item Also when the table was placed directly against a wall, the tabletop object detector could classify the wall plane as a tabletop.
+\item An improvement on the interaction would be to add confirmations from Eva after receiving a command.
+\item To make Eva appear less static is to provide a larger number of samples per emotion.
+\end{itemize}
+ 
+
 \end{document}

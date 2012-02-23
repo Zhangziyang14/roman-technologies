@@ -1,5 +1,5 @@
 % $ biblatex auxiliary file $
-% $ biblatex version 1.4 $
+% $ biblatex version 1.5 $
 % Do not modify the above lines!
 %
 % This is an auxiliary file used by the 'biblatex' package.
@@ -16,86 +16,6 @@
   {}
 \endgroup
 
-\entry{FaceDetection}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {AbhinayE}{A.}%
-     {}{}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{A1}
-  \strng{fullhash}{A1}
-  \field{sortinit}{A}
-  \field{title}{Face Detection using OpenCV}
-  \verb{url}
-  \verb http://opencv.willowgarage.com/wiki/FaceDetection
-  \endverb
-  \field{month}{02}
-  \field{year}{2012}
-\endentry
-
-\entry{plane}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Bohg}{B.}%
-     {J.}{J.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{BJ1}
-  \strng{fullhash}{BJ1}
-  \field{sortinit}{B}
-  \field{title}{Fast Plane Detector}
-  \verb{url}
-  \verb http://www.ros.org/wiki/fast_plane_detection
-  \endverb
-  \field{month}{02}
-  \field{year}{2012}
-\endentry
-
-\entry{braitenberg}{book}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Braitenberg}{B.}%
-     {V.}{V.}%
-     {}{}%
-     {}{}}%
-  }
-  \list{publisher}{1}{%
-    {MIT Press}%
-  }
-  \strng{namehash}{BV1}
-  \strng{fullhash}{BV1}
-  \field{sortinit}{B}
-  \field{isbn}{9780262521123}
-  \field{series}{Bradford Books}
-  \field{title}{Vehicles: experiments in synthetic psychology}
-  \verb{url}
-  \verb http://books.google.nl/books?id=7KkUAT_q_sQC
-  \endverb
-  \field{year}{1986}
-\endentry
-
-\entry{Joost}{article}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Broekens}{B.}%
-     {D.J.}{D.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{BD1}
-  \strng{fullhash}{BD1}
-  \field{sortinit}{B}
-  \field{title}{Robot Learning From Feedback}
-  \verb{url}
-  \verb https://code.google.com/p/roman-technologies
-  \endverb
-  \field{year}{2012}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
 \entry{CBS}{online}{}
   \name{author}{1}{}{%
     {{}%
@@ -106,7 +26,6 @@
   }
   \strng{namehash}{C1}
   \strng{fullhash}{C1}
-  \field{sortinit}{C}
   \field{title}{Dutch Ageing statistics}
   \verb{url}
   \verb http://statline.cbs.nl/StatWeb/publication/?VW=T&DM=SLNL&PA=70115ned&D1
@@ -116,33 +35,32 @@
   \field{year}{2012}
 \endentry
 
-\entry{bimodal}{inproceedings}{}
-  \name{author}{2}{}{%
+\entry{Forlizzi}{article}{}
+  \name{author}{3}{}{%
     {{}%
-     {De~Silva}{D.~S.}%
-     {L.C.}{L.}%
+     {Forlizzi}{F.}%
+     {J.}{J.}%
      {}{}%
      {}{}}%
     {{}%
-     {Pei}{P.}%
-     {C.N}{C.}%
+     {DiSalvo}{D.}%
+     {C.}{C.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Gemperle}{G.}%
+     {F.}{F.}%
      {}{}%
      {}{}}%
   }
-  \keyw{HMM;audio;bimodal emotion recognition;classification;emotional
-  speech;facial expressions;hidden Markov models;rule-based system;statistical
-  techniques;video;face recognition;hidden Markov models;knowledge based
-  systems;pattern classification;speech recognition;statistical analysis;}
-  \strng{namehash}{DSLPC1}
-  \strng{fullhash}{DSLPC1}
-  \field{sortinit}{D}
-  \field{booktitle}{Automatic Face and Gesture Recognition}
-  \verb{doi}
-  \verb 10.1109/AFGR.2000.840655
+  \strng{namehash}{FJDCGF1}
+  \strng{fullhash}{FJDCGF1}
+  \field{title}{Assistive Robotics and an Ecology of Elders Living
+  Independently in Their Homes}
+  \verb{url}
+  \verb http://dx.doi.org/10.1080/07370024.2004.9667339
   \endverb
-  \field{pages}{332 \bibrangedash 335}
-  \field{title}{Bimodal emotion recognition}
-  \field{year}{2000}
+  \field{year}{2004}
 \endentry
 
 \entry{Diepenhorst}{article}{}
@@ -165,7 +83,6 @@
   }
   \strng{namehash}{DMTWVFF1}
   \strng{fullhash}{DMTWVFF1}
-  \field{sortinit}{D}
   \field{title}{Kosteneffectiviteit van hulphonden}
   \field{year}{2011}
 \endentry
@@ -190,83 +107,209 @@
   }
   \strng{namehash}{EiHBiNWdC1}
   \strng{fullhash}{EiHBiNWdC1}
-  \field{sortinit}{E}
   \field{title}{Zorg op afstand, literatuurstudie naar internationale
   ontwikkelingen en kennis over effecten}
   \field{year}{2009}
 \endentry
 
-\entry{Forlizzi}{article}{}
-  \name{author}{3}{}{%
+\entry{autosmiley}{online}{}
+  \name{author}{1}{}{%
     {{}%
-     {Forlizzi}{F.}%
-     {J.}{J.}%
+     {Watson}{W.}%
      {}{}%
-     {}{}}%
-    {{}%
-     {DiSalvo}{D.}%
-     {C.}{C.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Gemperle}{G.}%
-     {F.}{F.}%
      {}{}%
      {}{}}%
   }
-  \strng{namehash}{FJDCGF1}
-  \strng{fullhash}{FJDCGF1}
-  \field{sortinit}{F}
-  \field{title}{Assistive Robotics and an Ecology of Elders Living
-  Independently in Their Homes}
+  \strng{namehash}{W1}
+  \strng{fullhash}{W1}
+  \field{title}{Autosmiley}
   \verb{url}
-  \verb http://dx.doi.org/10.1080/07370024.2004.9667339
+  \verb http://fffff.at/auto-smiley/
   \endverb
-  \field{year}{2004}
+  \field{month}{02}
+  \field{year}{2012}
 \endentry
 
-\entry{Tech}{article}{}
-  \name{author}{6}{}{%
+\entry{elderly}{article}{}
+  \name{author}{2}{}{%
     {{}%
-     {Gaiser}{G.}%
-     {J.H.}{J.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Jager}{J.}%
-     {I.}{I.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Kate}{K.}%
-     {J.D.}{J.}%
-     {ten}{t.}%
-     {}{}}%
-    {{}%
-     {Ko}{K.}%
-     {W.K.H.}{W.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Veen}{V.}%
-     {B.}{B.}%
-     {van~der}{v.~d.}%
-     {}{}}%
-    {{}%
-     {Wit}{W.}%
+     {Kemna}{K.}%
      {S.}{S.}%
-     {de}{d.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Does}{D.}%
+     {K.}{K.}%
+     {}{}%
      {}{}}%
   }
-  \strng{namehash}{GJ+1}
-  \strng{fullhash}{GJJIKJtKWVBvdWSd1}
-  \field{sortinit}{G}
-  \field{title}{Design of a Robot Prototype for the Domestic Healthcare Sector}
+  \strng{namehash}{KSDK1}
+  \strng{fullhash}{KSDK1}
+  \field{title}{Robots in elderly care}
+  \field{year}{2006}
+  \warn{\item Invalid format of field 'month'}
+\endentry
+
+\entry{uncanny}{article}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Mori}{M.}%
+     {M.}{M.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{MM1}
+  \strng{fullhash}{MM1}
+  \field{number}{4}
+  \field{pages}{33\bibrangedash 35}
+  \field{title}{The Uncanny Valley}
+  \field{volume}{7}
+  \field{journaltitle}{Energy}
+  \field{year}{1970}
+\endentry
+
+\entry{colour-emotion}{article}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Kaya}{K.}%
+     {Naz}{N.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Epps}{E.}%
+     {Helen~H.}{H.~H.}%
+     {}{}%
+     {}{}}%
+  }
+  \keyw{College Students; Emotional Response; Student Attitudes; Color;
+  Psychological Patterns; Dimensional Preference;}
+  \strng{namehash}{KNEHH1}
+  \strng{fullhash}{KNEHH1}
+  \field{issn}{ISSN-0146-3934}
+  \field{number}{3}
+  \field{pages}{396}
+  \field{title}{Relationship between Color and Emotion: A Study of College
+  Students}
+  \field{volume}{38}
+  \field{journaltitle}{College Student Journal}
+  \field{year}{2004}
+  \warn{\item Invalid format of field 'month'}
+\endentry
+
+\entry{iCat}{online}{}
+  \name{author}{1}{}{%
+    {{}%
+     {site}{s.}%
+     {}{}%
+     {iCat~community}{i.~c.}%
+     {}{}}%
+  }
+  \strng{namehash}{sic1}
+  \strng{fullhash}{sic1}
+  \field{title}{iCat research community}
   \verb{url}
-  \verb https://code.google.com/p/roman-technologies
+  \verb http://www.hitech-projects.com/icat/index.php
   \endverb
   \field{year}{2012}
   \warn{\item Invalid format of field 'month'}
+\endentry
+
+\entry{sounds}{online}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Nave}{N.}%
+     {R.}{R.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{NR1}
+  \strng{fullhash}{NR1}
+  \field{title}{Hyperphysics sound description}
+  \verb{url}
+  \verb http://hyperphysics.phy-astr.gsu.edu/HBASE/sound/soucon.html#c1
+  \endverb
+  \field{year}{2012}
+  \warn{\item Invalid format of field 'month'}
+\endentry
+
+\entry{FaceDetection}{online}{}
+  \name{author}{1}{}{%
+    {{}%
+     {AbhinayE}{A.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{A1}
+  \strng{fullhash}{A1}
+  \field{title}{Face Detection using OpenCV}
+  \verb{url}
+  \verb http://opencv.willowgarage.com/wiki/FaceDetection
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
+\entry{plane}{online}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Bohg}{B.}%
+     {J.}{J.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{BJ1}
+  \strng{fullhash}{BJ1}
+  \field{title}{Fast Plane Detector}
+  \verb{url}
+  \verb http://www.ros.org/wiki/fast_plane_detection
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
+\entry{tabletop}{online}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Muja}{M.}%
+     {M.}{M.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{MM2}
+  \strng{fullhash}{MM2}
+  \field{title}{Tabletop Object Detector}
+  \verb{url}
+  \verb http://www.ros.org/wiki/tabletop_object_detector
+  \endverb
+  \field{month}{02}
+  \field{year}{2012}
+\endentry
+
+\entry{Roboearth}{article}{}
+  \name{author}{3}{}{%
+    {{}%
+     {Schie{\ss}le}{S.}%
+     {B.}{B.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {H\"ausermann}{H.}%
+     {K.}{K.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Zweigle}{Z.}%
+     {O.}{O.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{SBHKZO1}
+  \strng{fullhash}{SBHKZO1}
+  \field{number}{D6.1}
+  \field{title}{Robots sharing a knowledge base for world modeling and learning
+  of actions}
+  \field{year}{2010}
 \endentry
 
 \entry{jacobian}{book}{}
@@ -292,10 +335,9 @@
   }
   \strng{namehash}{GBXNTT1}
   \strng{fullhash}{GBXNTT1}
-  \field{sortinit}{G}
   \field{isbn}{9780122818455}
   \field{series}{Academic Press series in engineering}
-  \field{title}{Control in robotics and automation:...}
+  \field{title}{Control in robotics and automation: sensor-based integration}
   \verb{url}
   \verb http://books.google.nl/books?id=qT6tHTQoRDAC
   \endverb
@@ -325,7 +367,6 @@
   robots;particle filtering (numerical methods);}
   \strng{namehash}{GGSCBW1}
   \strng{fullhash}{GGSCBW1}
-  \field{sortinit}{G}
   \verb{doi}
   \verb 10.1109/TRO.2006.889486
   \endverb
@@ -340,292 +381,7 @@
   \warn{\item Invalid format of field 'month'}
 \endentry
 
-\entry{colour-emotion}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Kaya}{K.}%
-     {Naz}{N.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Epps}{E.}%
-     {Helen~H.}{H.~H.}%
-     {}{}%
-     {}{}}%
-  }
-  \keyw{College Students; Emotional Response; Student Attitudes; Color;
-  Psychological Patterns; Dimensional Preference;}
-  \strng{namehash}{KNEHH1}
-  \strng{fullhash}{KNEHH1}
-  \field{sortinit}{K}
-  \field{issn}{ISSN-0146-3934}
-  \field{number}{3}
-  \field{pages}{396}
-  \field{title}{Relationship between Color and Emotion: A Study of College
-  Students}
-  \field{volume}{38}
-  \field{journaltitle}{College Student Journal}
-  \field{year}{2004}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
-\entry{elderly}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Kemna}{K.}%
-     {S.}{S.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Does}{D.}%
-     {K.}{K.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{KSDK1}
-  \strng{fullhash}{KSDK1}
-  \field{sortinit}{K}
-  \field{title}{Robots in elderly care}
-  \field{year}{2006}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
-\entry{urdf}{online}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Meeussen}{M.}%
-     {W.}{W.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Hsu}{H.}%
-     {J.}{J.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Diankov}{D.}%
-     {R.}{R.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{MWHJDR1}
-  \strng{fullhash}{MWHJDR1}
-  \field{sortinit}{M}
-  \field{title}{urdf}
-  \verb{url}
-  \verb http://www.ros.org/wiki/urdf
-  \endverb
-  \field{month}{02}
-  \field{year}{2012}
-\endentry
-
-\entry{uncanny}{article}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Mori}{M.}%
-     {M.}{M.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{MM1}
-  \strng{fullhash}{MM1}
-  \field{sortinit}{M}
-  \field{number}{4}
-  \field{pages}{33\bibrangedash 35}
-  \field{title}{The Uncanny Valley}
-  \field{volume}{7}
-  \field{journaltitle}{Energy}
-  \field{year}{1970}
-\endentry
-
-\entry{tabletop}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Muja}{M.}%
-     {M.}{M.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{MM2}
-  \strng{fullhash}{MM2}
-  \field{sortinit}{M}
-  \field{title}{Tabletop Object Detector}
-  \verb{url}
-  \verb http://www.ros.org/wiki/tabletop_object_detector
-  \endverb
-  \field{month}{02}
-  \field{year}{2012}
-\endentry
-
-\entry{sounds}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Nave}{N.}%
-     {R.}{R.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{NR1}
-  \strng{fullhash}{NR1}
-  \field{sortinit}{N}
-  \field{title}{Hyperphysics sound description}
-  \verb{url}
-  \verb http://hyperphysics.phy-astr.gsu.edu/HBASE/sound/soucon.html#c1
-  \endverb
-  \field{year}{2012}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
-\entry{Roboearth}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Schie{\ss}le}{S.}%
-     {B.}{B.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {H\"ausermann}{H.}%
-     {K.}{K.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Zweigle}{Z.}%
-     {O.}{O.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{SBHKZO1}
-  \strng{fullhash}{SBHKZO1}
-  \field{sortinit}{S}
-  \field{number}{D6.1}
-  \field{title}{Robots sharing a knowledge base for world modeling and learning
-  of actions}
-  \field{year}{2010}
-\endentry
-
-\entry{iCat}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {site}{s.}%
-     {}{}%
-     {iCat~community}{i.~c.}%
-     {}{}}%
-  }
-  \strng{namehash}{sic1}
-  \strng{fullhash}{sic1}
-  \field{sortinit}{S}
-  \field{title}{iCat research community}
-  \verb{url}
-  \verb http://www.hitech-projects.com/icat/index.php
-  \endverb
-  \field{year}{2012}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
-\entry{Thomaz}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Thomaz}{T.}%
-     {Andrea~L.}{A.~L.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Breazeal}{B.}%
-     {Cynthia}{C.}%
-     {}{}%
-     {}{}}%
-  }
-  \keyw{Human–robot interaction}
-  \strng{namehash}{TALBC1}
-  \strng{fullhash}{TALBC1}
-  \field{sortinit}{T}
-  \verb{doi}
-  \verb 10.1016/j.artint.2007.09.009
-  \endverb
-  \field{issn}{0004-3702}
-  \field{number}{6–7}
-  \field{pages}{716 \bibrangedash  737}
-  \field{title}{Teachable robots: Understanding human teaching behavior to
-  build more effective robot learners}
-  \verb{url}
-  \verb http://www.sciencedirect.com/science/article/pii/S000437020700135X
-  \endverb
-  \field{volume}{172}
-  \field{journaltitle}{Artificial Intelligence}
-  \field{year}{2008}
-\endentry
-
-\entry{affection}{incollection}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Vidrascu}{V.}%
-     {L.}{L.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Devillers}{D.}%
-     {L.}{L.}%
-     {}{}%
-     {}{}}%
-  }
-  \name{editor}{3}{}{%
-    {{}%
-     {Tao}{T.}%
-     {Jianhua}{J.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Tan}{T.}%
-     {Tieniu}{T.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Picard}{P.}%
-     {Rosalind}{R.}%
-     {}{}%
-     {}{}}%
-  }
-  \list{publisher}{1}{%
-    {Springer Berlin / Heidelberg}%
-  }
-  \strng{namehash}{VLDL1}
-  \strng{fullhash}{VLDL1}
-  \field{sortinit}{V}
-  \field{booktitle}{Affective Computing and Intelligent Interaction}
-  \field{isbn}{978-3-540-29621-8}
-  \field{note}{10.1007/11573548_95}
-  \field{pages}{739\bibrangedash 746}
-  \field{series}{Lecture Notes in Computer Science}
-  \field{title}{Real-Life Emotion Representation and Detection in Call Centers
-  Data}
-  \verb{url}
-  \verb http://dx.doi.org/10.1007/11573548_95
-  \endverb
-  \field{volume}{3784}
-  \field{year}{2005}
-\endentry
-
-\entry{autosmiley}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Watson}{W.}%
-     {}{}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{W1}
-  \strng{fullhash}{W1}
-  \field{sortinit}{W}
-  \field{title}{Autosmiley}
-  \verb{url}
-  \verb http://fffff.at/auto-smiley/
-  \endverb
-  \field{month}{02}
-  \field{year}{2012}
-\endentry
-
 \entry{wavefront}{online}{}
-  \field{sortinit}{W}
   \field{title}{Wavefront .obj file}
   \verb{url}
   \verb http://en.wikipedia.org/wiki/Wavefront_.obj_file
@@ -634,58 +390,26 @@
   \field{year}{2012}
 \endentry
 
-\entry{smile}{article}{}
-  \name{author}{5}{}{%
+\entry{braitenberg}{book}{}
+  \name{author}{1}{}{%
     {{}%
-     {Whitehill}{W.}%
-     {J.}{J.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Littlewort}{L.}%
-     {G.}{G.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Fasel}{F.}%
-     {I.}{I.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Bartlett}{B.}%
-     {M.}{M.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Movellan}{M.}%
-     {J.}{J.}%
+     {Braitenberg}{B.}%
+     {V.}{V.}%
      {}{}%
      {}{}}%
   }
-  \keyw{automatic facial expression recognition research;feature
-  representation;human-level expression recognition accuracy;illumination
-  conditions;image databases;image registration;machine learning
-  approaches;practical smile detection;training data set;face recognition;image
-  registration;image representation;learning (artificial intelligence);object
-  detection;visual databases;Algorithms;Artificial
-  Intelligence;Biometry;Computer Simulation;Face;Humans;Image Enhancement;Image
-  Interpretation, Computer-Assisted;Models, Biological;Pattern Recognition,
-  Automated;Reproducibility of Results;Sensitivity and
-  Specificity;Smiling;Subtraction Technique;}
-  \strng{namehash}{WJ+1}
-  \strng{fullhash}{WJLGFIBMMJ1}
-  \field{sortinit}{W}
-  \verb{doi}
-  \verb 10.1109/TPAMI.2009.42
+  \list{publisher}{1}{%
+    {MIT Press}%
+  }
+  \strng{namehash}{BV1}
+  \strng{fullhash}{BV1}
+  \field{isbn}{9780262521123}
+  \field{series}{Bradford Books}
+  \field{title}{Vehicles: experiments in synthetic psychology}
+  \verb{url}
+  \verb http://books.google.nl/books?id=7KkUAT_q_sQC
   \endverb
-  \field{issn}{0162-8828}
-  \field{number}{11}
-  \field{pages}{2106 \bibrangedash 2111}
-  \field{title}{Toward Practical Smile Detection}
-  \field{volume}{31}
-  \field{journaltitle}{Pattern Analysis and Machine Intelligence}
-  \field{year}{2009}
-  \warn{\item Invalid format of field 'month'}
+  \field{year}{1986}
 \endentry
 
 \lossort

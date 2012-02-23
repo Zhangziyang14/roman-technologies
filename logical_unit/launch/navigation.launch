@@ -8,7 +8,7 @@
     <!-- include file="$(find image_processing)/launch/kinect.launch"/ -->
 
     <node pkg="logical_unit" type="OdometryTracker" name="OdometryTracker"/>
-    <node pkg="logical_unit" type="PathPlanner" name="PathPlanner" args="$(arg navmesh_file)"/>
+    <node pkg="logical_unit" type="PathPlanner" name="PathPlanner" args="$(arg navmesh_file)" output="screen"/>
 
     <node pkg="amcl" type="amcl" name="amcl"/>
 

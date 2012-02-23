@@ -13,6 +13,7 @@
 \usepackage{hyperref}
 \usepackage{subfiles}
 \usepackage{parskip}
+\usepackage{eurosym}
 \usepackage{amsmath}
 %\usepackage[titles]{tocloft}
 
@@ -40,51 +41,56 @@
 
 \newcommand{\todo}[1]{\textbf{\textsc{\textcolor{red}{[#1]}}}}
 
-\chapter{Preface}
+\chapter*{Preface}
 \subfile{preface}
 \label{preface}
 
-\chapter{Abstract}
+\chapter*{Abstract}
 \subfile{abstract}
 \label{abstract}
 \newpage
 
 \tableofcontents
 
-\chapter{Aesthetic design}
+\chapter*{Introduction}
+\subfile{introduction}
+\label{introduction}
+
+\chapter*{Aesthetic design}
 \subfile{aesthetic_design}
 \label{aesthetic_design}
 
-\chapter{Emotion construction}
-\subfile{emotions}
-\label{emotions}
-
-\chapter{Head}
-\subfile{head}
-\label{head}
-
-\chapter{Arm}
-\subfile{arm}
-\label{arm}
-
-\chapter{Electronics}
-\subfile{electronics}
-\label{electronics}
-
-\chapter{Software Architecture}
-\subfile{software_architecture}
-\label{Software Architecture}
-
-\chapter{Global Planner}
+\chapter*{Global Planner}
 \subfile{global_planner}
 \label{global_planner}
 
-\chapter{Object Avoidance}
+\chapter*{Object Avoidance}
 \subfile{object_avoidance}
 \label{object_avoidance}
 
-\chapter{Postface}
-\subfile{postface}
-\label{postface}
+\chapter*{Software Architecture}
+\label{Software Architecture}
+\subfile{software_architecture}
+
+\chapter*{Electronics}
+\subfile{electronics}
+\label{electronics}
+
+\chapter*{Arm}
+\subfile{arm}
+\label{arm}
+
+\chapter*{Head}
+\subfile{head}
+\label{head}
+
+\chapter*{References}
+\label{references}
+\subfile{references}
+
+%... More Appendices
+
+\bibliographystyle{plain}
+\bibliography{biblio}
 
 \end{document}

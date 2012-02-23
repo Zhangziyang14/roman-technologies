@@ -29,7 +29,7 @@
 
 /// @class dtQueryFilter
 ///
-/// <b>The Default Implmentation</b>
+/// <b>The Default Implementation</b>
 /// 
 /// At construction: All area costs default to 1.0.  All flags are included
 /// and none are excluded.
@@ -81,7 +81,7 @@ float dtQueryFilter::getCost(const float* pa, const float* pb,
 							 const dtPolyRef /*curRef*/, const dtMeshTile* /*curTile*/, const dtPoly* curPoly,
 							 const dtPolyRef /*nextRef*/, const dtMeshTile* /*nextTile*/, const dtPoly* /*nextPoly*/) const
 {
-	return dtVdist(pa, pb) * m_areaCost[curPoly->area];
+	return dtVdist(pa, pb) * m_areaCost[curPoly->getArea()];
 }
 #else
 inline bool dtQueryFilter::passFilter(const dtPolyRef /*ref*/,
@@ -584,10 +584,13 @@ int dtNavMeshQuery::queryPolygonsInTile(const dtMeshTile* tile, const float* qmi
 		for (int i = 0; i < tile->header->polyCount; ++i)
 		{
 			const dtPoly* p = &tile->polys[i];
+			// Do not return off-mesh connection polygons.
+			if (p->getType() == DT_POLYTYPE_OFFMESH_CONNECTION)
+				continue;
+			// Must pass filter
 			const dtPolyRef ref = base | (dtPolyRef)i;
 			if (!filter->passFilter(ref, tile, p))
 				continue;
-				
 			// Calc polygon bounds.
 			const float* v = &tile->verts[p->verts[0]*3];
 			dtVcopy(bmin, v);
