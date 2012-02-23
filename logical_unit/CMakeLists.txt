@@ -27,7 +27,7 @@ rosbuild_genmsg()
 rosbuild_gensrv()
 
 rosbuild_add_executable(OdometryTracker src/OdometryTracker.cpp)
-rosbuild_add_executable(OdometrySimulator src/OdometrySimulator.cpp)
+#rosbuild_add_executable(OdometrySimulator src/OdometrySimulator.cpp)
 rosbuild_add_executable(PathPlanner src/PathPlanner.cpp src/fastlz.c)
 rosbuild_add_executable(Controller src/Controller.cpp)
 rosbuild_add_executable(PS3Controller src/PS3Controller.cpp)
