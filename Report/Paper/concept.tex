@@ -1,39 +1,18 @@
 \documentclass[project_eva.tex]{subfiles}
 \begin{document}
-Eva should be a service robot that performs activities of daily living, designed for making elderly more self-
-sufficient\cite{Forlizzi} and home-care professionals more efficient in their distribution of time across clients. These 
+The actual production of a robot that can fully support people with Activities of Daily Living(ADL)\footnote{basic tasks of everyday life, such as eating, bathing, dressing, toileting, and transferring}  tasks was a too large assignment for the minor time period. The project was narrowed down to providing working fetch-and-carry functionality; a suitable interaction method for interacting with humans. The way these were implemented are based on the full concept of the home care robot. This concept is presented below.
+
+The robot should be a service robot that performs activities of daily living, designed for making elderly more selfsufficient\cite{Forlizzi} and home-care professionals more efficient in their distribution of time across clients. These 
 activities are based on the tasks of helper dogs that have a proven efficiency on the reduction of the need for 
-professional healthcare help\cite{Diepenhorst}. Eva improves the service of helper dogs by allowing 
+professional healthcare help\cite{Diepenhorst}. The robot improves the service of helper dogs by allowing 
 expansion into ``care at distance'' \cite{Evers} through digital means and by allowing the improvement of the tasks 
-performed by an ADL\footnote{Activities of Daily Living} dog by losing the restraints posed by a dog\textquotesingle s body and mind: Eva\textquotesingle s design is more flexible than the 
-design of a dog. An example: a dog cannot bring hot coffee, while Eva can.
+performed by an ADLdog. A robot can be built specifically for the ADL tasks, while a dog is not born to do ADL tasks. So a robot could eventually outperform a dog.  A simple example of the biological constraints a robot would not have is that a dog cannot reach all the desired places in a home, such as high cabinets.
 
-Eva should have a set of three emotional states \pageref{sec:Emotion expression}: happy, sad and novelty, which serves as 
-communication methods. Eva will then communicate these states by non-textual vocal sounds, eyebrow movement and lights 
-\footnote{See Technical Document}. These elements allow communication even if the vision or hearing of the 
-user is impaired - which is often the case with our target group, due to ailments of old age. All elements of her 
-communication should be kept basic to allow her to use a very comprehensible form of emotional communication, making it 
-obvious for the user what she is trying to tell. This basic form of states also allows Eva to communicate a large amount of 
-messages using only a small array of emotions, this is because the emotional states can be interpreted depending on the 
-context of the action.
+Because humans communicate affectively with each other, and often do so with technology, to facilitate interacting with the robot, it should give affective feedback. At the very least, it should be able to detect positive and negative feedback with regards to her behaviour, as well as communicate to the user in a clear way that it will adapt its behaviour or understood a command from the user.
 
-Eva should understand the feedback of users by determining the emotional load of their reactions. She should then return 
-feedback herself to the user by showing emotional states - showing that she will adapt her behaviour in a positive or 
-negative manner. This allows Eva to adapt her complete behaviour to the user.
+The robot should learn by feedback and learn by guidance cite{Thomaz} . Learning by feedback is learning by adjusting the robot\textquotesingle s behaviour based on the intentional information of users after the robot has completed a task. The second method is learning by guidance, where the intentional information is received before the fact. Learning by feedback is used for adjusting the robot\textquotesingle s ``known'' behaviour. An example of this method is the robot learning to bring coffee when asked for drinks. This can be achieved by using the intentional negative or positive information from users.  This specific feedback-method is also called reinforcement learning: ``Where an agent learns behaviour by exploring an environment and learning which action to repeat and avoid based on positive and negative feedback respectively'' \cite{Joost}. 
+Learning by guidance allows the robot to learn before actually performing a task. For example, it allows the robot to learn recognize new objects to adapt them to the robot\textquotesingle s known tasks. The robot can use this learning method by having two levels of command recognition: task and object. The task part refers to command-parts such as ``get'' or ``go to'', whereas the object part refers to command-parts such as ``coffee'' or ``kitchen''. The tasks are preprogrammed, while the objects can be learned on the go. This allows the robot to adapt to its user by learning to apply its tasks to new (personal) areas, items, etc. 
 
-Eva should learn actively and passively. The method mentioned before is passive learning. With passive learning Eva 
-improves her behaviour directly after the accomplishment of her tasks. This is achieved by having the user give positive 
-feedback on ``bringing coffee (a specific drink)''  when the original command was ``get me a (random) drink''.  Eva will 
-then slowly change her behaviour in such a way that she will learn to ignore other potential drinks – and in the end will 
-only bring coffee when asked for drinks. Using the same method of passive learning, she could also learn to bring coffee 
-only in the morning or in the afternoon.
-
-\label{sec:Concept}
-Active learning is the second learning form. For active learning one could imagine Eva learning new objects so 
-she can help the user with personal items that are not available in the library of objects that Eva does recognize. 
-For this form of learning the user should actively interact with Eva, showing her new items, locations, etc. Eva should 
-learn actively by combining the ``task'' with the ``object''. An example: the task ``get'' is always known, but it will 
-result in an active learning process if the object is unknown. If the object is known, Eva simply performs the task and 
-retrieves the object. The same can be done for other tasks involving for instance locations instead of objects.
+This was the concept of the robot: how it should work. Eva is the prototype robot built for this project that is based on this concept.
 
 \end{document}

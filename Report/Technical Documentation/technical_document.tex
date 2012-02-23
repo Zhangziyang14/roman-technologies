@@ -13,7 +13,6 @@
 \usepackage{hyperref}
 \usepackage{subfiles}
 \usepackage{parskip}
-\usepackage{eurosym}
 \usepackage{amsmath}
 %\usepackage[titles]{tocloft}
 
@@ -41,56 +40,51 @@
 
 \newcommand{\todo}[1]{\textbf{\textsc{\textcolor{red}{[#1]}}}}
 
-\chapter*{Preface}
+\chapter{Preface}
 \subfile{preface}
 \label{preface}
 
-\chapter*{Abstract}
+\chapter{Abstract}
 \subfile{abstract}
 \label{abstract}
 \newpage
 
 \tableofcontents
 
-\chapter*{Introduction}
-\subfile{introduction}
-\label{introduction}
-
-\chapter*{Aesthetic design}
+\chapter{Aesthetic design}
 \subfile{aesthetic_design}
 \label{aesthetic_design}
 
-\chapter*{Global Planner}
-\subfile{global_planner}
-\label{global_planner}
+\chapter{Emotion construction}
+\subfile{emotions}
+\label{emotions}
 
-\chapter*{Object Avoidance}
-\subfile{object_avoidance}
-\label{object_avoidance}
-
-\chapter*{Software Architecture}
-\label{Software Architecture}
-\subfile{software_architecture}
-
-\chapter*{Electronics}
-\subfile{electronics}
-\label{electronics}
-
-\chapter*{Arm}
-\subfile{arm}
-\label{arm}
-
-\chapter*{Head}
+\chapter{Head}
 \subfile{head}
 \label{head}
 
-\chapter*{References}
-\label{references}
-\subfile{references}
+\chapter{Arm}
+\subfile{arm}
+\label{arm}
 
-%... More Appendices
+\chapter{Electronics}
+\subfile{electronics}
+\label{electronics}
 
-\bibliographystyle{plain}
-\bibliography{biblio}
+\chapter{Software Architecture}
+\subfile{software_architecture}
+\label{Software Architecture}
+
+\chapter{Global Planner}
+\subfile{global_planner}
+\label{global_planner}
+
+\chapter{Object Avoidance}
+\subfile{object_avoidance}
+\label{object_avoidance}
+
+\chapter{Postface}
+\subfile{postface}
+\label{postface}
 
 \end{document}
