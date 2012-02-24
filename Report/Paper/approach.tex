@@ -169,13 +169,9 @@ x = \sin(-1 * \beta)*(L3 + L4)
 Navigating Eva in an environment consists of three parts. Firstly, Eva needs to know her surroundings; she needs to map out the environment. Secondly, she needs to plan a path from where she is to where she wants to go. Thirdly she needs to know how to execute this path as good as she can.
 
 \subsubsection*{Object avoidance}
-Object avoidance is needed for Eva to keep herself safe, but also to keep the environment safe from her. Eva uses ultrasone 
-sensors to detect objects in her environment and scales the speeds of her wheels according to the distance to the 
-detected object and the position of this object. Eva has six sensors in front, two in the back and one on each side. The 
-sensors in the front are used in units. So if Eva hears an object on the left, she will go right and vice 
-versa. In essence, Eva avoids objects as a Braitenberg vehicle \cite{braitenberg} [p. 8]. For more information about object avoidance, see the technical document\cite{Tech} .
+Object avoidance is needed for Eva to keep herself safe, but also to keep the environment safe from her. Two types of object avoidance were tried out, one that works in layers, a high level and low (local) level, and one that only works in high level. The layered object avoidance works like a Braitenberg vehicle \cite{braitenberg} [p. 8]. What this does is scale the speed of the wheels depending on the detected distances with the ultrasone sensors. If an object is detected near Eva on her right, the right wheel speed gets scaled down, so that Eva will move towards the left.
 
-Another option for object avoidance is by using the object avoidance in Detour \pageref{Global} . With this, Eva will dynamically add objects whenever she sees one and plan her route around the object beforehand. Eva supports both types of avoidance, but further research needs to be conducted to improve on of the two methods.
+The weak point in this method is that it 'pushes' Eva away from objects, while she is also 'pushed' on her path by the path handler. Having two forces push Eva will lead to unexpected results. A solution was found by using a library in Detour \pageref{Global}, which will be discussed in the Global planner chapter, called DetourTileCache. This allows Eva to dynamically add obstacles in her knowledge base and calculate a path around these dynamic obstacles and the already known static obstacles. By letting Eva calculate a new path when an obstacle is detected along her path, she can dynamically avoid obstacles. This way Eva is only pushed by one force, that of the global path planner.
 
 \subsubsection*{Map creation}
 The GMapping package in ROS was used to create a map of the environment. GMapping \cite{GMapping} is a SLAM algorithm, 
