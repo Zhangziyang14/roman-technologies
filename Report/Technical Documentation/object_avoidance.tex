@@ -1,5 +1,5 @@
 \documentclass[technical_document.tex]{subfiles}
-Object avoidance is done using ultrasone sensors. Eva has 6 ultrasone sensors at the front, two sensors scanning backwards and one sensor to each side. Depending on where an object is detected with the ultrasone sensors, the speed of the left or right wheel will be scaled down, so Eva will avoid the object. The scaling will have more effect when the measured distance to the object is small and will have less effect if the distance is large.
+Object avoidance is done using ultrasone sensors. Eva has 6 ultrasone sensors at the front, two sensors scanning backwards and one sensor to each side. See figure \ref{fig:ultra_sensors} Depending on where an object is detected with the ultrasone sensors, the speed of the left or right wheel will be scaled down, so Eva will avoid the object. The scaling will have more effect when the measured distance to the object is small and will have less effect if the distance is large.
 
 The following example gives more insight in how this method works. If the ultrasone sensors on the front left detect an object, then the right wheel will go slower, making Eva turn right. The same goes for the side sensors when an object is detected on the sides, for the front sensors in the middle etc.
 
@@ -33,3 +33,10 @@ scaled\_speed = min(speed, min(\frac{speed-speed * (avoidance\_distance-measured
 , \frac{speed-speed * (avoidance\_distance-measured\_distance2)}{avoidance\_impact}))
 \end{equation*}
 Where the same parameters are used as the side sensors, except that the measured distance of another sensor (the other sensor in a unit) is used in the calculations as well.
+
+\begin{figure}[ht!]
+	\centering
+	\mbox{\includegraphics[scale=1]{Images/eva_topView_sensors.png}}
+	\caption{Ultrasone sensors of Eva. The green sensors will emit ultrasonic waves together, the same holds for the red sensors.}
+	\label{fig:ultra_sensors}
+\end{figure}

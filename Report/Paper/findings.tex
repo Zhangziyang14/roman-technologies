@@ -14,7 +14,7 @@ Besides findings based on Eva\textquotesingle s performance in the home care env
 
 \item  At some occasions Eva accidentally grasped the wrong object. This was due unstable navigation. Stable navigation was impaired by the h-bridges driving the wheels. They cut off the power above $3A$ resulting in shocking motion. A solution would be to power the motors at $24V$. The navigation could also be improved by reducing the slip  that results in inaccurate positioning. This could be done by replacing the current wheels by other wheels such as omni-directional wheels.
 
-\item The global planner and local planner both operated fine separately. However, more research is needed to make make them work in conjunction.
+\item The global planner and local planner both operated fine separately. However, more research is needed to make make them work in conjunction. This holds for both the Braitenberg approach as for the approach with Detour, but object avoidance in Detour delivered better results as of the moment.
 
 \item When a lot of objects were present on the table, tabletop object detector performed considerably slower. A more efficient way is to segment by RGB first and secondly fit the remaining clusters with the database. Also it would be better to track the objects after detection instead of constantly detecting. Alternatively one could separate the scanning for objects from nearest to farthest(using the z-coordinates of the Kinect), eliminating many objects at once.
 

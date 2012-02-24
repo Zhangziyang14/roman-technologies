@@ -17,37 +17,11 @@ Detection by words is the simplest form of affect detection that works efficient
  
 \subsubsection*{Emotion expression}
 \label{sec:Emotion expression}
-Eva communicates using emotional states. A system based on a modest amount of expressions would reduce the time needed 
-to program the system. The fictional robot examples of Wall-E and R2D2 show this by using emotional expressions in a 
-substantial array of different situations. Emotions also present a manner of communication that humans are already 
-accustomed to. This allows the communication to be comprehensible for users. The current emotional elements for Eva were chosen because they form a package that is understandable for the target group. Even users suffering from ailments of old age such as reduced hearing and vision should understand Eva. 
+Eva expresses her affective states using colours, facial movements and sounds. Eva expresses positive emotions using vivid colors - happiness and novelty use a bright white-yellow - and uses darker colors for expressing negative emotions - sadness is expressed using a dark blue color. \cite{Chris} \cite{Zentner} Novelty blinks frequently to signal the high arousal factor in this state. Happiness and blue do this in a less strong manner, since they have lower arousal. The colours are shown using LEDs on the side of her head. 
 
-Eva displays emotions for a functional reason: to display a state of feedback that tells the user information about the 
-actions of Eva. There are three emotional states: happy, sad and novelty. In  addition to the emotional states there is a 
-neutral state. The three emotional states are designed to ensure that Eva can react in most situations. The state or 
-reaction is interpreted by the user based on the context. Firstly, the happy  state allows for confirming and likewise 
-positive reactions. The intended meaning of this state is ``yes, I will do this''. The sad state functions as a state for communicating failure, disappointment or likewise negative reactions. The intended meaning of the sad state  is ``I cannot do this''. These states are activated based on the keyword triggered from the user\textquotesingle s voice: ``yummy'' has an inherent positive element so it triggers the positive state.
+The next element of the affective states are the eyebrows. The eyebrows are in the highest position for the novelty state and in the middle-high position for the happy state. The eyebrows are at their lowest position for the sad state. For the sad state the eyebrows are also rotated, with the outside of the eyebrows pointing downwards. That novelty - surprise, curiosity - and sadness can be communicated using the described eyebrow positions is shown in the iCat. \cite{iCat} 
 
-The novelty state is the third emotional state. This state signals the user that Eva wants to learn active. This is 
-linked 
-directly to a \textit{conceptual active learning process} that is not yet implemented in Eva \pageref{concept}. This 
-state is characterized by the sentence ``this is new for me''.
-
-The states of Eva are shown using three different elements \cite{Tech}: the movement of the eyebrows, the colouring of the sides of her head  and the sound emanating from Eva\textquotesingle s body. The combination of effects was chosen because it complements each other in such a way that elderly should be able to comprehend Eva even when they are suffering from an elderly ailment such as reduced vision or hearing. The lights were placed in the head. The head was 
-created because it creates a focus of attention for the user by creating a human-like feature that stimulates interaction 
-\cite{elderly}. The other facial features were limited to eyebrows to prevent the users from expecting too much from the 
-robot and also to prevent the uncanny valley effect that appears when non-living things begin appearing too human 
-\cite{uncanny}. 
-
-The lights are characterized by their colour, their intensity and their frequency in blinking. The ``startup time'' and 
-``dimming time'' are also characteristic for the lights but are somewhat linked to the frequency. Lights can be linked to 
-emotions \cite{colour-emotion} , whereas the intensity and frequency can be linked to arousal. The eyebrows have variable 
-rotation and variable height. Eyebrow positions can also be linked to emotions, as seen in the iCat \cite{iCat}. Finally, 
-the sounds are unique for each state. Each of the sounds was made with a design process based around non-textual vocals 
-of related ``emotional states'': the attributes of our sounds were based on related emotions  such as content and 
-enthusiasm for the happy state. This means that even though the actual pitch of the robot was unknown at first it could 
-be built by using elements \cite{sounds} of the relevant related sounds.
-
+The last part of the affective states of Eva is sound. Eva produces a sound for each of her affective states. Each of the sounds is a non-textual vocal. Text was left out to make the sounds usable in more situations and to lower expectations. If text was included, Eva would be more similar to a person and the user would expect a reaction more akin to a person than a robot. A female voice was used to strengthen the positive aspect in the voice. Eva produces a high-pitch, high-power sound for the happy state. The novelty state is made with an higher pitch and higher power sound, but the power decays fast from the start. The sad state produces a low-pitch, low-power sound that has a longer decay. All these sounds were based on sound from emotions that were related to the states of Eva. Happiness was related to enthusiasm, happiness, cheerfulness, etc. All these known emotional sounds were described using aspects such as amplitude and pitch. \footnote{See http://hyperphysics.phy-astr.gsu.edu/hbase/sound/soucon.html for an overview of attributes to sounds} It was found that ``positive sounds'' - relevant for the happy state - had  high pitch and high power. The same was process was repeated for novelty and sadness resulting in the characteristics described above.
 
 \subsubsection*{Commands}
 Being able to recognize commands through speech was a necessary feature for Eva because elder people are used to speaking 
@@ -201,6 +175,8 @@ detected object and the position of this object. Eva has six sensors in front, t
 sensors in the front are used in units. So if Eva hears an object on the left, she will go right and vice 
 versa. In essence, Eva avoids objects as a Braitenberg vehicle \cite{braitenberg} [p. 8]. For more information about object avoidance, see the technical document\cite{Tech} .
 
+Another option for object avoidance is by using the object avoidance in Detour \pageref{Global} . With this, Eva will dynamically add objects whenever she sees one and plan her route around the object beforehand. Eva supports both types of avoidance, but further research needs to be conducted to improve on of the two methods.
+
 \subsubsection*{Map creation}
 The GMapping package in ROS was used to create a map of the environment. GMapping \cite{GMapping} is a SLAM algorithm, 
 which stands for \textit{Simultaneous Localization And Mapping}. The algorithm takes in laserscan and odometry data and 
@@ -212,14 +188,13 @@ At this stage there is a map created by GMapping, but in PGM format (similar to 
 format \cite{wavefront}. To convert from PGM to OBJ, a custom converter had to be written \cite{Tech} . Recast is then ready to create a navigation mesh on the map. This mesh defines where Eva is allowed to walk, it does so using a set of parameters, of which the most important one is the radius of Eva. With this information, Recast can determine the walkable areas in the map. This mesh can later on be used to determine paths for Eva.
 
 \subsubsection*{Global planner}
-Originally the navigation stack in ROS was used as global planner. This navigation stack however had two major drawbacks: First, it's functionality is difficult to adapt, Adaption was required, because we needed to couple the planner to a reactive local object avoidance mechanism (in the subsumption architecture spirit). Second, it is computationally expensive. As development costs is a major constraint, all software should eventually run on one laptop. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch the ROS navigation stack and create one based on Recast/Detour. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents constantly requesting new paths.
+Originally the navigation stack in ROS was used as global planner. This navigation stack however had two major drawbacks: First, its functionality is difficult to adapt, Adaption was required, because we needed to couple the planner to a reactive local object avoidance mechanism (in the subsumption architecture spirit). Second, it is computationally expensive. As development costs is a major constraint, all software should eventually run on one laptop. For these reasons and because of earlier experience with a path planner designed for games (which could be applied here too), it was decided to scratch the ROS navigation stack and create one based on Recast/Detour \label{Global}. The efficiency of this path planner is much better, because most of the calculation is done before navigating and it is optimized to be functional in games with many agents constantly requesting new paths.
 
 \subsubsection*{Planning}
 Calculating paths on the generated navigation mesh is done using Detour, which is supplied together with Recast. Detour is handed a starting location (the position of Eva) and a goal location. Using the navigation mesh supplied earlier, a path is calculated (ideally exactly on the goal location, but if this is not on the navigation mesh or unreachable, it gets as close as possible). The path is described by waypoints, where the number of waypoints can be increased, making the path smoother.
 
 \subsubsection*{Executing a path}
-Originally Eva would strictly follow this path. What this means is that she would keep rotating until she was facing the 
-path, then drive forward until she reached a waypoint and then rotate again until she faced the next waypoint. This looked very unnatural and very static. 
+Originally Eva would strictly follow this path. What this means is that she would keep rotating until she was facing the path, then drive forward until she reached a waypoint and then rotate again until she faced the next waypoint. This looked very unnatural and very static. 
 
 For this reason a new way to execute the path was designed. This enabled Eva to deviate from the path just slightly, enough 
 to take corners while still driving forward. The idea behind this new way of executing the path, is that Eva looks a 

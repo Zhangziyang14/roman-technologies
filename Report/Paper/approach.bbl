@@ -77,6 +77,50 @@
   \field{year}{1986}
 \endentry
 
+\entry{Tech}{article}{}
+  \name{author}{6}{}{%
+    {{}%
+     {Gaiser}{G.}%
+     {J.H.}{J.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Jager}{J.}%
+     {I.}{I.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Kate}{K.}%
+     {J.D.}{J.}%
+     {ten}{t.}%
+     {}{}}%
+    {{}%
+     {Ko}{K.}%
+     {W.K.H.}{W.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Veen}{V.}%
+     {B.}{B.}%
+     {van~der}{v.~d.}%
+     {}{}}%
+    {{}%
+     {Wit}{W.}%
+     {S.}{S.}%
+     {de}{d.}%
+     {}{}}%
+  }
+  \strng{namehash}{GJ+1}
+  \strng{fullhash}{GJJIKJtKWVBvdWSd1}
+  \field{sortinit}{G}
+  \field{title}{Design of a Robot Prototype for the Domestic Healthcare Sector}
+  \verb{url}
+  \verb https://code.google.com/p/roman-technologies
+  \endverb
+  \field{year}{2012}
+  \warn{\item Invalid format of field 'month'}
+\endentry
+
 \entry{jacobian}{book}{}
   \name{author}{3}{}{%
     {{}%
@@ -148,56 +192,6 @@
   \warn{\item Invalid format of field 'month'}
 \endentry
 
-\entry{colour-emotion}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Kaya}{K.}%
-     {Naz}{N.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Epps}{E.}%
-     {Helen~H.}{H.~H.}%
-     {}{}%
-     {}{}}%
-  }
-  \keyw{College Students; Emotional Response; Student Attitudes; Color;
-  Psychological Patterns; Dimensional Preference;}
-  \strng{namehash}{KNEHH1}
-  \strng{fullhash}{KNEHH1}
-  \field{sortinit}{K}
-  \field{issn}{ISSN-0146-3934}
-  \field{number}{3}
-  \field{pages}{396}
-  \field{title}{Relationship between Color and Emotion: A Study of College
-  Students}
-  \field{volume}{38}
-  \field{journaltitle}{College Student Journal}
-  \field{year}{2004}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
-\entry{elderly}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Kemna}{K.}%
-     {S.}{S.}%
-     {}{}%
-     {}{}}%
-    {{}%
-     {Does}{D.}%
-     {K.}{K.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{KSDK1}
-  \strng{fullhash}{KSDK1}
-  \field{sortinit}{K}
-  \field{title}{Robots in elderly care}
-  \field{year}{2006}
-  \warn{\item Invalid format of field 'month'}
-\endentry
-
 \entry{urdf}{online}{}
   \name{author}{3}{}{%
     {{}%
@@ -227,25 +221,6 @@
   \field{year}{2012}
 \endentry
 
-\entry{uncanny}{article}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Mori}{M.}%
-     {M.}{M.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{MM1}
-  \strng{fullhash}{MM1}
-  \field{sortinit}{M}
-  \field{number}{4}
-  \field{pages}{33\bibrangedash 35}
-  \field{title}{The Uncanny Valley}
-  \field{volume}{7}
-  \field{journaltitle}{Energy}
-  \field{year}{1970}
-\endentry
-
 \entry{tabletop}{online}{}
   \name{author}{1}{}{%
     {{}%
@@ -254,8 +229,8 @@
      {}{}%
      {}{}}%
   }
-  \strng{namehash}{MM2}
-  \strng{fullhash}{MM2}
+  \strng{namehash}{MM1}
+  \strng{fullhash}{MM1}
   \field{sortinit}{M}
   \field{title}{Tabletop Object Detector}
   \verb{url}
@@ -263,25 +238,6 @@
   \endverb
   \field{month}{02}
   \field{year}{2012}
-\endentry
-
-\entry{sounds}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Nave}{N.}%
-     {R.}{R.}%
-     {}{}%
-     {}{}}%
-  }
-  \strng{namehash}{NR1}
-  \strng{fullhash}{NR1}
-  \field{sortinit}{N}
-  \field{title}{Hyperphysics sound description}
-  \verb{url}
-  \verb http://hyperphysics.phy-astr.gsu.edu/HBASE/sound/soucon.html#c1
-  \endverb
-  \field{year}{2012}
-  \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{Roboearth}{article}{}
@@ -330,23 +286,87 @@
   \warn{\item Invalid format of field 'month'}
 \endentry
 
-\entry{autosmiley}{online}{}
-  \name{author}{1}{}{%
+\entry{Thomaz}{article}{}
+  \name{author}{2}{}{%
     {{}%
-     {Watson}{W.}%
+     {Thomaz}{T.}%
+     {Andrea~L.}{A.~L.}%
      {}{}%
+     {}{}}%
+    {{}%
+     {Breazeal}{B.}%
+     {Cynthia}{C.}%
      {}{}%
      {}{}}%
   }
-  \strng{namehash}{W1}
-  \strng{fullhash}{W1}
-  \field{sortinit}{W}
-  \field{title}{Autosmiley}
-  \verb{url}
-  \verb http://fffff.at/auto-smiley/
+  \keyw{Human–robot interaction}
+  \strng{namehash}{TALBC1}
+  \strng{fullhash}{TALBC1}
+  \field{sortinit}{T}
+  \verb{doi}
+  \verb 10.1016/j.artint.2007.09.009
   \endverb
-  \field{month}{02}
-  \field{year}{2012}
+  \field{issn}{0004-3702}
+  \field{number}{6–7}
+  \field{pages}{716 \bibrangedash  737}
+  \field{title}{Teachable robots: Understanding human teaching behavior to
+  build more effective robot learners}
+  \verb{url}
+  \verb http://www.sciencedirect.com/science/article/pii/S000437020700135X
+  \endverb
+  \field{volume}{172}
+  \field{journaltitle}{Artificial Intelligence}
+  \field{year}{2008}
+\endentry
+
+\entry{affection}{incollection}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Vidrascu}{V.}%
+     {L.}{L.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Devillers}{D.}%
+     {L.}{L.}%
+     {}{}%
+     {}{}}%
+  }
+  \name{editor}{3}{}{%
+    {{}%
+     {Tao}{T.}%
+     {Jianhua}{J.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Tan}{T.}%
+     {Tieniu}{T.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Picard}{P.}%
+     {Rosalind}{R.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {Springer Berlin / Heidelberg}%
+  }
+  \strng{namehash}{VLDL1}
+  \strng{fullhash}{VLDL1}
+  \field{sortinit}{V}
+  \field{booktitle}{Affective Computing and Intelligent Interaction}
+  \field{isbn}{978-3-540-29621-8}
+  \field{note}{10.1007/11573548_95}
+  \field{pages}{739\bibrangedash 746}
+  \field{series}{Lecture Notes in Computer Science}
+  \field{title}{Real-Life Emotion Representation and Detection in Call Centers
+  Data}
+  \verb{url}
+  \verb http://dx.doi.org/10.1007/11573548_95
+  \endverb
+  \field{volume}{3784}
+  \field{year}{2005}
 \endentry
 
 \entry{wavefront}{online}{}
