@@ -1,5 +1,5 @@
 % $ biblatex auxiliary file $
-% $ biblatex version 1.4 $
+% $ biblatex version 0.9 $
 % Do not modify the above lines!
 %
 % This is an auxiliary file used by the 'biblatex' package.
@@ -17,9 +17,8 @@
 \endgroup
 
 \entry{FaceDetection}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {AbhinayE}{A.}%
+  \name{author}{1}{%
+    {{AbhinayE}{A.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -36,9 +35,8 @@
 \endentry
 
 \entry{plane}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Bohg}{B.}%
+  \name{author}{1}{%
+    {{Bohg}{B.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
@@ -55,18 +53,17 @@
 \endentry
 
 \entry{Chris}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Boyatzis}{B.}%
+  \name{author}{2}{%
+    {{Boyatzis}{B.}%
      {Chris~J.}{C.~J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Varghese}{V.}%
+    {{Varghese}{V.}%
      {Reenu}{R.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{The Journal of Genetic Psychology}
   \strng{namehash}{BCJVR1}
   \strng{fullhash}{BCJVR1}
   \field{sortinit}{B}
@@ -83,14 +80,12 @@
   \verb http://www.tandfonline.com/doi/abs/10.1080/00221325.1994.9914760
   \endverb
   \field{volume}{155}
-  \field{journaltitle}{The Journal of Genetic Psychology}
   \field{year}{1994}
 \endentry
 
 \entry{braitenberg}{book}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Braitenberg}{B.}%
+  \name{author}{1}{%
+    {{Braitenberg}{B.}%
      {V.}{V.}%
      {}{}%
      {}{}}%
@@ -111,9 +106,8 @@
 \endentry
 
 \entry{Joost}{article}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Broekens}{B.}%
+  \name{author}{1}{%
+    {{Broekens}{B.}%
      {D.J.}{D.}%
      {}{}%
      {}{}}%
@@ -130,9 +124,8 @@
 \endentry
 
 \entry{CBS}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {CBS}{C.}%
+  \name{author}{1}{%
+    {{CBS}{C.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -149,19 +142,18 @@
   \field{year}{2012}
 \endentry
 
-\entry{Kismet}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Cynthia}{C.}%
+\entry{kismet}{article}{}
+  \name{author}{2}{%
+    {{Cynthia}{C.}%
      {}{}%
      {}{}%
      {}{}}%
-    {{}%
-     {Breazeal}{B.}%
+    {{Breazeal}{B.}%
      {}{}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{Robotics and Autonomous Systems}
   \keyw{Sociable robots}
   \strng{namehash}{CB1}
   \strng{fullhash}{CB1}
@@ -178,19 +170,16 @@
   \verb http://www.sciencedirect.com/science/article/pii/S0921889002003731
   \endverb
   \field{volume}{42}
-  \field{journaltitle}{Robotics and Autonomous Systems}
   \field{year}{2003}
 \endentry
 
 \entry{bimodal}{inproceedings}{}
-  \name{author}{2}{}{%
-    {{}%
-     {De~Silva}{D.~S.}%
+  \name{author}{2}{%
+    {{De~Silva}{D.~S.}%
      {L.C.}{L.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Pei}{P.}%
+    {{Pei}{P.}%
      {C.N}{C.}%
      {}{}%
      {}{}}%
@@ -212,19 +201,16 @@
 \endentry
 
 \entry{Diepenhorst}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Diepenhorst}{D.}%
+  \name{author}{3}{%
+    {{Diepenhorst}{D.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
-    {{}%
-     {T.}{T.}%
+    {{T.}{T.}%
      {Weijnen}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Van~Free}{V.~F.}%
+    {{Van~Free}{V.~F.}%
      {F.}{F.}%
      {}{}%
      {}{}}%
@@ -237,19 +223,16 @@
 \endentry
 
 \entry{Evers}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Evers}{E.}%
+  \name{author}{3}{%
+    {{Evers}{E.}%
      {ir.~H.}{i.~H.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Blijham}{B.}%
+    {{Blijham}{B.}%
      {ir.~N.}{i.~N.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Willems}{W.}%
+    {{Willems}{W.}%
      {dr.~C.}{d.~C.}%
      {}{}%
      {}{}}%
@@ -263,19 +246,16 @@
 \endentry
 
 \entry{Forlizzi}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Forlizzi}{F.}%
+  \name{author}{3}{%
+    {{Forlizzi}{F.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {DiSalvo}{D.}%
+    {{DiSalvo}{D.}%
      {C.}{C.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Gemperle}{G.}%
+    {{Gemperle}{G.}%
      {F.}{F.}%
      {}{}%
      {}{}}%
@@ -292,34 +272,28 @@
 \endentry
 
 \entry{Tech}{article}{}
-  \name{author}{6}{}{%
-    {{}%
-     {Gaiser}{G.}%
+  \name{author}{6}{%
+    {{Gaiser}{G.}%
      {J.H.}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Jager}{J.}%
+    {{Jager}{J.}%
      {I.}{I.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Kate}{K.}%
+    {{Kate}{K.}%
      {J.D.}{J.}%
      {ten}{t.}%
      {}{}}%
-    {{}%
-     {Ko}{K.}%
+    {{Ko}{K.}%
      {W.K.H.}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Veen}{V.}%
+    {{Veen}{V.}%
      {B.}{B.}%
      {van~der}{v.~d.}%
      {}{}}%
-    {{}%
-     {Wit}{W.}%
+    {{Wit}{W.}%
      {S.}{S.}%
      {de}{d.}%
      {}{}}%
@@ -336,19 +310,16 @@
 \endentry
 
 \entry{jacobian}{book}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Ghosh}{G.}%
+  \name{author}{3}{%
+    {{Ghosh}{G.}%
      {B.K.}{B.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Xi}{X.}%
+    {{Xi}{X.}%
      {N.}{N.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Tarn}{T.}%
+    {{Tarn}{T.}%
      {T.J.}{T.}%
      {}{}%
      {}{}}%
@@ -369,19 +340,16 @@
 \endentry
 
 \entry{careObot}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Graf}{G.}%
+  \name{author}{3}{%
+    {{Graf}{G.}%
      {Birgit}{B.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Hans}{H.}%
+    {{Hans}{H.}%
      {Matthias}{M.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Schraft}{S.}%
+    {{Schraft}{S.}%
      {Rolf}{R.}%
      {}{}%
      {}{}}%
@@ -389,6 +357,7 @@
   \list{publisher}{1}{%
     {Springer Netherlands}%
   }
+  \field{journaltitle}{Autonomous Robots}
   \strng{namehash}{GBHMSR1}
   \strng{fullhash}{GBHMSR1}
   \field{sortinit}{G}
@@ -402,28 +371,25 @@
   \verb http://dx.doi.org/10.1023/B:AURO.0000016865.35796.e9
   \endverb
   \field{volume}{16}
-  \field{journaltitle}{Autonomous Robots}
   \field{year}{2004}
 \endentry
 
 \entry{GMapping}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Grisetti}{G.}%
+  \name{author}{3}{%
+    {{Grisetti}{G.}%
      {G.}{G.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Stachniss}{S.}%
+    {{Stachniss}{S.}%
      {C.}{C.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Burgard}{B.}%
+    {{Burgard}{B.}%
      {W.}{W.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{Robotics, IEEE Transactions on}
   \keyw{Rao-Blackwellized particle filters;grid mapping;mobile robots;particle
   depletion;simultaneous localization and mapping problem;SLAM (robots);mobile
   robots;particle filtering (numerical methods);}
@@ -439,25 +405,21 @@
   \field{title}{Improved Techniques for Grid Mapping With Rao-Blackwellized
   Particle Filters}
   \field{volume}{23}
-  \field{journaltitle}{Robotics, IEEE Transactions on}
   \field{year}{2007}
   \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{urdf}{online}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Meeussen}{M.}%
+  \name{author}{3}{%
+    {{Meeussen}{M.}%
      {W.}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Hsu}{H.}%
+    {{Hsu}{H.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Diankov}{D.}%
+    {{Diankov}{D.}%
      {R.}{R.}%
      {}{}%
      {}{}}%
@@ -474,9 +436,8 @@
 \endentry
 
 \entry{tabletop}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Muja}{M.}%
+  \name{author}{1}{%
+    {{Muja}{M.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
@@ -493,19 +454,16 @@
 \endentry
 
 \entry{Roboearth}{article}{}
-  \name{author}{3}{}{%
-    {{}%
-     {Schie{\ss}le}{S.}%
+  \name{author}{3}{%
+    {{Schie{\ss}le}{S.}%
      {B.}{B.}%
      {}{}%
      {}{}}%
-    {{}%
-     {H\"ausermann}{H.}%
+    {{H\"ausermann}{H.}%
      {K.}{K.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Zweigle}{Z.}%
+    {{Zweigle}{Z.}%
      {O.}{O.}%
      {}{}%
      {}{}}%
@@ -520,9 +478,8 @@
 \endentry
 
 \entry{iCat}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {site}{s.}%
+  \name{author}{1}{%
+    {{site}{s.}%
      {}{}%
      {iCat~community}{i.~c.}%
      {}{}}%
@@ -539,18 +496,17 @@
 \endentry
 
 \entry{Thomaz}{article}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Thomaz}{T.}%
+  \name{author}{2}{%
+    {{Thomaz}{T.}%
      {Andrea~L.}{A.~L.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Breazeal}{B.}%
+    {{Breazeal}{B.}%
      {Cynthia}{C.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{Artificial Intelligence}
   \keyw{Human–robot interaction}
   \strng{namehash}{TALBC1}
   \strng{fullhash}{TALBC1}
@@ -567,81 +523,66 @@
   \verb http://www.sciencedirect.com/science/article/pii/S000437020700135X
   \endverb
   \field{volume}{172}
-  \field{journaltitle}{Artificial Intelligence}
   \field{year}{2008}
 \endentry
 
 \entry{Minerva}{incollection}{}
-  \name{author}{11}{}{%
-    {{}%
-     {Thrun}{T.}%
+  \name{author}{11}{%
+    {{Thrun}{T.}%
      {Sebastian}{S.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Bennewitz}{B.}%
+    {{Bennewitz}{B.}%
      {Maren}{M.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Burgard}{B.}%
+    {{Burgard}{B.}%
      {Wolfram}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Cremers}{C.}%
+    {{Cremers}{C.}%
      {Armin}{A.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Dellaert}{D.}%
+    {{Dellaert}{D.}%
      {Frank}{F.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Fox}{F.}%
+    {{Fox}{F.}%
      {Dieter}{D.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Hähnel}{H.}%
+    {{Hähnel}{H.}%
      {Dirk}{D.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Rosenberg}{R.}%
+    {{Rosenberg}{R.}%
      {Charles}{C.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Roy}{R.}%
+    {{Roy}{R.}%
      {Nicholas}{N.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Schulte}{S.}%
+    {{Schulte}{S.}%
      {Jamieson}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Schulz}{S.}%
+    {{Schulz}{S.}%
      {Dirk}{D.}%
      {}{}%
      {}{}}%
   }
-  \name{editor}{3}{}{%
-    {{}%
-     {Burgard}{B.}%
+  \name{editor}{3}{%
+    {{Burgard}{B.}%
      {Wolfram}{W.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Cremers}{C.}%
+    {{Cremers}{C.}%
      {Armin}{A.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Cristaller}{C.}%
+    {{Cristaller}{C.}%
      {Thomas}{T.}%
      {}{}%
      {}{}}%
@@ -666,31 +607,26 @@
 \endentry
 
 \entry{affection}{incollection}{}
-  \name{author}{2}{}{%
-    {{}%
-     {Vidrascu}{V.}%
+  \name{author}{2}{%
+    {{Vidrascu}{V.}%
      {L.}{L.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Devillers}{D.}%
+    {{Devillers}{D.}%
      {L.}{L.}%
      {}{}%
      {}{}}%
   }
-  \name{editor}{3}{}{%
-    {{}%
-     {Tao}{T.}%
+  \name{editor}{3}{%
+    {{Tao}{T.}%
      {Jianhua}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Tan}{T.}%
+    {{Tan}{T.}%
      {Tieniu}{T.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Picard}{P.}%
+    {{Picard}{P.}%
      {Rosalind}{R.}%
      {}{}%
      {}{}}%
@@ -716,9 +652,8 @@
 \endentry
 
 \entry{autosmiley}{online}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Watson}{W.}%
+  \name{author}{1}{%
+    {{Watson}{W.}%
      {}{}%
      {}{}%
      {}{}}%
@@ -745,33 +680,29 @@
 \endentry
 
 \entry{smile}{article}{}
-  \name{author}{5}{}{%
-    {{}%
-     {Whitehill}{W.}%
+  \name{author}{5}{%
+    {{Whitehill}{W.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Littlewort}{L.}%
+    {{Littlewort}{L.}%
      {G.}{G.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Fasel}{F.}%
+    {{Fasel}{F.}%
      {I.}{I.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Bartlett}{B.}%
+    {{Bartlett}{B.}%
      {M.}{M.}%
      {}{}%
      {}{}}%
-    {{}%
-     {Movellan}{M.}%
+    {{Movellan}{M.}%
      {J.}{J.}%
      {}{}%
      {}{}}%
   }
+  \field{journaltitle}{Pattern Analysis and Machine Intelligence}
   \keyw{automatic facial expression recognition research;feature
   representation;human-level expression recognition accuracy;illumination
   conditions;image databases;image registration;machine learning
@@ -793,15 +724,13 @@
   \field{pages}{2106 \bibrangedash 2111}
   \field{title}{Toward Practical Smile Detection}
   \field{volume}{31}
-  \field{journaltitle}{Pattern Analysis and Machine Intelligence}
   \field{year}{2009}
   \warn{\item Invalid format of field 'month'}
 \endentry
 
 \entry{Zentner}{article}{}
-  \name{author}{1}{}{%
-    {{}%
-     {Zentner}{Z.}%
+  \name{author}{1}{%
+    {{Zentner}{Z.}%
      {Marcel~R.}{M.~R.}%
      {}{}%
      {}{}}%
@@ -809,6 +738,7 @@
   \list{publisher}{1}{%
     {Blackwell Publishers Ltd}%
   }
+  \field{journaltitle}{Developmental Science}
   \strng{namehash}{ZMR1}
   \strng{fullhash}{ZMR1}
   \field{sortinit}{Z}
@@ -824,7 +754,6 @@
   \verb http://dx.doi.org/10.1111/1467-7687.00180
   \endverb
   \field{volume}{4}
-  \field{journaltitle}{Developmental Science}
   \field{year}{2001}
 \endentry
 

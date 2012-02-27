@@ -3,160 +3,161 @@ The top-level auxiliary file: project_eva.aux
 The style file: biblatex.bst
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: project_eva-blx.bib
-Database file #2: project_eva.bib
-I was expecting a `,' or a `}'---line 129 of file project_eva.bib
+Database file #2: project_eva.bib.bib
+I was expecting a `,' or a `}'---line 129 of file project_eva.bib.bib
  : 
  : @ONLINE{iCat,
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
 Warning--I'm ignoring Thomaz's extra "keywords" field
---line 176 of file project_eva.bib
+--line 176 of file project_eva.bib.bib
 Warning--I'm ignoring Thomaz's extra "keywords" field
---line 178 of file project_eva.bib
-Warning--I'm ignoring Kismet's extra "keywords" field
---line 303 of file project_eva.bib
-Warning--I'm ignoring Kismet's extra "keywords" field
---line 304 of file project_eva.bib
-Warning--I'm ignoring Kismet's extra "keywords" field
---line 305 of file project_eva.bib
-Warning--I'm ignoring Kismet's extra "keywords" field
---line 307 of file project_eva.bib
-Biblatex version: 1.4
+--line 178 of file project_eva.bib.bib
+Warning--I'm ignoring kismet's extra "keywords" field
+--line 303 of file project_eva.bib.bib
+Warning--I'm ignoring kismet's extra "keywords" field
+--line 304 of file project_eva.bib.bib
+Warning--I'm ignoring kismet's extra "keywords" field
+--line 305 of file project_eva.bib.bib
+Warning--I'm ignoring kismet's extra "keywords" field
+--line 307 of file project_eva.bib.bib
+Biblatex version: 0.9
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2486 of file biblatex.bst
+while executing---line 2523 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2490 of file biblatex.bst
+while executing---line 2527 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2490 of file biblatex.bst
+while executing---line 2527 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2490 of file biblatex.bst
+while executing---line 2527 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2496 of file biblatex.bst
+while executing---line 2533 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2496 of file biblatex.bst
+while executing---line 2533 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2496 of file biblatex.bst
+while executing---line 2533 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2500 of file biblatex.bst
+while executing---line 2537 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2500 of file biblatex.bst
+while executing---line 2537 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2500 of file biblatex.bst
+while executing---line 2537 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2500 of file biblatex.bst
+while executing---line 2537 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2500 of file biblatex.bst
+while executing---line 2537 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2500 of file biblatex.bst
+while executing---line 2537 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2504 of file biblatex.bst
+while executing---line 2541 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2504 of file biblatex.bst
+while executing---line 2541 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2504 of file biblatex.bst
+while executing---line 2541 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2510 of file biblatex.bst
+while executing---line 2547 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2510 of file biblatex.bst
+while executing---line 2547 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2510 of file biblatex.bst
+while executing---line 2547 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2514 of file biblatex.bst
+while executing---line 2551 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2514 of file biblatex.bst
+while executing---line 2551 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2514 of file biblatex.bst
+while executing---line 2551 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2514 of file biblatex.bst
+while executing---line 2551 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2514 of file biblatex.bst
+while executing---line 2551 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2514 of file biblatex.bst
+while executing---line 2551 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2568 of file biblatex.bst
+while executing---line 2619 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2568 of file biblatex.bst
+while executing---line 2619 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2568 of file biblatex.bst
+while executing---line 2619 of file biblatex.bst
+Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 Name 1 in "Watson," has a comma at the end for entry autosmiley
-while executing---line 2631 of file biblatex.bst
+while executing---line 2682 of file biblatex.bst
 You've used 27 entries,
-            5995 wiz_defined-function locations,
-            1316 strings with 13917 characters,
-and the built_in function-call counts, 84936 in all, are:
-= -- 2992
+            6083 wiz_defined-function locations,
+            1327 strings with 13989 characters,
+and the built_in function-call counts, 83582 in all, are:
+= -- 2939
 > -- 3038
-< -- 860
+< -- 739
 + -- 961
 - -- 1196
-* -- 6920
-:= -- 5136
+* -- 6796
+:= -- 5183
 add.period$ -- 0
 call.type$ -- 27
-change.case$ -- 366
+change.case$ -- 367
 chr.to.int$ -- 81
 cite$ -- 52
-duplicate$ -- 9611
-empty$ -- 8854
+duplicate$ -- 9440
+empty$ -- 8710
 format.name$ -- 1925
-if$ -- 19138
+if$ -- 18856
 int.to.chr$ -- 0
 int.to.str$ -- 59
 missing$ -- 0
-newline$ -- 812
+newline$ -- 741
 num.names$ -- 1168
-pop$ -- 8329
+pop$ -- 8279
 preamble$ -- 1
-purify$ -- 451
+purify$ -- 452
 quote$ -- 0
-skip$ -- 4997
+skip$ -- 4830
 stack$ -- 0
-substring$ -- 1461
-swap$ -- 3348
+substring$ -- 1247
+swap$ -- 3277
 text.length$ -- 780
-text.prefix$ -- 26
+text.prefix$ -- 0
 top$ -- 1
-type$ -- 1014
+type$ -- 1176
 warning$ -- 0
 while$ -- 548
 width$ -- 0
-write$ -- 784
+write$ -- 713
 (There were 49 error messages)
