@@ -92,8 +92,8 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 
     if (mDisplayFrames)
     {
-		cv::startWindowThread();
-		cvNamedWindow("FaceFocus", 1);
+//		cv::startWindowThread();
+//		cvNamedWindow("FaceFocus", 1);
     }
 
     ROS_INFO("FocusFace initialised.");
@@ -206,8 +206,8 @@ void FocusFace::detectFaces(cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cl
         	mFeatures[0].clear();
     }
 
-    if (mDisplayFrames)
-    	cv::imshow("FaceFocus", frame);
+    //if (mDisplayFrames)
+    //	cv::imshow("FaceFocus", frame);
 
 }
 
@@ -273,8 +273,8 @@ void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame, pcl::PointCloud<pc
     else
     	mFeatures[0].clear();
 
-    if (mDisplayFrames)
-    	cv::imshow("FaceFocus", frame);
+    //if (mDisplayFrames)
+    //	cv::imshow("FaceFocus", frame);
 }
 
 /**

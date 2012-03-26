@@ -238,7 +238,7 @@ void joyCB(const sensor_msgs::Joy& msg)
 			case PS3_R1:
 				ROS_INFO("Publishing arm_up state.");
 				posemsg.position.x = 0.0;
-				posemsg.position.z = -0.15;
+				posemsg.position.z = -0.1;
 				arm_pub->publish(posemsg);
 				break;
 			case PS3_R2:

@@ -540,12 +540,11 @@ uint8_t Controller::get(int object)
 	moveHead(FOCUS_FACE_ANGLE, 0.0);
 
 	//Deliver the juice
-	mLock = LOCK_ARM;
-	moveArm(DELIVER_ARM_X_VALUE, DELIVER_ARM_Z_VALUE);
-	waitForLock();
+	//mLock = LOCK_ARM;
+	//moveArm(DELIVER_ARM_X_VALUE, DELIVER_ARM_Z_VALUE);
+	//waitForLock();
 
 	mBusy = false;
-
 	return nero_msgs::Emotion::HAPPY;
 }
 
@@ -596,7 +595,6 @@ uint8_t Controller::release()
 	else
 	{
 		setFocusFace(false);
-		positionBase(DISTANCE_TO_PERSON);
 		mBusy = false;
 		return nero_msgs::Emotion::NEUTRAL;
 	}
@@ -651,6 +649,7 @@ void Controller::speechCB(const nero_msgs::SpeechCommand& msg)
 			{
 				ROS_INFO("Getting juice...");
 				expressEmotion(get(JUICE_ID));
+				mBusy = false;
 			}
 			else
 				ROS_INFO("Don't disturb me, I'm busy");
@@ -663,6 +662,7 @@ void Controller::speechCB(const nero_msgs::SpeechCommand& msg)
 				//Start initiating actions to get the juice
 				ROS_INFO("Getting coke...");
 				expressEmotion(get(COLA_ID));
+				mBusy = false;
 			}
 			else
 				ROS_INFO("Dont' disturb me, I'm busy");
@@ -686,6 +686,7 @@ void Controller::speechCB(const nero_msgs::SpeechCommand& msg)
 			break;
 
 		case SLEEP:
+		case BREAK:
 			if(mWakeUp)
 			{
 				//Go to sleep
@@ -741,7 +742,7 @@ void Controller::init(const char *goalPath)
 	mWakeUp = false;
 	mBusy = false;
 	respondedSurprised = false;
-	mPathingEnabled = true;
+	mPathingEnabled = false;
 
 	//initialise map
 	stringToValue[""]		 = NOTHING;
@@ -755,6 +756,7 @@ void Controller::init(const char *goalPath)
 	stringToValue["give"]	 = GIVE;
 	stringToValue["got"]	 = GOT;
 	stringToValue["sleep"]	 = SLEEP;
+	stringToValue["break"]	 = BREAK;
 	stringToValue["break"]	 = BREAK;
 
 	mNodeHandle.param<double>("distance_tolerance", mDistanceTolerance, 0.2);

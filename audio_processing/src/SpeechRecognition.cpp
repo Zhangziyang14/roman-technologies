@@ -56,6 +56,7 @@ void SpeechRecognition::speechCB(const std_msgs::String& msg)
 
 	else if(msg.data.find("stop") != string::npos)
 			processed_msg.command = "stop";
+
 	else
 		processed_msg.command = "";
 

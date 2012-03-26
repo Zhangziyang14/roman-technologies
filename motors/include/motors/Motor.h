@@ -4,6 +4,7 @@
 #include <CDxlGeneric.h>
 #include <threemxl/dxlassert.h>
 #include <threemxl/C3mxlROS.h>
+#include <signal.h>
 
 #define THREEMXL_SERIAL_DEVICE		"/dev/roman/threemxl"
 

@@ -50,18 +50,8 @@ void MotorHandler::positionCB(const nero_msgs::MotorPosition& msg)
 	mLock = true;
 
 	//ROS_INFO("left: %f, right: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", msg.left, msg.right, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
-	if((msg.left > 0 && msg.right > 0  && mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_LEFT] > msg.left*100 && mSensorData[SensorFeedback::SENSOR_FRONT_CENTER_RIGHT] > msg.left*100) ||
-			(msg.left < 0 && msg.right < 0 && mSensorData[SensorFeedback::SENSOR_REAR_LEFT] > std::abs(msg.left*100) && mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] > std::abs(msg.left*100)) ||
-			msg.left != msg.right)
-	{
 		mRightMotor.setPosition(currentRightPosition + msg.right);
 		mLeftMotor.setPosition(currentLeftPosition + msg.left);
-	}
-	else if(msg.left == 0 && msg.right == 0)
-	{
-		mRightMotor.stopAtPosition(currentRightPosition);
-		mLeftMotor.stopAtPosition(currentRightPosition);
-	}
 }
 
 /**

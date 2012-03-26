@@ -1,7 +1,7 @@
 <launch>
 
     <node pkg="tabletop_object_detector" name="tabletop_object_recognition" 
-    type="tabletop_object_recognition" respawn="false" output="screen">
+    type="tabletop_object_recognition" respawn="false">
 	<!--operational parameters-->
 	<param name="fit_merge_threshold" value="0.05" />
 	<param name="min_marker_quality" value="0.003" />

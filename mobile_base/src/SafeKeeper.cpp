@@ -36,7 +36,7 @@ void SafeKeeper::bumperFeedbackCB(const std_msgs::UInt8 &msg)
 		position_msg.right  = SAFE_DISTANCE;
 	}
 
-	mMovement_pub.publish(position_msg);
+//	mMovement_pub.publish(position_msg);
 
 	mDisableForward	 = false;
 	mDisableBackward = false;
@@ -78,7 +78,7 @@ void SafeKeeper::ultrasoneFeedbackCB(const nero_msgs::SensorFeedback& msg)
 		nero_msgs::MotorPosition position_msg;
 		position_msg.left   = 0;
 		position_msg.right  = 0;
-		mMovement_pub.publish(position_msg);
+//		mMovement_pub.publish(position_msg);
 	}
 	else if((msg.data[SensorFeedback::SENSOR_REAR_LEFT] - mSensorData[SensorFeedback::SENSOR_REAR_LEFT] < 0 ||
 			msg.data[SensorFeedback::SENSOR_REAR_RIGHT] - mSensorData[SensorFeedback::SENSOR_REAR_RIGHT] < 0) && mCurrentSpeed.linear.x < 0)
@@ -86,7 +86,7 @@ void SafeKeeper::ultrasoneFeedbackCB(const nero_msgs::SensorFeedback& msg)
 		nero_msgs::MotorPosition position_msg;
 		position_msg.left   = 0;
 		position_msg.right  = 0;
-		mMovement_pub.publish(position_msg);
+//		mMovement_pub.publish(position_msg);
 	}
 
 	mSensorData = msg.data;
@@ -108,7 +108,7 @@ void SafeKeeper::init()
 	// initialise subscribers
 	mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &SafeKeeper::bumperFeedbackCB, this);
 	mUltrasone_sub		= mNodeHandle.subscribe("/sensorFeedbackTopic", 10, &SafeKeeper::ultrasoneFeedbackCB, this);
-	mSpeed_sub			= mNodeHandle.subscribe("/speedFeedbackTopic", 10, &SafeKeeper::speedFeedbackCB, this);
+//	mSpeed_sub			= mNodeHandle.subscribe("/speedFeedbackTopic", 10, &SafeKeeper::speedFeedbackCB, this);
 
 	// initialise publishers
 	mMovement_pub 		= mNodeHandle.advertise<nero_msgs::MotorPosition>("/positionTopic", 1);
