@@ -1,0 +1,17 @@
+#!/bin/bash
+
+log_file=/tmp/nero-upstart.log
+DATE=`date`
+echo "$DATE: nero-stop" >> $log_file
+
+if [ -s /home/panda/setup.sh ]; then
+    echo "$DATE: nero-stop using setup file /home/panda/setup.sh" >> $log_file
+    source /home/panda/setup.sh
+else
+    echo "$DATE: nero-stop using setup file /opt/ros/electric/setup.bash" >> $log_file
+    source /opt/ros/electric/setup.bash
+fi
+
+for i in $( rosnode list ); do
+    rosnode kill $i;
+done
