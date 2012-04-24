@@ -41,6 +41,12 @@ void KinectServer::run()
 	bool captureRGB = mPublishRGB;
 	bool captureCloud = mPublishCloud || publishLaserScan;
 	
+	if ((captureRGB || captureCloud) && mKinect.grab() == false)
+	{
+		ROS_WARN("Can not grab images.");
+		return;
+	}
+
 	cv::Mat rgb;
 	if (captureRGB)
 	{
