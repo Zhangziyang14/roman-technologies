@@ -40,8 +40,8 @@
 #include "std_msgs/Bool.h"
 #include "sensor_msgs/Joy.h"
 
-#define MAX_LINEAR_SPEED 0.2
-#define MAX_ANGULAR_SPEED 0.2
+#define MAX_LINEAR_SPEED 0.4
+#define MAX_ANGULAR_SPEED 0.4
 
 #define MAX_ARM_SPEED 0.2
 #define MAX_HEAD_SPEED 0.2
