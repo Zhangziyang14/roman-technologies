@@ -12,5 +12,5 @@
 
   <node pkg="image_processing" name="ObjectRecognition" type="ObjectRecognition" respawn="true" output="screen"/>
 
-  <include file="$(find image_processing)/launch/kinect.launch"/>
+  <!-- include file="$(find image_processing)/launch/kinect.launch"/ -->
 </launch>

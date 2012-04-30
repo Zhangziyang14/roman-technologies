@@ -29,7 +29,7 @@ include_directories(/usr/local/include)
 target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(Kinect opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(PGMToObj opencv_core opencv_imgproc opencv_highgui)
-target_link_libraries(FocusFace opencv_core opencv_imgproc opencv_highgui opencv_contrib)
+target_link_libraries(FocusFace opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_video)
 #target_link_libraries(Webcam opencv_core opencv_imgproc opencv_highgui)
 #target_link_libraries(PublishLaserscan opencv_core opencv_imgproc opencv_highgui)
 

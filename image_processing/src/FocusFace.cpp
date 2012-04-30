@@ -355,7 +355,7 @@ int main( int argc, char* argv[] )
 
 	while (ros::ok())
 	{
-		if (focusFace.isActive())
+		//if (focusFace.isActive())
 			sleep.sleep();
 		ros::spinOnce();
 	}
