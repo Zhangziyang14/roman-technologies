@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -s /home/panda/setup.sh ]; then
+    #echo "$DATE: nero-start using setup file /home/panda/setup.sh" >> $log_file
+    source /home/panda/setup.sh
+else
+    #echo "$DATE: nero-start using setup file /opt/ros/electric/setup.bash" >> $log_file
+    source /opt/ros/electric/setup.bash
+fi
+
+setuidgid panda roscore

@@ -19,6 +19,5 @@ if [ -s /etc/ros/electric/ps3joy.launch ]; then
     setuidgid panda roslaunch /etc/ros/electric/ps3joy.launch
 else
     echo "Using roslaunch nero_launch ps3joy.launch" >> $log_file
-    setuidgid panda roscore >> $log_file
     setuidgid root roslaunch nero_launch ps3joy.launch --wait >> $log_file
 fi

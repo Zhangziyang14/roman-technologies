@@ -2,19 +2,21 @@
 
 KinectServer::KinectServer() :
 	mNodeHandle(""),
-	mImageTransport(mNodeHandle),
-	mPublishRGB(true),
-	mPublishCloud(false),
-	mKinect(CV_CAP_OPENNI)
+	mPublishLaserScan(false)
+	//mImageTransport(mNodeHandle)
 {
-	if (mKinect.isOpened())
-		mKinect.set(CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ); // default
-	
 	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
 	
-	mRGBPub = mImageTransport.advertise("/camera/rgb/image_color", 1);
-	mPCPub = mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
-	mLaserPub = mNodeHandle.advertise<sensor_msgs::LaserScan>("/scan", 1);
+	mRGBPub			= mNodeHandle.advertise<sensor_msgs::CompressedImage>("/camera/rgb/image_color/compressed", 1);
+	mPCPub			= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
+	mLaserPub		= mNodeHandle.advertise<sensor_msgs::LaserScan>("/scan", 1);
+	mRGBControl		= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
+	mCloudControl	= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
+	
+	mNodeHandle.param<double>("/KinectServer/scale", mScale, 1.0);
+	mNodeHandle.param<bool>("/KinectServer/publish_rgb", mPublishRGB, false);
+	mNodeHandle.param<bool>("/KinectServer/publish_cloud", mPublishCloud, false);
+	mNodeHandle.param<bool>("/KinectServer/close_idle_kinect", mCloseIdleKinect, true);
 	
 	ROS_INFO("done.");
 }
@@ -24,24 +26,37 @@ KinectServer::KinectServer() :
  */
 void KinectServer::run()
 {
+	bool publishRealLaserScan = mSendEmptyLaserscan == false && mPublishLaserScan;
+	bool captureRGB = mPublishRGB && mRGBPub.getNumSubscribers();
+	bool captureCloud = (mPublishCloud && mPCPub.getNumSubscribers()) || (publishRealLaserScan && mLaserPub.getNumSubscribers());
+	
+	// nothing to do right now
+	if (captureRGB == false && captureCloud == false)
+	{
+		if (mCloseIdleKinect && mKinect.isOpened())
+		{
+			mKinect.release(); // lets not waste CPU usage on the Kinect
+			ROS_INFO("Kinect closed.");
+		}
+		return;
+	}
+
 	if (mKinect.isOpened() == false)
 	{
-		mKinect = cv::VideoCapture(CV_CAP_OPENNI);
+		ROS_INFO("Opening Kinect.");
+		mKinect.open(CV_CAP_OPENNI);
 		if (mKinect.isOpened() == false)
 		{
 			ROS_WARN("Can not open Kinect device, will try again in one second.");
 			usleep(1000000);
 			return;
 		}
-		else
-			mKinect.set(CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ); // default
+
+		mKinect.set(CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ); // default
+		ROS_INFO("Kinect opened.");
 	}
 
-	bool publishLaserScan = mSendEmptyLaserscan == false && mPublishLaserScan;
-	bool captureRGB = mPublishRGB;
-	bool captureCloud = mPublishCloud || publishLaserScan;
-	
-	if ((captureRGB || captureCloud) && mKinect.grab() == false)
+	if (mKinect.grab() == false)
 	{
 		ROS_WARN("Can not grab images.");
 		return;
@@ -55,12 +70,24 @@ void KinectServer::run()
 			ROS_WARN("Failed to retrieve RGB image.");
 			return;
 		}
+
+		if (mScale != 1.0)
+			cv::resize(rgb, rgb, cv::Size(rgb.cols * mScale, rgb.rows * mScale), 0, 0, cv::INTER_LINEAR);
 		
-		if (mPublishRGB)
-			mRGBPub.publish(OpenCVTools::matToImage(rgb));
+		//if (mPublishRGB)
+		//	mRGBPub.publish(OpenCVTools::matToImage(rgb));
+		
+		sensor_msgs::CompressedImage rgb_c;
+		rgb_c.header.stamp = ros::Time::now();
+		std::vector<int> p;
+		p.push_back(CV_IMWRITE_JPEG_QUALITY);
+		p.push_back(90);
+		cv::imencode(".jpg", rgb, rgb_c.data, p);
+		
+		mRGBPub.publish(rgb_c);
 	}
-	
-	cv::Mat cloud;	
+
+	cv::Mat cloud;
 	if (captureCloud)
 	{
 		if (mKinect.retrieve(cloud, CV_CAP_OPENNI_POINT_CLOUD_MAP) == false)
@@ -72,91 +99,21 @@ void KinectServer::run()
 		if (mPublishCloud)
 			mPCPub.publish(OpenCVTools::matToPointCloud2(cloud));
 	}
-	
+
 	if (mPublishLaserScan)
 		mLaserPub.publish(OpenCVTools::matToLaserScan(cloud, mSendEmptyLaserscan));
-	
-	/*bool quit = false;
+}
 
-	// this provides image compression
-	image_transport::ImageTransport it(nh);
-	ros::Publisher laser_pub = nh.advertise<sensor_msgs::LaserScan>("/scan", 1);
-	image_transport::Publisher image_pub = it.advertise("/camera/rgb/image_color", 1);
-	//ros::Publisher image_pub = nh.advertise<sensor_msgs::Image>("/camera/rgb/image_color", 1);
-	ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
-	ros::Publisher rgbcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/camera/depth_registered/points", 1);
+bool KinectServer::RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+{
+	mPublishRGB = req.active;
+	return true;
+}
 
-	bool captureRGB = false;
-	bool captureCloud = false;
-	bool publishRGBCloud = false;
-	bool publishLaserscan = false;
-	bool publishRGB = false;
-	bool publishCloud = false;
-
-	sensor_msgs::ImagePtr imageMsg;
-
-	while (quit == false && ros::ok())
-	{
-		cv::Mat image, pointCloud;
-		//IplImage iplImage;
-
-		// is it required to capture a laserscan ?
-		publishLaserscan = gSendEmptyLaserscan == false && laser_pub.getNumSubscribers() != 0;
-		// is it required to capture a pointcloud with rgb data ?
-		publishRGBCloud = rgbcloud_pub.getNumSubscribers() != 0;
-		// is it required to convert to point clouds and publish ?
-		publishCloud = cloud_pub.getNumSubscribers() != 0;
-		// is it required to capture RGB images ?
-		publishRGB = image_pub.getNumSubscribers() != 0;
-		// is it required to convert to point clouds and publish ?
-		captureCloud = publishRGBCloud || publishLaserscan || publishCloud;
-		// is it required to capture RGB images ?
-		captureRGB = publishRGBCloud || publishRGB;
-
-		if (capture->grab() == false)
-		{
-			std::cout << "Can not grab images." << std::endl;
-			return;
-		}
-
-		// try to capture a RGB and pointcloud
-		if ((captureRGB == false || capture->retrieve(image, CV_CAP_OPENNI_BGR_IMAGE)) &&
-			(captureCloud == false || capture->retrieve(pointCloud, CV_CAP_OPENNI_POINT_CLOUD_MAP)))
-		{
-			IplImage rgb;
-			if (captureRGB)
-				rgb = image;
-			IplImage pc = pointCloud;
-
-			// SLAM / AMCL
-			if (publishLaserscan || gSendEmptyLaserscan)
-			{
-				sensor_msgs::LaserScanPtr laserscan = iplImageToLaserScan(&pc, gSendEmptyLaserscan);
-				if (laserscan)
-					laser_pub.publish(laserscan);
-			}
-
-			if (publishRGB)
-			{
-				imageMsg = iplImageToImage(&rgb);
-				image_pub.publish(imageMsg);
-			}
-
-			if (publishCloud)
-			{
-				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToPointCloud2(&pc);
-				cloud_pub.publish(cloudMsg);
-			}
-
-			if (publishRGBCloud)
-			{
-				sensor_msgs::PointCloud2Ptr cloudMsg = iplImageToRegisteredPointCloud2(&pc, &rgb);
-				rgbcloud_pub.publish(cloudMsg);
-			}
-		}
-
-		ros::spinOnce();
-	}*/
+bool KinectServer::CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+{
+	mPublishCloud = req.active;
+	return true;
 }
 
 int main(int argc, char* argv[])
@@ -166,8 +123,32 @@ int main(int argc, char* argv[])
 	
 	KinectServer kinectServer;
 
+	ros::Rate rate(30);
+
+	//double fps = 0.0;
+	//int fpsCount = 0;
+
 	while (ros::ok())
 	{
+		rate.sleep();
+		
+		/*if (kinectServer.isCapturing())
+		{
+			double cycleTime = rate.cycleTime().toSec();
+			if (cycleTime != 0.0)
+			{
+				fps += (1.0 / cycleTime);
+				fpsCount++;
+				
+				if (fpsCount == 10)
+				{
+					ROS_INFO("Rate: %lf", fps / fpsCount);
+					fps = 0.0;
+					fpsCount = 0;
+				}
+			}
+		}*/
+		
 		kinectServer.run();
 		ros::spinOnce();
 	}

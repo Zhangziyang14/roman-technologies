@@ -29,7 +29,7 @@ void HeadMotorHandler::publishHeadPosition()
 	}
 */
 	btQuaternion orientation;
-	orientation.setRPY(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
+	orientation.setEulerZYX(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
 	mKinectTF.setRotation(orientation);
 	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now(), "kinect_normal_axis_frame", "head_frame"));
 }
