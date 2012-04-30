@@ -95,7 +95,7 @@ void KinectServer::run()
 			ROS_WARN("Failed to retrieve cloud image.");
 			return;
 		}
-		
+
 		if (mPublishCloud)
 			mPCPub.publish(OpenCVTools::matToPointCloud2(cloud));
 	}

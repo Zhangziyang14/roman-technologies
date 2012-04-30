@@ -106,38 +106,52 @@ sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
  */
 sensor_msgs::PointCloud2Ptr OpenCVTools::matToPointCloud2(cv::Mat &mat)
 {
-        sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
-        output->header.stamp = ros::Time::now();
-        output->header.frame_id = OUTPUT_FRAME_ID;
-        output->width = mat.cols;
-        output->height = mat.rows;
-        output->is_dense = false;
-        output->point_step = 16;
-        output->is_bigendian = false;
-        output->point_step = 8*sizeof(float);
-        output->row_step = output->width * output->point_step;
+	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
+	output->header.stamp = ros::Time::now();
+	output->header.frame_id = OUTPUT_FRAME_ID;
+	output->width = mat.cols;
+	output->height = mat.rows;
+	output->is_dense = false;
+	output->point_step = 16;
+	output->is_bigendian = false;
+	output->point_step = 4*sizeof(float);
+	output->row_step = output->width * output->point_step;
 
 
-        sensor_msgs::PointField pf;
-        pf.name = "x";
-        pf.offset = 0;
-        pf.count = 1;
-        pf.datatype = sensor_msgs::PointField::FLOAT32;
-        output->fields.push_back(pf);
-        pf.name = "y";
-        pf.offset = 4;
-        pf.count = 1;
-        pf.datatype = sensor_msgs::PointField::FLOAT32;
-        output->fields.push_back(pf);
-        pf.name = "z";
-        pf.offset = 8;
-        pf.count = 1;
-        pf.datatype = sensor_msgs::PointField::FLOAT32;
-        output->fields.push_back(pf);
+	sensor_msgs::PointField pf;
+	pf.name = "x";
+	pf.offset = 0;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "y";
+	pf.offset = 4;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "z";
+	pf.offset = 8;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
 
+	output->data.resize(size_t(output->width * output->height * output->point_step));
+	for (uint32_t x = 0; x < output->width; x++)
+	{
+		for (uint32_t y = 0; y < output->height; y++)
+		{
+			uint8_t data[16];
+			cv::Point3f p = mat.at<cv::Point3f>(y, x);
+			if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0)
+				p.x = p.y = p.z = std::numeric_limits<float>::quiet_NaN();
+			memcpy(&data[0], &p.x, sizeof(float));
+			memcpy(&data[4], &p.y, sizeof(float));
+			memcpy(&data[8], &p.z, sizeof(float));
 
-        output->data.assign(mat.data, mat.data + size_t(output->width * output->height * mat.depth()));
-        return output;
+			memcpy(&output->data[(y*output->width + x) * output->point_step], data, output->point_step);
+		}
+	}
+	return output;
 }
 
 /// Calculates the distance from point p to plane with the form of plane(0)*x + plane(1)*y + plane(2)*z + plane(3) = 0
