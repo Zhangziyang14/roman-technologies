@@ -17,6 +17,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(KinectServer src/KinectServer.cpp src/OpenCVTools.cpp)
+rosbuild_add_executable(ServiceTest src/ServiceTest.cpp)
 
 link_directories(/usr/local/lib)
 include_directories(/usr/local/include)

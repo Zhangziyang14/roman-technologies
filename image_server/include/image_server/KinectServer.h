@@ -14,6 +14,7 @@
 #include "image_server/OpenCVTools.h"
 #include "sensor_msgs/CompressedImage.h"
 #include "nero_msgs/SetActive.h"
+#include "nero_msgs/QueryCloud.h"
 
 class KinectServer
 {
@@ -26,11 +27,16 @@ protected:
 	ros::Publisher mLaserPub;
 	ros::ServiceServer mRGBControl;
 	ros::ServiceServer mCloudControl;
+	ros::ServiceServer mCloudSaveControl;
+	ros::ServiceServer mQueryCloud;
 
 	bool mSendEmptyLaserscan;
 	bool mPublishRGB;
 	bool mPublishCloud;
 	bool mPublishLaserScan;
+
+	bool mSaveCloud;
+	cv::Mat mSavedCloud;
 
 	double mScale;
 	bool mCloseIdleKinect;
@@ -52,6 +58,8 @@ public:
 private:
 	bool RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 	bool CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
+	bool CloudSaveControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
+	bool QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res);
 };
 
 #endif /* KINECTSERVER_H_ */

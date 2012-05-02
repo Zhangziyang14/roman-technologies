@@ -7,16 +7,19 @@ KinectServer::KinectServer() :
 {
 	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
 	
-	mRGBPub			= mNodeHandle.advertise<sensor_msgs::CompressedImage>("/camera/rgb/image_color/compressed", 1);
-	mPCPub			= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
-	mLaserPub		= mNodeHandle.advertise<sensor_msgs::LaserScan>("/scan", 1);
-	mRGBControl		= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
-	mCloudControl	= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
+	mRGBPub				= mNodeHandle.advertise<sensor_msgs::CompressedImage>("/camera/rgb/image_color/compressed", 1);
+	mPCPub				= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
+	mLaserPub			= mNodeHandle.advertise<sensor_msgs::LaserScan>("/scan", 1);
+	mRGBControl			= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
+	mCloudControl		= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
+	mCloudSaveControl	= mNodeHandle.advertiseService("/KinectServer/CloudSaveControl", &KinectServer::CloudSaveControl, this);
+	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
 	
 	mNodeHandle.param<double>("/KinectServer/scale", mScale, 1.0);
 	mNodeHandle.param<bool>("/KinectServer/publish_rgb", mPublishRGB, false);
 	mNodeHandle.param<bool>("/KinectServer/publish_cloud", mPublishCloud, false);
 	mNodeHandle.param<bool>("/KinectServer/close_idle_kinect", mCloseIdleKinect, true);
+	mNodeHandle.param<bool>("/KinectServer/save_cloud", mSaveCloud, false);
 	
 	ROS_INFO("done.");
 }
@@ -28,7 +31,7 @@ void KinectServer::run()
 {
 	bool publishRealLaserScan = mSendEmptyLaserscan == false && mPublishLaserScan;
 	bool captureRGB = mPublishRGB && mRGBPub.getNumSubscribers();
-	bool captureCloud = (mPublishCloud && mPCPub.getNumSubscribers()) || (publishRealLaserScan && mLaserPub.getNumSubscribers());
+	bool captureCloud = (mPublishCloud && mPCPub.getNumSubscribers()) || (publishRealLaserScan && mLaserPub.getNumSubscribers()) || mSaveCloud;
 	
 	// nothing to do right now
 	if (captureRGB == false && captureCloud == false)
@@ -38,6 +41,8 @@ void KinectServer::run()
 			mKinect.release(); // lets not waste CPU usage on the Kinect
 			ROS_INFO("Kinect closed.");
 		}
+		if (mSavedCloud.empty() == false)
+			mSavedCloud.release();
 		return;
 	}
 
@@ -98,6 +103,9 @@ void KinectServer::run()
 
 		if (mPublishCloud)
 			mPCPub.publish(OpenCVTools::matToPointCloud2(cloud));
+		
+		if (mSaveCloud)
+			mSavedCloud = cloud;
 	}
 
 	if (mPublishLaserScan)
@@ -113,6 +121,31 @@ bool KinectServer::RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::Set
 bool KinectServer::CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
 	mPublishCloud = req.active;
+	return true;
+}
+
+bool KinectServer::CloudSaveControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+{
+	mSaveCloud = req.active;
+	return true;
+}
+
+bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res)
+{
+	if (mSavedCloud.empty())
+		return false;
+		
+	for (size_t i = 0; i < req.indices.size(); i++)
+	{
+		if (req.indices[i].x >= 0 && req.indices[i].x < mSavedCloud.cols &&
+			req.indices[i].y >= 0 && req.indices[i].y < mSavedCloud.rows)
+		{
+			geometry_msgs::Point gp;
+			cv::Point3f cp = mSavedCloud.at<cv::Point3f>(req.indices[i].x, req.indices[i].y);
+			gp.x = cp.x; gp.y = cp.y; gp.z = cp.z;
+			res.points.push_back(gp);
+		}
+	}
 	return true;
 }
 
