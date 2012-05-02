@@ -3,6 +3,6 @@
 	<arg name="profileface_cascade_file" default="$(find image_processing)/cascade/haarcascade_profileface.xml" />
 	<arg name="frontalface2_cascade_file" default="$(find image_processing)/cascade/haarcascade_frontalface_alt2.xml" />
 	<node pkg="image_processing" name="FocusFace" type="FocusFace" args="$(arg profileface_cascade_file) $(arg frontalface_cascade_file) $(arg frontalface2_cascade_file)" output="screen">
-		<param name="display_frames" value="false"/>
+		<param name="display_frames" value="true"/>
 	</node>
 </launch>

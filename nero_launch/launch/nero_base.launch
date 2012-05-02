@@ -1,5 +1,6 @@
 <launch>
   <node name="serial" pkg="shared_serial" type="server" respawn="true">
+    <param name="watchdog_interval" value="10" />
 	<param name="port_name" value="/dev/roman/threemxl" />
 	<param name="port_type" value="RS485_FTDI" />
 	<param name="baud_rate" value="921600" />
@@ -25,4 +26,8 @@
   
   <!-- start PS3 controller -->
   <!-- node name="PS3Controller" pkg="logical_unit" type="PS3Controller"/ -->
+  
+  <!-- start Kinect -->
+  <!-- include file="$(find image_server)/launch/kinect.launch/ -->
+  <node name="KinectServer" pkg="image_server" type="KinectServer"/>
 </launch>

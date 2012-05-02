@@ -8,14 +8,12 @@
 #ifndef FOCUSFACE_H_
 #define FOCUSFACE_H_
 
-//#define WEBCAM
+#define WEBCAM
 
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/video/tracking.hpp"
-
-#include "pcl/ros/conversions.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -26,6 +24,7 @@
 #include <image_transport/image_transport.h>
 #include "nero_msgs/PitchYaw.h"
 #include "nero_msgs/SetActive.h"
+#include "nero_msgs/QueryCloud.h"
 
 #define STOP_SPEED_TOLERANCE 0.005
 #define MAX_CORNERS 200
@@ -38,6 +37,8 @@ class FocusFace
 {
 private:
 	ros::NodeHandle mNodeHandle;
+	image_transport::ImageTransport mImageTransport;
+
 	cv::CascadeClassifier mFrontalFaceCascade;
 	cv::CascadeClassifier mProfileCascade;
 	cv::CascadeClassifier mFrontalFace2Cascade;
@@ -49,8 +50,11 @@ private:
 	ros::Publisher mHeadPosPub;
 	ros::Subscriber mHeadSpeedSub;
 	ros::Subscriber mHeadPosSub;
-	ros::Subscriber mImageSub;
+	image_transport::Subscriber mImageSub;
 	ros::ServiceServer mActiveServer;
+	ros::ServiceClient mImageControlClient;
+	ros::ServiceClient mCloudSaveClient;
+	ros::ServiceClient mQueryCloudClient;
 
 	nero_msgs::PitchYaw mCurrentOrientation;
 	nero_msgs::PitchYaw mCurrentSpeed;
@@ -66,20 +70,17 @@ public:
 	void headSpeedCb(const nero_msgs::PitchYaw &msg);
 	void headPositionCb(const nero_msgs::PitchYaw &msg);
 
-	void detectFaces(cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cloud);
-	void trackFace(cv::Mat &prevFrame, cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cloud);
-#ifdef WEBCAM
-	void imageCb(const sensor_msgs::ImagePtr &image_);
-#else
-	void imageCb(const sensor_msgs::PointCloud2Ptr &cloud2);
-#endif
+	void detectFaces(cv::Mat &frame);
+	void trackFace(cv::Mat &prevFrame, cv::Mat &frame);
+	void imageCb(const sensor_msgs::ImageConstPtr &image_);
 	bool setActiveCB(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 
-	void sendHeadPosition(pcl::PointCloud<pcl::PointXYZRGB> cloud);
+	void sendHeadPosition();
 
 	inline ros::NodeHandle *getNodeHandle() { return &mNodeHandle; };
 	inline bool isActive() { return mActive; };
-
+	inline void setRGBOutput(bool active) { nero_msgs::SetActive srv; srv.request.active = active; mImageControlClient.call(srv); };
+	inline void setCloudSave(bool active) { nero_msgs::SetActive srv; srv.request.active = active; mCloudSaveClient.call(srv); };
 };
 
 #endif /* FOCUSFACE_H_ */

@@ -19,6 +19,7 @@
 #include <tabletop_collision_map_processing/TabletopCollisionMapProcessing.h>
 
 #include "nero_msgs/FindObject.h"
+#include "nero_msgs/SetActive.h"
 
 // REMOVE THIS
 #include <tf/transform_listener.h>
@@ -31,6 +32,7 @@ protected:
 	ros::NodeHandle mNodeHandle;				//ROS node handler
 
 	ros::ServiceClient mObjectRecognizeClient;		//Service client for tabletop_object_detection
+	ros::ServiceClient mCloudControlClient;		//Service client for cloud control
 	ros::ServiceServer mFindObjectServer;		/// Server for finding an object
 
 	double mMinQuality;							//Threshold for when a model is considered recognised
@@ -48,6 +50,8 @@ public:
 	void spin();
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
+
+	inline void setCloudPublish(bool active) { nero_msgs::SetActive call; call.request.active = active; mCloudControlClient.call(call); };
 };
 
 #endif /* OBJECTRECOGNITION_H_ */

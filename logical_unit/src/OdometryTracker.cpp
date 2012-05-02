@@ -95,10 +95,10 @@ int main(int argc, char ** argv)
 	current_time = ros::Time::now();
 	last_time = ros::Time::now();
 	
-	//ros::Rate rate(100.0);
+	ros::Rate rate(100.0);
 	while (node.ok())
 	{
-		//rate.sleep();
+		rate.sleep();
 		ros::spinOnce();
 	}
 	return 0;

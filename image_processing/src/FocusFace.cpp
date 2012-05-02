@@ -65,16 +65,24 @@ void pruneFeatures(std::vector<cv::Point2f> &f)
 }
 
 FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const char *frontal_face_2) :
-		mStartTime(0)
+		mImageTransport(mNodeHandle), mStartTime(0)
 {
-	mHeadPosSub = mNodeHandle.subscribe("/headPositionFeedbackTopic", 1, &FocusFace::headPositionCb, this);
-	mHeadSpeedSub = mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &FocusFace::headSpeedCb, this);
-	mHeadPosPub = mNodeHandle.advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1);
-	mActiveServer = mNodeHandle.advertiseService("/set_focus_face", &FocusFace::setActiveCB, this);
+	image_transport::TransportHints hints("compressed", ros::TransportHints(), mNodeHandle);
+	mImageSub 			= mImageTransport.subscribe("/camera/rgb/image_color", 5, &FocusFace::imageCb, this, hints);
+	mHeadPosSub 		= mNodeHandle.subscribe("/headPositionFeedbackTopic", 1, &FocusFace::headPositionCb, this);
+	mHeadSpeedSub 		= mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &FocusFace::headSpeedCb, this);
+	mHeadPosPub 		= mNodeHandle.advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1);
+
+	mActiveServer 		= mNodeHandle.advertiseService("/set_focus_face", &FocusFace::setActiveCB, this);
+	mImageControlClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/RGBControl");
+	mCloudSaveClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/CloudSaveControl");
+	mQueryCloudClient	= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/QueryCloud");
 
 	mCurrentOrientation.pitch = 0.f;
 	mCurrentOrientation.yaw = 0.f;
 	mActive = false;
+	setRGBOutput(false);
+	setCloudSave(false);
 
     if (mFrontalFaceCascade.load(frontal_face)	 == false)
         ROS_ERROR("Could not load frontal face classifier cascade");
@@ -86,14 +94,10 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
     mNodeHandle.param<double>("image_scale", mScale, 2.0);
     mNodeHandle.param<bool>("display_frames", mDisplayFrames, true);
 
-#ifdef WEBCAM
-    mImageSub = mNodeHandle.subscribe("/camera/rgb/image_color", 1, &FocusFace::imageCb, this);
-#endif
-
     if (mDisplayFrames)
     {
-//		cv::startWindowThread();
-//		cvNamedWindow("FaceFocus", 1);
+		cv::startWindowThread();
+		cvNamedWindow("FaceFocus", 1);
     }
 
     ROS_INFO("FocusFace initialised.");
@@ -109,32 +113,50 @@ void FocusFace::headPositionCb(const nero_msgs::PitchYaw &msg)
 	mCurrentOrientation = msg;
 }
 
-void FocusFace::sendHeadPosition(pcl::PointCloud<pcl::PointXYZRGB> cloud)
+void FocusFace::sendHeadPosition()
 {
 	if (canMoveHead() == false)
 		return;
 
-    nero_msgs::PitchYaw msg;
+    //pcl::PointXYZRGB p = cloud.at(mFaceCenter.x, mFaceCenter.y);
+	nero_msgs::QueryCloud query;
+	geometry_msgs::Point index;
+	index.x = mFaceCenter.x;
+	index.y = mFaceCenter.y;
+	query.request.indices.push_back(index);
 
-    pcl::PointXYZRGB p = cloud.at(mFaceCenter.x, mFaceCenter.y);
+	if (mQueryCloudClient.call(query) == false)
+	{
+		ROS_WARN("Failed to call cloud save server.");
+		return;
+	}
+
+	if (query.response.points.size() == 0)
+	{
+		ROS_WARN("QueryCloud returned 0 points.");
+		return;
+	}
+
+	geometry_msgs::Point p = query.response.points[0];
     if (p.z == 0.f)
     {
-    	ROS_ERROR("Invalid face center.");
+    	ROS_WARN("Invalid face center.");
     	return;
     }
 
     double pitch = atan(p.y / p.z);
     double yaw = -atan(p.x / p.z);
 
+    nero_msgs::PitchYaw msg;
     msg.pitch = pitch + mCurrentOrientation.pitch;
     msg.yaw = yaw + mCurrentOrientation.yaw;
     if (isnan(msg.pitch) || isnan(msg.yaw))
-            return;
+    	return;
 
     mHeadPosPub.publish(msg);
 }
 
-void FocusFace::detectFaces(cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cloud)
+void FocusFace::detectFaces(cv::Mat &frame)
 {
 	uint16_t minDepth = -1;
 	size_t minIndex = -1;
@@ -144,12 +166,12 @@ void FocusFace::detectFaces(cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cl
 	cv::resize(gray_frame, scaled_frame, cv::Size(gray_frame.cols / mScale, gray_frame.rows / mScale), 0, 0, cv::INTER_LINEAR);
 
 	std::vector<cv::Rect> faces;
-	mFrontalFaceCascade.detectMultiScale(scaled_frame, faces, 1.1, 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+	mFrontalFaceCascade.detectMultiScale(scaled_frame, faces, 1.1, 2, CV_HAAR_SCALE_IMAGE | CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(30, 30));
 
 	if (faces.size() == 0 && mProfileCascade.empty() == false)
-		mProfileCascade.detectMultiScale(scaled_frame, faces, 1.1, 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+		mProfileCascade.detectMultiScale(scaled_frame, faces, 1.1, 2, CV_HAAR_SCALE_IMAGE | CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(30, 30));
 	if (faces.size() == 0 && mFrontalFace2Cascade.empty() == false)
-		mFrontalFace2Cascade.detectMultiScale(scaled_frame, faces, 1.1, 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+		mFrontalFace2Cascade.detectMultiScale(scaled_frame, faces, 1.1, 2, CV_HAAR_SCALE_IMAGE | CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(30, 30));
 
     for (size_t i = 0; i < faces.size(); i++)
     {
@@ -160,14 +182,14 @@ void FocusFace::detectFaces(cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cl
 
     	cv::rectangle(frame, faces[i], CV_RGB(255, 0, 0), 3);
 
-#ifdef WEBCAM
+//#ifdef WEBCAM
 		minDepth = 0;
 		minIndex = i;
 		break;
-#endif
+//#endif
 
     	// look for the closest face
-    	uint16_t depth = getDepthFromCloud(faces[i].x + (faces[i].width >> 1), faces[i].y + (faces[i].height >> 1), &cloud);
+    	uint16_t depth = 0;//getDepthFromCloud(faces[i].x + (faces[i].width >> 1), faces[i].y + (faces[i].height >> 1), &cloud);
     	if (depth < minDepth)
     	{
     		minDepth = depth;
@@ -194,24 +216,24 @@ void FocusFace::detectFaces(cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cl
 				float mse = calcMeanSquareError(mFeatures[0], cog);
 				cv::circle(frame, mFaceCenter, sqrtf(mse), CV_RGB(0, 120, 255), 3, CV_AA);
 
-#ifndef WEBCAM
-				sendHeadPosition(cloud);
-#endif
-
-				//for (size_t j = 0; j < mFeatures[0].size(); j++)
-				//	cv::circle(frame, mFeatures[0][j], 3, CV_RGB(0, 125, 125), 1, CV_AA);
+				for (size_t j = 0; j < mFeatures[0].size(); j++)
+					cv::circle(frame, mFeatures[0][j], 3, CV_RGB(0, 125, 125), 1, CV_AA);
         	}
+
+//#ifndef WEBCAM
+			sendHeadPosition();
+//#endif
         }
         else
         	mFeatures[0].clear();
     }
 
-    //if (mDisplayFrames)
-    //	cv::imshow("FaceFocus", frame);
+    if (mDisplayFrames)
+    	cv::imshow("FaceFocus", frame);
 
 }
 
-void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame, pcl::PointCloud<pcl::PointXYZRGB> cloud)
+void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame)
 {
 	if (prevFrame.empty())
 		frame.copyTo(prevFrame);
@@ -264,35 +286,31 @@ void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame, pcl::PointCloud<pc
 				cv::circle(frame, mFeatures[1][i], 3, cv::Scalar(0,255,0), CV_FILLED, CV_AA);
     	}
 
-#ifndef WEBCAM
-    	sendHeadPosition(cloud);
-#endif
+//#ifndef WEBCAM
+    	sendHeadPosition();
+//#endif
 
         std::swap(mFeatures[1], mFeatures[0]);
     }
     else
     	mFeatures[0].clear();
 
-    //if (mDisplayFrames)
-    //	cv::imshow("FaceFocus", frame);
+    if (mDisplayFrames)
+    	cv::imshow("FaceFocus", frame);
 }
 
 /**
  * Receives RGB images and displays them on screen.
  */
-#ifdef WEBCAM
-void FocusFace::imageCb(const sensor_msgs::ImagePtr &image_)
-#else
-void FocusFace::imageCb(const sensor_msgs::PointCloud2Ptr &cloud2)
-#endif
+void FocusFace::imageCb(const sensor_msgs::ImageConstPtr &image_)
 {
-	pcl::PointCloud<pcl::PointXYZRGB> cloud;
+	/*pcl::PointCloud<pcl::PointXYZRGB> cloud;
 #ifndef WEBCAM
 	pcl::fromROSMsg(*cloud2, cloud);
 
     sensor_msgs::ImagePtr image_(new sensor_msgs::Image);
     pcl::toROSMsg(cloud, *image_);
-#endif
+#endif*/
     cv::Mat frame(image_->height, image_->width, CV_8UC3);
     imageToMat(image_, frame);
 
@@ -302,13 +320,13 @@ void FocusFace::imageCb(const sensor_msgs::PointCloud2Ptr &cloud2)
 
     if (mFeatures[0].size())
     {
-    	trackFace(mPrevFrame, frame, cloud);
+    	trackFace(mPrevFrame, frame);
     	if (ros::Time::now().toSec() - mStartTime > MAX_TRACKING_TIME)
     		mFeatures[0].clear();
     }
     else
     {
-    	detectFaces(frame, cloud);
+    	detectFaces(frame);
     	if (mFeatures[0].size())
     		mStartTime = ros::Time::now().toSec();
     }
@@ -324,12 +342,14 @@ bool FocusFace::setActiveCB(nero_msgs::SetActive::Request &req, nero_msgs::SetAc
 	ROS_INFO("Active cb");
 	if (mActive && req.active == false)
 	{
-		mImageSub.shutdown();
+		setRGBOutput(false);
+		setCloudSave(false);
 		ROS_INFO("Shutting down focus face.");
 	}
 	else if (mActive == false && req.active)
 	{
-		mImageSub = mNodeHandle.subscribe("/camera/depth_registered/points", 1, &FocusFace::imageCb, this);
+		setRGBOutput(true);
+		setCloudSave(true);
 		ROS_INFO("Starting up focus face.");
 	}
 
@@ -355,8 +375,10 @@ int main( int argc, char* argv[] )
 
 	while (ros::ok())
 	{
-		//if (focusFace.isActive())
-			sleep.sleep();
+		sleep.sleep();
 		ros::spinOnce();
 	}
+
+	focusFace.setRGBOutput(false);
+	focusFace.setCloudSave(false);
 }
