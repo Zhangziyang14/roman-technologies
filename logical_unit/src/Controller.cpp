@@ -174,6 +174,8 @@ void Controller::moveHead(double x, double z)
  */
 bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y)
 {
+	setCloudPublish(true);
+
 	nero_msgs::FindObject find_call;
 	find_call.request.objectId = object_id;
 
@@ -189,6 +191,7 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 				object_pose = find_call.response.pose;
 				object_pose.pose.position.z = find_call.response.table_z + GRAB_OBJECT_Z_OFFSET;
 				min_y = find_call.response.min_y;
+				setCloudPublish(false);
 				return true;
 			}
 			else
@@ -199,6 +202,7 @@ bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_po
 	}
 
 	ROS_INFO("Finding object failed.");
+	setCloudPublish(false);
 	return false;
 }
 
@@ -789,6 +793,11 @@ void Controller::init(const char *goalPath)
 
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
+
+	if (waitForServiceClient(&mNodeHandle, "KinectServer/CloudControl"))
+		mCloudControlClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/CloudControl", true);
+
+	setCloudPublish(false);
 
 	//Store goal position
 

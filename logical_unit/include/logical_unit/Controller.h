@@ -140,6 +140,7 @@ private:
 	ros::Publisher mGripperClosePublisher;	
 	ros::ServiceClient mFindObjectClient;			/// Service client for finding the object
 	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
+	ros::ServiceClient mCloudControlClient;
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
 	geometry_msgs::PoseStamped mOriginalPosition;	/// Keeps track of the original position of the robot in the map
@@ -209,6 +210,8 @@ public:
 	}
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
+
+	inline void setCloudPublish(bool active) { nero_msgs::SetActive call; call.request.active = active; mCloudControlClient.call(call); };
 };
 
 #endif /* CONTROLLER_H_ */

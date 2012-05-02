@@ -30,9 +30,6 @@ ObjectRecognition::ObjectRecognition() : mNodeHandle("")
 		exit(0);
 
 	mObjectRecognizeClient	= mNodeHandle.serviceClient<tabletop_object_detector::TabletopDetection>("/object_detection", true);
-	mCloudControlClient 	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/CloudControl", true);
-	
-	setCloudPublish(false);
 
 	//initialise services
 	mFindObjectServer = mNodeHandle.advertiseService("/cmd_object_recognition", &ObjectRecognition::recognizeCB, this);
@@ -45,8 +42,6 @@ bool ObjectRecognition::recognizeCB(nero_msgs::FindObject::Request &req, nero_ms
 	res.result = res.SUCCESS;
 	if (req.objectId == -1)
 		return false;
-
-	setCloudPublish(true);
 
 	//call the tabletop detection
 	ROS_INFO("Calling tabletop detector");

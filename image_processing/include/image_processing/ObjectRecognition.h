@@ -50,8 +50,6 @@ public:
 	void spin();
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
-
-	inline void setCloudPublish(bool active) { nero_msgs::SetActive call; call.request.active = active; mCloudControlClient.call(call); };
 };
 
 #endif /* OBJECTRECOGNITION_H_ */
