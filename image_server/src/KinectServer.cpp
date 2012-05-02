@@ -31,7 +31,7 @@ void KinectServer::run()
 {
 	bool publishRealLaserScan = mSendEmptyLaserscan == false && mPublishLaserScan;
 	bool captureRGB = mPublishRGB && mRGBPub.getNumSubscribers();
-	bool captureCloud = (mPublishCloud && mPCPub.getNumSubscribers()) || (publishRealLaserScan && mLaserPub.getNumSubscribers());
+	bool captureCloud = (mPublishCloud) || (publishRealLaserScan && mLaserPub.getNumSubscribers());
 	
 	// nothing to do right now
 	if (captureRGB == false && captureCloud == false && mForceKinectOpen == false)
@@ -182,6 +182,8 @@ int main(int argc, char* argv[])
 
 	ros::Rate rate(30);
 
+	bool show_fps;
+	kinectServer.getNodeHandle()->param<bool>("/KinectServer/show_fps", show_fps, false);
 	double fps = 0.0;
 	int fpsCount = 0;
 
@@ -189,7 +191,7 @@ int main(int argc, char* argv[])
 	{
 		rate.sleep();
 		
-		if (kinectServer.isCapturing())
+		if (show_fps && kinectServer.isCapturing())
 		{
 			double cycleTime = rate.cycleTime().toSec();
 			if (cycleTime != 0.0)

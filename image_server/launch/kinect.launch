@@ -4,5 +4,6 @@
     	<param name="publish_rgb" value="true"/>
     	<param name="publish_cloud" value="false"/>
     	<param name="close_idle_kinect" value="true"/>
+    	<param name="debug_fps" valuie="false"/>
     </node>
 </launch>
