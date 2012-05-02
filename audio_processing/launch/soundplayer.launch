@@ -3,5 +3,6 @@
     <arg name="happy_file_path" default="$(find audio_processing)/Sounds/happy.wav" />
     <arg name="sad_file_path" default="$(find audio_processing)/Sounds/sad.wav" />
 
-    <node pkg="audio_processing" type="SoundPlayer" name="SoundPlayer" args="$(arg happy_file_path) $(arg sad_file_path) $(arg novelty_file_path)" />
+    <node pkg="audio_processing" type="SoundPlayer" name="SoundPlayer" output="screen" args="$(arg happy_file_path) $(arg sad_file_path) $(arg novelty_file_path)" />
+    <node pkg="sound_play" type="soundplay_node.py" name="SoundPlayServer"/>
 </launch>

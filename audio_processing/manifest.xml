@@ -12,6 +12,7 @@
   <depend package="rospy"/>
   <depend package="roscpp"/>
   <depend package="nero_msgs"/>
+  <depend package="sound_play"/>
 
 </package>
 

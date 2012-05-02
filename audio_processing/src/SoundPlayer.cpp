@@ -10,29 +10,6 @@
 /// Maps incoming Emotion to a file path for playback
 static std::map<u_int8_t, std::string> emotionToPath;
 
-bool SoundPlayer::playSound(std::string Path)
-{
-	if (!mBuffer.LoadFromFile(Path.c_str()))
-		return false;
-
-	// Create a sound instance and play it
-	sf::Sound Sound(mBuffer);
-	Sound.Play();
-	sf::Sleep(0.4f);
-
-	// Loop while the sound is playing
-	while (Sound.GetStatus() == sf::Sound::Playing)
-	{
-		// Display the playing position
-		std::cout << "\rPlaying... " << std::fixed << std::setprecision(2) << Sound.GetPlayingOffset() << " sec";
-
-		// Leave some CPU time for other threads
-		sf::Sleep(0.1f);
-	}
-
-	return true;
-}
-
 void SoundPlayer::playCB(const std_msgs::UInt8& msg)
 {
 	if(emotionToPath.find(msg.data) == emotionToPath.end())
@@ -41,10 +18,9 @@ void SoundPlayer::playCB(const std_msgs::UInt8& msg)
 		return;
 	}
 
-	if(playSound(emotionToPath[msg.data]))
-		ROS_INFO("Played sound successfully");
-	else
-		ROS_ERROR("Could not find wav file");
+	mSoundClient.playWave(emotionToPath[msg.data]);
+
+	ROS_INFO("Played sound");
 }
 
 /**

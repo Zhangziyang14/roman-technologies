@@ -20,16 +20,14 @@ void constructEmotion(nero_msgs::Emotion &emotion, uint8_t min_r, uint8_t min_g,
 
 AutonomeHeadController::AutonomeHeadController(): mNodeHandle("")
 {
-	constructEmotion(mNeutral,   255, 255, 255,   150, 150, 150,   3000,   90, 90, 120,   0, 0, 0,   0);
-	constructEmotion(mHappy,   255, 255, 150,   255, 150, 30,   800,   90, 90, 120,   0, 0, 0,   2500);
-	constructEmotion(mSad,   50, 50, 255,   150, 110, 255,   4000,   60, 120, 120,   500, 500, 0,   2500);
-	constructEmotion(mSurprised,   255, 255, 255,   150, 150, 150,   250,   90, 90, 140,   0, 0, 0,   2500);
-	constructEmotion(mError,   50, 0, 0,   255, 0, 0,   1000,   120, 60, 120,   0, 0, 0,   2500);
-	constructEmotion(mSleep,   20, 20, 20,   50, 50, 50,   5000,   90, 90, 120,   0, 0, 0,   0);
+	constructEmotion(mNeutral,		255, 255, 255,	150, 150, 150,	3000,	90, 90, 120,	0, 0, 0,		0);
+	constructEmotion(mHappy,		255, 255, 150,	255, 150, 30,	800,	90, 90, 120,	0, 0, 0,		2500);
+	constructEmotion(mSad,			50, 50, 255,	150, 110, 255,	4000,	60, 120, 120,	500, 500, 0,	2500);
+	constructEmotion(mSurprised,	255, 255, 255, 	150, 150,150,	250, 	90, 90, 140, 	0, 0, 0,		2500);
+	constructEmotion(mError,		50, 0, 0,		255, 0, 0,		1000,	120, 60, 120,	0, 0, 0,		2500);
+	constructEmotion(mSleep,		20, 20, 20,		50, 50, 50,		5000,	90, 90, 120,	0, 0, 0,		0);
 
 	mReturnNeutralTime = 0.0;
-
-	ROS_INFO("AutonomeHeadController initialised.");
 }
 
 /**
@@ -87,6 +85,7 @@ void AutonomeHeadController::init()
 	mSounds_pub			= mNodeHandle.advertise<std_msgs::UInt8>("/cmd_sound", 1, true);
 	mHead_movement_pub 	= mNodeHandle.advertise<nero_msgs::PitchYaw>("/headPositionTopic", 1, true);
 
+	// set the head to sleep angle
 	nero_msgs::PitchYaw msg;
 	msg.pitch = 0.8;
 	msg.yaw = 0.0;

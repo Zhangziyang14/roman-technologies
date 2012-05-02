@@ -9,11 +9,8 @@
 #define SOUNDPLAYER_H_
 
 #include <ros/ros.h>
-#include <SFML/Audio.hpp>
 #include <std_msgs/UInt8.h>
-#include <iomanip>
-#include <iostream>
-#include <stdio.h>
+#include <sound_play/sound_play.h>
 
 enum Emotions
 {
@@ -30,8 +27,7 @@ protected:
 	ros::NodeHandle mNodeHandle;	/// ROS node handle
 	ros::Subscriber mSoundSub;		/// Listens	to commands and plays the corresponding wav file
 
-	sf::SoundBuffer mBuffer;		/// Buffer for sound data
-
+	sound_play::SoundClient mSoundClient;
 public:
 	/// Constructor
 	SoundPlayer() : mNodeHandle("") {};

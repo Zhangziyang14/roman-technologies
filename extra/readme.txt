@@ -1,7 +1,4 @@
 Install:
-	Install sfml for audio playback by following this tutorial (do not install pocketsphinx yet):
-	http://code.google.com/p/ros-pocketsphinx-speech-recognition-tutorial/wiki/Tutorial
-	
 	Install the complete package using nero.rosinstall
 	$rosinstall ~/ros nero.rosinstall
 

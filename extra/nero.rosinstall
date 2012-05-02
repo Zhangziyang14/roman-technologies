@@ -41,3 +41,8 @@
 - svn:
     local-name: joy
     uri: https://code.ros.org/svn/ros-pkg/stacks/joystick_drivers/trunk/joy
+
+- hg:
+    local-name: sound_play
+    uri: https://kforge.ros.org/audiocommon/audio_common
+
