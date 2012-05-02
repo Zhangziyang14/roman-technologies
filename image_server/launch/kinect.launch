@@ -2,7 +2,7 @@
     <node name="KinectServer" pkg="image_server" type="KinectServer" output="screen" respawn="true">
     	<param name="scale" value="0.5"/>
     	<param name="publish_rgb" value="true"/>
-    	<param name="publish_cloud" value="true"/>
+    	<param name="publish_cloud" value="false"/>
     	<param name="close_idle_kinect" value="true"/>
     </node>
 </launch>

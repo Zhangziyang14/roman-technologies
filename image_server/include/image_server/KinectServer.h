@@ -27,7 +27,7 @@ protected:
 	ros::Publisher mLaserPub;
 	ros::ServiceServer mRGBControl;
 	ros::ServiceServer mCloudControl;
-	ros::ServiceServer mCloudSaveControl;
+	ros::ServiceServer mForceKinectControl;
 	ros::ServiceServer mQueryCloud;
 
 	bool mSendEmptyLaserscan;
@@ -35,8 +35,7 @@ protected:
 	bool mPublishCloud;
 	bool mPublishLaserScan;
 
-	bool mSaveCloud;
-	cv::Mat mSavedCloud;
+	bool mForceKinectOpen;
 
 	double mScale;
 	bool mCloseIdleKinect;
@@ -58,7 +57,7 @@ public:
 private:
 	bool RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 	bool CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
-	bool CloudSaveControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
+	bool ForceKinectControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 	bool QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res);
 };
 

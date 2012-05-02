@@ -2,7 +2,8 @@
 
 KinectServer::KinectServer() :
 	mNodeHandle(""),
-	mPublishLaserScan(false)
+	mPublishLaserScan(false),
+	mForceKinectOpen(false)
 	//mImageTransport(mNodeHandle)
 {
 	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
@@ -12,14 +13,13 @@ KinectServer::KinectServer() :
 	mLaserPub			= mNodeHandle.advertise<sensor_msgs::LaserScan>("/scan", 1);
 	mRGBControl			= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
 	mCloudControl		= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
-	mCloudSaveControl	= mNodeHandle.advertiseService("/KinectServer/CloudSaveControl", &KinectServer::CloudSaveControl, this);
+	mForceKinectControl	= mNodeHandle.advertiseService("/KinectServer/ForceKinectControl", &KinectServer::ForceKinectControl, this);
 	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
 	
 	mNodeHandle.param<double>("/KinectServer/scale", mScale, 1.0);
 	mNodeHandle.param<bool>("/KinectServer/publish_rgb", mPublishRGB, false);
 	mNodeHandle.param<bool>("/KinectServer/publish_cloud", mPublishCloud, false);
 	mNodeHandle.param<bool>("/KinectServer/close_idle_kinect", mCloseIdleKinect, true);
-	mNodeHandle.param<bool>("/KinectServer/save_cloud", mSaveCloud, false);
 	
 	ROS_INFO("done.");
 }
@@ -31,18 +31,16 @@ void KinectServer::run()
 {
 	bool publishRealLaserScan = mSendEmptyLaserscan == false && mPublishLaserScan;
 	bool captureRGB = mPublishRGB && mRGBPub.getNumSubscribers();
-	bool captureCloud = (mPublishCloud && mPCPub.getNumSubscribers()) || (publishRealLaserScan && mLaserPub.getNumSubscribers()) || mSaveCloud;
+	bool captureCloud = (mPublishCloud && mPCPub.getNumSubscribers()) || (publishRealLaserScan && mLaserPub.getNumSubscribers());
 	
 	// nothing to do right now
-	if (captureRGB == false && captureCloud == false)
+	if (captureRGB == false && captureCloud == false && mForceKinectOpen == false)
 	{
 		if (mCloseIdleKinect && mKinect.isOpened())
 		{
 			mKinect.release(); // lets not waste CPU usage on the Kinect
 			ROS_INFO("Kinect closed.");
 		}
-		if (mSavedCloud.empty() == false)
-			mSavedCloud.release();
 		return;
 	}
 
@@ -60,6 +58,10 @@ void KinectServer::run()
 		mKinect.set(CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ); // default
 		ROS_INFO("Kinect opened.");
 	}
+
+	// we're not actually capturing anything now
+	if (captureRGB == false && captureCloud == false)
+		return;
 
 	if (mKinect.grab() == false)
 	{
@@ -103,9 +105,6 @@ void KinectServer::run()
 
 		if (mPublishCloud)
 			mPCPub.publish(OpenCVTools::matToPointCloud2(cloud));
-		
-		if (mSaveCloud)
-			mSavedCloud = cloud;
 	}
 
 	if (mPublishLaserScan)
@@ -114,34 +113,59 @@ void KinectServer::run()
 
 bool KinectServer::RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
+	if (mPublishRGB == false && req.active)
+		ROS_INFO("Publishing RGB images");
+	else if (mPublishRGB && req.active == false)
+		ROS_INFO("No longer publishing RGB images");
+
 	mPublishRGB = req.active;
 	return true;
 }
 
 bool KinectServer::CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
+	if (mPublishCloud == false && req.active)
+		ROS_INFO("Publishing clouds");
+	else if (mPublishCloud && req.active == false)
+		ROS_INFO("No longer publishing clouds");
+
 	mPublishCloud = req.active;
 	return true;
 }
 
-bool KinectServer::CloudSaveControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+bool KinectServer::ForceKinectControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
-	mSaveCloud = req.active;
+	if (mForceKinectOpen == false && req.active)
+		ROS_INFO("Saving clouds");
+	else if (mForceKinectOpen && req.active == false)
+		ROS_INFO("No longer saving clouds");
+
+	mForceKinectOpen = req.active;
 	return true;
 }
 
 bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res)
 {
-	if (mSavedCloud.empty())
+	if (mKinect.isOpened() == false)
+	{
+		ROS_WARN("Received cloud query while Kinect is offline");
 		return false;
-		
+	}
+
+	cv::Mat cloud;
+	if (mKinect.retrieve(cloud, CV_CAP_OPENNI_POINT_CLOUD_MAP) == false)
+	{
+		ROS_WARN("Failed to retrieve cloud image during cloud query.");
+		return false;
+	}
+
 	for (size_t i = 0; i < req.indices.size(); i++)
 	{
-		if (req.indices[i].x >= 0 && req.indices[i].x < mSavedCloud.cols &&
-			req.indices[i].y >= 0 && req.indices[i].y < mSavedCloud.rows)
+		if (req.indices[i].x >= 0 && req.indices[i].x < cloud.cols &&
+			req.indices[i].y >= 0 && req.indices[i].y < cloud.rows)
 		{
 			geometry_msgs::Point gp;
-			cv::Point3f cp = mSavedCloud.at<cv::Point3f>(req.indices[i].x, req.indices[i].y);
+			cv::Point3f cp = cloud.at<cv::Point3f>(req.indices[i].x, req.indices[i].y);
 			gp.x = cp.x; gp.y = cp.y; gp.z = cp.z;
 			res.points.push_back(gp);
 		}
@@ -158,14 +182,14 @@ int main(int argc, char* argv[])
 
 	ros::Rate rate(30);
 
-	//double fps = 0.0;
-	//int fpsCount = 0;
+	double fps = 0.0;
+	int fpsCount = 0;
 
 	while (ros::ok())
 	{
 		rate.sleep();
 		
-		/*if (kinectServer.isCapturing())
+		if (kinectServer.isCapturing())
 		{
 			double cycleTime = rate.cycleTime().toSec();
 			if (cycleTime != 0.0)
@@ -180,7 +204,7 @@ int main(int argc, char* argv[])
 					fpsCount = 0;
 				}
 			}
-		}*/
+		}
 		
 		kinectServer.run();
 		ros::spinOnce();
