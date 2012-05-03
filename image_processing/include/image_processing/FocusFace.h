@@ -61,6 +61,8 @@ private:
 	bool mActive;
 	double mScale;
 	bool mDisplayFrames;
+	bool mDetectOnly;
+	bool mSendHeadPosition;
 
 	inline bool canMoveHead() { return mCurrentSpeed.pitch < STOP_SPEED_TOLERANCE && mCurrentSpeed.yaw < STOP_SPEED_TOLERANCE; };
 

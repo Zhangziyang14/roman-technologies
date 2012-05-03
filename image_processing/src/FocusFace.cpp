@@ -91,8 +91,10 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
     if (profile_face == NULL || mFrontalFace2Cascade.load(frontal_face_2) == false)
     	ROS_WARN("Could not load frontal face2 classifier cascade");
 
-    mNodeHandle.param<double>("image_scale", mScale, 2.0);
-    mNodeHandle.param<bool>("display_frames", mDisplayFrames, true);
+    mNodeHandle.param<double>("/FocusFace/image_scale", mScale, 1.0);
+    mNodeHandle.param<bool>("/FocusFace/display_frames", mDisplayFrames, true);
+    mNodeHandle.param<bool>("/FocusFace/detect_only", mDetectOnly, false);
+    mNodeHandle.param<bool>("/FocusFace/send_head_position", mSendHeadPosition, true);
 
     if (mDisplayFrames)
     {
@@ -205,27 +207,29 @@ void FocusFace::detectFaces(cv::Mat &frame)
 
     	cv::circle(mask, mFaceCenter, radius, cv::Scalar(255), CV_FILLED);
 
-    	mFeatures[0].clear();
-        cv::goodFeaturesToTrack(gray_frame, mFeatures[0], MAX_CORNERS, 0.01, 8, mask);
+    	if (mDetectOnly == false)
+    	{
+			mFeatures[0].clear();
+			cv::goodFeaturesToTrack(gray_frame, mFeatures[0], MAX_CORNERS, 0.01, 8, mask);
 
-        if (mFeatures[0].size() > MIN_FEATURE_COUNT)
-        {
-        	if (mDisplayFrames)
-        	{
-				cv::Point2f cog = calcCenterOfGravity(mFeatures[0]);
-				float mse = calcMeanSquareError(mFeatures[0], cog);
-				cv::circle(frame, mFaceCenter, sqrtf(mse), CV_RGB(0, 120, 255), 3, CV_AA);
+			if (mFeatures[0].size() > MIN_FEATURE_COUNT)
+			{
+				if (mDisplayFrames)
+				{
+					cv::Point2f cog = calcCenterOfGravity(mFeatures[0]);
+					float mse = calcMeanSquareError(mFeatures[0], cog);
+					cv::circle(frame, mFaceCenter, sqrtf(mse), CV_RGB(0, 120, 255), 3, CV_AA);
 
-				for (size_t j = 0; j < mFeatures[0].size(); j++)
-					cv::circle(frame, mFeatures[0][j], 3, CV_RGB(0, 125, 125), 1, CV_AA);
-        	}
+					for (size_t j = 0; j < mFeatures[0].size(); j++)
+						cv::circle(frame, mFeatures[0][j], 3, CV_RGB(0, 125, 125), 1, CV_AA);
+				}
+			}
+			else
+				mFeatures[0].clear();
+    	}
 
-//#ifndef WEBCAM
-			sendHeadPosition();
-//#endif
-        }
-        else
-        	mFeatures[0].clear();
+    	if (mSendHeadPosition)
+    		sendHeadPosition();
     }
 
     if (mDisplayFrames)
@@ -286,9 +290,8 @@ void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame)
 				cv::circle(frame, mFeatures[1][i], 3, cv::Scalar(0,255,0), CV_FILLED, CV_AA);
     	}
 
-//#ifndef WEBCAM
-    	sendHeadPosition();
-//#endif
+    	if (mSendHeadPosition)
+    		sendHeadPosition();
 
         std::swap(mFeatures[1], mFeatures[0]);
     }
@@ -304,13 +307,6 @@ void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame)
  */
 void FocusFace::imageCb(const sensor_msgs::ImageConstPtr &image_)
 {
-	/*pcl::PointCloud<pcl::PointXYZRGB> cloud;
-#ifndef WEBCAM
-	pcl::fromROSMsg(*cloud2, cloud);
-
-    sensor_msgs::ImagePtr image_(new sensor_msgs::Image);
-    pcl::toROSMsg(cloud, *image_);
-#endif*/
     cv::Mat frame(image_->height, image_->width, CV_8UC3);
     imageToMat(image_, frame);
 
@@ -318,7 +314,7 @@ void FocusFace::imageCb(const sensor_msgs::ImageConstPtr &image_)
     if (mDisplayFrames)
     	frame.copyTo(tmp);
 
-    if (mFeatures[0].size())
+    if (mDetectOnly == false && mFeatures[0].size())
     {
     	trackFace(mPrevFrame, frame);
     	if (ros::Time::now().toSec() - mStartTime > MAX_TRACKING_TIME)
