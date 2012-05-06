@@ -10,7 +10,6 @@
   <depend package="nav_msgs"/>
   <depend package="tf"/>
   <depend package="audio_processing"/>  
-  <depend package="yaml_cpp"/>
   <depend package="head"/>
   <depend package="arm"/>
   <depend package="image_processing"/>
@@ -20,5 +19,7 @@
   <export>
         <rosdoc config="rosdoc.yaml" />
   </export>
+
+  <rosdep name="yaml-cpp"/>
 </package>
 

@@ -1,9 +1,11 @@
 <launch>
-    <node name="KinectServer" pkg="image_server" type="KinectServer" output="screen" respawn="true">
+    <arg name="config_file" default="$(find image_server)/config/config.xml"/>
+    <node name="KinectServer" pkg="image_server" type="KinectServer" args="$(arg config_file)" output="screen" respawn="true">
     	<param name="scale" value="0.5"/>
     	<param name="publish_rgb" value="true"/>
     	<param name="publish_cloud" value="false"/>
     	<param name="close_idle_kinect" value="true"/>
-    	<param name="debug_fps" valuie="false"/>
+    	<param name="show_fps" value="true"/>
+	<param name="fps" value="30"/>
     </node>
 </launch>

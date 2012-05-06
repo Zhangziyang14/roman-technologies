@@ -94,7 +94,7 @@ sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
 	output->height = mat.rows;
 	output->step = mat.cols * mat.channels();
 	output->is_bigendian = false;
-	output->encoding = "bgr8";
+	output->encoding = "rgb8";//"bgr8";
 
 	// copy actual data
 	output->data.assign(mat.data, mat.data + size_t(mat.cols * mat.rows * mat.channels()));
@@ -151,6 +151,7 @@ sensor_msgs::PointCloud2Ptr OpenCVTools::matToPointCloud2(cv::Mat &mat)
 			memcpy(&output->data[(y*output->width + x) * output->point_step], data, output->point_step);
 		}
 	}
+	//output->data.assign(mat.data, mat.data + size_t(mat.cols * mat.rows * mat.channels()));
 	return output;
 }
 

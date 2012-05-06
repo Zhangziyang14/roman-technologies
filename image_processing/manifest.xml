@@ -15,13 +15,14 @@
   <depend package="nav_msgs"/>
   <depend package="image_transport"/>
   <depend package="pcl"/>
-  <depend package="yaml_cpp"/>
 
   <depend package="object_manipulation_msgs"/> 
   <depend package="tabletop_object_detector"/> 
   <depend package="tabletop_collision_map_processing"/>
 
   <depend package="nero_msgs"/>
+
+  <rosdep name="yaml-cpp"/>
 </package>
 
 

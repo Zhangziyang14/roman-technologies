@@ -16,6 +16,8 @@
 #include "nero_msgs/SetActive.h"
 #include "nero_msgs/QueryCloud.h"
 
+#include "image_server/CaptureKinect.h"
+
 class KinectServer
 {
 protected:
@@ -40,10 +42,11 @@ protected:
 	double mScale;
 	bool mCloseIdleKinect;
 
-	cv::VideoCapture mKinect;
+	//cv::VideoCapture mKinect;
+	CaptureKinect mKinect;
 
 public:
-	KinectServer();
+	KinectServer(const char *filePath);
 	~KinectServer()
 	{
 		mNodeHandle.shutdown();
@@ -52,7 +55,7 @@ public:
 	void run();
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
-	inline bool isCapturing() { return mKinect.isOpened(); };
+	inline bool isCapturing() { return mKinect.isGenerating(); };
 
 private:
 	bool RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);

@@ -6,6 +6,7 @@
  */
 
 #include <image_processing/Util.h>
+#include <ros/ros.h>
 
 // LaserScan parameters
 #define MIN_HEIGHT 0.10

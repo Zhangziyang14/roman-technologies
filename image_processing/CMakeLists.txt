@@ -21,17 +21,13 @@ rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
 rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
 rosbuild_add_executable(ObjectRecognition src/ObjectRecognition.cpp)
 rosbuild_add_executable(FocusFace src/FocusFace.cpp src/KinectTools.cpp)
-rosbuild_add_executable(Webcam src/Webcam.cpp src/KinectTools.cpp)
-#rosbuild_add_executable(PublishLaserscan src/LaserScanPublisher.cpp src/KinectTools.cpp)
 
 link_directories(/usr/local/lib)
 include_directories(/usr/local/include)
 target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(Kinect opencv_core opencv_imgproc opencv_highgui)
-target_link_libraries(PGMToObj opencv_core opencv_imgproc opencv_highgui)
+target_link_libraries(PGMToObj yaml-cpp opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(FocusFace opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_video)
-target_link_libraries(Webcam opencv_core opencv_imgproc opencv_highgui)
-#target_link_libraries(PublishLaserscan opencv_core opencv_imgproc opencv_highgui)
 
 #uncomment if you have defined messages
 rosbuild_genmsg()

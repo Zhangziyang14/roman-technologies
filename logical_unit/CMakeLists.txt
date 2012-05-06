@@ -32,6 +32,7 @@ rosbuild_add_executable(PathPlanner src/PathPlanner.cpp src/fastlz.c)
 rosbuild_add_executable(Controller src/Controller.cpp)
 rosbuild_add_executable(PS3Controller src/PS3Controller.cpp)
 
+target_link_libraries(Controller yaml-cpp)
 target_link_libraries(PathPlanner -L${PROJECT_SOURCE_DIR}/lib DetourTileCache Detour)
 
 #common commands for building c++ executables and libraries

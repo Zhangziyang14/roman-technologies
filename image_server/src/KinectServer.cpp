@@ -1,10 +1,10 @@
 #include "image_server/KinectServer.h"
 
-KinectServer::KinectServer() :
+KinectServer::KinectServer(const char *filePath) :
 	mNodeHandle(""),
 	mPublishLaserScan(false),
-	mForceKinectOpen(false)
-	//mImageTransport(mNodeHandle)
+	mForceKinectOpen(false),
+	mKinect(filePath)
 {
 	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
 	
@@ -33,21 +33,9 @@ void KinectServer::run()
 	bool captureRGB = mPublishRGB && mRGBPub.getNumSubscribers();
 	bool captureCloud = (mPublishCloud) || (publishRealLaserScan && mLaserPub.getNumSubscribers());
 	
-	// nothing to do right now
-	if (captureRGB == false && captureCloud == false && mForceKinectOpen == false)
-	{
-		if (mCloseIdleKinect && mKinect.isOpened())
-		{
-			mKinect.release(); // lets not waste CPU usage on the Kinect
-			ROS_INFO("Kinect closed.");
-		}
-		return;
-	}
-
 	if (mKinect.isOpened() == false)
 	{
-		ROS_INFO("Opening Kinect.");
-		mKinect.open(CV_CAP_OPENNI);
+		mKinect.open();
 		if (mKinect.isOpened() == false)
 		{
 			ROS_WARN("Can not open Kinect device, will try again in one second.");
@@ -55,34 +43,49 @@ void KinectServer::run()
 			return;
 		}
 
-		mKinect.set(CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ); // default
 		ROS_INFO("Kinect opened.");
+	}
+
+	// nothing to do right now
+	if (captureRGB == false && captureCloud == false && mForceKinectOpen == false)
+	{
+		if (mCloseIdleKinect && mKinect.isGenerating())
+		{
+			mKinect.stop(); // lets not waste CPU usage on the Kinect
+			ROS_INFO("Stopped Kinect.");
+		}
+		return;
+	}
+
+	if (mKinect.isGenerating() == false)
+	{
+		mKinect.start();
+		ROS_INFO("Started Kinect.");
 	}
 
 	// we're not actually capturing anything now
 	if (captureRGB == false && captureCloud == false)
 		return;
 
-	if (mKinect.grab() == false)
+	//if (mKinect.grab() == false)
+	if (mKinect.queryFrame(captureRGB, captureCloud) == false)
 	{
-		ROS_WARN("Can not grab images.");
+		ROS_WARN("Can not grab images, releasing Kinect.");
+		mKinect.close();
 		return;
 	}
 
-	cv::Mat rgb;
 	if (captureRGB)
 	{
-		if (mKinect.retrieve(rgb, CV_CAP_OPENNI_BGR_IMAGE) == false)
+		cv::Mat rgb = mKinect.getImage();
+		if (rgb.cols == 0 || rgb.rows == 0)
 		{
-			ROS_WARN("Failed to retrieve RGB image.");
+			ROS_WARN("Failed to grab RGB image.");
 			return;
 		}
 
 		if (mScale != 1.0)
 			cv::resize(rgb, rgb, cv::Size(rgb.cols * mScale, rgb.rows * mScale), 0, 0, cv::INTER_LINEAR);
-		
-		//if (mPublishRGB)
-		//	mRGBPub.publish(OpenCVTools::matToImage(rgb));
 		
 		sensor_msgs::CompressedImage rgb_c;
 		rgb_c.header.stamp = ros::Time::now();
@@ -97,9 +100,10 @@ void KinectServer::run()
 	cv::Mat cloud;
 	if (captureCloud)
 	{
-		if (mKinect.retrieve(cloud, CV_CAP_OPENNI_POINT_CLOUD_MAP) == false)
+		cloud = mKinect.getCloud();
+		if (cloud.cols == 0 || cloud.rows == 0)
 		{
-			ROS_WARN("Failed to retrieve cloud image.");
+			ROS_WARN("Failed to grab RGB image.");
 			return;
 		}
 
@@ -136,9 +140,9 @@ bool KinectServer::CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::S
 bool KinectServer::ForceKinectControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
 	if (mForceKinectOpen == false && req.active)
-		ROS_INFO("Saving clouds");
+		ROS_INFO("Forcing Kinect open");
 	else if (mForceKinectOpen && req.active == false)
-		ROS_INFO("No longer saving clouds");
+		ROS_INFO("No longer forcing Kinect");
 
 	mForceKinectOpen = req.active;
 	return true;
@@ -152,8 +156,13 @@ bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::Qu
 		return false;
 	}
 
-	cv::Mat cloud;
-	if (mKinect.retrieve(cloud, CV_CAP_OPENNI_POINT_CLOUD_MAP) == false)
+	if (mKinect.isGenerating() == false)
+		mKinect.start();
+
+	mKinect.queryFrame(false, true);
+
+	cv::Mat cloud = mKinect.getCloud();
+	if (cloud.cols == 0 || cloud.rows == 0)
 	{
 		ROS_WARN("Failed to retrieve cloud image during cloud query.");
 		return false;
@@ -170,22 +179,31 @@ bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::Qu
 			res.points.push_back(gp);
 		}
 	}
+
 	return true;
 }
 
 int main(int argc, char* argv[])
 {
+	if (argc < 2)
+	{
+		std::cout << "Usage: ./KinectServer <path-to-xml>" << std::endl;
+		return 0;
+	}
+
 	// init ros
 	ros::init(argc, argv, "KinectServer");
 	
-	KinectServer kinectServer;
-
-	ros::Rate rate(30);
+	KinectServer kinectServer(argv[1]);
 
 	bool show_fps;
+	double desired_fps;
 	kinectServer.getNodeHandle()->param<bool>("/KinectServer/show_fps", show_fps, false);
+	kinectServer.getNodeHandle()->param<double>("/KinectServer/fps", desired_fps, 30.0);
 	double fps = 0.0;
 	int fpsCount = 0;
+
+	ros::Rate rate(desired_fps);
 
 	while (ros::ok())
 	{
@@ -201,7 +219,7 @@ int main(int argc, char* argv[])
 				
 				if (fpsCount == 10)
 				{
-					ROS_INFO("Rate: %lf", fps / fpsCount);
+					ROS_INFO("Rate: %lf", std::min(desired_fps, fps / fpsCount));
 					fps = 0.0;
 					fpsCount = 0;
 				}

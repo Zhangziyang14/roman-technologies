@@ -16,11 +16,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-rosbuild_add_executable(KinectServer src/KinectServer.cpp src/OpenCVTools.cpp)
+rosbuild_add_executable(KinectServer src/KinectServer.cpp src/OpenCVTools.cpp src/CaptureKinect.cpp)
 
 link_directories(/usr/local/lib)
+include_directories(/usr/include/ni)
 include_directories(/usr/local/include)
-target_link_libraries(KinectServer opencv_core opencv_imgproc opencv_highgui)
+target_link_libraries(KinectServer opencv_core opencv_imgproc opencv_highgui -lOpenNI)
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
