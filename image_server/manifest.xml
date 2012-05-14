@@ -13,6 +13,9 @@
   <depend package="nero_msgs"/>
   <depend package="image_transport"/>
 
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lOpenCVTools"/>
+  </export>
 </package>
 
 

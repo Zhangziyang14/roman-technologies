@@ -94,7 +94,7 @@ sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
 	output->height = mat.rows;
 	output->step = mat.cols * mat.channels();
 	output->is_bigendian = false;
-	output->encoding = "rgb8";//"bgr8";
+	output->encoding = "bgr8";
 
 	// copy actual data
 	output->data.assign(mat.data, mat.data + size_t(mat.cols * mat.rows * mat.channels()));

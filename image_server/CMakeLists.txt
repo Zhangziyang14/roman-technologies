@@ -17,11 +17,16 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(KinectServer src/KinectServer.cpp src/OpenCVTools.cpp src/CaptureKinect.cpp)
+rosbuild_add_executable(WebcamServer src/WebcamServer.cpp src/OpenCVTools.cpp)
 
 link_directories(/usr/local/lib)
 include_directories(/usr/include/ni)
 include_directories(/usr/local/include)
 target_link_libraries(KinectServer opencv_core opencv_imgproc opencv_highgui -lOpenNI)
+target_link_libraries(WebcamServer opencv_core opencv_imgproc opencv_highgui)
+
+rosbuild_add_library(OpenCVTools src/OpenCVTools.cpp)
+target_link_libraries(OpenCVTools opencv_core opencv_imgproc opencv_highgui)
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
