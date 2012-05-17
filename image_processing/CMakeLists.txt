@@ -16,17 +16,17 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
+#rosbuild_add_executable(KinectDisplay src/KinectTools.cpp src/KinectDisplay.cpp)
 rosbuild_add_executable(Kinect src/KinectTools.cpp src/Kinect.cpp)
-rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
+#rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
 rosbuild_add_executable(ObjectRecognition src/ObjectRecognition.cpp)
 rosbuild_add_executable(FocusFace src/FocusFace.cpp src/KinectTools.cpp)
 
 link_directories(/usr/local/lib)
 include_directories(/usr/local/include)
-target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
+#target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(Kinect opencv_core opencv_imgproc opencv_highgui)
-target_link_libraries(PGMToObj yaml-cpp opencv_core opencv_imgproc opencv_highgui)
+#target_link_libraries(PGMToObj yaml-cpp opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(FocusFace opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_video)
 
 #uncomment if you have defined messages

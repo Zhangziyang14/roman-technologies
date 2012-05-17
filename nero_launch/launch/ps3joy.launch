@@ -1,4 +1,5 @@
 <launch>
     <node name="ps3joy" pkg="ps3joy" type="ps3joy_node.py" output="screen" respawn="true" />
     <node name="joy_node" pkg="joy" type="joy_node" respawn="true" />
+    <node name="PS3Controller" pkg="nero_tools" type="PS3Controller" respawn="true" />
 </launch>

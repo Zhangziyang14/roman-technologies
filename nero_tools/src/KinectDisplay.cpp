@@ -5,24 +5,19 @@
  *      Author: hans
  */
 
-#include "image_processing/Util.h"
+#include "image_server/OpenCVTools.h"
 #include "ros/ros.h"
-#include <image_transport/image_transport.h>
-
-// forward declaration
-IplImage *imageToSharedIplImage(const sensor_msgs::ImageConstPtr &image);
+#include "image_transport/image_transport.h"
 
 /**
  * Receives RGB images and displays them on screen.
  */
 void imageCb(const sensor_msgs::ImageConstPtr &image)
 {
-	IplImage *iplImg = imageToSharedIplImage(image);
-	if (iplImg)
-	{
-		cvShowImage(WINDOW_NAME, iplImg);
-		cvReleaseImage(&iplImg);
-	}
+	cv::Mat frame(image->height, image->width, CV_8UC3);
+	OpenCVTools::imageToMat(image, frame);
+
+	cv::imshow("Display", frame);
 }
 
 int main(int argc, char* argv[])
@@ -34,7 +29,7 @@ int main(int argc, char* argv[])
 	image_transport::Subscriber image_sub = it.subscribe("/camera/rgb/image_color", 1, &imageCb, hints);
 
 	cv::startWindowThread();
-	cvNamedWindow(WINDOW_NAME);
+	cv::namedWindow("Display");
 	ros::Rate rate(30);
 	while (ros::ok())
 	{

@@ -1,7 +1,7 @@
 #include "ros/ros.h"
-#include "image_processing/Util.h"
 #include "fstream"
 #include "yaml-cpp/yaml.h"
+#include "image_server/OpenCVTools.h"
 
 void addVertices(std::ofstream *file, cv::Point2d p[], double z)
 {
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 
 	if (argc != 2)
 	{
-		ROS_ERROR("Invalid number of arguments. Usage: rosrun image_processing PGMToObj <filename>.yaml");
+		ROS_ERROR("Invalid number of arguments. Usage: rosrun nero_tools PGMToObj <filename>.yaml");
 		return 0;
 	}
 
@@ -74,38 +74,39 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	IplImage *image = cvLoadImage(mapname.c_str(), -1);
-	if (image == NULL)
+	cv::Mat image = cv::imread(mapname.c_str(), -1);
+	if (image.data == NULL)
 	{
 		std::cout << "It failed.." << std::endl;
 		return -1;
 	}
 
-	std::vector<uint32> faces;
+	std::vector<uint32_t> faces;
 
-	uint32 vertIndex = 1;
+	uint32_t vertIndex = 1;
 	cv::Point2d vertices[4]; // left-top, left-bottom, right-bottom, right-top
 	bool buildingPolygon = false;
-	for (int y = 0; y < image->height; y++)
+	for (int y = 0; y < image.rows; y++)
 	{
-		for (int x = 0; x < image->width; x++)
+		for (int x = 0; x < image.cols; x++)
 		{
-			if (*getPixel<uint8>(x, y, image) >= 254)
+			//if (*getPixel<uint8>(x, y, image) >= 254)
+			if (image.at<uint8_t>(y, x) >= 254)
 			{
 				if (buildingPolygon == false)
 				{
 					// if we are starting a line, fill the leftmost vertices
 					vertices[0].x = origin_x + x * resolution;
-					vertices[0].y = origin_y + (image->height - y - 1) * resolution;
+					vertices[0].y = origin_y + (image.rows - y - 1) * resolution;
 					vertices[1].x = origin_x + x * resolution;
-					vertices[1].y = origin_y + (image->height - y - 1) * resolution + resolution;
+					vertices[1].y = origin_y + (image.rows - y - 1) * resolution + resolution;
 				}
 
 				// fill the rightmost vertices regardless of extending or starting a new line
 				vertices[2].x = origin_x + x * resolution + resolution;
-				vertices[2].y = origin_y + (image->height - y - 1) * resolution + resolution;
+				vertices[2].y = origin_y + (image.rows - y - 1) * resolution + resolution;
 				vertices[3].x = origin_x + x * resolution + resolution;
-				vertices[3].y = origin_y + (image->height - y - 1) * resolution;
+				vertices[3].y = origin_y + (image.rows - y - 1) * resolution;
 
 				// we are now building a line polygon
 				buildingPolygon = true;
@@ -137,26 +138,27 @@ int main(int argc, char **argv)
 		}
 	}
 
-	for (int y = 0; y < image->height; y++)
+	for (int y = 0; y < image.rows; y++)
 	{
-		for (int x = 0; x < image->width; x++)
+		for (int x = 0; x < image.cols; x++)
 		{
-			if (*getPixel<uint8>(x, y, image) <= 100)
+			//if (*getPixel<uint8>(x, y, image) <= 100)
+			if (image.at<uint8_t>(y, x) <= 100)
 			{
 				if (buildingPolygon == false)
 				{
 					// if we are starting a line, fill the leftmost vertices
 					vertices[0].x = origin_x + x * resolution;
-					vertices[0].y = origin_y + (image->height - y - 1) * resolution;
+					vertices[0].y = origin_y + (image.rows - y - 1) * resolution;
 					vertices[1].x = origin_x + x * resolution;
-					vertices[1].y = origin_y + (image->height - y - 1) * resolution + resolution;
+					vertices[1].y = origin_y + (image.rows - y - 1) * resolution + resolution;
 				}
 
 				// fill the rightmost vertices regardless of extending or starting a new line
 				vertices[2].x = origin_x + x * resolution + resolution;
-				vertices[2].y = origin_y + (image->height - y - 1) * resolution + resolution;
+				vertices[2].y = origin_y + (image.rows - y - 1) * resolution + resolution;
 				vertices[3].x = origin_x + x * resolution + resolution;
-				vertices[3].y = origin_y + (image->height - y - 1) * resolution;
+				vertices[3].y = origin_y + (image.rows - y - 1) * resolution;
 
 				// we are now building a line polygon
 				buildingPolygon = true;

@@ -1,0 +1,18 @@
+<package>
+  <description brief="nero_tools">
+
+     nero_tools
+
+  </description>
+  <author>Kungfu Panda</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/nero_tools</url>
+
+  <depend package="roscpp"/>
+  <depend package="image_server"/>
+
+  <rosdep name="yaml-cpp"/>
+</package>
+
+

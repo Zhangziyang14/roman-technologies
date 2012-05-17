@@ -1,5 +1,5 @@
 <launch>
-  <node name="serial" pkg="shared_serial" type="server" respawn="true">
+  <node name="serial" pkg="shared_serial" type="server">
     <param name="watchdog_interval" value="10" />
 	<param name="port_name" value="/dev/roman/threemxl" />
 	<param name="port_type" value="RS485_FTDI" />

@@ -16,21 +16,18 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-rosbuild_add_executable(KinectServer src/KinectServer.cpp src/OpenCVTools.cpp src/CaptureKinect.cpp)
-rosbuild_add_executable(WebcamServer src/WebcamServer.cpp src/OpenCVTools.cpp)
-
-link_directories(/usr/local/lib)
-include_directories(/usr/include/ni)
-include_directories(/usr/local/include)
-target_link_libraries(KinectServer opencv_core opencv_imgproc opencv_highgui -lOpenNI)
-target_link_libraries(WebcamServer opencv_core opencv_imgproc opencv_highgui)
-
-rosbuild_add_library(OpenCVTools src/OpenCVTools.cpp)
-
 #uncomment if you have defined messages
 #rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
+
+rosbuild_add_executable(KinectDisplay src/KinectDisplay.cpp)
+rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
+rosbuild_add_executable(PS3Controller src/PS3Controller.cpp)
+
+target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
+target_link_libraries(PGMToObj yaml-cpp opencv_core opencv_imgproc opencv_highgui)
+
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
