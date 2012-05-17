@@ -168,15 +168,21 @@ bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::Qu
 		return false;
 	}
 
+	geometry_msgs::Point invalid;
+	invalid.x = invalid.y = invalid.z = std::numeric_limits<float>::quiet_NaN();
 	for (size_t i = 0; i < req.indices.size(); i++)
 	{
-		if (req.indices[i].x >= 0 && req.indices[i].x < cloud.cols &&
-			req.indices[i].y >= 0 && req.indices[i].y < cloud.rows)
+		if (req.indices[i].x >= 0.0 && req.indices[i].x < 1.0 &&
+			req.indices[i].y >= 0.0 && req.indices[i].y < 1.0)
 		{
 			geometry_msgs::Point gp;
-			cv::Point3f cp = cloud.at<cv::Point3f>(req.indices[i].x, req.indices[i].y);
+			cv::Point3f cp = cloud.at<cv::Point3f>(req.indices[i].y * cloud.rows, req.indices[i].x * cloud.cols);
 			gp.x = cp.x; gp.y = cp.y; gp.z = cp.z;
 			res.points.push_back(gp);
+		}
+		else
+		{
+			res.points.push_back(invalid);
 		}
 	}
 

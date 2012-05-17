@@ -1,4 +1,4 @@
 <launch>
-    <node name="ps3joy" pkg="ps3joy" type="ps3joy_node.py" args="--inactivity-timeout=30" output="screen" respawn="true" />
+    <node name="ps3joy" pkg="ps3joy" type="ps3joy_node.py" output="screen" respawn="true" />
     <node name="joy_node" pkg="joy" type="joy_node" respawn="true" />
 </launch>

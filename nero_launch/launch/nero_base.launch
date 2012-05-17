@@ -19,7 +19,7 @@
   <include file="$(find head)/launch/head.launch"/>
 
   <!-- start audio processing -->
-  <!-- include file="$(find audio_processing)/launch/soundplayer.launch"/ -->
+  <include file="$(find audio_processing)/launch/soundplayer.launch"/>
 
   <!-- start gripper -->
   <include file="$(find gripper)/launch/gripper.launch"/>
