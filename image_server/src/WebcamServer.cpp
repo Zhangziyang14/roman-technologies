@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+	//int frameCount = 0;
 	while (ros::ok())
 	{
 		rate.sleep();
@@ -54,6 +55,12 @@ int main(int argc, char *argv[])
 			cv::Mat frame;
 			cap >> frame;
 			pub.publish(OpenCVTools::matToImage(frame));
+
+		    /*char path[255];
+			sprintf(path, "/home/hans/tracking/images/frame%.4d.jpg", frameCount);
+			frameCount++;
+
+			cv::imwrite(path, frame);*/
 		}
 
 		ros::spinOnce();
