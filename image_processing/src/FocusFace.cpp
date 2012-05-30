@@ -78,6 +78,8 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 	mCloudSaveClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/CloudSaveControl");
 	mQueryCloudClient	= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/QueryCloud");
 
+	mFaceCenter.x = mFaceCenter.y = 0.f;
+	mFaceCenterPct.x = mFaceCenterPct.y = 0.f;
 	mCurrentOrientation.pitch = 0.f;
 	mCurrentOrientation.yaw = 0.f;
 	mActive = false;
@@ -123,8 +125,8 @@ void FocusFace::sendHeadPosition()
     //pcl::PointXYZRGB p = cloud.at(mFaceCenter.x, mFaceCenter.y);
 	nero_msgs::QueryCloud query;
 	geometry_msgs::Point index;
-	index.x = mFaceCenter.x;
-	index.y = mFaceCenter.y;
+	index.x = mFaceCenterPct.x;
+	index.y = mFaceCenterPct.y;
 	query.request.indices.push_back(index);
 
 	if (mQueryCloudClient.call(query) == false)
@@ -146,7 +148,7 @@ void FocusFace::sendHeadPosition()
     	return;
     }
 
-    double pitch = atan(p.y / p.z);
+    double pitch = -atan(p.y / p.z);
     double yaw = -atan(p.x / p.z);
 
     nero_msgs::PitchYaw msg;
@@ -203,6 +205,8 @@ void FocusFace::detectFaces(cv::Mat &frame)
     {
     	int radius = 0.25*(faces[minIndex].width + faces[minIndex].height);
     	mFaceCenter = cv::Point(faces[minIndex].x + faces[minIndex].width*0.5, faces[minIndex].y + faces[minIndex].height*0.5);
+    	mFaceCenterPct.x = mFaceCenter.x / frame.cols;
+    	mFaceCenterPct.y = mFaceCenter.y / frame.rows;
     	cv::Mat mask = cv::Mat::zeros(cv::Size(gray_frame.cols, gray_frame.rows), CV_8UC1);
 
     	cv::circle(mask, mFaceCenter, radius, cv::Scalar(255), CV_FILLED);
@@ -275,6 +279,8 @@ void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame)
     mFaceCenter.y += diff.y;
     mFaceCenter.x = std::min(std::max(mFaceCenter.x, 0.f), float(frame.cols));
     mFaceCenter.y = std::min(std::max(mFaceCenter.y, 0.f), float(frame.rows));
+	mFaceCenterPct.x = mFaceCenter.x / frame.cols;
+	mFaceCenterPct.y = mFaceCenter.y / frame.rows;
 
     pruneFeatures(mFeatures[1]);
     if (mFeatures[1].size() > MIN_FEATURE_COUNT)

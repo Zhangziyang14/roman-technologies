@@ -46,6 +46,7 @@ private:
 	std::vector<cv::Point2f> mFeatures[2];
 	double mStartTime;
 	cv::Point2f mFaceCenter;
+	cv::Point2f mFaceCenterPct;
 
 	ros::Publisher mHeadPosPub;
 	ros::Subscriber mHeadSpeedSub;

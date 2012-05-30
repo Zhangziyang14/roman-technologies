@@ -29,5 +29,5 @@
   
   <!-- start Kinect -->
   <!-- include file="$(find image_server)/launch/kinect.launch/ -->
-  <node name="KinectServer" pkg="image_server" type="KinectServer"/>
+  <!-- node name="KinectServer" pkg="image_server" type="KinectServer"/ -->
 </launch>

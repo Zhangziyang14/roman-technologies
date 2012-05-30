@@ -14,10 +14,10 @@ else
     source /opt/ros/electric/setup.bash
 fi
 
-if [ -s /etc/ros/electric/ps3joy.launch ]; then
-    echo "Using /etc/ros/electric/ps3joy.launch" >> $log_file
-    setuidgid panda roslaunch /etc/ros/electric/ps3joy.launch
+if [ -s /etc/ros/electric/nero_base.launch ]; then
+    echo "Using /etc/ros/electric/nero_base.launch" >> $log_file
+    setuidgid panda roslaunch /etc/ros/electric/nero_base.launch
 else
-    echo "Using roslaunch nero_launch ps3joy.launch" >> $log_file
-    setuidgid root roslaunch nero_launch ps3joy.launch --wait >> $log_file
+    echo "Using roslaunch nero_launch nero_base.launch" >> $log_file
+    setuidgid root roslaunch nero_launch nero_base.launch --wait >> $log_file
 fi

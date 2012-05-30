@@ -79,6 +79,9 @@ bool ArmMotorHandler::init()
  */
 void ArmMotorHandler::publishArmPosition()
 {
+	if (mArmPosFeedbackPub.getNumSubscribers() == 0)
+		return;
+
 	mCurrentShoulderJointPos = getShoulderAngle();
 	mCurrentSideJointPos 	 = getSideJointAngle();
 
@@ -108,6 +111,9 @@ void ArmMotorHandler::publishArmPosition()
  */
 void ArmMotorHandler::publishArmSpeed()
 {
+	if (mArmSpeedFeedbackPub.getNumSubscribers() == 0)
+		return;
+
 	mCurrentShoulderJointSpeed 	 = getShoulderSpeed();
 	mCurrentSideJointSpeed	 	 = getSideJointSpeed();
 

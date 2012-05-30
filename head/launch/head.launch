@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="head" name="HeadMotorHandler" type="HeadMotorHandler"/>
+    <node pkg="head" name="HeadMotorHandler" type="HeadMotorHandler" output="screen"/>
     <node pkg="head" name="AutonomeHeadController" type="AutonomeHeadController" output="screen"/>
 </launch>

@@ -15,5 +15,5 @@
   <include file="$(find logical_unit)/launch/controller.launch"/>
 
   <!-- start PS3 controller -->
-  <node name="PS3Controller" pkg="logical_unit" type="PS3Controller"/>
+  <!-- node name="PS3Controller" pkg="logical_unit" type="PS3Controller"/-->
 </launch>

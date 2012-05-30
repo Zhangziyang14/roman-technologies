@@ -12,6 +12,14 @@
  */
 void HeadMotorHandler::publishHeadPosition()
 {
+	btQuaternion orientation;
+	orientation.setEulerZYX(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
+	mKinectTF.setRotation(orientation);
+	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now(), "kinect_normal_axis_frame", "head_frame"));
+
+	if (mPositionPub.getNumSubscribers() == 0)
+		return;
+
 	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
 	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
 	mPositionPub.publish(mCurrentPose);
@@ -28,10 +36,6 @@ void HeadMotorHandler::publishHeadPosition()
 		mYaw.setSpeed(0.0);
 	}
 */
-	btQuaternion orientation;
-	orientation.setEulerZYX(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
-	mKinectTF.setRotation(orientation);
-	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now(), "kinect_normal_axis_frame", "head_frame"));
 }
 
 /**

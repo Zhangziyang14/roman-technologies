@@ -1,6 +1,7 @@
 #include "image_server/OpenCVTools.h"
 #include "ros/ros.h"
 #include "image_transport/image_transport.h"
+#include "sensor_msgs/CompressedImage.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,9 +9,10 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "WebcamServer");
 
 	ros::NodeHandle nh;
-	image_transport::ImageTransport it(nh);
+	//image_transport::ImageTransport it(nh);
 
-	image_transport::Publisher pub = it.advertise("/camera/rgb/image_color", 1);
+	//image_transport::Publisher pub = it.advertise("/camera/rgb/image_color", 1);
+	ros::Publisher pub = nh.advertise<sensor_msgs::CompressedImage>("/camera/rgb/image_color/compressed", 1);
 
 	bool show_fps;
 	double desired_fps;
@@ -54,7 +56,16 @@ int main(int argc, char *argv[])
 		{
 			cv::Mat frame;
 			cap >> frame;
-			pub.publish(OpenCVTools::matToImage(frame));
+			//pub.publish(OpenCVTools::matToImage(frame));
+
+			sensor_msgs::CompressedImage rgb_c;
+			rgb_c.header.stamp = ros::Time::now();
+			std::vector<int> p;
+			p.push_back(CV_IMWRITE_JPEG_QUALITY);
+			p.push_back(90);
+			cv::imencode(".jpg", frame, rgb_c.data, p);
+
+			pub.publish(rgb_c);
 
 		    /*char path[255];
 			sprintf(path, "/home/hans/tracking/images/frame%.4d.jpg", frameCount);

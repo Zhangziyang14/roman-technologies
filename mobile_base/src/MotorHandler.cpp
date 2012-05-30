@@ -7,6 +7,9 @@ using namespace nero_msgs;
  */
 void MotorHandler::publishRobotSpeed()
 {
+	if (mSpeedPub.getNumSubscribers() == 0)
+		return;
+
 	mRightMotorSpeed = mRightMotor.getRotationSpeed();
 	mLeftMotorSpeed	 = mLeftMotor.getRotationSpeed();
 
@@ -50,8 +53,8 @@ void MotorHandler::positionCB(const nero_msgs::MotorPosition& msg)
 	mLock = true;
 
 	//ROS_INFO("left: %f, right: %f, front_l: %d, front_r: %d, rear_l: %d, rear_r: %d", msg.left, msg.right, mFrontLeftCenter, mFrontRightCenter, mRearLeft, mRearRight);
-		mRightMotor.setPosition(currentRightPosition + msg.right);
-		mLeftMotor.setPosition(currentLeftPosition + msg.left);
+	mRightMotor.setPosition(currentRightPosition + msg.right);
+	mLeftMotor.setPosition(currentLeftPosition + msg.left);
 }
 
 /**

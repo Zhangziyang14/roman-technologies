@@ -10,6 +10,9 @@ cp nero-stop /usr/sbin/nero-stop
 cp kinect-start /usr/sbin/kinect-start
 cp kinect.conf /etc/init/kinect.conf
 
+cp ps3-start /usr/sbin/ps3-start
+cp ps3.conf /etc/init/ps3.conf
+
 chmod +x /usr/sbin/roscore-start
 chmod +x /usr/sbin/nero-start
 chmod +x /usr/sbin/nero-stop
