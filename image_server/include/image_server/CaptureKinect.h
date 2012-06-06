@@ -20,7 +20,8 @@ class CaptureKinect
 protected:
 	xn::Context mContext;
     bool mIsContextOpened;
-    bool mIsGenerating;
+    bool mRGBGenerating;
+    bool mDepthGenerating;
     const char *mConfigPath;
 
     XnUInt64 mShadowValue;
@@ -41,15 +42,21 @@ public:
 
 	bool open();
 	bool close();
-	bool start();
-	bool stop();
+	bool startDepth();
+	bool stopDepth();
+	bool startRGB();
+	bool stopRGB();
 
-	bool queryFrame(bool image, bool cloud);
+	bool queryFrame(bool image, bool depth);
 	cv::Mat getImage();
-	cv::Mat getCloud();
+	cv::Mat getCloud(cv::Mat depth);
+	cv::Mat getDepth();
 
 	inline bool isOpened() { return mIsContextOpened; };
-	inline bool isGenerating() { return mIsGenerating; };
+	inline bool isDepthGenerating() { return mDepthGenerating; };
+	inline bool isRGBGenerating() { return mRGBGenerating; };
+
+	inline xn::DepthGenerator* getDepthGenerator() { return &mDepthGenerator; };
 };
 
 

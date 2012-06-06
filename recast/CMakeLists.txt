@@ -1,0 +1,35 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+
+PROJECT(RecastNavigation)
+#SET(RECAST_VERSION r129)
+
+rosbuild_init()
+
+#set the default path for built executables to the "bin" directory
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+#set the default path for built libraries to the "lib" directory
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
+IF(NOT CMAKE_BUILD_TYPE)
+#	SET(CMAKE_BUILD_TYPE "Debug")
+	SET(CMAKE_BUILD_TYPE "Release")
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+IF(MSVC)
+	OPTION(USE_MSVC_FAST_FLOATINGPOINT "Use MSVC /fp:fast option" ON)
+	IF(USE_MSVC_FAST_FLOATINGPOINT)
+		ADD_DEFINITIONS(/fp:fast)
+	ENDIF(USE_MSVC_FAST_FLOATINGPOINT)
+ENDIF(MSVC)
+
+IF(WIN32)
+	ADD_DEFINITIONS(/D _CRT_SECURE_NO_WARNINGS)
+ENDIF(WIN32)
+
+#ADD_SUBDIRECTORY(DebugUtils)
+ADD_SUBDIRECTORY(Detour)
+#ADD_SUBDIRECTORY(DetourCrowd)
+ADD_SUBDIRECTORY(DetourTileCache)
+#ADD_SUBDIRECTORY(Recast)
+#ADD_SUBDIRECTORY(RecastDemo)

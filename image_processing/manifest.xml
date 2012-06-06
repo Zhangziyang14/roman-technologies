@@ -14,7 +14,9 @@
   <depend package="sensor_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="image_transport"/>
+  <depend package="image_server"/>
   <depend package="pcl"/>
+  <depend package="opencv2"/>
 
   <depend package="object_manipulation_msgs"/> 
   <depend package="tabletop_object_detector"/> 

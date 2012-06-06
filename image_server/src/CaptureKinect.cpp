@@ -9,6 +9,8 @@
 
 CaptureKinect::CaptureKinect(const char *filePath) :
 	mIsContextOpened(false),
+	mRGBGenerating(false),
+	mDepthGenerating(false),
 	mConfigPath(filePath)
 {
 }
@@ -23,7 +25,7 @@ CaptureKinect::~CaptureKinect()
 	mContext.Release();
 }
 
-bool CaptureKinect::queryFrame(bool image, bool cloud)
+bool CaptureKinect::queryFrame(bool image, bool depth)
 {
 	XnStatus rc = XN_STATUS_OK;
 
@@ -38,7 +40,7 @@ bool CaptureKinect::queryFrame(bool image, bool cloud)
 	if (image)
 		mImageGenerator.GetMetaData(mImageMetaData);
 
-	if (cloud)
+	if (depth)
 		mDepthGenerator.GetMetaData(mDepthMetaData);
 
 	return true;
@@ -61,13 +63,19 @@ cv::Mat CaptureKinect::getImage()
     return rgbImage;
 }
 
-cv::Mat CaptureKinect::getCloud()
+cv::Mat CaptureKinect::getDepth()
 {
-	cv::Mat depth(mDepthMetaData.YRes(), mDepthMetaData.XRes(), CV_16UC3);
+	cv::Mat depth(mDepthMetaData.YRes(), mDepthMetaData.XRes(), CV_16UC1);
 
     const XnDepthPixel* pDepthMap = mDepthMetaData.Data();
-    memcpy(depth.data, pDepthMap, depth.cols*depth.rows*sizeof(XnDepthPixel));
+//    memcpy(depth.data, pDepthMap, depth.cols*depth.rows*sizeof(XnDepthPixel));
+    memcpy(depth.data, pDepthMap, mDepthMetaData.DataSize());
 
+	return depth;
+}
+
+cv::Mat CaptureKinect::getCloud(cv::Mat depth)
+{
     int cols = mDepthMetaData.XRes();
     int rows = mDepthMetaData.YRes();
     cv::Mat pointCloud_XYZ( rows, cols, CV_32FC3);
@@ -173,7 +181,12 @@ bool CaptureKinect::open()
 	mContext.StopGeneratingAll();
 
 	mIsContextOpened = true;
-	mIsGenerating = false;
+	mRGBGenerating = false;
+	mDepthGenerating = false;
+
+	// enable RGB viewpoint for the depth image
+	if (mDepthGenerator.GetAlternativeViewPointCap().IsViewPointSupported(mImageGenerator))
+		mDepthGenerator.GetAlternativeViewPointCap().SetViewPoint(mImageGenerator);
 
 	return true;
 }
@@ -188,26 +201,47 @@ bool CaptureKinect::close()
 	mContext.Release();
 
 	mIsContextOpened = false;
-	mIsGenerating = false;
+	mDepthGenerating = false;
+	mRGBGenerating = false;
 	return true;
 }
 
-bool CaptureKinect::start()
+bool CaptureKinect::startDepth()
 {
-	if (isGenerating())
+	if (isDepthGenerating())
 		return false;
 
-	mContext.StartGeneratingAll();
-	mIsGenerating = true;
+	mDepthGenerator.StartGenerating();
+	mDepthGenerating = true;
 	return true;
 }
 
-bool CaptureKinect::stop()
+bool CaptureKinect::stopDepth()
 {
-	if (isGenerating() == false)
+	if (isDepthGenerating() == false)
 		return false;
 
-	mContext.StopGeneratingAll();
-	mIsGenerating = false;
+	mDepthGenerator.StopGenerating();
+	mDepthGenerating = false;
+	return true;
+}
+
+bool CaptureKinect::startRGB()
+{
+	if (isRGBGenerating())
+		return false;
+
+	mImageGenerator.StartGenerating();
+	mRGBGenerating = true;
+	return true;
+}
+
+bool CaptureKinect::stopRGB()
+{
+	if (isRGBGenerating() == false)
+		return false;
+
+	mImageGenerator.StopGenerating();
+	mRGBGenerating = false;
 	return true;
 }

@@ -7,9 +7,6 @@
 
 #include "image_processing/FocusFace.h"
 
-// forward declaration
-void imageToMat(const sensor_msgs::ImageConstPtr &image, cv::Mat &mat);
-
 cv::Point2f calcCenterOfGravity(std::vector<cv::Point2f> f)
 {
 	uint32_t size = f.size();
@@ -127,7 +124,7 @@ void FocusFace::sendHeadPosition()
 	geometry_msgs::Point index;
 	index.x = mFaceCenterPct.x;
 	index.y = mFaceCenterPct.y;
-	query.request.indices.push_back(index);
+	query.request.points.push_back(index);
 
 	if (mQueryCloudClient.call(query) == false)
 	{
@@ -141,15 +138,15 @@ void FocusFace::sendHeadPosition()
 		return;
 	}
 
-	geometry_msgs::Point p = query.response.points[0];
-    if (p.z == 0.f)
+	geometry_msgs::PointStamped p = query.response.points[0];
+    if (p.point.z == 0.f)
     {
     	ROS_WARN("Invalid face center.");
     	return;
     }
 
-    double pitch = -atan(p.y / p.z);
-    double yaw = -atan(p.x / p.z);
+    double pitch = -atan(p.point.y / p.point.z);
+    double yaw = -atan(p.point.x / p.point.z);
 
     nero_msgs::PitchYaw msg;
     msg.pitch = pitch + mCurrentOrientation.pitch;
@@ -311,10 +308,9 @@ void FocusFace::trackFace(cv::Mat &prevFrame, cv::Mat &frame)
 /**
  * Receives RGB images and displays them on screen.
  */
-void FocusFace::imageCb(const sensor_msgs::ImageConstPtr &image_)
+void FocusFace::imageCb(const sensor_msgs::ImageConstPtr &image)
 {
-    cv::Mat frame(image_->height, image_->width, CV_8UC3);
-    imageToMat(image_, frame);
+    cv::Mat frame = OpenCVTools::imageToMat(image);
 
     cv::Mat tmp;
     if (mDisplayFrames)

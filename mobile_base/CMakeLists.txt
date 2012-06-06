@@ -24,6 +24,7 @@ rosbuild_gensrv()
 rosbuild_add_executable(AutonomeMobileController src/AutonomeMobileController.cpp src/PathHandler.cpp src/LocalPlanner.cpp)
 rosbuild_add_executable(BaseMotorHandler src/MotorHandler.cpp)
 rosbuild_add_executable(SafeKeeper src/SafeKeeper.cpp)
+rosbuild_add_executable(PersonFollower src/PersonFollower.cpp)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

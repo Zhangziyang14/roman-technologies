@@ -1,0 +1,17 @@
+<package>
+  <description brief="recast">
+
+     recast
+
+  </description>
+  <author>Hans</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/recast</url>
+
+  <export>
+    <cpp cflags="-I${prefix}/Detour/Include -I${prefix}/DetourTileCache/Include" lflags="-L${prefix}/lib -lDetour -lDetourTileCache"/>
+  </export>
+</package>
+
+

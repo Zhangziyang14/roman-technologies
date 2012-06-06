@@ -26,6 +26,8 @@
 #include "nero_msgs/SetActive.h"
 #include "nero_msgs/QueryCloud.h"
 
+#include "image_server/OpenCVTools.h"
+
 #define STOP_SPEED_TOLERANCE 0.005
 #define MAX_CORNERS 200
 
@@ -75,7 +77,7 @@ public:
 
 	void detectFaces(cv::Mat &frame);
 	void trackFace(cv::Mat &prevFrame, cv::Mat &frame);
-	void imageCb(const sensor_msgs::ImageConstPtr &image_);
+	void imageCb(const sensor_msgs::ImageConstPtr &image);
 	bool setActiveCB(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 
 	void sendHeadPosition();

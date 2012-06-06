@@ -288,7 +288,7 @@ void PathPlanner::goalCB(const geometry_msgs::PoseStamped &goal)
 	if (mLaserScan.get() != NULL)
 		removeAllObstacles();
 
-	ROS_INFO("Size: %d", path.poses.size());
+	//ROS_INFO("Size: %d", path.poses.size());
 	for (size_t i = 0; i < path.poses.size(); i++)
 	{
 		std::cout << "Path[" << i << "]: x = " << path.poses[i].pose.position.x << ", y = " << path.poses[i].pose.position.y << std::endl;

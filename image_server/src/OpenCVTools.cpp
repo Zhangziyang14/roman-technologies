@@ -74,15 +74,47 @@ sensor_msgs::LaserScanPtr OpenCVTools::matToLaserScan(cv::Mat &cloud, bool empty
 	return output;
 }
 
-void OpenCVTools::imageToMat(const sensor_msgs::ImageConstPtr &image, cv::Mat &mat)
+//  // Check for the most common encodings first
+//  if (encoding == enc::BGR8)   return CV_8UC3;
+//  if (encoding == enc::MONO8)  return CV_8UC1;
+//  if (encoding == enc::RGB8)   return CV_8UC3;
+//  if (encoding == enc::MONO16) return CV_16UC1;
+//  if (encoding == enc::BGR16)  return CV_16UC3;
+//  if (encoding == enc::RGB16)  return CV_16UC3;
+//  if (encoding == enc::BGRA8)  return CV_8UC4;
+//  if (encoding == enc::RGBA8)  return CV_8UC4;
+//  if (encoding == enc::BGRA16) return CV_16UC4;
+//  if (encoding == enc::RGBA16) return CV_16UC4;
+
+cv::Mat OpenCVTools::imageToMat(sensor_msgs::Image image) {
+	int intType = 0;
+	if(image.encoding == sensor_msgs::image_encodings::BGR8) {
+		intType = CV_8UC3;
+	} else if(image.encoding == sensor_msgs::image_encodings::MONO16) {
+		intType = CV_16UC1;
+	}
+	cv::Mat matTemp(image.height, image.width, intType);
+	memcpy(matTemp.data, &image.data[0], image.step * image.height);
+	return matTemp;
+}
+
+cv::Mat OpenCVTools::imageToMat(const sensor_msgs::ImageConstPtr &image)
 {
-	memcpy(mat.data, &image->data[0], sizeof(uchar) * image->data.size());
+	int intType = 0;
+	if(image->encoding == sensor_msgs::image_encodings::BGR8) {
+		intType = CV_8UC3;
+	} else if(image->encoding == sensor_msgs::image_encodings::MONO16) {
+		intType = CV_16UC1;
+	}
+	cv::Mat matTemp(image->height, image->width, intType);
+	memcpy(matTemp.data, &image->data[0], image->step * image->height);
+	return matTemp;
 }
 
 sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
 {
 	sensor_msgs::ImagePtr output(new sensor_msgs::Image());
-	if (mat.type() != CV_8UC3)
+	if (mat.type() != CV_8UC3 && mat.type() != CV_16UC1)
 	{
 		ROS_WARN("Cannot convert non-uint8 to sensor_msgs::Image. Depth = %d", mat.type());
 		return output;
@@ -92,12 +124,16 @@ sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
 	output->header.stamp = ros::Time::now();
 	output->width = mat.cols;
 	output->height = mat.rows;
-	output->step = mat.cols * mat.channels();
+	output->step = mat.cols * mat.elemSize();
 	output->is_bigendian = false;
-	output->encoding = "bgr8";
+	if (mat.type() == CV_8UC3) {
+		output->encoding = "bgr8";
+	} else if (mat.type() == CV_16UC1) {
+		output->encoding = "mono16";
+	}
 
 	// copy actual data
-	output->data.assign(mat.data, mat.data + size_t(mat.cols * mat.rows * mat.channels()));
+	output->data.assign(mat.data, mat.data + size_t(mat.rows * output->step));
 	return output;
 }
 
@@ -155,12 +191,69 @@ sensor_msgs::PointCloud2Ptr OpenCVTools::matToPointCloud2(cv::Mat &mat)
 	return output;
 }
 
-/// Calculates the distance from point p to plane with the form of plane(0)*x + plane(1)*y + plane(2)*z + plane(3) = 0
-/*static float OpenCVTools::getDistanceFromPointToPlane(Eigen::Vector4f plane, pcl::PointXYZ p);
+/**
+ * Converts cv::Mat to sensor_msgs::PointCloud2Ptr, with XYZRGB data
+ */
+sensor_msgs::PointCloud2Ptr OpenCVTools::matToRegisteredPointCloud2(cv::Mat pc, cv::Mat rgb)
 {
-	float divisor = sqrt(plane(0)*plane(0) + plane(1)*plane(1) + plane(2)*plane(2));
-	if (divisor == 0.f)
-		return std::numeric_limits<float>::quiet_NaN();
+	sensor_msgs::PointCloud2Ptr output(new sensor_msgs::PointCloud2);
+	output->header.stamp = ros::Time::now();
+	output->header.frame_id = OUTPUT_FRAME_ID;
+	output->width = pc.cols;
+	output->height = pc.rows;
+	output->is_dense = false;
+	output->point_step = 8*sizeof(float);
+	output->row_step = output->width * output->point_step;
+	sensor_msgs::PointField pf;
+	pf.name = "x";
+	pf.offset = 0;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "y";
+	pf.offset = 4;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "z";
+	pf.offset = 8;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "_";
+	pf.offset = 12;
+	pf.count = 4;
+	pf.datatype = sensor_msgs::PointField::UINT8;
+	output->fields.push_back(pf);
+	pf.name = "rgb";
+	pf.offset = 16;
+	pf.count = 1;
+	pf.datatype = sensor_msgs::PointField::FLOAT32;
+	output->fields.push_back(pf);
+	pf.name = "_";
+	pf.offset = 20;
+	pf.count = 12;
+	pf.datatype = sensor_msgs::PointField::UINT8;
+	output->fields.push_back(pf);
 
-	return (plane(0)*p.x + plane(1)*p.y + plane(2)*p.z + plane(3)) / divisor;
-}*/
+	output->data.resize(size_t(pc.cols * pc.rows * output->point_step));
+	for (int y = 0; y < pc.rows; y++)
+	{
+		for (int x = 0; x < pc.cols; x++)
+		{
+			uint8_t data[32];
+			cv::Point3f p = pc.at<cv::Point3f>(y, x);
+			p.y = -p.y; // y-axis is inverted
+			if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0)
+				p.x = p.y = p.z = std::numeric_limits<float>::quiet_NaN();
+			memcpy(&data[0], &p.x, sizeof(cv::Point3f));
+
+			cv::Point3_<uint8_t> c = rgb.at< cv::Point3_<uint8_t> >(y, x);
+			memcpy(&data[16], &c, sizeof(cv::Point3_<uint8_t>));
+
+			memcpy(&output->data[(y*pc.cols + x) * output->point_step], data, output->point_step);
+		}
+	}
+	return output;
+}
+

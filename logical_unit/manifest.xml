@@ -15,10 +15,7 @@
   <depend package="image_processing"/>
   <depend package="joy"/>
   <depend package="nero_msgs"/>
-
-  <export>
-        <rosdoc config="rosdoc.yaml" />
-  </export>
+  <depend package="recast"/>
 
   <rosdep name="yaml-cpp"/>
 </package>
