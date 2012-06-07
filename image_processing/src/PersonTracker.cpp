@@ -51,7 +51,7 @@ PersonTracker::PersonTracker() :
 	// initialise services and topics
 	mColorDepthImageSub 	= mNodeHandle.subscribe("/camera/color_depth", 1, &PersonTracker::imageColorDepthCb, this);
 	mTrackedPointPub 		= mNodeHandle.advertise<geometry_msgs::PointStamped>("/PersonTracker/point", 10);
-	mCloudClient			= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/QueryCloud", true);
+	mProjectClient			= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/ProjectPoints", true);
 
 	mNodeHandle.param<bool>("/PersonTracker/show_output", mShowOutput, true);
 
@@ -67,7 +67,7 @@ geometry_msgs::PointStamped PersonTracker::getWorldPoint(geometry_msgs::Point p)
 	nero_msgs::QueryCloud qc;
 	qc.request.points.push_back(p);
 
-	if (mCloudClient.call(qc) == false || qc.response.points.size() == 0)
+	if (mProjectClient.call(qc) == false || qc.response.points.size() == 0)
 	{
 		ROS_WARN("Failed to call cloud save server.");
 		return geometry_msgs::PointStamped();

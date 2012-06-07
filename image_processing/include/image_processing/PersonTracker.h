@@ -30,7 +30,7 @@ private:
 
 	ros::Subscriber mColorDepthImageSub;
 	ros::Publisher mTrackedPointPub;
-	ros::ServiceClient mCloudClient;
+	ros::ServiceClient mProjectClient;
 
 	bool mShowOutput;
 	bool mTracking;

@@ -17,6 +17,7 @@ KinectServer::KinectServer(const char *filePath) :
 	mCloudControl		= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
 	mForceKinectControl	= mNodeHandle.advertiseService("/KinectServer/ForceKinectControl", &KinectServer::ForceKinectControl, this);
 	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
+	mProjectPoints		= mNodeHandle.advertiseService("/KinectServer/ProjectPoints", &KinectServer::ProjectPoints, this);
 	
 	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
 	mNodeHandle.param<double>("/KinectServer/scale", mScale, 1.0);
@@ -203,6 +204,51 @@ bool KinectServer::ForceKinectControl(nero_msgs::SetActive::Request &req, nero_m
 }
 
 bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res)
+{
+	if (mKinect.isOpened() == false)
+	{
+		ROS_WARN("Received cloud query while Kinect is offline");
+		return false;
+	}
+
+	if (isDepthGenerating() == false)
+		mKinect.startDepth();
+
+	mKinect.queryFrame(false, true);
+
+	cv::Mat cloud = mKinect.getCloud(mKinect.getDepth());
+	if (cloud.cols == 0 || cloud.rows == 0)
+	{
+		ROS_WARN("Failed to retrieve cloud image during cloud query.");
+		return false;
+	}
+
+    std_msgs::Header header;
+    header.stamp = ros::Time::now();
+    header.frame_id = "/kinect_frame";
+	geometry_msgs::PointStamped invalid;
+	invalid.point.x = invalid.point.y = invalid.point.z = std::numeric_limits<float>::quiet_NaN();
+	for (size_t i = 0; i < req.points.size(); i++)
+	{
+		if (req.points[i].x >= 0.0 && req.points[i].x < 1.0 &&
+			req.points[i].y >= 0.0 && req.points[i].y < 1.0)
+		{
+			geometry_msgs::PointStamped gp;
+			gp.header = header;
+			cv::Point3f cp = cloud.at<cv::Point3f>(req.points[i].y * cloud.rows, req.points[i].x * cloud.cols);
+			gp.point.x = cp.x; gp.point.y = cp.y; gp.point.z = cp.z;
+			res.points.push_back(gp);
+		}
+		else
+		{
+			res.points.push_back(invalid);
+		}
+	}
+
+	return true;
+}
+
+bool KinectServer::ProjectPoints(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res)
 {
 	if (mKinect.isOpened() == false)
 	{
