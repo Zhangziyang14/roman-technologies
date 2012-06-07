@@ -88,6 +88,7 @@ geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)
 	geometry_msgs::Point gp;
 	gp.x = p.x;
 	gp.y = p.y;
+	gp.z = mLastDepthImage.at<uint16_t>(p.y, p.x);
 	qc.request.points.push_back(gp);
 
 	if (mProjectClient.call(qc) == false || qc.response.points.size() == 0)

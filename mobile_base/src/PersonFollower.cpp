@@ -22,11 +22,11 @@ PersonFollower::PersonFollower() :
 
 void PersonFollower::positionCb(const geometry_msgs::PointStampedPtr &point)
 {
-	if (point->header.frame_id != "/base_link")
+	/*if (point->header.frame_id != "/base_link")
 	{
-		ROS_ERROR("Person position is nog in /base_link!");
+		ROS_ERROR("Person position is not in /base_link! It is in %s.", point->header.frame_id.c_str());
 		return;
-	}
+	}*/
 
 	mPersonLoc = point->point;
 	mFollowing = true;
@@ -42,8 +42,14 @@ void PersonFollower::sendSpeed(double linear, double angular)
 
 void PersonFollower::updateFollow()
 {
+	if (isnan(mPersonLoc.x) || isnan(mPersonLoc.y))
+	{
+		ROS_ERROR("Person location is NaN.");
+		return;
+	}
+
 	// calculate the distance to the person
-	double dist = sqrt(mPersonLoc.x*mPersonLoc.x + mPersonLoc.y*mPersonLoc.y + mPersonLoc.z*mPersonLoc.z);
+	double dist = sqrt(mPersonLoc.x*mPersonLoc.x + mPersonLoc.y*mPersonLoc.y);
 
 	if (dist > MAX_DISTANCE)
 	{
@@ -51,9 +57,19 @@ void PersonFollower::updateFollow()
 		return;
 	}
 
-	double linear = dist <= mFollowDistance ? 0.0 : (std::max(dist, mMaxSpeedDistance - mFollowDistance) / (mMaxSpeedDistance - mFollowDistance)) * mMaxLinearSpeed;
-	double angle = atan2(mPersonLoc.y, mPersonLoc.x);
-	double angular = angle < ANGULAR_TOLERANCE ? 0.0 : (std::max(angle, mMaxSpeedAngle) / mMaxSpeedAngle) * mMaxAngularSpeed;
+	ROS_INFO("dist: %lf, follow_dist: %lf, diff: %lf", dist, mFollowDistance, mFollowDistance - dist);
+	double abs_dist = fabs(mFollowDistance - dist);
+	double linear = abs_dist < LINEAR_TOLERANCE ? 0.0 : (std::min(mMaxSpeedDistance, abs_dist) / mMaxSpeedDistance) * mMaxLinearSpeed;
+	if (dist < mFollowDistance)
+		linear *= -1.0;
+	//double linear = dist <= mFollowDistance ? 0.0 : (std::max(dist, mMaxSpeedDistance - mFollowDistance) / (mMaxSpeedDistance - mFollowDistance)) * mMaxLinearSpeed;
+
+	double angle = -atan2(mPersonLoc.x, mPersonLoc.y);
+	double abs_angle = fabs(angle);
+	//ROS_INFO("angle: %lf", angle);
+	double angular = abs_angle < ANGULAR_TOLERANCE ? 0.0 : (std::min(abs_angle, mMaxSpeedAngle) / mMaxSpeedAngle) * mMaxAngularSpeed;
+	if (angle < 0.0)
+		angular *= -1;
 
 	sendSpeed(linear, angular);
 	mFollowing = false;

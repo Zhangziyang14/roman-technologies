@@ -32,7 +32,7 @@ protected:
 	ros::NodeHandle mNodeHandle;				//ROS node handler
 
 	ros::ServiceClient mObjectRecognizeClient;		//Service client for tabletop_object_detection
-	ros::ServiceClient mCloudControlClient;		//Service client for cloud control
+	ros::ServiceClient mSendCloudsClient;		//Service client for cloud control
 	ros::ServiceServer mFindObjectServer;		/// Server for finding an object
 
 	double mMinQuality;							//Threshold for when a model is considered recognised
@@ -50,6 +50,8 @@ public:
 	void spin();
 
 	inline ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
+
+	inline void sendClouds(bool active) { nero_msgs::SetActive srv; srv.request.active = active; mSendCloudsClient.call(srv); };
 };
 
 #endif /* OBJECTRECOGNITION_H_ */

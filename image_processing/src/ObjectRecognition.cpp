@@ -30,6 +30,7 @@ ObjectRecognition::ObjectRecognition() : mNodeHandle("")
 		exit(0);
 
 	mObjectRecognizeClient	= mNodeHandle.serviceClient<tabletop_object_detector::TabletopDetection>("/object_detection", true);
+	mSendCloudsClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/SendClouds", true);
 
 	//initialise services
 	mFindObjectServer = mNodeHandle.advertiseService("/cmd_object_recognition", &ObjectRecognition::recognizeCB, this);
@@ -53,12 +54,14 @@ bool ObjectRecognition::recognizeCB(nero_msgs::FindObject::Request &req, nero_ms
 	detection_call.request.return_models = true;
 	detection_call.request.num_models = 1;
 
+	sendClouds(true);
 	if (!mObjectRecognizeClient.call(detection_call))
 	{
 		res.result = res.FAILED;
 		//ROS_ERROR("Tabletop detection service failed");
 		//return -1;
 	}
+	sendClouds(false);
 	if (detection_call.response.detection.result !=
 			detection_call.response.detection.SUCCESS)
 	{
@@ -101,6 +104,9 @@ bool ObjectRecognition::recognizeCB(nero_msgs::FindObject::Request &req, nero_ms
 		geometry_msgs::PoseStamped pose, poseInArmSpace;
 		pose = detection_call.response.detection.table.pose;
 		mTransformListener.transformPose("arm_frame", pose, poseInArmSpace);
+
+		//ROS_INFO("Table z : %f ArmTable z : %f", detection_call.response.detection.table.pose.pose.position.z, poseInArmSpace.pose.position.z);
+		ROS_INFO("Point: (%s, %f, %f, %f)", pose.header.frame_id.c_str(), pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
 
 		res.min_y = detection_call.response.detection.table.y_min;
 		res.table_z = poseInArmSpace.pose.position.z;

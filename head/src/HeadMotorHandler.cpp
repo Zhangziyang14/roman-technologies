@@ -12,16 +12,18 @@
  */
 void HeadMotorHandler::publishHeadPosition()
 {
-	btQuaternion orientation;
-	orientation.setEulerZYX(mCurrentPose.pitch, 0.0, -mCurrentPose.yaw);
+	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
+	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
+
+	tf::Quaternion orientation;
+	orientation.setRPY(-mCurrentPose.pitch, 0.0, mCurrentPose.yaw);
 	mKinectTF.setRotation(orientation);
-	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now(), "head_frame", "kinect_normal_axis_frame"));
+	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now() +
+			ros::Duration(0.1) /* stupid hack to catch up with static_transform_publishers*/, "head_frame", "kinect_normal_axis_frame"));
 
 	if (mPositionPub.getNumSubscribers() == 0)
 		return;
 
-	mCurrentPose.pitch = mPitch.getPosition() - PITCH_OFFSET;
-	mCurrentPose.yaw = mYaw.getPosition() - YAW_OFFSET;
 	mPositionPub.publish(mCurrentPose);
 /*
 	if((mCurrentSpeed.pitch < 0 && mCurrentPose.pitch  > PITCH_LOWER_LIMIT) ||
@@ -115,7 +117,7 @@ void HeadMotorHandler::init(char *path)
 	mPitch.init(path);
 	mYaw.init(path);
 
-	mKinectTF.setOrigin(tf::Vector3(0.03, -0.055, -0.12));
+	mKinectTF.setOrigin(tf::Vector3(-0.03, 0.055, 0.12));
 
 	ROS_INFO("Initialising completed.");
 }

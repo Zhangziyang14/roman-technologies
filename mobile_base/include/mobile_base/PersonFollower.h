@@ -15,6 +15,7 @@
 
 #define MAX_DISTANCE 5.0 // in meters
 
+#define LINEAR_TOLERANCE 0.1
 #define ANGULAR_TOLERANCE 0.1
 
 class PersonFollower

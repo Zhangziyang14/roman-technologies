@@ -35,6 +35,7 @@ protected:
 	ros::ServiceServer mForceDepthControl;
 	ros::ServiceServer mQueryCloud;
 	ros::ServiceServer mProjectPoints;
+	ros::ServiceServer mSendClouds;
 
 	bool mSendEmptyLaserscan;
 	bool mPublishRGB;
@@ -46,6 +47,7 @@ protected:
 
 	bool mForceKinectOpen;
 	bool mForceDepthOpen;
+	bool mForceSendCloud;
 
 	double mScale;
 	bool mCloseIdleKinect;
@@ -74,6 +76,8 @@ private:
 
 	bool QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res);
 	bool ProjectPoints(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res);
+
+	bool SendClouds(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 };
 
 #endif /* KINECTSERVER_H_ */

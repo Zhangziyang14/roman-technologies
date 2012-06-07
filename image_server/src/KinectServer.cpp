@@ -6,6 +6,7 @@ KinectServer::KinectServer(const char *filePath) :
 	mPublishLaserScan(false),
 	mForceKinectOpen(false),
 	mForceDepthOpen(false),
+	mForceSendCloud(false),
 	mKinect(filePath)
 {
 	mRGBPub				= mImageTransport.advertise("/camera/rgb/image_color", 1);
@@ -20,6 +21,7 @@ KinectServer::KinectServer(const char *filePath) :
 	mForceDepthControl	= mNodeHandle.advertiseService("/KinectServer/ForceDepthControl", &KinectServer::ForceDepthControl, this);
 	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
 	mProjectPoints		= mNodeHandle.advertiseService("/KinectServer/ProjectPoints", &KinectServer::ProjectPoints, this);
+	mSendClouds			= mNodeHandle.advertiseService("/KinectServer/SendClouds", &KinectServer::SendClouds, this);
 	
 	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
 	mNodeHandle.param<double>("/KinectServer/scale", mScale, 1.0);
@@ -42,7 +44,7 @@ void KinectServer::run()
 	bool publishRGB 			= mPublishRGB && mRGBPub.getNumSubscribers();
 	bool publishDepth 			= mPublishDepth && mDepthPub.getNumSubscribers();
 	bool publishRGBDepth		= mPublishRGBDepth && mRGBDepthPub.getNumSubscribers();
-	bool publishCloud			= mPublishCloud && mPCPub.getNumSubscribers();
+	bool publishCloud			= (mPublishCloud && mPCPub.getNumSubscribers()) || mForceSendCloud;
 	bool publishXYZRGB			= mPublishXYZRGB && mXYZRGBPub.getNumSubscribers();
 
 	bool captureRGB = publishRGB || publishRGBDepth || publishXYZRGB;
@@ -302,6 +304,17 @@ bool KinectServer::ProjectPoints(nero_msgs::QueryCloud::Request &req, nero_msgs:
 			res.points.push_back(invalid);
 	}
 
+	return true;
+}
+
+bool KinectServer::SendClouds(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+{
+	if (mForceSendCloud == false && req.active)
+		ROS_INFO("Forcing cloud publishing.");
+	else if (mForceSendCloud && req.active == false)
+		ROS_INFO("No longer forcing cloud publishing.");
+
+	mForceSendCloud = req.active;
 	return true;
 }
 
