@@ -72,8 +72,8 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 
 	mActiveServer 		= mNodeHandle.advertiseService("/set_focus_face", &FocusFace::setActiveCB, this);
 	mImageControlClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/RGBControl");
-	mCloudSaveClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/CloudSaveControl");
 	mQueryCloudClient	= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/QueryCloud");
+	mForceDepthClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthControl");
 
 	mFaceCenter.x = mFaceCenter.y = 0.f;
 	mFaceCenterPct.x = mFaceCenterPct.y = 0.f;
@@ -81,7 +81,7 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 	mCurrentOrientation.yaw = 0.f;
 	mActive = false;
 	setRGBOutput(false);
-	setCloudSave(false);
+	setDepthForced(false);
 
     if (mFrontalFaceCascade.load(frontal_face)	 == false)
         ROS_ERROR("Could not load frontal face classifier cascade");
@@ -128,7 +128,7 @@ void FocusFace::sendHeadPosition()
 
 	if (mQueryCloudClient.call(query) == false)
 	{
-		ROS_WARN("Failed to call cloud save server.");
+		ROS_WARN("Failed to call query cloud server.");
 		return;
 	}
 
@@ -341,13 +341,13 @@ bool FocusFace::setActiveCB(nero_msgs::SetActive::Request &req, nero_msgs::SetAc
 	if (mActive && req.active == false)
 	{
 		setRGBOutput(false);
-		setCloudSave(false);
+		setDepthForced(false);
 		ROS_INFO("Shutting down focus face.");
 	}
 	else if (mActive == false && req.active)
 	{
 		setRGBOutput(true);
-		setCloudSave(true);
+		setDepthForced(true);
 		ROS_INFO("Starting up focus face.");
 	}
 
@@ -378,5 +378,5 @@ int main( int argc, char* argv[] )
 	}
 
 	focusFace.setRGBOutput(false);
-	focusFace.setCloudSave(false);
+	focusFace.setDepthForced(false);
 }

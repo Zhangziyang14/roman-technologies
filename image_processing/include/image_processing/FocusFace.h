@@ -56,8 +56,8 @@ private:
 	image_transport::Subscriber mImageSub;
 	ros::ServiceServer mActiveServer;
 	ros::ServiceClient mImageControlClient;
-	ros::ServiceClient mCloudSaveClient;
 	ros::ServiceClient mQueryCloudClient;
+	ros::ServiceClient mForceDepthClient;
 
 	nero_msgs::PitchYaw mCurrentOrientation;
 	nero_msgs::PitchYaw mCurrentSpeed;
@@ -85,7 +85,7 @@ public:
 	inline ros::NodeHandle *getNodeHandle() { return &mNodeHandle; };
 	inline bool isActive() { return mActive; };
 	inline void setRGBOutput(bool active) { nero_msgs::SetActive srv; srv.request.active = active; mImageControlClient.call(srv); };
-	inline void setCloudSave(bool active) { nero_msgs::SetActive srv; srv.request.active = active; mCloudSaveClient.call(srv); };
+	inline void setDepthForced(bool active) { nero_msgs::SetActive srv; srv.request.active = active; mForceDepthClient.call(srv); };
 };
 
 #endif /* FOCUSFACE_H_ */

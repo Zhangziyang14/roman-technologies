@@ -28,6 +28,7 @@ private:
 	ros::NodeHandle mNodeHandle;
 	tf::TransformListener mTransformListener;
 
+	ros::Subscriber mInitialPointSub;
 	ros::Subscriber mColorDepthImageSub;
 	ros::Publisher mTrackedPointPub;
 	ros::ServiceClient mProjectClient;
@@ -42,17 +43,16 @@ private:
 	cv::Rect mBBox;
 	cv::Point2i mCOG;
 	uint16_t mLastDepth;
-	uint16_t mCurrDepth;
-	cv::Point2f mLastLoc;
-	cv::Point2f mCurrLoc;
 
 public:
 	PersonTracker();
 
 	void imageColorDepthCb(const nero_msgs::ColorDepthPtr &image);
 
+	void initialPointCb(const geometry_msgs::Point &point);
+
 	bool seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, cv::Rect &r, cv::Point2i &cog);
-	geometry_msgs::PointStamped getWorldPoint(geometry_msgs::Point p);
+	geometry_msgs::PointStamped getWorldPoint(cv::Point2i p);
 
 	void spin();
 };

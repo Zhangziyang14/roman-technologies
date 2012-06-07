@@ -32,6 +32,7 @@ protected:
 	ros::ServiceServer mRGBControl;
 	ros::ServiceServer mCloudControl;
 	ros::ServiceServer mForceKinectControl;
+	ros::ServiceServer mForceDepthControl;
 	ros::ServiceServer mQueryCloud;
 	ros::ServiceServer mProjectPoints;
 
@@ -44,6 +45,7 @@ protected:
 	bool mPublishXYZRGB;
 
 	bool mForceKinectOpen;
+	bool mForceDepthOpen;
 
 	double mScale;
 	bool mCloseIdleKinect;
@@ -68,6 +70,7 @@ private:
 	bool RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 	bool CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 	bool ForceKinectControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
+	bool ForceDepthControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res);
 
 	bool QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res);
 	bool ProjectPoints(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res);

@@ -49,6 +49,7 @@ PersonTracker::PersonTracker() :
 	mLastDepth(0)
 {
 	// initialise services and topics
+	mInitialPointSub		= mNodeHandle.subscribe("/PersonTracker/initial_point", 1, &PersonTracker::initialPointCb, this);
 	mColorDepthImageSub 	= mNodeHandle.subscribe("/camera/color_depth", 1, &PersonTracker::imageColorDepthCb, this);
 	mTrackedPointPub 		= mNodeHandle.advertise<geometry_msgs::PointStamped>("/PersonTracker/point", 10);
 	mProjectClient			= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/ProjectPoints", true);
@@ -62,10 +63,32 @@ PersonTracker::PersonTracker() :
 	}
 }
 
-geometry_msgs::PointStamped PersonTracker::getWorldPoint(geometry_msgs::Point p)
+void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
+{
+	if (mLastDepthImage.empty())
+	{
+		ROS_ERROR("Received initial point but without depth image.");
+		return;
+	}
+
+	if (point.x < 0 || point.x >= mLastDepthImage.cols || point.y < 0 || point.y >= mLastDepthImage.rows)
+	{
+		ROS_ERROR("Initial point is out of image bounds.");
+		return;
+	}
+
+	mLastDepth = mLastDepthImage.at<uint16_t>(point.y, point.x);
+	if (mLastDepth > 0)
+		mTracking = true;
+}
+
+geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)
 {
 	nero_msgs::QueryCloud qc;
-	qc.request.points.push_back(p);
+	geometry_msgs::Point gp;
+	gp.x = p.x;
+	gp.y = p.y;
+	qc.request.points.push_back(gp);
 
 	if (mProjectClient.call(qc) == false || qc.response.points.size() == 0)
 	{
@@ -103,7 +126,8 @@ void PersonTracker::imageColorDepthCb(const nero_msgs::ColorDepthPtr &image)
 			cv::Mat person = cv::Mat::zeros(mLastDepthImage.rows, mLastDepthImage.cols, mLastDepthImage.type());
 			if (seedImage(mLastDepthImage, person, mCOG, mBBox, mCOG))
 			{
-
+				geometry_msgs::PointStamped p = getWorldPoint(mCOG);
+				mTrackedPointPub.publish(p);
 				if (mShowOutput)
 					cv::rectangle(mLastImage, mBBox, CV_RGB(0,0,255), 8, 8, 0);
 			}

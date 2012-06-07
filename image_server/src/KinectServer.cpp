@@ -5,6 +5,7 @@ KinectServer::KinectServer(const char *filePath) :
 	mImageTransport(mNodeHandle),
 	mPublishLaserScan(false),
 	mForceKinectOpen(false),
+	mForceDepthOpen(false),
 	mKinect(filePath)
 {
 	mRGBPub				= mImageTransport.advertise("/camera/rgb/image_color", 1);
@@ -16,6 +17,7 @@ KinectServer::KinectServer(const char *filePath) :
 	mRGBControl			= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
 	mCloudControl		= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
 	mForceKinectControl	= mNodeHandle.advertiseService("/KinectServer/ForceKinectControl", &KinectServer::ForceKinectControl, this);
+	mForceDepthControl	= mNodeHandle.advertiseService("/KinectServer/ForceDepthControl", &KinectServer::ForceDepthControl, this);
 	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
 	mProjectPoints		= mNodeHandle.advertiseService("/KinectServer/ProjectPoints", &KinectServer::ProjectPoints, this);
 	
@@ -44,7 +46,7 @@ void KinectServer::run()
 	bool publishXYZRGB			= mPublishXYZRGB && mXYZRGBPub.getNumSubscribers();
 
 	bool captureRGB = publishRGB || publishRGBDepth || publishXYZRGB;
-	bool captureDepth = publishCloud || publishRealLaserScan || publishRGBDepth || publishDepth || publishXYZRGB;
+	bool captureDepth = publishCloud || publishRealLaserScan || publishRGBDepth || publishDepth || publishXYZRGB || mForceDepthOpen;
 
 	if (mKinect.isOpened() == false)
 	{
@@ -200,6 +202,17 @@ bool KinectServer::ForceKinectControl(nero_msgs::SetActive::Request &req, nero_m
 		ROS_INFO("No longer forcing Kinect");
 
 	mForceKinectOpen = req.active;
+	return true;
+}
+
+bool KinectServer::ForceDepthControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+{
+	if (mForceDepthOpen == false && req.active)
+		ROS_INFO("Forcing depth open");
+	else if (mForceDepthOpen && req.active == false)
+		ROS_INFO("No longer forcing depth");
+
+	mForceDepthOpen = req.active;
 	return true;
 }
 
