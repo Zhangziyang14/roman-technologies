@@ -77,9 +77,23 @@ void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
 		return;
 	}
 
+	if (point.x == 0 && point.y == 0)
+	{
+		mTracking = false;
+		geometry_msgs::PointStamped p;
+		p.header.frame_id = "/base_link";
+		p.point.x = 0.0;
+		p.point.y = 0.0;
+		p.point.z = 0.0;
+		mTrackedPointPub.publish(p);
+		return;
+	}
+
 	mLastDepth = mLastDepthImage.at<uint16_t>(point.y, point.x);
 	if (mLastDepth > 0)
 		mTracking = true;
+	else
+		ROS_WARN("Depth at person follow point is 0.");
 }
 
 geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)

@@ -54,6 +54,7 @@ ros::Publisher *gripper_state_pub;
 ros::Publisher *speech_pub;
 ros::Publisher *speed_pub;
 ros::Publisher *head_speed_pub;
+ros::Publisher *person_follow_pub;
 
 bool sent_arm_speed = false;
 bool sent_base_speed = false;
@@ -97,6 +98,7 @@ void joyCB(const sensor_msgs::Joy& msg)
 	geometry_msgs::Twist speedmsg;
 	nero_msgs::ArmJoint armspeedmsg;
 	nero_msgs::PitchYaw headspeedmsg;
+	geometry_msgs::Point personfollowmsg;
 
 	if (pressedKey != PS3_NONE && msg.buttons[pressedKey] == 0)
 		pressedKey = PS3_NONE;
@@ -194,10 +196,16 @@ void joyCB(const sensor_msgs::Joy& msg)
 				speech_pub->publish(speechmsg);
 				break;
 			case PS3_UP:
-				ROS_INFO("Publishing give command.");
-				speechmsg.arousal = 0;
-				speechmsg.command = "give";
-				speech_pub->publish(speechmsg);
+				ROS_INFO("Publishing initial_point command.");
+				personfollowmsg.x = 320;
+				personfollowmsg.y = 240;
+				person_follow_pub->publish(personfollowmsg);
+				break;
+			case PS3_DOWN:
+				ROS_INFO("Publishing stop follow person command.");
+				personfollowmsg.x = 0;
+				personfollowmsg.y = 0;
+				person_follow_pub->publish(personfollowmsg);
 				break;
 			case PS3_LEFT:
 				ROS_INFO("Publishing cola command.");
@@ -209,12 +217,6 @@ void joyCB(const sensor_msgs::Joy& msg)
 				ROS_INFO("Publishing juice command.");
 				speechmsg.arousal = 0;
 				speechmsg.command = "juice";
-				speech_pub->publish(speechmsg);
-				break;
-			case PS3_DOWN:
-				ROS_INFO("Publishing stop command.");
-				speechmsg.arousal = 0;
-				speechmsg.command = "stop";
 				speech_pub->publish(speechmsg);
 				break;
 
@@ -268,6 +270,7 @@ int main( int argc, char* argv[] )
 	speech_pub = new ros::Publisher(nh.advertise<nero_msgs::SpeechCommand>("/processedSpeechTopic", 1));
 	speed_pub = new ros::Publisher(nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1));
 	head_speed_pub = new ros::Publisher(nh.advertise<nero_msgs::PitchYaw>("/head/cmd_vel", 1));
+	person_follow_pub = new ros::Publisher(nh.advertise<geometry_msgs::Point>("/PersonTracker/initial_point", 1));
 	pressedKey = PS3_NONE;
 
 	ros::spin();

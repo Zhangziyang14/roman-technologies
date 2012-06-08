@@ -16,20 +16,25 @@ PersonFollower::PersonFollower() :
 	mNodeHandle.param<double>("/PersonFollower/max_linear", mMaxLinearSpeed, 1.0);
 	mNodeHandle.param<double>("/PersonFollower/max_angular", mMaxAngularSpeed, 0.5);
 	mNodeHandle.param<double>("/PersonFollower/follow_distance", mFollowDistance, 1.0);
-	mNodeHandle.param<double>("/PersonFollower/max_speed_distance", mMaxSpeedDistance, 3.0);
-	mNodeHandle.param<double>("/PersonFollower/max_speed_angle", mMaxSpeedAngle, 1.0);
+	mNodeHandle.param<double>("/PersonFollower/max_speed_distance", mMaxSpeedDistance, 1.0);
+	mNodeHandle.param<double>("/PersonFollower/max_speed_angle", mMaxSpeedAngle, 0.5);
 }
 
 void PersonFollower::positionCb(const geometry_msgs::PointStampedPtr &point)
 {
-	/*if (point->header.frame_id != "/base_link")
+	if (point->header.frame_id != "/base_link")
 	{
 		ROS_ERROR("Person position is not in /base_link! It is in %s.", point->header.frame_id.c_str());
 		return;
-	}*/
+	}
 
-	mPersonLoc = point->point;
-	mFollowing = true;
+	if (point->point.x && point->point.y && point->point.z)
+	{
+		mPersonLoc = point->point;
+		mFollowing = true;
+	}
+	else
+		sendSpeed(0.0, 0.0);
 }
 
 void PersonFollower::sendSpeed(double linear, double angular)
