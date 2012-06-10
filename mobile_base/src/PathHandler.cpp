@@ -267,7 +267,9 @@ bool PathHandler::updateCurrentPosition()
 	// get current position in the map
 	try
 	{
-		mTransformListener.lookupTransform("/map", "/base_link", ros::Time(0), mRobotPosition);
+		ros::Time now = ros::Time::now();
+		mTransformListener.waitForTransform("/base_link", "/map", now, ros::Duration(1.0));
+		mTransformListener.lookupTransform("/map", "/base_link", now, mRobotPosition);
 	}
 	catch (tf::TransformException &ex)
 	{

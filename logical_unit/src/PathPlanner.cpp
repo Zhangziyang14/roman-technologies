@@ -259,6 +259,7 @@ void PathPlanner::goalCB(const geometry_msgs::PoseStamped &goal)
 
 			try
 			{
+				mTransformListener.waitForTransform(tmp.header.frame_id, "/map", tmp.header.stamp, ros::Duration(1.0));
 				mTransformListener.transformPoint("/map", tmp, p);
 			}
 			catch (tf::TransformException &ex)

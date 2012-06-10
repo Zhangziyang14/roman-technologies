@@ -114,6 +114,7 @@ geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)
 	geometry_msgs::PointStamped result;
 	try
 	{
+		mTransformListener.waitForTransform(qc.response.points[0].header.frame_id, "/base_link", qc.response.points[0].header.stamp, ros::Duration(1.0));
 		mTransformListener.transformPoint("/base_link", qc.response.points[0], result);
 	}
 	catch (tf::TransformException &ex)
