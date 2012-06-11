@@ -18,8 +18,7 @@ void HeadMotorHandler::publishHeadPosition()
 	tf::Quaternion orientation;
 	orientation.setRPY(-mCurrentPose.pitch, 0.0, mCurrentPose.yaw);
 	mKinectTF.setRotation(orientation);
-	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now() +
-			ros::Duration(0.1) /* stupid hack to catch up with static_transform_publishers*/, "head_frame", "kinect_normal_axis_frame"));
+	mKinectTFBroadcaster.sendTransform(tf::StampedTransform(mKinectTF, ros::Time::now(), "head_frame", "kinect_normal_axis_frame"));
 
 	if (mPositionPub.getNumSubscribers() == 0)
 		return;
