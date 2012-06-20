@@ -30,4 +30,7 @@
   <!-- start Kinect -->
   <!-- include file="$(find image_server)/launch/kinect.launch/ -->
   <!-- node name="KinectServer" pkg="image_server" type="KinectServer"/ -->
+
+  <!-- start PersonFollower -->
+  <node name="PersonFollower" pkg="mobile_base" type="PersonFollower"/>
 </launch>

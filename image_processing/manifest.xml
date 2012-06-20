@@ -23,6 +23,7 @@
   <depend package="tabletop_collision_map_processing"/>
 
   <depend package="nero_msgs"/>
+  <depend package="opentld"/>
 </package>
 
 

@@ -20,7 +20,7 @@
 
 namespace OpenCVTools
 {
-	sensor_msgs::LaserScanPtr matToLaserScan(cv::Mat &cloud, bool emptyScan);
+	sensor_msgs::LaserScanPtr matToLaserScan(cv::Mat &cloud, bool emptyScan = false);
 	cv::Mat imageToMat(const sensor_msgs::ImageConstPtr &image); //, cv::Mat &mat
 	cv::Mat imageToMat(sensor_msgs::Image image); //, cv::Mat &mat
 	sensor_msgs::ImagePtr matToImage(cv::Mat mat);

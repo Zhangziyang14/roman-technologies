@@ -172,7 +172,7 @@ public:
 	void moveBase(geometry_msgs::Pose &goal);
 	void returnToOriginalPosition();
 	void moveHead(double x, double z);
-	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y);
+	bool findTable(nero_msgs::Table &table);
 	void setFocusFace(bool active);
 	void rotateBase(float angle);
 	void positionBase(float dist);

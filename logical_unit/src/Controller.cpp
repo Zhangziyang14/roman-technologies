@@ -169,42 +169,10 @@ void Controller::moveHead(double x, double z)
 	mHeadPositionPublisher.publish(head_msg);
 }
 
-/**
- *	Sends the id of the object to recognise to ObjectRecognition
- */
-bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y)
+bool Controller::findTable(nero_msgs::Table &table)
 {
-	setDepthForced(true);
-	setFocusFace(false);
 
-	nero_msgs::FindObject find_call;
-	find_call.request.objectId = object_id;
-
-	double timer = ros::Time::now().toSec();
-
-	ROS_INFO("Starting search for object with id: %d", object_id);
-	while (ros::Time::now().toSec() - timer < FIND_OBJECT_DURATION)
-	{
-		if (mFindObjectClient.call(find_call))
-		{
-			if (find_call.response.result == find_call.response.SUCCESS)
-			{
-				object_pose = find_call.response.pose;
-				object_pose.pose.position.z = find_call.response.table_z + GRAB_OBJECT_Z_OFFSET;
-				min_y = find_call.response.min_y;
-				setDepthForced(false);
-				return true;
-			}
-			else
-				ROS_ERROR("Something went wrong finding the object.");
-		}
-		else
-			ROS_ERROR("Failed calling finding service.");
-	}
-
-	ROS_INFO("Finding object failed.");
-	setDepthForced(false);
-	return false;
+	return true;
 }
 
 void Controller::setFocusFace(bool active)
@@ -795,8 +763,8 @@ void Controller::init(const char *goalPath)
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
 
-	if (waitForServiceClient(&mNodeHandle, "KinectServer/ForceDepthControl"))
-		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthClient", true);
+	if (waitForServiceClient(&mNodeHandle, "KinectServer/ForceDepth"))
+		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepth", true);
 
 	setDepthForced(false);
 
