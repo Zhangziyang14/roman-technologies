@@ -1,20 +1,17 @@
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="base_to_head" args="0.0 0 0.84 0 0 0 base_link head_frame 100" />
-	<node pkg="tf" type="static_transform_publisher" name="kinect_normal_axis_to_kinect" args="0 0 0 0 0 -1.57 kinect_normal_axis_frame kinect_frame 100" />
-	<!-- node pkg="tf" type="static_transform_publisher" name="head_to_kinect_normal_axis" args="-0.03 0.055 0.12 0 0 -0.4 head_frame kinect_normal_axis_frame 20" / -->
-	<node pkg="tf" type="static_transform_publisher" name="head_to_arm" args="0.135 -0.08 -0.095 0 0 0 head_frame arm_frame 100" />
+	<include file="$(find image_server)/launch/transforms.launch"/>
 
 	<arg name="config_file" default="$(find image_server)/config/config.xml"/>
-    <node name="KinectServer" pkg="image_server" type="KinectServer" args="$(arg config_file)" output="screen" respawn="true">
-    	<param name="send_empty_laserscan" value="false"/>
-    	<param name="scale" value="0.5"/>
-    	<param name="publish_rgb" value="true"/>
-    	<param name="publish_depth" value="true"/>
-    	<param name="publish_rgb_depth" value="true"/>
-    	<param name="publish_cloud" value="false"/>
-    	<param name="publish_xyzrgb" value="false"/>
-    	<param name="close_idle_kinect" value="true"/>
-    	<param name="show_fps" value="true"/>
+	<node name="KinectServer" pkg="image_server" type="KinectServer" args="$(arg config_file)" output="screen" respawn="true">
+		<param name="send_empty_laserscan" value="false"/>
+		<param name="scale" value="0.5"/>
+		<param name="publish_rgb" value="true"/>
+		<param name="publish_depth" value="true"/>
+		<param name="publish_rgb_depth" value="true"/>
+		<param name="publish_cloud" value="false"/>
+		<param name="publish_xyzrgb" value="false"/>
+		<param name="close_idle_kinect" value="true"/>
+		<param name="show_fps" value="true"/>
 		<param name="fps" value="30"/>
-    </node>
+	</node>
 </launch>

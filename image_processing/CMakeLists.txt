@@ -22,6 +22,9 @@ rosbuild_add_executable(FocusFace src/FocusFace.cpp)
 rosbuild_add_executable(PersonTracker src/PersonTracker.cpp)
 rosbuild_add_executable(TabletopSegmentation src/TabletopSegmentation.cpp)
 
+#rosbuild_add_executable(TFTest src/TFTest.cpp)
+#rosbuild_add_executable(TabletopTest src/TabletopTest.cpp)
+
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services

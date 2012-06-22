@@ -12,6 +12,8 @@
 
 #include "sensor_msgs/PointCloud.h"
 #include "sensor_msgs/PointCloud2.h"
+#include "sensor_msgs/point_cloud_conversion.h"
+#include "visualization_msgs/Marker.h"
 #include "nero_msgs/SegmentTable.h"
 
 #include "tf/transform_listener.h"
@@ -39,7 +41,9 @@ class TabletopSegmentation
 {
 private:
 	ros::NodeHandle mNodeHandle;
+	tf::TransformListener mTransformListener;
 	ros::ServiceServer mSegmentServer;
+	ros::Publisher mMarkerPub;
 
 	double mMinZ;
 	double mMaxZ;
@@ -51,6 +55,13 @@ private:
 	int mMinClustSize;
 	int mInlierThresh;
 	double mUpDirection;
+	std::string mProcessingFrame;
+
+	int mCurrentMarkerId;
+	int mMarkersPublished;
+
+	visualization_msgs::Marker getTableMarker(float xmin, float xmax, float ymin, float ymax);
+	void clearOldMarkers(std::string frame_id);
 
 	template <typename PointT>
 	bool getPlanePoints(const pcl::PointCloud<PointT> &table, const tf::Transform& table_plane_trans, sensor_msgs::PointCloud &table_points);

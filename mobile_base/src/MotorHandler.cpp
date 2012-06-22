@@ -20,6 +20,18 @@ void MotorHandler::publishRobotSpeed()
 	mSpeedPub.publish(mCurrentSpeed);
 }
 
+void MotorHandler::publishRobotPosition()
+{
+	if (mPositionPub.getNumSubscribers() == 0)
+		return;
+
+	nero_msgs::MotorPosition msg;
+	msg.left = mLeftMotor.getPosition();
+	msg.right = mRightMotor.getPosition();
+
+	mPositionPub.publish(msg);
+}
+
 /**
  * Disables unused ultrasone sensors
  * Is not used because arduino does not support any more service servers or subscribers...
@@ -128,6 +140,7 @@ void MotorHandler::init(char *path)
 	//Initialise publishers
 	//mDisableUltrasonePub 	= mNodeHandle.advertise<mobile_base::SensorFeedback>("/sensorDisableTopic", 1);
 	mSpeedPub 				= mNodeHandle.advertise<geometry_msgs::Twist>("/speedFeedbackTopic", 1);
+	mPositionPub			= mNodeHandle.advertise<nero_msgs::MotorPosition>("/MobileBase/position", 1);
 
 	//Initialise subscribers
 	mTwistSub 				= mNodeHandle.subscribe("/cmd_vel", 10, &MotorHandler::moveCB, this);
@@ -173,6 +186,7 @@ int main(int argc, char **argv)
 	while(ros::ok())
 	{
 		motorHandler.publishRobotSpeed();
+		motorHandler.publishRobotPosition();
 		//motorHandler.disableUltrasoneSensors();
 
 		ros::spinOnce();

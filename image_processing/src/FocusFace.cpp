@@ -73,7 +73,7 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 	mActiveServer 		= mNodeHandle.advertiseService("/set_focus_face", &FocusFace::setActiveCB, this);
 	mImageControlClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/RGBControl");
 	mQueryCloudClient	= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/QueryCloud");
-	mForceDepthClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthControl");
+	mForceDepthClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepth");
 
 	mFaceCenter.x = mFaceCenter.y = 0.f;
 	mFaceCenterPct.x = mFaceCenterPct.y = 0.f;

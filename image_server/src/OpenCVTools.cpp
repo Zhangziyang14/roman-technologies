@@ -180,6 +180,7 @@ sensor_msgs::PointCloud2Ptr OpenCVTools::matToPointCloud2(cv::Mat &mat)
 			cv::Point3f p = mat.at<cv::Point3f>(y, x);
 			if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0)
 				p.x = p.y = p.z = std::numeric_limits<float>::quiet_NaN();
+			p.y = -p.y; // y-axis is inverted
 			memcpy(&data[0], &p.x, sizeof(float));
 			memcpy(&data[4], &p.y, sizeof(float));
 			memcpy(&data[8], &p.z, sizeof(float));

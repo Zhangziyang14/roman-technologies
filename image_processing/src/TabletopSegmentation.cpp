@@ -7,11 +7,14 @@
 
 #include "image_processing/TabletopSegmentation.h"
 
-TabletopSegmentation::TabletopSegmentation()
+TabletopSegmentation::TabletopSegmentation() :
+	mCurrentMarkerId(0),
+	mMarkersPublished(0)
 {
 	mSegmentServer = mNodeHandle.advertiseService("/TabletopSegmentation/segment_table", &TabletopSegmentation::segmentCb, this);
+	mMarkerPub = mNodeHandle.advertise<visualization_msgs::Marker>("/TabletopSegmentation/markers_out", 10);
 
-	mNodeHandle.param<double>("/TabletopSegmentation/min_z", mMinZ, 0.4);
+	mNodeHandle.param<double>("/TabletopSegmentation/min_z", mMinZ, 0.2);
 	mNodeHandle.param<double>("/TabletopSegmentation/max_z", mMaxZ, 1.25);
 	mNodeHandle.param<double>("/TabletopSegmentation/min_table_z", mMinTableZ, 0.01);
 	mNodeHandle.param<double>("/TabletopSegmentation/max_table_z", mMaxTableZ, 0.50);
@@ -20,7 +23,75 @@ TabletopSegmentation::TabletopSegmentation()
 	mNodeHandle.param<double>("/TabletopSegmentation/clustering_distance", mClustDist, 0.03);
 	mNodeHandle.param<int>("/TabletopSegmentation/min_cluster_size", mMinClustSize, 300);
 	mNodeHandle.param<int>("/TabletopSegmentation/inlier_threshold", mInlierThresh, 300);
-	mNodeHandle.param<double>("/TabletopSegmentation/up_direction", mUpDirection, -1.0);
+	mNodeHandle.param<double>("/TabletopSegmentation/up_direction", mUpDirection, 1.0);
+	mNodeHandle.param<std::string>("/TabletopSegmentation/processing_frame", mProcessingFrame, "/base_link");
+
+	ROS_INFO("TabletopSegmentation initialized.");
+}
+
+void TabletopSegmentation::clearOldMarkers(std::string frame_id)
+{
+	for (int id = mCurrentMarkerId; id < mMarkersPublished; id++)
+	{
+		visualization_msgs::Marker delete_marker;
+		delete_marker.header.stamp = ros::Time::now();
+		delete_marker.header.frame_id = frame_id;
+		delete_marker.id = id;
+		delete_marker.action = visualization_msgs::Marker::DELETE;
+		delete_marker.ns = "TabletopSegmentation";
+		mMarkerPub.publish(delete_marker);
+	}
+
+	mMarkersPublished = mCurrentMarkerId;
+	mCurrentMarkerId = 0;
+}
+
+visualization_msgs::Marker TabletopSegmentation::getTableMarker(float xmin, float xmax, float ymin, float ymax)
+{
+	visualization_msgs::Marker marker;
+	marker.action = visualization_msgs::Marker::ADD;
+	marker.type = visualization_msgs::Marker::LINE_STRIP;
+	marker.lifetime = ros::Duration();
+
+	//create the marker in the table reference frame
+	//the caller is responsible for setting the pose of the marker to match
+
+	marker.scale.x = 0.001;
+	marker.scale.y = 0.001;
+	marker.scale.z = 0.001;
+
+	marker.points.resize(5);
+	marker.points[0].x = xmin;
+	marker.points[0].y = ymin;
+	marker.points[0].z = 0;
+
+	marker.points[1].x = xmin;
+	marker.points[1].y = ymax;
+	marker.points[1].z = 0;
+
+	marker.points[2].x = xmax;
+	marker.points[2].y = ymax;
+	marker.points[2].z = 0;
+
+	marker.points[3].x = xmax;
+	marker.points[3].y = ymin;
+	marker.points[3].z = 0;
+
+	marker.points[4].x = xmin;
+	marker.points[4].y = ymin;
+	marker.points[4].z = 0;
+
+	marker.points.resize(6);
+	marker.points[5].x = xmin;
+	marker.points[5].y = ymin;
+	marker.points[5].z = 0.02;
+
+	marker.color.r = 1.0;
+	marker.color.g = 1.0;
+	marker.color.b = 0.0;
+	marker.color.a = 1.0;
+
+	return marker;
 }
 
 template <typename PointT>
@@ -37,11 +108,10 @@ bool TabletopSegmentation::getPlanePoints(const pcl::PointCloud<PointT> &table, 
 	}
 
 	// Transform the data
-	tf::TransformListener listener;
 	tf::StampedTransform table_pose_frame(table_plane_trans, table.header.stamp, table.header.frame_id, "table_frame");
-	listener.setTransform(table_pose_frame);
+	mTransformListener.setTransform(table_pose_frame);
 	std::string error_msg;
-	if (!listener.canTransform("table_frame", table_points.header.frame_id, table_points.header.stamp, &error_msg))
+	if (!mTransformListener.canTransform("table_frame", table_points.header.frame_id, table_points.header.stamp, &error_msg))
 	{
 		ROS_ERROR("Can not transform point cloud from frame %s to table frame; error %s",
 		table_points.header.frame_id.c_str(), error_msg.c_str());
@@ -50,7 +120,7 @@ bool TabletopSegmentation::getPlanePoints(const pcl::PointCloud<PointT> &table, 
 
 	try
 	{
-		listener.transformPointCloud("table_frame", table_points, table_points);
+		mTransformListener.transformPointCloud("table_frame", table_points, table_points);
 	}
 	catch (tf::TransformException ex)
 	{
@@ -91,13 +161,12 @@ nero_msgs::Table TabletopSegmentation::getTable(std_msgs::Header cloud_header, c
 	table.pose.pose = table_pose;
 	table.pose.header = cloud_header;
 
-/*	visualization_msgs::Marker tableMarker = MarkerGenerator::getTableMarker(table.x_min, table.x_max,
-																		   table.y_min, table.y_max);
+	visualization_msgs::Marker tableMarker = getTableMarker(table.x_min, table.x_max, table.y_min, table.y_max);
 	tableMarker.header = cloud_header;
 	tableMarker.pose = table_pose;
-	tableMarker.ns = "tabletop_node";
-	tableMarker.id = current_marker_id_++;
-	marker_pub_.publish(tableMarker);*/
+	tableMarker.ns = "TabletopSegmentation";
+	tableMarker.id = mCurrentMarkerId++;
+	mMarkerPub.publish(tableMarker);
 
 	return table;
 }
@@ -140,6 +209,32 @@ bool TabletopSegmentation::segmentCb(nero_msgs::SegmentTable::Request &req, nero
 {
 	ROS_INFO("Starting process on new cloud");
 	ROS_INFO("In frame %s", req.cloud.header.frame_id.c_str());
+
+	sensor_msgs::PointCloud2 cloud;
+	if (mProcessingFrame != "")
+	{
+		//convert cloud to base link frame
+		sensor_msgs::PointCloud old_cloud;
+		sensor_msgs::convertPointCloud2ToPointCloud(req.cloud, old_cloud);
+		try
+		{
+			mTransformListener.transformPointCloud(mProcessingFrame, old_cloud, old_cloud);
+		}
+		catch (tf::TransformException ex)
+		{
+			ROS_ERROR("Failed to transform cloud from frame %s into frame %s; %s", old_cloud.header.frame_id.c_str(), mProcessingFrame.c_str(), ex.what());
+			return false;
+		}
+
+		sensor_msgs::convertPointCloudToPointCloud2(old_cloud, cloud);
+		ROS_INFO("Input cloud converted to %s frame", mProcessingFrame.c_str());
+		clearOldMarkers(cloud.header.frame_id);
+	}
+	else
+	{
+		cloud = req.cloud;
+		clearOldMarkers(cloud.header.frame_id);
+	}
 
 	// PCL objects
 	KdTreePtr normals_tree_, clusters_tree_;
@@ -187,7 +282,7 @@ bool TabletopSegmentation::segmentCb(nero_msgs::SegmentTable::Request &req, nero
 
 	// Step 1 : Filter, remove NaNs and downsample
 	pcl::PointCloud<Point> cloud_t;
-	pcl::fromROSMsg (req.cloud, cloud_t);
+	pcl::fromROSMsg (cloud, cloud_t);
 	pcl::PointCloud<Point>::ConstPtr cloud_ptr = boost::make_shared<const pcl::PointCloud<Point> > (cloud_t);
 
 	pcl::PointCloud<Point> cloud_filtered;
@@ -270,14 +365,14 @@ bool TabletopSegmentation::segmentCb(nero_msgs::SegmentTable::Request &req, nero
 	}
 	ROS_INFO("Table computed");
 
-	res.table = getTable<sensor_msgs::PointCloud>(req.cloud.header, table_plane_trans, table_points);
+	res.table = getTable<sensor_msgs::PointCloud>(cloud.header, table_plane_trans, table_points);
 	return true;
 }
 
 int main(int argc, char *argv[])
 {
 	// init ros
-	ros::init(argc, argv, "ObjectTrackingTLD");
+	ros::init(argc, argv, "TabletopSegmentation");
 	srand(0);
 
 	TabletopSegmentation ts;

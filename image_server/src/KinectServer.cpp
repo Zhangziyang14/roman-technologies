@@ -11,19 +11,19 @@ KinectServer::KinectServer(const char *filePath) :
 	mForceDepth(false),
 	mKinect(filePath)
 {
-	mRGBPub				= mImageTransport.advertise("/head/rgb/image_color", 1);
-	mPCPub				= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/head/depth/points", 1);
-	mDepthPub			= mNodeHandle.advertise<sensor_msgs::Image>("/head/depth/image", 1);
-	mLaserPub			= mNodeHandle.advertise<sensor_msgs::LaserScan>("/head/scan", 1);
-	mRGBDepthPub		= mNodeHandle.advertise<nero_msgs::ColorDepth>("/head/color_depth", 1);
-	mFilteredRGBPub		= mNodeHandle.advertise<sensor_msgs::Image>("/head/filtered/color", 1);
-	mFilteredRGBDepthPub= mNodeHandle.advertise<nero_msgs::ColorDepth>("/head/filtered/color_depth", 1);
-	mXYZRGBPub			= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/head/rgb/points", 1);
+	mRGBPub				= mImageTransport.advertise("/camera/rgb/image_color", 1);
+	mPCPub				= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/depth/points", 1);
+	mDepthPub			= mNodeHandle.advertise<sensor_msgs::Image>("/camera/depth/image", 1);
+	mLaserPub			= mNodeHandle.advertise<sensor_msgs::LaserScan>("/camera/scan", 1);
+	mRGBDepthPub		= mNodeHandle.advertise<nero_msgs::ColorDepth>("/camera/color_depth", 1);
+	mFilteredRGBPub		= mNodeHandle.advertise<sensor_msgs::Image>("/camera/filtered/color", 1);
+	mFilteredRGBDepthPub= mNodeHandle.advertise<nero_msgs::ColorDepth>("/camera/filtered/color_depth", 1);
+	mXYZRGBPub			= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
 	mRGBControl			= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
 	mCloudControl		= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
 	mForceKinectControl	= mNodeHandle.advertiseService("/KinectServer/ForceKinectControl", &KinectServer::ForceKinectControl, this);
 	mCloudServer		= mNodeHandle.advertiseService("/KinectServer/CloudServer", &KinectServer::CloudServer, this);
-	mForceDepth			= mNodeHandle.advertiseService("/KinectServer/ForceDepth", &KinectServer::ForceDepth, this);
+	mForceDepthControl	= mNodeHandle.advertiseService("/KinectServer/ForceDepth", &KinectServer::ForceDepth, this);
 	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
 	mProjectPoints		= mNodeHandle.advertiseService("/KinectServer/ProjectPoints", &KinectServer::ProjectPoints, this);
 

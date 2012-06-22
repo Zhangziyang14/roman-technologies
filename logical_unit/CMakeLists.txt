@@ -23,9 +23,10 @@ rosbuild_gensrv()
 
 rosbuild_add_executable(OdometryTracker src/OdometryTracker.cpp)
 rosbuild_add_executable(PathPlanner src/PathPlanner.cpp src/fastlz.c)
-rosbuild_add_executable(Controller src/Controller.cpp)
+#rosbuild_add_executable(Controller src/Controller.cpp)
+rosbuild_add_executable(GrabDemo src/GrabDemo.cpp)
 
-target_link_libraries(Controller yaml-cpp)
+#target_link_libraries(Controller yaml-cpp)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

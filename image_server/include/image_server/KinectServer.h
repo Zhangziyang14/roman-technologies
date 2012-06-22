@@ -35,6 +35,7 @@ protected:
 	ros::ServiceServer mRGBControl;
 	ros::ServiceServer mCloudControl;
 	ros::ServiceServer mForceKinectControl;
+	ros::ServiceServer mForceDepthControl;
 	ros::ServiceServer mCloudServer;
 	ros::ServiceServer mQueryCloud;
 	ros::ServiceServer mProjectPoints;
