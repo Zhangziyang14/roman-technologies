@@ -322,6 +322,8 @@ bool KinectServer::CloudServer(nero_msgs::GetCloud::Request &req, nero_msgs::Get
 
 bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res)
 {
+	ROS_INFO("Received query cloud request.");
+
 	if (mKinect.isOpened() == false)
 	{
 		ROS_WARN("Received cloud query while Kinect is offline");

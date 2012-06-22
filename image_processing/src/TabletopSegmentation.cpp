@@ -218,9 +218,11 @@ bool TabletopSegmentation::segmentCb(nero_msgs::SegmentTable::Request &req, nero
 		sensor_msgs::convertPointCloud2ToPointCloud(req.cloud, old_cloud);
 		try
 		{
+			old_cloud.header.stamp = ros::Time::now(); // there might have been some delay, make this an updated cloud
+			mTransformListener.waitForTransform(old_cloud.header.frame_id, mProcessingFrame, old_cloud.header.stamp, ros::Duration(2.0));
 			mTransformListener.transformPointCloud(mProcessingFrame, old_cloud, old_cloud);
 		}
-		catch (tf::TransformException ex)
+		catch (tf::TransformException &ex)
 		{
 			ROS_ERROR("Failed to transform cloud from frame %s into frame %s; %s", old_cloud.header.frame_id.c_str(), mProcessingFrame.c_str(), ex.what());
 			return false;
