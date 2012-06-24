@@ -1,14 +1,12 @@
 #include "image_server/KinectServer.h"
 
-/**
- * Constructor
- */
 KinectServer::KinectServer(const char *filePath) :
 	mNodeHandle(""),
 	mImageTransport(mNodeHandle),
 	mPublishLaserScan(false),
 	mForceKinectOpen(false),
-	mForceDepth(false),
+	mForceDepthOpen(false),
+	mForceSendCloud(false),
 	mKinect(filePath)
 {
 	mRGBPub				= mImageTransport.advertise("/camera/rgb/image_color", 1);
@@ -16,166 +14,25 @@ KinectServer::KinectServer(const char *filePath) :
 	mDepthPub			= mNodeHandle.advertise<sensor_msgs::Image>("/camera/depth/image", 1);
 	mLaserPub			= mNodeHandle.advertise<sensor_msgs::LaserScan>("/camera/scan", 1);
 	mRGBDepthPub		= mNodeHandle.advertise<nero_msgs::ColorDepth>("/camera/color_depth", 1);
-	mFilteredRGBPub		= mNodeHandle.advertise<sensor_msgs::Image>("/camera/filtered/color", 1);
-	mFilteredRGBDepthPub= mNodeHandle.advertise<nero_msgs::ColorDepth>("/camera/filtered/color_depth", 1);
 	mXYZRGBPub			= mNodeHandle.advertise<sensor_msgs::PointCloud2>("/camera/rgb/points", 1);
 	mRGBControl			= mNodeHandle.advertiseService("/KinectServer/RGBControl", &KinectServer::RGBControl, this);
 	mCloudControl		= mNodeHandle.advertiseService("/KinectServer/CloudControl", &KinectServer::CloudControl, this);
 	mForceKinectControl	= mNodeHandle.advertiseService("/KinectServer/ForceKinectControl", &KinectServer::ForceKinectControl, this);
-	mCloudServer		= mNodeHandle.advertiseService("/KinectServer/CloudServer", &KinectServer::CloudServer, this);
-	mForceDepthControl	= mNodeHandle.advertiseService("/KinectServer/ForceDepth", &KinectServer::ForceDepth, this);
+	mForceDepthControl	= mNodeHandle.advertiseService("/KinectServer/ForceDepthControl", &KinectServer::ForceDepthControl, this);
 	mQueryCloud			= mNodeHandle.advertiseService("/KinectServer/QueryCloud", &KinectServer::QueryCloud, this);
 	mProjectPoints		= mNodeHandle.advertiseService("/KinectServer/ProjectPoints", &KinectServer::ProjectPoints, this);
-
-	mNodeHandle.param<int>("/KinectServer/filter_distance", mFilterDistance, 2000);
+	mSendClouds			= mNodeHandle.advertiseService("/KinectServer/SendClouds", &KinectServer::SendClouds, this);
+	
+	mNodeHandle.param<bool>("/KinectServer/send_empty_laserscan", mSendEmptyLaserscan, false);
 	mNodeHandle.param<double>("/KinectServer/scale", mScale, 1.0);
 	mNodeHandle.param<bool>("/KinectServer/publish_rgb", mPublishRGB, true);
 	mNodeHandle.param<bool>("/KinectServer/publish_depth", mPublishDepth, true);
 	mNodeHandle.param<bool>("/KinectServer/publish_cloud", mPublishCloud, true);
 	mNodeHandle.param<bool>("/KinectServer/publish_rgb_depth", mPublishRGBDepth, true);
-	mNodeHandle.param<bool>("/KinectServer/publish_filtered_rgb", mPublishFilteredRGB, true);
 	mNodeHandle.param<bool>("/KinectServer/publish_xyzrgb", mPublishXYZRGB, true);
 	mNodeHandle.param<bool>("/KinectServer/close_idle_kinect", mCloseIdleKinect, true);
-
+	
 	ROS_INFO("KinectServer initialised.");
-}
-
-/**
- * Attempts to open the Kinect device. Waits one second and returns false if it fails to open.
- */
-bool KinectServer::openKinect()
-{
-	if (mKinect.isOpened() == false)
-	{
-		ROS_INFO("Opening Kinect ...");
-
-		mKinect.open();
-		if (mKinect.isOpened() == false)
-		{
-			ROS_WARN("Can not open Kinect device, will try again in one second.");
-			usleep(1000000);
-			return false;
-		}
-
-		ROS_INFO("Kinect opened.");
-	}
-
-	return true;
-}
-
-/**
- * Query the kinect for new images. Will start streaming if not streaming already.
- */
-bool KinectServer::queryKinect(bool queryRGB, bool queryDepth)
-{
-	// is the kinect open or can we open it?
-	if (openKinect() == false)
-		return false;
-
-	// stop generating if no longer necessary
-	if (mForceKinectOpen == false && mCloseIdleKinect && isGenerating())
-	{
-		if (queryRGB == false && isRGBGenerating())
-		{
-			mKinect.stopRGB(); // lets not waste CPU usage on the Kinect
-			ROS_INFO("Stopped RGB stream.");
-		}
-
-		if (queryDepth == false && isDepthGenerating())
-		{
-			mKinect.stopDepth(); // lets not waste CPU usage on the Kinect
-			ROS_INFO("Stopped depth stream.");
-		}
-
-		// nothing to do
-		if (isGenerating() == false)
-			return false;
-	}
-
-	// start streaming RGB if required
-	if (mForceKinectOpen || queryRGB)
-		startRGB();
-
-	// start streaming depth if required
-	if (mForceKinectOpen || queryDepth)
-		startDepth();
-
-	// we're not actually capturing anything right now
-	if (queryRGB == false && queryDepth == false)
-		return false;
-
-	if (mKinect.queryFrame(queryRGB, queryDepth) == false)
-	{
-		ROS_WARN("Can not grab images, releasing Kinect.");
-		mKinect.close();
-		return false;
-	}
-
-	return true;
-}
-
-/**
- * Fills rgb with the RGB image from the Kinect.
- */
-bool KinectServer::grabRGB(cv::Mat &rgb)
-{
-	rgb = mKinect.getImage();
-	if (rgb.empty())
-	{
-		ROS_WARN("Failed to grab RGB image.");
-		return false;
-	}
-
-	return true;
-}
-
-/**
- * Fills depth with the depth image from the Kinect.
- */
-bool KinectServer::grabDepth(cv::Mat &depth)
-{
-	depth = mKinect.getDepth();
-	if (depth.empty())
-	{
-		ROS_WARN("Failed to grab depth image.");
-		return false;
-	}
-
-	return true;
-}
-
-/**
- * Projects the depth image to real world points, using the Kinect device.
- */
-bool KinectServer::grabCloud(cv::Mat &cloud, cv::Mat depth)
-{
-	cloud = mKinect.getCloud(depth);
-	if (cloud.empty())
-	{
-		ROS_WARN("Failed to grab point cloud.");
-		return false;
-	}
-
-	return true;
-}
-
-/**
- * Filters the RGB and or Depth image by filterDepth (default is set to mFilterDepth)
- */
-void KinectServer::filterRGBDepth(cv::Mat rgb_in, cv::Mat depth_in, cv::Mat &rgb_out, cv::Mat &depth_out, bool filterDepth)
-{
-	// create a structuring element for dilation
-    cv::Mat se = cv::getStructuringElement(0, cv::Size(15,15));
-
-    // make a mask based on the depth
-	cv::Mat mask = (depth_in <= mFilterDistance) & (depth_in != 0);
-
-	// dilate the mask so all important parts are fully in the mask
-	cv::dilate(mask, mask, se);
-	rgb_in.copyTo(rgb_out, mask);
-
-	if (filterDepth)
-		depth_in.copyTo(depth_out, mask);
 }
 
 /**
@@ -183,71 +40,140 @@ void KinectServer::filterRGBDepth(cv::Mat rgb_in, cv::Mat depth_in, cv::Mat &rgb
  */
 void KinectServer::run()
 {
-	bool sendLaserScan 			= mPublishLaserScan && mLaserPub.getNumSubscribers();
-	bool sendRGB 				= mPublishRGB && mRGBPub.getNumSubscribers();
-	bool sendDepth 				= mPublishDepth && mDepthPub.getNumSubscribers();
-	bool sendRGBDepth			= mPublishRGBDepth && mRGBDepthPub.getNumSubscribers();
-	bool sendFilteredRGB		= mPublishFilteredRGB && mFilteredRGBPub.getNumSubscribers();
-	bool sendFilteredRGBDepth	= mPublishFilteredRGBDepth && mFilteredRGBDepthPub.getNumSubscribers();
-	bool sendCloud				= mPublishCloud && mPCPub.getNumSubscribers();
-	bool sendXYZRGB				= mPublishXYZRGB && mXYZRGBPub.getNumSubscribers();
+	bool publishRealLaserScan 	= mSendEmptyLaserscan == false && mPublishLaserScan && mLaserPub.getNumSubscribers();
+	bool publishRGB 			= mPublishRGB && mRGBPub.getNumSubscribers();
+	bool publishDepth 			= mPublishDepth && mDepthPub.getNumSubscribers();
+	bool publishRGBDepth		= mPublishRGBDepth && mRGBDepthPub.getNumSubscribers();
+	bool publishCloud			= (mPublishCloud && mPCPub.getNumSubscribers()) || mForceSendCloud;
+	bool publishXYZRGB			= mPublishXYZRGB && mXYZRGBPub.getNumSubscribers();
 
-	// determine what we need from the kinect
-	bool captureRGB = sendRGB || sendRGBDepth || sendFilteredRGB || sendXYZRGB || sendFilteredRGBDepth;
-	bool captureCloud = sendCloud || sendXYZRGB || sendLaserScan;
-	bool captureDepth = captureCloud || sendRGBDepth || sendFilteredRGB || sendDepth || sendFilteredRGBDepth || mForceDepth;
+	bool captureRGB = publishRGB || publishRGBDepth || publishXYZRGB;
+	bool captureDepth = publishCloud || publishRealLaserScan || publishRGBDepth || publishDepth || publishXYZRGB || mForceDepthOpen;
 
-	// retrieve the images from the kinect
-	if (queryKinect(captureRGB, captureDepth) == false)
+	if (mKinect.isOpened() == false)
+	{
+		ROS_INFO("Opening Kinect...");
+
+		mKinect.open();
+		if (mKinect.isOpened() == false)
+		{
+			ROS_WARN("Can not open Kinect device, will try again in one second.");
+			usleep(1000000);
+			return;
+		}
+
+		ROS_INFO("Kinect opened.");
+	}
+
+	if (mForceKinectOpen == false && mCloseIdleKinect && isGenerating())
+	{
+		if (captureRGB == false && isRGBGenerating())
+		{
+			mKinect.stopRGB(); // lets not waste CPU usage on the Kinect
+			ROS_INFO("Stopped RGB stream.");
+		}
+
+		if (captureDepth == false && isDepthGenerating())
+		{
+			mKinect.stopDepth(); // lets not waste CPU usage on the Kinect
+			ROS_INFO("Stopped depth stream.");
+		}
+
+		// nothing to do
+		if (isGenerating() == false)
+			return;
+	}
+
+	// start streaming RGB if required
+	if ((mForceKinectOpen || captureRGB) && isRGBGenerating() == false)
+	{
+		ROS_INFO("Starting RGB stream ...");
+		mKinect.startRGB();
+		ROS_INFO("Started RGB stream.");
+	}
+
+	// start streaming depth if required
+	if ((mForceKinectOpen || captureDepth) && isDepthGenerating() == false)
+	{
+		ROS_INFO("Starting depth stream ...");
+		mKinect.startDepth();
+		ROS_INFO("Started depth stream.");
+	}
+
+	// we're not actually capturing anything now
+	if (captureRGB == false && captureDepth == false)
 		return;
 
-	// attempt to grab the RGB image
+	if (mKinect.queryFrame(captureRGB, captureDepth) == false)
+	{
+		ROS_WARN("Can not grab images, releasing Kinect.");
+		mKinect.close();
+		return;
+	}
+
 	cv::Mat rgb;
-	if(captureRGB && grabRGB(rgb) == false)
-		return;
+	if(captureRGB)
+	{
+		rgb = mKinect.getImage();
+		if (rgb.empty())
+		{
+			ROS_WARN("Failed to grab RGB image.");
+			return;
+		}
+	}
 
-	// attempt to grab the depth image
+	if (publishRGB)
+	{
+		if (mScale != 1.0)
+			cv::resize(rgb, rgb, cv::Size(rgb.cols * mScale, rgb.rows * mScale), 0, 0, cv::INTER_LINEAR);
+		
+		if (publishRGB)
+			mRGBPub.publish(OpenCVTools::matToImage(rgb));
+	}
+
 	cv::Mat depth;
-	if(captureDepth && grabDepth(depth) == false)
-		return;
+	if(captureDepth)
+	{
+		depth = mKinect.getDepth();
+		if (depth.empty())
+		{
+			ROS_WARN("Failed to grab Depth image.");
+			return;
+		}
+	}
 
-	// publish the image
-	if (sendRGB)
-		publishRGB(rgb);
-
-	// publish the depth
-	if (sendDepth)
-		publishDepth(depth);
-
-	// combine and publish the rgb and depth in one message
-	if (sendRGBDepth)
-		publishRGBDepth(rgb, depth);
-
-	// grab a cloud
 	cv::Mat cloud;
-	if (captureCloud && grabCloud(cloud, depth) == false)
-		return;
+	if (publishCloud || publishXYZRGB)
+	{
+		cloud = mKinect.getCloud(depth);
+		if (cloud.empty())
+		{
+			ROS_WARN("Failed to grab RGB image.");
+			return;
+		}
 
-	// publish the cloud
-	if (sendCloud)
-		publishCloud(cloud);
+		if (publishCloud)
+			mPCPub.publish(OpenCVTools::matToPointCloud2(cloud));
+		if (publishXYZRGB)
+			mXYZRGBPub.publish(OpenCVTools::matToRegisteredPointCloud2(cloud, rgb));
+	}
 
-	// publish the filtered cloud (each point has XYZ and RGB)
-	if (sendXYZRGB)
-		publishRegisteredCloud(cloud, rgb);
+	if (mPublishLaserScan)
+		mLaserPub.publish(OpenCVTools::matToLaserScan(cloud, mSendEmptyLaserscan));
 
-	// publish the laserscan (used for navigating)
-	if (sendLaserScan)
-		publishLaserScan(cloud);
+	if (publishDepth) {
+		mDepthPub.publish(OpenCVTools::matToImage(depth));
+	}
 
-	// publish the filtered RGB and or RGBDepth
-	if (sendFilteredRGB || sendFilteredRGBDepth)
-		publishFiltered(rgb, depth, sendFilteredRGB, sendFilteredRGBDepth);
+	if (publishRGBDepth)
+	{
+		nero_msgs::ColorDepth msg;
+		msg.color = *OpenCVTools::matToImage(rgb);
+		msg.depth = *OpenCVTools::matToImage(depth);
+		mRGBDepthPub.publish(msg);
+	}
 }
 
-/**
- * Service handler for enabling/disabling RGB output.
- */
 bool KinectServer::RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
 	if (mPublishRGB == false && req.active)
@@ -259,9 +185,6 @@ bool KinectServer::RGBControl(nero_msgs::SetActive::Request &req, nero_msgs::Set
 	return true;
 }
 
-/**
- * Service handler for enabling/disabling Cloud output.
- */
 bool KinectServer::CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
 	if (mPublishCloud == false && req.active)
@@ -273,9 +196,6 @@ bool KinectServer::CloudControl(nero_msgs::SetActive::Request &req, nero_msgs::S
 	return true;
 }
 
-/**
- * Service handler for enabling/disabling the forcing of keeping the Kinect opened.
- */
 bool KinectServer::ForceKinectControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
 	if (mForceKinectOpen == false && req.active)
@@ -287,43 +207,19 @@ bool KinectServer::ForceKinectControl(nero_msgs::SetActive::Request &req, nero_m
 	return true;
 }
 
-/**
- * Service handler for enabling/disabling the forced generating of depth images (not publishing).
- */
-bool KinectServer::ForceDepth(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+bool KinectServer::ForceDepthControl(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
 {
-	if (mForceDepth == false && req.active)
+	if (mForceDepthOpen == false && req.active)
 		ROS_INFO("Forcing depth open");
-	else if (mForceDepth && req.active == false)
+	else if (mForceDepthOpen && req.active == false)
 		ROS_INFO("No longer forcing depth");
 
-	mForceDepth = req.active;
-	return true;
-}
-
-/**
- * Service handler for retrieving a single point cloud. Assumes the kinect is generating depth.
- * Use /KinectServer/ForceDepth to force depth generating on.
- */
-bool KinectServer::CloudServer(nero_msgs::GetCloud::Request &req, nero_msgs::GetCloud::Response &res)
-{
-	if (mKinect.isDepthGenerating() == false)
-	{
-		ROS_WARN("Received cloud request while not generating depth, starting depth now.");
-		ROS_WARN("It is suggested to use the /KinectServer/ForceDepth service to force it open.");
-		mKinect.startDepth();
-	}
-
-	mKinect.queryFrame(false, true);
-	cv::Mat cloud = mKinect.getCloud(mKinect.getDepth());
-	res.cloud = *OpenCVTools::matToPointCloud2(cloud);
+	mForceDepthOpen = req.active;
 	return true;
 }
 
 bool KinectServer::QueryCloud(nero_msgs::QueryCloud::Request &req, nero_msgs::QueryCloud::Response &res)
 {
-	ROS_INFO("Received query cloud request.");
-
 	if (mKinect.isOpened() == false)
 	{
 		ROS_WARN("Received cloud query while Kinect is offline");
@@ -411,6 +307,17 @@ bool KinectServer::ProjectPoints(nero_msgs::QueryCloud::Request &req, nero_msgs:
 	return true;
 }
 
+bool KinectServer::SendClouds(nero_msgs::SetActive::Request &req, nero_msgs::SetActive::Response &res)
+{
+	if (mForceSendCloud == false && req.active)
+		ROS_INFO("Forcing cloud publishing.");
+	else if (mForceSendCloud && req.active == false)
+		ROS_INFO("No longer forcing cloud publishing.");
+
+	mForceSendCloud = req.active;
+	return true;
+}
+
 int main(int argc, char* argv[])
 {
 	if (argc < 2)
@@ -421,7 +328,7 @@ int main(int argc, char* argv[])
 
 	// init ros
 	ros::init(argc, argv, "KinectServer");
-
+	
 	KinectServer kinectServer(argv[1]);
 
 	bool show_fps;
@@ -436,7 +343,7 @@ int main(int argc, char* argv[])
 	while (ros::ok())
 	{
 		rate.sleep();
-
+		
 		if (show_fps && kinectServer.isGenerating())
 		{
 			double cycleTime = rate.cycleTime().toSec();
@@ -444,7 +351,7 @@ int main(int argc, char* argv[])
 			{
 				fps += (1.0 / cycleTime);
 				fpsCount++;
-
+				
 				if (fpsCount == 10)
 				{
 //					ROS_INFO("Rate: %lf", std::min(desired_fps, fps / fpsCount));
@@ -453,9 +360,10 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-
+		
 		kinectServer.run();
 		ros::spinOnce();
 	}
 	return 0;
 }
+

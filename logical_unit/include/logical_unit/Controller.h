@@ -25,8 +25,6 @@
 #include "nero_msgs/ArmJoint.h"
 #include "nero_msgs/Emotion.h"
 #include "nero_msgs/SetActive.h"
-#include "nero_msgs/SegmentTable.h"
-#include "nero_msgs/GetCloud.h"
 #include <signal.h>
 
 #define MIN_ARM_Z_VALUE (-0.321)
@@ -140,10 +138,9 @@ private:
 	ros::Publisher mEmotionPublisher;				/// Publishes emotions for the head
 	ros::Publisher mBaseSpeedPublisher;				/// Publishes twist messages for the mobile base
 	ros::Publisher mGripperClosePublisher;	
+	ros::ServiceClient mFindObjectClient;			/// Service client for finding the object
 	ros::ServiceClient mSetFaceFocusClient;			/// Service client for activating face detection
 	ros::ServiceClient mForceDepthClient;
-	ros::ServiceClient mCloudClient;
-	ros::ServiceClient mSegmentTableClient;
 
 	tf::TransformListener mTransformListener;		/// Fills mOriginalPosition
 	geometry_msgs::PoseStamped mOriginalPosition;	/// Keeps track of the original position of the robot in the map
@@ -175,7 +172,7 @@ public:
 	void moveBase(geometry_msgs::Pose &goal);
 	void returnToOriginalPosition();
 	void moveHead(double x, double z);
-	bool findTable(nero_msgs::Table &table);
+	bool findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y);
 	void setFocusFace(bool active);
 	void rotateBase(float angle);
 	void positionBase(float dist);

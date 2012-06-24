@@ -107,7 +107,7 @@ geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)
 
 	if (mProjectClient.call(qc) == false || qc.response.points.size() == 0)
 	{
-		ROS_WARN("Failed to project client server.");
+		ROS_WARN("Failed to call cloud save server.");
 		return geometry_msgs::PointStamped();
 	}
 

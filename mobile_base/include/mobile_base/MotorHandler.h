@@ -32,7 +32,6 @@ protected:
 
 	//ros::Publisher mDisableUltrasonePub;		///	Disables unused ultrasone sensors
 	ros::Publisher mSpeedPub;					/// Publishes robot's speed
-	ros::Publisher mPositionPub;				/// Publishes robot's position
 
 	//ros::ServiceClient mUltrasoneDisableClient;	/// Client for disabling ultrasone sensors
 	uint16_t mCurrentUltrasoneState;				/// Keeps track of which ultrasone sensors are disabled
@@ -65,8 +64,6 @@ public:
 	void init(char *path);
 
 	void publishRobotSpeed();
-	void publishRobotPosition();
-
 	//void disableUltrasoneSensors();
 	void moveCB(const geometry_msgs::Twist& msg);
 	void positionCB(const nero_msgs::MotorPosition& msg);

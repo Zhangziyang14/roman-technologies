@@ -169,41 +169,39 @@ void Controller::moveHead(double x, double z)
 	mHeadPositionPublisher.publish(head_msg);
 }
 
-bool Controller::findTable(nero_msgs::Table &table)
+/**
+ *	Sends the id of the object to recognise to ObjectRecognition
+ */
+bool Controller::findObject(int object_id, geometry_msgs::PoseStamped &object_pose, float &min_y)
 {
-	nero_msgs::GetCloud cloudSrv;
+	setFocusFace(false);
 
-	if (mCloudClient.call(cloudSrv) == false)
+	nero_msgs::FindObject find_call;
+	find_call.request.objectId = object_id;
+
+	double timer = ros::Time::now().toSec();
+
+	ROS_INFO("Starting search for object with id: %d", object_id);
+	while (ros::Time::now().toSec() - timer < FIND_OBJECT_DURATION)
 	{
-		ROS_WARN("Cannot retrieve PointCloud.");
-		return false;
+		if (mFindObjectClient.call(find_call))
+		{
+			if (find_call.response.result == find_call.response.SUCCESS)
+			{
+				object_pose = find_call.response.pose;
+				object_pose.pose.position.z = find_call.response.table_z + GRAB_OBJECT_Z_OFFSET;
+				min_y = find_call.response.min_y;
+				return true;
+			}
+			else
+				ROS_ERROR("Something went wrong finding the object.");
+		}
+		else
+			ROS_ERROR("Failed calling finding service.");
 	}
 
-	nero_msgs::SegmentTable seg;
-	seg.request.cloud = cloudSrv.response.cloud;
-
-	if (mSegmentTableClient.call(seg) == false)
-	{
-		ROS_WARN("Cannot segment table.");
-		return false;
-	}
-
-	table = seg.response.table;
-
-	table.pose.header.stamp = ros::Time::now();
-
-	try
-	{
-		mTransformListener.waitForTransform(table.pose.header.frame_id, "/arm_frame", table.pose.header.stamp, ros::Duration(1.0));
-		mTransformListener.transformPose("/arm_frame", table.pose, table.pose);
-	}
-	catch (tf::TransformException &ex)
-	{
-		ROS_ERROR("%s",ex.what());
-		return false;
-	}
-
-	return true;
+	ROS_INFO("Finding object failed.");
+	return false;
 }
 
 void Controller::setFocusFace(bool active)
@@ -264,7 +262,7 @@ void Controller::updateRobotPosition()
 		tf::Stamped<tf::Pose> p = tf::Stamped<tf::Pose>(tf::Pose(originalPosition.getRotation(), originalPosition.getOrigin()), ros::Time::now(), originalPosition.frame_id_);
 		tf::poseStampedTFToMsg(p, mOriginalPosition);
 	}
-	catch (tf::TransformException &ex)
+	catch (tf::TransformException ex)
 	{
 		//ROS_ERROR("%s",ex.what());
 	}
@@ -372,6 +370,7 @@ uint8_t Controller::respond()
 uint8_t Controller::get(int object)
 {
 	mBusy = true;
+	float min_y = 0.f;
 
 	mLock = LOCK_ARM;
 	moveArm(MIN_ARM_X_VALUE, MIN_ARM_Z_VALUE);
@@ -401,10 +400,12 @@ uint8_t Controller::get(int object)
 	double drive_time = 0.0;
 
 	uint8_t attempts = 0;
-	nero_msgs::Table table;
 	for (attempts = 0; attempts < MAX_GRAB_ATTEMPTS; attempts++)
 	{
-		/*uint8_t i = 0;
+		// start depth for object grabbing (takes a second to start up, so we put it here)
+		setDepthForced(true);
+	
+		uint8_t i = 0;
 		for (i = 0; i < 3; i++)
 		{
 			mLock = LOCK_HEAD;
@@ -435,28 +436,18 @@ uint8_t Controller::get(int object)
 						ROS_ERROR("Failed to find object, quitting script.");
 						if (mPathingEnabled)
 							returnToOriginalPosition();
+							
+						setDepthForced(false);
 						return nero_msgs::Emotion::SAD;
 					}
 				}
 				break;
 			}
-		}*/
+		}
 
 		// found an object, now rotate base to face the object directly and
 		// create enough space between the robot and the table for the arm to move up
-		while (fabs(TABLE_DISTANCE - table.y_min) > TABLE_DISTANCE_THRESHOLD)
-		{
-			if (findTable(table) == false)
-				return nero_msgs::Emotion::SAD;
-
-			ROS_INFO("Moving by %lf. Distance: %lf", table.y_min - TABLE_DISTANCE, table.y_min);
-
-			mLock = LOCK_BASE;
-			positionBase(table.y_min - TABLE_DISTANCE);
-			waitForLock();
-		}
-
-		/*double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
+		double yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
 		while (fabs(yaw) > TARGET_YAW_THRESHOLD || fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
 		{
 			if (fabs(TABLE_DISTANCE - min_y) > TABLE_DISTANCE_THRESHOLD)
@@ -485,12 +476,12 @@ uint8_t Controller::get(int object)
 			}
 
 			yaw = -atan(objectPose.pose.position.x / objectPose.pose.position.y);
-		}*/
+		}
+		
+		setDepthForced(false); // we are done with object finding
 
-		return nero_msgs::Emotion::HAPPY;
-
-		//ROS_INFO("yaw: %lf", yaw);
-		ROS_INFO("distance: %lf", fabs(TABLE_DISTANCE - table.y_min));
+		ROS_INFO("yaw: %lf", yaw);
+		ROS_INFO("distance: %lf", fabs(TABLE_DISTANCE - min_y));
 
 		//Move arm to object and grab it
 		objectPose.pose.position.x = 0.0; // we are straight ahead of the object, so this should be 0.0 (it is most likely already close to 0.0)
@@ -802,17 +793,14 @@ void Controller::init(const char *goalPath)
 	stopPublisher				= new ros::Publisher(mNodeHandle.advertise<std_msgs::Bool>("/emergencyStop", 1));
 	mSetPathingServer			= mNodeHandle.advertiseService("/set_pathing", &Controller::setPathingCB, this);
 
+	if (waitForServiceClient(&mNodeHandle, "/cmd_object_recognition"))
+		mFindObjectClient		= mNodeHandle.serviceClient<nero_msgs::FindObject>("/cmd_object_recognition", true);
+
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
 
-	if (waitForServiceClient(&mNodeHandle, "KinectServer/ForceDepth"))
-		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepth", true);
-
-	if (waitForServiceClient(&mNodeHandle, "KinectServer/CloudServer"))
-		mCloudClient			= mNodeHandle.serviceClient<nero_msgs::GetCloud>("/KinectServer/CloudServer", true);
-
-	if (waitForServiceClient(&mNodeHandle, "TabletopSegmentation/segment_table"))
-		mSegmentTableClient		= mNodeHandle.serviceClient<nero_msgs::SegmentTable>("/TabletopSegmentation/segment_table", true);
+	if (waitForServiceClient(&mNodeHandle, "KinectServer/ForceDepthControl"))
+		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthClient", true);
 
 	setDepthForced(false);
 
@@ -840,7 +828,7 @@ void Controller::init(const char *goalPath)
 
 		convertQuaternion(mGoal.orientation, tf::createQuaternionFromYaw(yaw));
 
-	} catch (YAML::InvalidScalar &e)
+	} catch (YAML::InvalidScalar)
 	{
 		ROS_ERROR("No goal found in yaml file");
 		return;

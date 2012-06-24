@@ -12,10 +12,13 @@
   <include file="$(find image_processing)/launch/object_recognition.launch"/>
 
   <!-- start logical unit controller -->
-  <!-- include file="$(find logical_unit)/launch/controller.launch"/ -->
+  <include file="$(find logical_unit)/launch/controller.launch"/>
 
   <!-- start PS3 controller -->
   <!-- node name="PS3Controller" pkg="logical_unit" type="PS3Controller"/-->
+
+  <!-- start PersonFollower -->
+  <node name="PersonFollower" pkg="mobile_base" type="PersonFollower"/>
 
   <!-- start PersonTracker -->
   <node name="PersonTracker" pkg="image_processing" type="PersonTracker"/>

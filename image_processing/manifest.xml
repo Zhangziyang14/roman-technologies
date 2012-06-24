@@ -12,7 +12,6 @@
   <depend package="threemxl"/>
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
-  <depend package="visualization_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="image_transport"/>
   <depend package="image_server"/>
@@ -24,7 +23,6 @@
   <depend package="tabletop_collision_map_processing"/>
 
   <depend package="nero_msgs"/>
-  <depend package="opentld"/>
 </package>
 
 
