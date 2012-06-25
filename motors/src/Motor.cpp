@@ -257,6 +257,10 @@ void Motor::init(char *path)
     //motor_->init(false);
     setMode(CM_STOP_MODE);
     setEncoderCount(DEFAULT_ENCODER_COUNT);		//NB: this overrides the 3mxel default
+    mPID.p = DEFAULT_P;
+    mPID.i = DEFAULT_I;
+    mPID.d = DEFAULT_D;
+    updatePID();
     mLock = false;
 
     delete config;

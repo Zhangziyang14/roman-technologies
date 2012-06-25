@@ -8,9 +8,9 @@
 
 #define THREEMXL_SERIAL_DEVICE		"/dev/roman/threemxl"
 
-#define DEFAULT_P 0.01
+#define DEFAULT_P 0.015
 #define DEFAULT_I 0.0
-#define DEFAULT_D 0.0
+#define DEFAULT_D 0.025
 
 #define DEFAULT_ENCODER_COUNT		500
 #define SAFE_BRAKING_DECCELERATION	0.5

@@ -46,6 +46,7 @@
 #define MAX_ARM_SPEED 0.2
 #define MAX_HEAD_SPEED 0.2
 
+ros::Publisher *head_pub;
 ros::Publisher *emotion_pub;
 ros::Publisher *arm_pub;
 ros::Publisher *arm_speed_pub;
@@ -99,6 +100,7 @@ void joyCB(const sensor_msgs::Joy& msg)
 	nero_msgs::ArmJoint armspeedmsg;
 	nero_msgs::PitchYaw headspeedmsg;
 	geometry_msgs::Point personfollowmsg;
+	nero_msgs::PitchYaw headmsg;
 
 	if (pressedKey != PS3_NONE && msg.buttons[pressedKey] == 0)
 		pressedKey = PS3_NONE;
@@ -188,12 +190,20 @@ void joyCB(const sensor_msgs::Joy& msg)
 				speechmsg.arousal = 0;
 				speechmsg.command = "wake_up";
 				speech_pub->publish(speechmsg);
+
+				headmsg.pitch = 0.0;
+				headmsg.yaw = 0.0;
+				head_pub->publish(headmsg);
 				break;
 			case PS3_SELECT:
 				ROS_INFO("Publishing sleep state.");
 				speechmsg.arousal = 0;
 				speechmsg.command = "sleep";
 				speech_pub->publish(speechmsg);
+				
+				headmsg.pitch = 0.8;
+				headmsg.yaw = 0.0;
+				head_pub->publish(headmsg);
 				break;
 			case PS3_UP:
 				ROS_INFO("Publishing initial_point command.");
@@ -271,6 +281,7 @@ int main( int argc, char* argv[] )
 	speed_pub = new ros::Publisher(nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1));
 	head_speed_pub = new ros::Publisher(nh.advertise<nero_msgs::PitchYaw>("/head/cmd_vel", 1));
 	person_follow_pub = new ros::Publisher(nh.advertise<geometry_msgs::Point>("/PersonTracker/initial_point", 1));
+	head_pub = new ros::Publisher(nh.advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1));
 	pressedKey = PS3_NONE;
 
 	ros::spin();

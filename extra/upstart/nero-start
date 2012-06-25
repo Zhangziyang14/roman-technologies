@@ -16,7 +16,7 @@ fi
 
 if [ -s /etc/ros/electric/nero_base.launch ]; then
     echo "Using /etc/ros/electric/nero_base.launch" >> $log_file
-    setuidgid tux roslaunch /etc/ros/electric/nero_base.launch
+    setuidgid panda roslaunch /etc/ros/electric/nero_base.launch
 else
     echo "Using roslaunch nero_launch nero_base.launch" >> $log_file
     setuidgid root roslaunch nero_launch nero_base.launch --wait >> $log_file

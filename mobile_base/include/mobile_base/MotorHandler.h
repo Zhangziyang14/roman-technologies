@@ -17,7 +17,7 @@
 #define PID_TWEAK_STEP 			0.01
 
 #define ZERO_SPEED				0.0
-#define DEFAULT_ACCELERATION	2
+#define DEFAULT_ACCELERATION	4
 
 /// Listens to motor commands and handles them accordingly.
 class MotorHandler
