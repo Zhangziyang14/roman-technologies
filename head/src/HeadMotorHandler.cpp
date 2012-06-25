@@ -84,6 +84,9 @@ void HeadMotorHandler::positionCB(const nero_msgs::PitchYaw &msg)
 	double pitch	= msg.pitch;
 	double yaw 		= msg.yaw;
 
+	if (isnan(pitch) || isnan(yaw))
+		return;
+
 	if(msg.pitch > PITCH_UPPER_LIMIT)
 		pitch = PITCH_UPPER_LIMIT;
 

@@ -115,6 +115,12 @@ void AutonomeHeadController::trackCb(const geometry_msgs::PointStamped &msg)
     double pitch = -atan(msg.point.z / msg.point.y);
     double yaw = -atan(msg.point.x / msg.point.y);
 
+    if (isnan(pitch) || isnan(yaw))
+    {
+    	ROS_WARN("[AutonomeHeadController] Pitch or Yaw is NaN.");
+    	return;
+    }
+
     nero_msgs::PitchYaw headmsg;
     headmsg.pitch = pitch;
     headmsg.yaw = yaw;

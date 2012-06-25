@@ -88,7 +88,7 @@ void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
 		p.point.y = 0.0;
 		p.point.z = 0.0;
 		mTrackedPointPub.publish(p);
-		setFocusFace(true);
+		//setFocusFace(true);
 		return;
 	}
 
@@ -96,7 +96,7 @@ void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
 	if (mLastDepth > 0)
 	{
 		mTracking = true;
-		setFocusFace(false);
+		//setFocusFace(false);
 	}
 	else
 		ROS_WARN("Depth at person follow point is 0.");
@@ -158,7 +158,7 @@ void PersonTracker::imageColorDepthCb(const nero_msgs::ColorDepthPtr &image)
 				{
 					geometry_msgs::PointStamped hp = getWorldPoint(highPoint, "/head_frame");
 					hp.point.z += HIGH_POINT_OFFSET;
-					mHighPointPub.publish(hp);
+					//mHighPointPub.publish(hp);
 				}
 			}
 		}
@@ -181,7 +181,7 @@ bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, 
 
 	cv::Point2i min(depth.cols - 1, depth.rows - 1);
 	cv::Point2i max(0, 0);
-	cv::Point2i hp(depth.cols, depth.rows);
+	cv::Point2i hp(0, 0);
 
 	double depthSum = 0.0;
 	cv::Point2f cogSum(0.f, 0.f);
