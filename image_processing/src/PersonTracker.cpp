@@ -52,7 +52,9 @@ PersonTracker::PersonTracker() :
 	mInitialPointSub		= mNodeHandle.subscribe("/PersonTracker/initial_point", 1, &PersonTracker::initialPointCb, this);
 	mColorDepthImageSub 	= mNodeHandle.subscribe("/camera/color_depth", 1, &PersonTracker::imageColorDepthCb, this);
 	mTrackedPointPub 		= mNodeHandle.advertise<geometry_msgs::PointStamped>("/PersonTracker/point", 10);
+	mHighPointPub 			= mNodeHandle.advertise<geometry_msgs::PointStamped>("/Head/follow_point", 10);
 	mProjectClient			= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/ProjectPoints", true);
+	mFocusFaceClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
 
 	mNodeHandle.param<bool>("/PersonTracker/show_output", mShowOutput, true);
 
@@ -86,17 +88,21 @@ void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
 		p.point.y = 0.0;
 		p.point.z = 0.0;
 		mTrackedPointPub.publish(p);
+		setFocusFace(true);
 		return;
 	}
 
 	mLastDepth = mLastDepthImage.at<uint16_t>(point.y, point.x);
 	if (mLastDepth > 0)
+	{
 		mTracking = true;
+		setFocusFace(false);
+	}
 	else
 		ROS_WARN("Depth at person follow point is 0.");
 }
 
-geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)
+geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p, const char *frame)
 {
 	nero_msgs::QueryCloud qc;
 	geometry_msgs::Point gp;
@@ -114,8 +120,8 @@ geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p)
 	geometry_msgs::PointStamped result;
 	try
 	{
-		mTransformListener.waitForTransform(qc.response.points[0].header.frame_id, "/base_link", qc.response.points[0].header.stamp, ros::Duration(1.0));
-		mTransformListener.transformPoint("/base_link", qc.response.points[0], result);
+		mTransformListener.waitForTransform(qc.response.points[0].header.frame_id, frame, qc.response.points[0].header.stamp, ros::Duration(1.0));
+		mTransformListener.transformPoint(frame, qc.response.points[0], result);
 	}
 	catch (tf::TransformException &ex)
 	{
@@ -140,12 +146,20 @@ void PersonTracker::imageColorDepthCb(const nero_msgs::ColorDepthPtr &image)
 		if (abs(mLastDepthImage.at<uint16_t>(mCOG.y, mCOG.x) - mLastDepth) < ABSOLUTE_DEPTH_TOLERANCE)
 		{
 			cv::Mat person = cv::Mat::zeros(mLastDepthImage.rows, mLastDepthImage.cols, mLastDepthImage.type());
-			if (seedImage(mLastDepthImage, person, mCOG, mBBox, mCOG))
+			cv::Point2i highPoint(0, 0);
+			if (seedImage(mLastDepthImage, person, mCOG, mBBox, mCOG, highPoint))
 			{
-				geometry_msgs::PointStamped p = getWorldPoint(mCOG);
+				geometry_msgs::PointStamped p = getWorldPoint(mCOG, "/base_link");
 				mTrackedPointPub.publish(p);
 				if (mShowOutput)
 					cv::rectangle(mLastImage, mBBox, CV_RGB(0,0,255), 8, 8, 0);
+
+				if (highPoint.x && highPoint.y)
+				{
+					geometry_msgs::PointStamped hp = getWorldPoint(highPoint, "/head_frame");
+					hp.point.z += HIGH_POINT_OFFSET;
+					mHighPointPub.publish(hp);
+				}
 			}
 		}
 	}
@@ -157,7 +171,7 @@ void PersonTracker::imageColorDepthCb(const nero_msgs::ColorDepthPtr &image)
 	}
 }
 
-bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, cv::Rect &r, cv::Point2i &cog)
+bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, cv::Rect &r, cv::Point2i &cog, cv::Point2i &highPoint)
 {
 	std::queue<cv::Point2i> processQueue;
 	processQueue.push(seed);
@@ -167,6 +181,7 @@ bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, 
 
 	cv::Point2i min(depth.cols - 1, depth.rows - 1);
 	cv::Point2i max(0, 0);
+	cv::Point2i hp(depth.cols, depth.rows);
 
 	double depthSum = 0.0;
 	cv::Point2f cogSum(0.f, 0.f);
@@ -208,6 +223,9 @@ bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, 
 				cogSum.x += n.x;
 				cogSum.y += n.y;
 
+				if (n.y < hp.y)
+					hp = n;
+
 				count++;
 			}
 		}
@@ -225,6 +243,9 @@ bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, 
 	cog.y = cogSum.y / count;
 
 	mLastDepth = depthSum / count;
+
+	if (hp.y < depth.rows)
+		highPoint = hp;
 
 	return true;
 }

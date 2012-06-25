@@ -799,8 +799,8 @@ void Controller::init(const char *goalPath)
 	if (waitForServiceClient(&mNodeHandle, "/set_focus_face"))
 		mSetFaceFocusClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
 
-	if (waitForServiceClient(&mNodeHandle, "KinectServer/ForceDepthControl"))
-		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthClient", true);
+	if (waitForServiceClient(&mNodeHandle, "/KinectServer/ForceDepthControl"))
+		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthControl", true);
 
 	setDepthForced(false);
 

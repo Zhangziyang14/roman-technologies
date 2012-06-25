@@ -14,6 +14,7 @@
 #include "image_server/OpenCVTools.h"
 #include "nero_msgs/ColorDepth.h"
 #include "nero_msgs/QueryCloud.h"
+#include "nero_msgs/SetActive.h"
 
 #include "geometry_msgs/PointStamped.h"
 
@@ -21,6 +22,8 @@
 
 #define DEPTH_TOLERANCE 20 // in mm
 #define ABSOLUTE_DEPTH_TOLERANCE 200 // in mm
+
+#define HIGH_POINT_OFFSET -0.1
 
 class PersonTracker
 {
@@ -31,7 +34,9 @@ private:
 	ros::Subscriber mInitialPointSub;
 	ros::Subscriber mColorDepthImageSub;
 	ros::Publisher mTrackedPointPub;
+	ros::Publisher mHighPointPub;
 	ros::ServiceClient mProjectClient;
+	ros::ServiceClient mFocusFaceClient;
 
 	bool mShowOutput;
 	bool mTracking;
@@ -51,8 +56,10 @@ public:
 
 	void initialPointCb(const geometry_msgs::Point &point);
 
-	bool seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, cv::Rect &r, cv::Point2i &cog);
-	geometry_msgs::PointStamped getWorldPoint(cv::Point2i p);
+	bool seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, cv::Rect &r, cv::Point2i &cog, cv::Point2i &highPoint);
+	geometry_msgs::PointStamped getWorldPoint(cv::Point2i p, const char *frame = "/base_link");
+
+	inline void setFocusFace(bool active) { nero_msgs::SetActive srv;  srv.request.active = active; mFocusFaceClient.call(srv); };
 
 	void spin();
 };

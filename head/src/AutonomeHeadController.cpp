@@ -78,6 +78,7 @@ void AutonomeHeadController::init()
 	//mBumperFeedback_sub = mNodeHandle.subscribe("/bumperFeedbackTopic", 10, &SafeKeeper::bumperFeedbackCB, this);
 	mEmotion_sub = mNodeHandle.subscribe("/cmd_emotion",1, &AutonomeHeadController::expressEmotionCB, this);
 	mCommand_sub = mNodeHandle.subscribe("/cmd_head_position",1, &AutonomeHeadController::headCommandCB, this);
+	mTrackSub	 = mNodeHandle.subscribe("/Head/follow_point",1, &AutonomeHeadController::trackCb, this);
 
 	// initialise publishers
 	mRGB_pub 			= mNodeHandle.advertise<nero_msgs::RGB>("/rgbTopic", 1, true);
@@ -101,6 +102,23 @@ void AutonomeHeadController::init()
 void AutonomeHeadController::headCommandCB(const nero_msgs::PitchYaw &msg)
 {
 	mHead_movement_pub.publish(msg);
+}
+
+void AutonomeHeadController::trackCb(const geometry_msgs::PointStamped &msg)
+{
+	if (msg.header.frame_id != "/head_frame")
+	{
+		ROS_ERROR("[AutonomeHeadController] Track point not in /head_frame!");
+		return;
+	}
+
+    double pitch = -atan(msg.point.z / msg.point.y);
+    double yaw = -atan(msg.point.x / msg.point.y);
+
+    nero_msgs::PitchYaw headmsg;
+    headmsg.pitch = pitch;
+    headmsg.yaw = yaw;
+    mHead_movement_pub.publish(headmsg);
 }
 
 void AutonomeHeadController::update()

@@ -28,6 +28,8 @@
 
 #include "image_server/OpenCVTools.h"
 
+#include "tf/transform_listener.h"
+
 #define STOP_SPEED_TOLERANCE 0.005
 #define MAX_CORNERS 200
 

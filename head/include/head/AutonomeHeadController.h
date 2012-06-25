@@ -9,6 +9,7 @@
 #include "nero_msgs/RGB.h"
 #include "nero_msgs/Eyebrows.h"
 #include <stdint.h>
+#include "geometry_msgs/PointStamped.h"
 
 class AutonomeHeadController
 {
@@ -22,6 +23,7 @@ protected:
 
 	ros::Subscriber mEmotion_sub;
 	ros::Subscriber mCommand_sub;
+	ros::Subscriber mTrackSub;
 	double mReturnNeutralTime;
 
 	nero_msgs::Emotion mNeutral;
@@ -45,6 +47,7 @@ public:
 	void setExpression(nero_msgs::Emotion emotion, int soundId = -1);
 	void headCommandCB(const nero_msgs::PitchYaw &msg);
 	void expressEmotionCB(const std_msgs::UInt8 &msg);
+	void trackCb(const geometry_msgs::PointStamped &msg);
 	void init();
 	void update();
 
