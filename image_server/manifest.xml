@@ -14,8 +14,10 @@
   <depend package="image_transport"/>
   <depend package="opencv2"/>
 
+  <rosdep name="openni-dev"/>
+
   <export>
-      <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lOpenCVTools"/>
+      <cpp cflags="-I${prefix}/include -I/usr/include/ni" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lOpenCVTools -lOpenNI -lusb-1.0"/>
   </export>
 </package>
 

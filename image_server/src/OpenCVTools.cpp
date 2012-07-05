@@ -74,51 +74,87 @@ sensor_msgs::LaserScanPtr OpenCVTools::matToLaserScan(cv::Mat &cloud, bool empty
 	return output;
 }
 
-//  // Check for the most common encodings first
-//  if (encoding == enc::BGR8)   return CV_8UC3;
-//  if (encoding == enc::MONO8)  return CV_8UC1;
-//  if (encoding == enc::RGB8)   return CV_8UC3;
-//  if (encoding == enc::MONO16) return CV_16UC1;
-//  if (encoding == enc::BGR16)  return CV_16UC3;
-//  if (encoding == enc::RGB16)  return CV_16UC3;
-//  if (encoding == enc::BGRA8)  return CV_8UC4;
-//  if (encoding == enc::RGBA8)  return CV_8UC4;
-//  if (encoding == enc::BGRA16) return CV_16UC4;
-//  if (encoding == enc::RGBA16) return CV_16UC4;
+/**
+ * converts from encoding string to OpenCV type id
+ */
+int encodingToId(std::string enc)
+{
+	// cannot unfortunately be in a switch
+	if (enc == sensor_msgs::image_encodings::MONO8)
+		return CV_8UC1;
+	else if (enc == sensor_msgs::image_encodings::MONO16)
+		return CV_16UC1;
+	else if (enc == sensor_msgs::image_encodings::BGR8 ||
+			  enc == sensor_msgs::image_encodings::RGB8)
+		return CV_8UC3;
+	else if (enc == sensor_msgs::image_encodings::BGRA8 ||
+			  enc == sensor_msgs::image_encodings::RGBA8)
+		return CV_8UC4;
+	else if (enc == sensor_msgs::image_encodings::BGR16 ||
+			  enc == sensor_msgs::image_encodings::RGB16)
+		return CV_16UC3;
+	else if (enc == sensor_msgs::image_encodings::BGRA16 ||
+			  enc == sensor_msgs::image_encodings::RGBA16)
+		return CV_16UC4;
+	else
+		return -1;
+}
 
-cv::Mat OpenCVTools::imageToMat(sensor_msgs::Image image) {
-	int intType = 0;
-	if(image.encoding == sensor_msgs::image_encodings::BGR8) {
-		intType = CV_8UC3;
-	} else if(image.encoding == sensor_msgs::image_encodings::MONO16) {
-		intType = CV_16UC1;
+/**
+ * converts from OpenCV type id to encoding string to
+ */
+std::string idToEncoding(int type)
+{
+	// cannot unfortunately be in a switch
+	switch (type)
+	{
+	case CV_8UC1:
+		return sensor_msgs::image_encodings::MONO8;
+	case CV_16UC1:
+		return sensor_msgs::image_encodings::MONO16;
+	case CV_8UC3:
+		return sensor_msgs::image_encodings::BGR8;
+	case CV_8UC4:
+		return sensor_msgs::image_encodings::BGRA8;
+	case CV_16UC3:
+		return sensor_msgs::image_encodings::BGR16;
+	case CV_16UC4:
+		return sensor_msgs::image_encodings::BGRA16;
+	default:
+		return "";
 	}
-	cv::Mat matTemp(image.height, image.width, intType);
+}
+
+/**
+ * Converts sensor_msgs::Image to cv::Mat
+ */
+cv::Mat OpenCVTools::imageToMat(sensor_msgs::Image image) {
+	int type = encodingToId(image.encoding);
+	if (type == -1)
+	{
+		ROS_ERROR("[OpenCVTools] Invalid encoding specified: %s", image.encoding.c_str());
+		return cv::Mat();
+	}
+
+	cv::Mat matTemp(image.height, image.width, type);
 	memcpy(matTemp.data, &image.data[0], image.step * image.height);
 	return matTemp;
 }
 
+/**
+ * Converts sensor_msgs::ImageConstPtr to cv::Mat
+ */
 cv::Mat OpenCVTools::imageToMat(const sensor_msgs::ImageConstPtr &image)
 {
-	int intType = 0;
-	if(image->encoding == sensor_msgs::image_encodings::BGR8) {
-		intType = CV_8UC3;
-	} else if(image->encoding == sensor_msgs::image_encodings::MONO16) {
-		intType = CV_16UC1;
-	}
-	cv::Mat matTemp(image->height, image->width, intType);
-	memcpy(matTemp.data, &image->data[0], image->step * image->height);
-	return matTemp;
+	return imageToMat(*image);
 }
 
+/**
+ * Converts a cv::Mat to sensor_msgs::ImagePtr
+ */
 sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
 {
 	sensor_msgs::ImagePtr output(new sensor_msgs::Image());
-	if (mat.type() != CV_8UC3 && mat.type() != CV_16UC1)
-	{
-		ROS_WARN("Cannot convert non-uint8 to sensor_msgs::Image. Depth = %d", mat.type());
-		return output;
-	}
 
 	// copy header
 	output->header.stamp = ros::Time::now();
@@ -126,11 +162,7 @@ sensor_msgs::ImagePtr OpenCVTools::matToImage(cv::Mat mat)
 	output->height = mat.rows;
 	output->step = mat.cols * mat.elemSize();
 	output->is_bigendian = false;
-	if (mat.type() == CV_8UC3) {
-		output->encoding = "bgr8";
-	} else if (mat.type() == CV_16UC1) {
-		output->encoding = "mono16";
-	}
+	output->encoding = idToEncoding(mat.type());
 
 	// copy actual data
 	output->data.assign(mat.data, mat.data + size_t(mat.rows * output->step));
@@ -152,7 +184,6 @@ sensor_msgs::PointCloud2Ptr OpenCVTools::matToPointCloud2(cv::Mat &mat)
 	output->is_bigendian = false;
 	output->point_step = 4*sizeof(float);
 	output->row_step = output->width * output->point_step;
-
 
 	sensor_msgs::PointField pf;
 	pf.name = "x";
