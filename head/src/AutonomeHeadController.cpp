@@ -88,7 +88,7 @@ void AutonomeHeadController::init()
 
 	// set the head to sleep angle
 	nero_msgs::PitchYaw msg;
-	msg.pitch = 0.8;
+	msg.pitch = 0.0;
 	msg.yaw = 0.0;
 	mHead_movement_pub.publish(msg);
 	setExpression(mSleep);

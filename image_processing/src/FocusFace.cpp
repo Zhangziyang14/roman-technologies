@@ -62,13 +62,13 @@ void pruneFeatures(std::vector<cv::Point2f> &f)
 }
 
 FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const char *frontal_face_2) :
-		mImageTransport(mNodeHandle), mStartTime(0)
+		mImageTransport(mNodeHandle),
+		mStartTime(0)
 {
 	image_transport::TransportHints hints("compressed", ros::TransportHints(), mNodeHandle);
 	mImageSub 			= mImageTransport.subscribe("/camera/rgb/image_color", 5, &FocusFace::imageCb, this, hints);
-	mHeadPosSub 		= mNodeHandle.subscribe("/headPositionFeedbackTopic", 1, &FocusFace::headPositionCb, this);
 	mHeadSpeedSub 		= mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &FocusFace::headSpeedCb, this);
-	mHeadPosPub 		= mNodeHandle.advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1);
+	mHeadPosPub 		= mNodeHandle.advertise<geometry_msgs::PointStamped>("/Head/look_at", 1);
 
 	mActiveServer 		= mNodeHandle.advertiseService("/set_focus_face", &FocusFace::setActiveCB, this);
 	mImageControlClient	= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/RGBControl");
@@ -77,8 +77,6 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 
 	mFaceCenter.x = mFaceCenter.y = 0.f;
 	mFaceCenterPct.x = mFaceCenterPct.y = 0.f;
-	mCurrentOrientation.pitch = 0.f;
-	mCurrentOrientation.yaw = 0.f;
 	mActive = false;
 	setRGBOutput(false);
 	setDepthForced(false);
@@ -94,6 +92,9 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
     mNodeHandle.param<bool>("/FocusFace/display_frames", mDisplayFrames, true);
     mNodeHandle.param<bool>("/FocusFace/detect_only", mDetectOnly, false);
     mNodeHandle.param<bool>("/FocusFace/send_head_position", mSendHeadPosition, true);
+    mNodeHandle.param<double>("/FocusFace/min_height", mMinHeight, 1.1);
+    mNodeHandle.param<double>("/FocusFace/max_height", mMaxHeight, 2.0);
+    mNodeHandle.param<double>("/FocusFace/max_distance", mMaxDistance, 3.0);
 
     if (mDisplayFrames)
     {
@@ -107,11 +108,6 @@ FocusFace::FocusFace(const char *frontal_face, const char *profile_face, const c
 void FocusFace::headSpeedCb(const nero_msgs::PitchYaw &msg)
 {
 	mCurrentSpeed = msg;
-}
-
-void FocusFace::headPositionCb(const nero_msgs::PitchYaw &msg)
-{
-	mCurrentOrientation = msg;
 }
 
 void FocusFace::sendHeadPosition()
@@ -145,14 +141,35 @@ void FocusFace::sendHeadPosition()
     	return;
     }
 
-    double pitch = -atan(p.point.y / p.point.z);
-    double yaw = -atan(p.point.x / p.point.z);
+	geometry_msgs::PointStamped basePos;
+	try
+	{
+		mTransformListener.waitForTransform(p.header.frame_id, "/link", p.header.stamp, ros::Duration(1.0));
+		mTransformListener.transformPoint("/base_link", p, basePos);
+	}
+	catch (tf::TransformException &ex)
+	{
+		ROS_ERROR("%s", ex.what());
+		return;
+	}
 
-    nero_msgs::PitchYaw msg;
-    msg.pitch = pitch + mCurrentOrientation.pitch;
-    msg.yaw = yaw + mCurrentOrientation.yaw;
-    if (isnan(msg.pitch) || isnan(msg.yaw))
-    	return;
+	if (basePos.point.z < mMinHeight || basePos.point.z > mMaxHeight || basePos.point.y > mMaxDistance)
+	{
+		ROS_INFO("Found face outside of range. (%lf, %lf)", basePos.point.y, basePos.point.z);
+		return;
+	}
+
+	geometry_msgs::PointStamped msg;
+	try
+	{
+		mTransformListener.waitForTransform(p.header.frame_id, "/head_frame", p.header.stamp, ros::Duration(1.0));
+		mTransformListener.transformPoint("/head_frame", p, msg);
+	}
+	catch (tf::TransformException &ex)
+	{
+		ROS_ERROR("%s", ex.what());
+		return;
+	}
 
     mHeadPosPub.publish(msg);
 }

@@ -42,6 +42,7 @@ class FocusFace
 private:
 	ros::NodeHandle mNodeHandle;
 	image_transport::ImageTransport mImageTransport;
+	tf::TransformListener mTransformListener;
 
 	cv::CascadeClassifier mFrontalFaceCascade;
 	cv::CascadeClassifier mProfileCascade;
@@ -61,13 +62,15 @@ private:
 	ros::ServiceClient mQueryCloudClient;
 	ros::ServiceClient mForceDepthClient;
 
-	nero_msgs::PitchYaw mCurrentOrientation;
 	nero_msgs::PitchYaw mCurrentSpeed;
 	bool mActive;
 	double mScale;
 	bool mDisplayFrames;
 	bool mDetectOnly;
 	bool mSendHeadPosition;
+	double mMinHeight;
+	double mMaxHeight;
+	double mMaxDistance;
 
 	inline bool canMoveHead() { return mCurrentSpeed.pitch < STOP_SPEED_TOLERANCE && mCurrentSpeed.yaw < STOP_SPEED_TOLERANCE; };
 

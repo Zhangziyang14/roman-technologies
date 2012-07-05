@@ -837,7 +837,7 @@ void Controller::init(const char *goalPath)
 
 	usleep(1000000);
 
-	sleep();
+	wakeUp();
 	ROS_INFO("Initialised Controller");
 }
 
