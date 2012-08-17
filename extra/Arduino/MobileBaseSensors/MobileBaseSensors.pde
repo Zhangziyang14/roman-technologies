@@ -1,26 +1,26 @@
 //ROS
 #include "ros.h"
 #include "mobile_base/SensorFeedback.h"
-//#include <head/Eyebrows.h>
+#include <head/Eyebrows.h>
 #include <std_msgs/UInt8.h>
 #include <mobile_base/disableUltrasone.h>
 #include <Wire.h>
-//#include <Servo.h>
-//#include <DigiServ.h>
-//#include <FlexiTimer2.h>
+#include <Servo.h>
+#include <DigiServ.h>
+#include <FlexiTimer2.h>
 
-//#define EYEBROW_LEFT A3
-//#define EYEBROW_RIGHT A1//
-//#define EYEBROW_LIFT A0
+#define EYEBROW_LEFT A3
+#define EYEBROW_RIGHT A1
+#define EYEBROW_LIFT A0
 
-//#define LIFT_LOWER_LIMIT 94
-//#define LIFT_UPPER_LIMIT 130
-//#define EYEBROW_LOWER_LIMIT 60
-//#define EYEBROW_UPPER_LIMIT 120
+#define LIFT_LOWER_LIMIT 94
+#define LIFT_UPPER_LIMIT 130
+#define EYEBROW_LOWER_LIMIT 60
+#define EYEBROW_UPPER_LIMIT 120
 
-//#define PIN_POT		A0
-//#define PIN_MOTOR_L	5
-//#define PIN_MOTOR_R	6
+#define PIN_POT		A0
+#define PIN_MOTOR_L	5
+#define PIN_MOTOR_R	6
 
 #define SENSOR_ADDRESS(x) (0x70 + x)
 
@@ -45,11 +45,11 @@ const unsigned short bumperPin[BUMPER_COUNT] =
 	11,		// BUMPER_REAR_RIGHT
 };
 
-//Servo eyebrowLeft;
-//Servo eyebrowRight;
+Servo eyebrowLeft;
+Servo eyebrowRight;
 
-//PID pid = {5.0, 0.0, 10.0, 255};
-//DigiServ digi_lift(PIN_MOTOR_L, PIN_MOTOR_R, PIN_POT, pid);
+PID pid = {5.0, 0.0, 10.0, 255};
+DigiServ digi_lift(PIN_MOTOR_L, PIN_MOTOR_R, PIN_POT, pid);
 
 ros::NodeHandle nh;
 
@@ -61,15 +61,13 @@ std_msgs::UInt8 bump_msg;
 ros::Publisher feedback_pub("/sensorFeedbackTopic", &sensor_msg);
 //topic that issues a warning when bumper hits something
 ros::Publisher bumper_pub("/bumperFeedbackTopic", &bump_msg);
-/*
+
 int old_left_eb_angle, old_right_eb_angle, old_lift_angle;
 int new_left_eb_angle, new_right_eb_angle, new_lift_angle;
 unsigned long start_time;
 unsigned int left_eb_angle_time;
 unsigned int right_eb_angle_time;
-//unsigned int lift_time;
-*/
-//uint16_t enableUltrasoneMask;
+unsigned int lift_time;
 
 //uint16_t enableUltrasoneMask;
 
@@ -98,7 +96,7 @@ void readSensors()
 	}
 
 feedback_pub.publish(&sensor_msg);
-//delay(100);
+delay(100);
 }
 
 /*
@@ -181,7 +179,7 @@ ros::ServiceServer<mobile_base::disableUltrasone::Request, mobile_base::disableU
 
 /** EYEBROWS
  * Updates eyebrow angles if necessary
- 
+ */
 void updateEyebrowEvent()
 {
 	unsigned long now = millis();
@@ -189,7 +187,7 @@ void updateEyebrowEvent()
 
 	int left_eb_angle = 0;
 	int right_eb_angle = 0;
-//	int lift_angle = old_lift_angle;
+	int lift_angle = old_lift_angle;
 
 	// are we set on a timer?
 	if (left_eb_angle_time)
@@ -230,7 +228,7 @@ void updateEyebrowEvent()
 	}
 
 	// are we set on a timer?
-/*	if (lift_time)
+	if (lift_time)
 	{
 		// did our time end?
 		if (now - start_time > lift_time)
@@ -246,26 +244,25 @@ void updateEyebrowEvent()
 		}
 	}
 
-        //digi_lift.setAngle(lift_angle);
-
+        digi_lift.setAngle(lift_angle);
 }
-*/
+
 /**
  * message order: lift left right
- 
+ */
 void setEyebrowCB(const head::Eyebrows &msg)
 {
 	old_left_eb_angle = new_left_eb_angle;
 	old_right_eb_angle = new_right_eb_angle;
-//	old_lift_angle = new_lift_angle;
+	old_lift_angle = new_lift_angle;
 
 	new_left_eb_angle = msg.left;
 	new_right_eb_angle = msg.right;
-//	new_lift_angle = msg.lift;
+	new_lift_angle = msg.lift;
 
 	left_eb_angle_time = max(1, msg.left_time);
 	right_eb_angle_time = max(1, msg.right_time);
-//	lift_time = max(1, msg.lift_time);
+	lift_time = max(1, msg.lift_time);
 
         if (new_left_eb_angle > EYEBROW_UPPER_LIMIT)
 		new_left_eb_angle = EYEBROW_UPPER_LIMIT;
@@ -288,46 +285,46 @@ void setEyebrowCB(const head::Eyebrows &msg)
 
 //Subscriber to eyebrow commands from eyebrowTopic
 ros::Subscriber<head::Eyebrows> servo_sub("/eyebrowTopic", &setEyebrowCB);
-*/
+
 void setup()
 {
 	//attach interrupt 0(= pin 2) 
-	//attachInterrupt(0, bumperHit, RISING);
-	//pinMode(bumperPin[BUMPER_FRONT], INPUT);
-	//pinMode(bumperPin[BUMPER_REAR], INPUT);
-	//pinMode(bumperPin[BUMPER_REAR_LEFT], INPUT);
-	//pinMode(bumperPin[BUMPER_REAR_RIGHT], INPUT);
+	attachInterrupt(0, bumperHit, RISING);
+	pinMode(bumperPin[BUMPER_FRONT], INPUT);
+	pinMode(bumperPin[BUMPER_REAR], INPUT);
+	pinMode(bumperPin[BUMPER_REAR_LEFT], INPUT);
+	pinMode(bumperPin[BUMPER_REAR_RIGHT], INPUT);
 	//led
-	//pinMode(13, OUTPUT);
+	pinMode(13, OUTPUT);
 
-	//Wire.begin();
+	Wire.begin();
 
 	nh.initNode();
-/*
+
 	//eyebrow init
 	old_left_eb_angle = 0;
 	old_right_eb_angle = 0;
-	//old_lift_angle = LIFT_LOWER_LIMIT;
+	old_lift_angle = LIFT_LOWER_LIMIT;
 	new_left_eb_angle = 0;
 	new_right_eb_angle = 0;
-	//new_lift_angle = LIFT_LOWER_LIMIT;
+	new_lift_angle = LIFT_LOWER_LIMIT;
 	left_eb_angle_time = 0;
 	right_eb_angle_time = 0;
-//	lift_time = 0;
+	lift_time = 0;
 	start_time = 0;
 	nh.subscribe(servo_sub);
-	*/
+	
         //eyebrowLeft.attach(EYEBROW_LEFT);
 	//eyebrowRight.attach(EYEBROW_RIGHT);
 	//lift.attach(EYEBROW_LIFT);
 	//lift.write(150);
 	//delay(500);
 
-	//FlexiTimer2::set(150, 1.0/1000, updateEyebrowEvent); // call every 150ms
-	//FlexiTimer2::start();
+	FlexiTimer2::set(150, 1.0/1000, updateEyebrowEvent); // call every 150ms
+	FlexiTimer2::start();
 
 	nh.advertise(feedback_pub);
-	//nh.advertise(bumper_pub);
+	nh.advertise(bumper_pub);
 }
 
 void loop()
