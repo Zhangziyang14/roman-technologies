@@ -2,6 +2,7 @@
 #include "ros.h"
 #include <Servo.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/UInt16.h>
 #include <FlexiTimer2.h>
 #include <nero_msgs/Eyebrows.h>
 
@@ -26,23 +27,56 @@ unsigned int right_eb_angle_time;
 
 
 ros::NodeHandle nh;
+std_msgs::UInt16 bat_log;
+ros::Publisher bat_log_pub("/batteryLogTopic", &bat_log);
+
 std_msgs::Bool bat_msg;
 ros::Publisher bat_pub("/batteryTopic", &bat_msg);
 
-void readBatteryPower()
+int readBatteryPower()
 {
-   int adcValue = analogRead(batteryPin);
-   if (adcValue < batteryThreshold) {
+  
+     
+  bat_msg.data = true; 
+  bat_pub.publish(&bat_msg);
+   
+   return analogRead(batteryPin);
+
+   /*if (adcValue < batteryThreshold) {
      bat_msg.data = true; 
      bat_pub.publish(&bat_msg); 
-   }
+   }*/
 }
 
+int bat_count = 0;
 
+static const int movingAverageSize = 100;
+int batteryValues[movingAverageSize];
+int index = 0;
 void loop()
 {
-        readBatteryPower();
-	nh.spinOnce(); 
+  
+  
+   if (bat_count > 10000){
+     batteryValues[index] = readBatteryPower();
+     index = (index+1) % movingAverageSize;
+     unsigned long sum = 0;
+     int elements = 0;
+     for (int i = 0; i < movingAverageSize; i++)
+     {
+       if (batteryValues[i] != 0) {
+         sum += batteryValues[i];
+         elements++; 
+       }
+        
+     }
+     bat_log.data = sum / elements;
+     bat_log_pub.publish(&bat_log);
+     bat_count = 0;
+   }
+   else
+     bat_count++;
+   nh.spinOnce(); 
   
 }
 
@@ -160,6 +194,8 @@ void setup()
 	FlexiTimer2::start();
 
 	nh.advertise(bat_pub);
+	nh.advertise(bat_log_pub);
+        memset(batteryValues, 0, sizeof(int)*movingAverageSize);
 
 }
 
