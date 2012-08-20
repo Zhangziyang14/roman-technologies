@@ -14,8 +14,7 @@
  */
 void imageCb(const sensor_msgs::ImageConstPtr &image)
 {
-	cv::Mat frame(image->height, image->width, CV_16UC1);
-	OpenCVTools::imageToMat(image, frame);
+	cv::Mat frame = OpenCVTools::imageToMat(image);
 
 	cv::imshow("Display", frame);
 }

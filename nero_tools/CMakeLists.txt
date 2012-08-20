@@ -23,10 +23,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(KinectDisplay src/KinectDisplay.cpp)
 rosbuild_add_executable(PGMToObj src/PGMToObj.cpp)
-rosbuild_add_executable(PS3Controller src/PS3Controller.cpp)
+rosbuild_add_executable(PS3Controller src/PS3Controller.cpp src/ControllerMode.cpp src/DriveMode.cpp)
 
 target_link_libraries(KinectDisplay opencv_core opencv_imgproc opencv_highgui)
 target_link_libraries(PGMToObj yaml-cpp opencv_core opencv_imgproc opencv_highgui)
+target_link_libraries(PS3Controller boost_system)
 
 
 #common commands for building c++ executables and libraries
