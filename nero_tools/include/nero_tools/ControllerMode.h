@@ -40,6 +40,8 @@ enum PS3Key
     PS3_S,
 
     PS3_HOME,
+
+    PS3_BUTTON_MAX,
 };
 
 enum PS3Axis
@@ -92,7 +94,7 @@ private:
 public:
 	ControllerMode(ros::NodeHandle *nodeHandle);
 
-	virtual void handleController(const sensor_msgs::Joy &previousJoy, const sensor_msgs::Joy &joy);
+	virtual void handleController(std::vector<int> previousButtons, std::vector<float> previousAxes, const sensor_msgs::Joy &joy);
 	virtual void onActivate() {};
 	virtual void onDeactivate() {};
 	virtual void runOnce() {};
@@ -101,7 +103,7 @@ public:
 	void sendSpeechCommand(std::string command);
 	void sendHeadPosition(float pitch, float yaw);
 
-	bool pressed(const sensor_msgs::Joy &previousJoy, const sensor_msgs::Joy &joy, PS3Key key);
+	bool pressed(std::vector<int> previousButtons, const sensor_msgs::Joy &joy, PS3Key key);
 };
 
 #endif /* PS3MODE_H_ */

@@ -45,7 +45,7 @@ class DriveMode : public ControllerMode
 public:
 	DriveMode(ros::NodeHandle *nodeHandle);
 
-	void handleController(const sensor_msgs::Joy &previousJoy, const sensor_msgs::Joy &joy);
+	void handleController(std::vector<int> previousButtons, std::vector<float> previousAxes, const sensor_msgs::Joy &joy);
 
 	void sendSpeed(float linearScale, float angularScale);
 	void sendArmPosition(float x, float z);

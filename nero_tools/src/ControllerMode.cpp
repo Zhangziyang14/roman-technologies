@@ -17,25 +17,25 @@ ControllerMode::ControllerMode(ros::NodeHandle *nodeHandle) :
 	mHeadPosPub			= mNodeHandle->advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1);
 }
 
-bool ControllerMode::pressed(const sensor_msgs::Joy &previousJoy, const sensor_msgs::Joy &joy, PS3Key key)
+bool ControllerMode::pressed(std::vector<int> previousButtons, const sensor_msgs::Joy &joy, PS3Key key)
 {
-	return previousJoy.buttons[key] == 0 && joy.buttons[key] == 1;
+	return previousButtons[key] == 0 && joy.buttons[key] == 1;
 }
 
-void ControllerMode::handleController(const sensor_msgs::Joy &previousJoy, const sensor_msgs::Joy &joy)
+void ControllerMode::handleController(std::vector<int> previousButtons, std::vector<float> previousAxes, const sensor_msgs::Joy &joy)
 {
 	// Emotions
-	if (pressed(previousJoy, joy, PS3_X))
+	if (pressed(previousButtons, joy, PS3_X))
 		sendEmotion(nero_msgs::Emotion::HAPPY);
-	if (pressed(previousJoy, joy, PS3_O))
+	if (pressed(previousButtons, joy, PS3_O))
 		sendEmotion(nero_msgs::Emotion::SURPRISED);
-	if (pressed(previousJoy, joy, PS3_S))
+	if (pressed(previousButtons, joy, PS3_S))
 		sendEmotion(nero_msgs::Emotion::SAD);
-	if (pressed(previousJoy, joy, PS3_T))
+	if (pressed(previousButtons, joy, PS3_T))
 		sendEmotion(nero_msgs::Emotion::ERROR);
 
 	// Wake up / sleep
-	if (pressed(previousJoy, joy, PS3_START))
+	if (pressed(previousButtons, joy, PS3_START))
 	{
 		if (mAwake)
 		{
@@ -52,9 +52,9 @@ void ControllerMode::handleController(const sensor_msgs::Joy &previousJoy, const
 	}
 
 	// fetch commands
-	if (pressed(previousJoy, joy, PS3_LEFT))
+	if (pressed(previousButtons, joy, PS3_LEFT))
 		sendSpeechCommand("cola");
-	if (pressed(previousJoy, joy, PS3_RIGHT))
+	if (pressed(previousButtons, joy, PS3_RIGHT))
 		sendSpeechCommand("juice");
 }
 

@@ -14,35 +14,35 @@ DriveMode::DriveMode(ros::NodeHandle *nodeHandle) :
 	mSpeedPub 			= nodeHandle->advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 	mArmPosPub			= nodeHandle->advertise<geometry_msgs::Pose>("/cmd_arm_position", 1);
 	mGripperStatePub	= nodeHandle->advertise<std_msgs::Bool>("/cmd_gripper_state", 1);
-	mPingState 			= nodeHandle->advertise<std_msgs::Bool>("/cmd_gripper", 1);
+	mPingStatePub		= nodeHandle->advertise<std_msgs::Bool>("/cmd_gripper", 1);
 
 	ROS_INFO("[DriveMode] Initialized.");
 }
 
-void DriveMode::handleController(const sensor_msgs::Joy &previousJoy, const sensor_msgs::Joy &joy)
+void DriveMode::handleController(std::vector<int> previousButtons, std::vector<float> previousAxes, const sensor_msgs::Joy &joy)
 {
-	ControllerMode::handleController(previousJoy, joy);
+	ControllerMode::handleController(previousButtons, previousAxes, joy);
 
 	// speed of the base
 	if (joy.axes[PS3_AXIS_LEFT_HORIZONTAL] || joy.axes[PS3_AXIS_RIGHT_VERTICAL]) // we are sending speed
 		sendSpeed(joy.axes[PS3_AXIS_LEFT_HORIZONTAL], joy.axes[PS3_AXIS_RIGHT_VERTICAL]);
-	else if (previousJoy.axes[PS3_AXIS_LEFT_HORIZONTAL] || previousJoy.axes[PS3_AXIS_RIGHT_VERTICAL]) // we stopped sending speed
+	else if (previousAxes[PS3_AXIS_LEFT_HORIZONTAL] || previousAxes[PS3_AXIS_RIGHT_VERTICAL]) // we stopped sending speed
 		sendSpeed(0.f, 0.f);
 
 	// arm
-	if (pressed(previousJoy, joy, PS3_R1))
+	if (pressed(previousButtons, joy, PS3_R1))
 		sendArmPosition(ARM_POS_UP_X, ARM_POS_UP_X);
-	if (pressed(previousJoy, joy, PS3_R2))
+	if (pressed(previousButtons, joy, PS3_R2))
 		sendArmPosition(ARM_POS_DOWN_X, ARM_POS_DOWN_Z);
 
 	// gripper
-	if (pressed(previousJoy, joy, PS3_L1))
+	if (pressed(previousButtons, joy, PS3_L1))
 		sendGripperState(true);
-	if (pressed(previousJoy, joy, PS3_R1))
+	if (pressed(previousButtons, joy, PS3_L2))
 		sendGripperState(false);
 
 	// ping sensor
-	if (pressed(previousJoy, joy, PS3_SELECT))
+	if (pressed(previousButtons, joy, PS3_SELECT))
 	{
 		mPingState = !mPingState;
 		sendPingState(mPingState);
@@ -93,6 +93,7 @@ void DriveMode::sendPingState(bool state)
 
 void DriveMode::sendSpeedEvent()
 {
+	ROS_INFO("Speed Event.");
 	if (mActive)
 	{
 		mTimer.expires_at(mTimer.expires_at() + boost::posix_time::seconds(1));
@@ -104,19 +105,23 @@ void DriveMode::sendSpeedEvent()
 
 void DriveMode::onActivate()
 {
-	boost::asio::deadline_timer t(mIOService, boost::posix_time::seconds(1));
-	mTimer.async_wait(boost::bind(&DriveMode::sendSpeedEvent, this));
+	ROS_INFO("[DriveMode] Activated.");
+
+	//boost::asio::deadline_timer t(mIOService, boost::posix_time::seconds(1));
+	//mTimer.async_wait(boost::bind(&DriveMode::sendSpeedEvent, this));
 
 	mActive = true;
 }
 
 void DriveMode::runOnce()
 {
-	mIOService.run_one();
+	//mIOService.run_one();
 }
 
 void DriveMode::onDeactivate()
 {
+	ROS_INFO("[DriveMode] Deactivated.");
+
 	sendSpeed(0.f, 0.f);
 	mActive = false;
 }

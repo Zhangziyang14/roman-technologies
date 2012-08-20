@@ -8,6 +8,11 @@
 #include "ros/ros.h"
 #include "nero_tools/PS3Controller.h"
 
+bool pressed(std::vector<int> previousButtons, const sensor_msgs::Joy &joy, PS3Key key)
+{
+	return previousButtons[key] == 0 && joy.buttons[key] == 1;
+}
+
 PS3Controller::PS3Controller() :
 	mPS3ModeCount(0),
 	mPS3ModeIndex(0),
@@ -22,32 +27,43 @@ PS3Controller::PS3Controller() :
 
 void PS3Controller::controllerCb(const sensor_msgs::Joy& joy)
 {
-	if (mPreviousJoy.buttons[PS3_LEFT_STICK] && joy.buttons[PS3_RIGHT_STICK]) // shift up one mode
+	if (mPreviousButtons.empty())
+		mPreviousButtons = joy.buttons; // first callback trigger
+	if (mPreviousAxes.empty())
+		mPreviousAxes = joy.axes;
+
+	// toggle modes
+	if (mPS3ModeCount > 1)
 	{
-		if (getCurrentMode())
-			getCurrentMode()->onDeactivate();
-		mPS3ModeIndex = (mPS3ModeIndex + 1) % MAX_MODES;
-		if (getCurrentMode())
-			getCurrentMode()->onActivate();
-	}
-	else if (joy.buttons[PS3_LEFT_STICK] && mPreviousJoy.buttons[PS3_RIGHT_STICK]) // shift down one mode
-	{
-		if (getCurrentMode())
-			getCurrentMode()->onDeactivate();
-		mPS3ModeIndex = (mPS3ModeIndex == 0 ? mPS3ModeCount : mPS3ModeIndex) - 1;
-		if (getCurrentMode())
-			getCurrentMode()->onActivate();
+		if (mPreviousButtons[PS3_LEFT_STICK] && pressed(mPreviousButtons, joy, PS3_RIGHT_STICK)) // shift up one mode
+		{
+			if (getCurrentMode())
+				getCurrentMode()->onDeactivate();
+			mPS3ModeIndex = (mPS3ModeIndex + 1) % mPS3ModeCount;
+			if (getCurrentMode())
+				getCurrentMode()->onActivate();
+		}
+		else if (pressed(mPreviousButtons, joy, PS3_LEFT_STICK) && mPreviousButtons[PS3_RIGHT_STICK]) // shift down one mode
+		{
+			if (getCurrentMode())
+				getCurrentMode()->onDeactivate();
+			mPS3ModeIndex = (mPS3ModeIndex == 0 ? mPS3ModeCount : mPS3ModeIndex) - 1;
+			if (getCurrentMode())
+				getCurrentMode()->onActivate();
+		}
 	}
 
 	if (getCurrentMode() == NULL)
 	{
 		ROS_ERROR("PS3Mode with index %d does not exist!", mPS3ModeIndex);
-		mPreviousJoy = joy;
+		mPreviousButtons = joy.buttons;
+		mPreviousAxes = joy.axes;
 		return;
 	}
 
-	getCurrentMode()->handleController(mPreviousJoy, joy);
-	mPreviousJoy = joy;
+	getCurrentMode()->handleController(mPreviousButtons, mPreviousAxes, joy);
+	mPreviousButtons = joy.buttons;
+	mPreviousAxes = joy.axes;
 }
 
 void PS3Controller::addMode(ControllerMode *mode)

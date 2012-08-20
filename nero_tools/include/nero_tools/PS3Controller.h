@@ -26,7 +26,9 @@ private:
 	int mPS3ModeCount;
 	int mPS3ModeIndex;
 
-	sensor_msgs::Joy mPreviousJoy;
+	std::vector<int> mPreviousButtons;
+	std::vector<float> mPreviousAxes;
+
 	bool mPS3Active;
 
 	inline ControllerMode* getCurrentMode() { return mPS3Modes[mPS3ModeIndex]; };
