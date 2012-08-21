@@ -75,7 +75,7 @@ void PS3Controller::batteryLogCb(const std_msgs::UInt16& log)
 		sensor_msgs::JoyFeedbackArray msg;
 
 		sensor_msgs::JoyFeedback feedback;
-		feedback.id = sensor_msgs::JoyFeedback::TYPE_RUMBLE;
+		feedback.type = sensor_msgs::JoyFeedback::TYPE_RUMBLE;
 		feedback.intensity = 1.f;
 		msg.array.push_back(feedback);
 
