@@ -21,15 +21,15 @@
 #define EXT_INIT_MODE_SHOULDER_SPEED	(-0.4)	 // negative speed for downwards angle initialization
 #define EXT_INIT_MODE_SIDEJOINT_SPEED	(-0.4)	 // negative speed for outwards angle initialization
 #define DEFAULT_SPEED 					(0.5)
-#define DEFAULT_ACCEL					(0.5)
+#define DEFAULT_ACCEL					(1.0)
 
 #define SHOULDERMOTOR_OFFSET			(1.66)
 #define SIDEJOINT_OFFSET				(0.48)
 
 #define SHOULDERMOTOR_MIN_ANGLE 		(-1.1)	//Relative to virtual origin
-#define SHOULDERMOTOR_MAX_ANGLE 		(2.16 - SHOULDERMOTOR_OFFSET)
+#define SHOULDERMOTOR_MAX_ANGLE 		(1.96 - SHOULDERMOTOR_OFFSET)
 
-#define SIDEJOINT_MIN_ANGLE			    (-0.07 - SIDEJOINT_OFFSET)
+#define SIDEJOINT_MIN_ANGLE			    (0.14 - SIDEJOINT_OFFSET)
 #define SIDEJOINT_MAX_ANGLE				(1.55)	//Relative to virtual origin
 
 #define SHOULDERMOTOR_START_POS			(-1.1)	//

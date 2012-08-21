@@ -2,7 +2,7 @@
  * ArmMode.h
  *
  *  Created on: Aug 21, 2012
- *      Author: parallels
+ *      Author: hans
  */
 
 #ifndef ARMMODE_H_
@@ -11,8 +11,8 @@
 #include "nero_tools/ControllerMode.h"
 #include "nero_msgs/ArmJoint.h"
 
-#define MAX_WRIST_SPEED 0.2f
-#define MAX_UPPER_SPEED 0.2f
+#define MAX_WRIST_SPEED 0.4f
+#define MAX_UPPER_SPEED 0.4f
 
 class ArmMode : public ControllerMode
 {

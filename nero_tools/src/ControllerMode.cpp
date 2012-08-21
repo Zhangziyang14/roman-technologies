@@ -8,7 +8,7 @@
 #include "nero_tools/ControllerMode.h"
 
 ControllerMode::ControllerMode(ros::NodeHandle *nodeHandle) :
-		mAwake(false)
+		mAwake(true)
 {
 	mNodeHandle = nodeHandle;
 

@@ -17,14 +17,14 @@
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#define MAX_LINEAR_SPEED 0.4
-#define MAX_ANGULAR_SPEED 0.4
+#define MAX_LINEAR_SPEED 0.8
+#define MAX_ANGULAR_SPEED 0.6
 
-#define ARM_POS_UP_X (-1.f)
-#define ARM_POS_UP_Z (-1.f)
+#define ARM_POS_DOWN_X (-1.f)
+#define ARM_POS_DOWN_Z (-1.f)
 
-#define ARM_POS_DOWN_X 0
-#define ARM_POS_DOWN_Z (-0.1f)
+#define ARM_POS_UP_X 0
+#define ARM_POS_UP_Z (-0.1f)
 
 class DriveMode : public ControllerMode
 {

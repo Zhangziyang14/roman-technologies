@@ -54,26 +54,18 @@ void HeadMotorHandler::publishHeadSpeed()
  */
 void HeadMotorHandler::speedCB(const nero_msgs::PitchYaw &msg)
 {
-	double pitch	= msg.pitch;
-	double yaw 		= msg.yaw;
+	double avgPitch = (PITCH_LOWER_LIMIT + PITCH_UPPER_LIMIT) / 2;
+	double avgYaw = (YAW_LOWER_LIMIT + YAW_UPPER_LIMIT) / 2;
+	double pitchScale = 1.0 - (fabs(avgPitch - std::min(PITCH_UPPER_LIMIT, std::max(PITCH_LOWER_LIMIT, (double)mCurrentPose.pitch))) / (PITCH_UPPER_LIMIT - avgPitch));
+	double yawScale = 1.0 - (fabs(avgYaw - std::min(YAW_UPPER_LIMIT, std::max(YAW_LOWER_LIMIT, (double)mCurrentPose.yaw))) / (YAW_UPPER_LIMIT - avgYaw));
 
-	if (isnan(pitch) || isnan(yaw))
-	{
-		ROS_WARN("Received nan in speedCb.");
-		return;
-	}
+	if ((msg.pitch > 0.0 && mCurrentPose.pitch < avgPitch) || (msg.pitch < 0.0 && mCurrentPose.pitch > avgPitch))
+		pitchScale = 1.0;
+	if ((msg.yaw > 0.0 && mCurrentPose.yaw < avgYaw) || (msg.yaw < 0.0 && mCurrentPose.yaw > avgYaw))
+		yawScale = 1.0;
 
-	if((pitch > 0 && mCurrentPose.pitch < PITCH_UPPER_LIMIT) ||
-			(pitch < 0 && mCurrentPose.pitch > PITCH_LOWER_LIMIT) || pitch == 0)
-	{
-		mPitch.setSpeed(pitch);
-	}
-
-	if((yaw > 0 && mCurrentPose.yaw < YAW_UPPER_LIMIT) ||
-			(yaw < 0 && mCurrentPose.yaw > YAW_LOWER_LIMIT) || pitch == 0)
-	{
-		mPitch.setSpeed(yaw);
-	}
+	mPitch.setSpeed(msg.pitch * pitchScale);
+	mYaw.setSpeed(msg.yaw * yawScale);
 }
 
 /**
@@ -114,7 +106,7 @@ void HeadMotorHandler::init(char *path)
 
 	//Initialise subscribers
 	mPositionSub	= mNodeHandle.subscribe("/headPositionTopic", 10, &HeadMotorHandler::positionCB, this);
-	//mSpeedSub		= mNodeHandle.subscribe("head/cmd_vel", 10, &HeadMotorHandler::speedCB, this);
+	mSpeedSub		= mNodeHandle.subscribe("/head/cmd_vel", 10, &HeadMotorHandler::speedCB, this);
 
 	mPitch.init(path);
 	mYaw.init(path);

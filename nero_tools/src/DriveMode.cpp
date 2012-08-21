@@ -25,13 +25,13 @@ void DriveMode::handleController(std::vector<int> previousButtons, std::vector<f
 
 	// speed of the base
 	if (joy.axes[PS3_AXIS_LEFT_HORIZONTAL] || joy.axes[PS3_AXIS_RIGHT_VERTICAL]) // we are sending speed
-		sendSpeed(joy.axes[PS3_AXIS_LEFT_HORIZONTAL], joy.axes[PS3_AXIS_RIGHT_VERTICAL]);
+		sendSpeed(joy.axes[PS3_AXIS_RIGHT_VERTICAL], joy.axes[PS3_AXIS_LEFT_HORIZONTAL]);
 	else if (previousAxes[PS3_AXIS_LEFT_HORIZONTAL] || previousAxes[PS3_AXIS_RIGHT_VERTICAL]) // we stopped sending speed
 		sendSpeed(0.f, 0.f);
 
 	// arm
 	if (pressed(previousButtons, joy, PS3_R1))
-		sendArmPosition(ARM_POS_UP_X, ARM_POS_UP_X);
+		sendArmPosition(ARM_POS_UP_X, ARM_POS_UP_Z);
 	if (pressed(previousButtons, joy, PS3_R2))
 		sendArmPosition(ARM_POS_DOWN_X, ARM_POS_DOWN_Z);
 
@@ -54,7 +54,7 @@ void DriveMode::sendSpeed(float linearScale, float angularScale)
 {
 	geometry_msgs::Twist msg;
 	msg.linear.x = linearScale * MAX_LINEAR_SPEED;
-	msg.angular.z = (linearScale < 0.f ? -angularScale : angularScale) * MAX_ANGULAR_SPEED; // reverse angular speed when driving in reverse, feels more natural
+	msg.angular.z = angularScale * MAX_ANGULAR_SPEED;
 	mSpeedPub.publish(msg);
 
 	mLastLinearSpeed = msg.linear.x;

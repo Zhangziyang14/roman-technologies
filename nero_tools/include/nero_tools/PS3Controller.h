@@ -15,6 +15,7 @@
 #include "nero_tools/ControllerMode.h"
 #include "nero_tools/DriveMode.h"
 #include "nero_tools/ArmMode.h"
+#include "nero_tools/HeadMode.h"
 
 #define MAX_MODES 4
 #define LED_COUNT 4

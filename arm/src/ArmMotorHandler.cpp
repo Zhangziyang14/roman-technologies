@@ -210,8 +210,15 @@ void ArmMotorHandler::shoulderCB(const std_msgs::Float64& msg)
  */
 void ArmMotorHandler::speedCB(const nero_msgs::ArmJoint& msg)
 {
-	double upperScale = (SIDEJOINT_MAX_ANGLE - std::min(fabs(mCurrentSideJointPos), SIDEJOINT_MAX_ANGLE)) / SIDEJOINT_MAX_ANGLE;
-	double wristScale = (SHOULDERMOTOR_MAX_ANGLE - std::min(fabs(mCurrentSideJointPos), SHOULDERMOTOR_MAX_ANGLE)) / SHOULDERMOTOR_MAX_ANGLE;
+	double avgUpperAngle = (SHOULDERMOTOR_MAX_ANGLE + SHOULDERMOTOR_MIN_ANGLE) / 2;
+	double avgWristAngle = (SIDEJOINT_MAX_ANGLE + SIDEJOINT_MIN_ANGLE) / 2;
+	double upperScale = 1.0 - (fabs(avgUpperAngle - std::min(SHOULDERMOTOR_MAX_ANGLE, std::max(SHOULDERMOTOR_MIN_ANGLE, mCurrentShoulderJointPos))) / (SHOULDERMOTOR_MAX_ANGLE - avgUpperAngle));
+	double wristScale = 1.0 - (fabs(avgWristAngle - std::min(SIDEJOINT_MAX_ANGLE, std::max(SIDEJOINT_MIN_ANGLE, mCurrentSideJointPos))) / (SIDEJOINT_MAX_ANGLE - avgWristAngle));
+
+	if ((msg.upper_joint > 0.0 && mCurrentShoulderJointPos < avgUpperAngle) || (msg.upper_joint < 0.0 && mCurrentShoulderJointPos > avgUpperAngle))
+		upperScale = 1.0;
+	if ((msg.wrist_joint > 0.0 && mCurrentSideJointPos < avgWristAngle) || (msg.wrist_joint < 0.0 && mCurrentSideJointPos > avgWristAngle))
+		wristScale = 1.0;
 
 	mShoulderMotor.setSpeed(msg.upper_joint * upperScale);
 	mSideMotor.setSpeed(msg.wrist_joint * wristScale);

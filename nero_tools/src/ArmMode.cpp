@@ -2,7 +2,7 @@
  * ArmMode.cpp
  *
  *  Created on: Aug 21, 2012
- *      Author: parallels
+ *      Author: hans
  */
 
 #include "nero_tools/ArmMode.h"

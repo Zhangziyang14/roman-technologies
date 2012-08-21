@@ -146,5 +146,6 @@ int main( int argc, char* argv[] )
 	PS3Controller ps3Controller;
 	ps3Controller.addMode(new DriveMode(ps3Controller.getNodeHandle()));
 	ps3Controller.addMode(new ArmMode(ps3Controller.getNodeHandle()));
+	ps3Controller.addMode(new HeadMode(ps3Controller.getNodeHandle()));
 	ps3Controller.spin();
 }
