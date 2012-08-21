@@ -28,6 +28,7 @@
 
 class DriveMode : public ControllerMode
 {
+private:
 	ros::Publisher mSpeedPub;
 	ros::Publisher mArmPosPub;
 	ros::Publisher mGripperStatePub;

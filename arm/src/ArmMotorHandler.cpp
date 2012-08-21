@@ -210,20 +210,11 @@ void ArmMotorHandler::shoulderCB(const std_msgs::Float64& msg)
  */
 void ArmMotorHandler::speedCB(const nero_msgs::ArmJoint& msg)
 {
-	double upper_joint = msg.upper_joint;
-	double wrist_joint = msg.wrist_joint;
+	double upperScale = (SIDEJOINT_MAX_ANGLE - std::min(fabs(mCurrentSideJointPos), SIDEJOINT_MAX_ANGLE)) / SIDEJOINT_MAX_ANGLE;
+	double wristScale = (SHOULDERMOTOR_MAX_ANGLE - std::min(fabs(mCurrentSideJointPos), SHOULDERMOTOR_MAX_ANGLE)) / SHOULDERMOTOR_MAX_ANGLE;
 
-	if((upper_joint > 0 && mCurrentShoulderJointPos  < SHOULDERMOTOR_MAX_ANGLE) ||
-			(upper_joint < 0 && mCurrentShoulderJointPos > SHOULDERMOTOR_MIN_ANGLE) || upper_joint == 0)
-	{
-		mShoulderMotor.setSpeed(upper_joint);
-	}
-
-	if((wrist_joint > 0 && mCurrentSideJointPos < SIDEJOINT_MAX_ANGLE) ||
-			(wrist_joint < 0 && mCurrentSideJointPos > SIDEJOINT_MIN_ANGLE) || wrist_joint == 0)
-	{
-		mSideMotor.setSpeed(wrist_joint);
-	}
+	mShoulderMotor.setSpeed(msg.upper_joint * upperScale);
+	mSideMotor.setSpeed(msg.wrist_joint * wristScale);
 }
 
 

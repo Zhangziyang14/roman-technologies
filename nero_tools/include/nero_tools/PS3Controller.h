@@ -14,8 +14,10 @@
 #include "std_msgs/UInt16.h"
 #include "nero_tools/ControllerMode.h"
 #include "nero_tools/DriveMode.h"
+#include "nero_tools/ArmMode.h"
 
 #define MAX_MODES 4
+#define LED_COUNT 4
 
 #define BATTERY_FULL 1023
 #define BATTERY_EMPTY 950
@@ -48,6 +50,8 @@ public:
 
 	void addMode(ControllerMode *mode);
 	void spin();
+	void setLED(uint8_t led, bool on = true);
+	void setRumble(float intensity);
 
 	ros::NodeHandle* getNodeHandle() { return &mNodeHandle; };
 };

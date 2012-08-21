@@ -5,7 +5,6 @@
  *      Author: hans
  */
 
-#include "ros/ros.h"
 #include "nero_tools/PS3Controller.h"
 
 bool pressed(std::vector<int> previousButtons, const sensor_msgs::Joy &joy, PS3Key key)
@@ -41,7 +40,9 @@ void PS3Controller::controllerCb(const sensor_msgs::Joy& joy)
 		{
 			if (getCurrentMode())
 				getCurrentMode()->onDeactivate();
+			setLED(mPS3ModeIndex, false);
 			mPS3ModeIndex = (mPS3ModeIndex + 1) % mPS3ModeCount;
+			setLED(mPS3ModeIndex, true);
 			if (getCurrentMode())
 				getCurrentMode()->onActivate();
 		}
@@ -49,7 +50,9 @@ void PS3Controller::controllerCb(const sensor_msgs::Joy& joy)
 		{
 			if (getCurrentMode())
 				getCurrentMode()->onDeactivate();
+			setLED(mPS3ModeIndex, false);
 			mPS3ModeIndex = (mPS3ModeIndex == 0 ? mPS3ModeCount : mPS3ModeIndex) - 1;
+			setLED(mPS3ModeIndex, true);
 			if (getCurrentMode())
 				getCurrentMode()->onActivate();
 		}
@@ -71,20 +74,48 @@ void PS3Controller::controllerCb(const sensor_msgs::Joy& joy)
 void PS3Controller::batteryLogCb(const std_msgs::UInt16& log)
 {
 	if (log.data <= BATTERY_EMPTY)
+		setRumble(1.f);
+}
+
+void PS3Controller::setLED(uint8_t led, bool on)
+{
+	if (led >= LED_COUNT)
 	{
-		sensor_msgs::JoyFeedbackArray msg;
-
-		sensor_msgs::JoyFeedback feedback;
-		feedback.type = sensor_msgs::JoyFeedback::TYPE_RUMBLE;
-		feedback.intensity = 1.f;
-		msg.array.push_back(feedback);
-
-		mPS3FeedbackPub.publish(msg);
+		ROS_ERROR("[PS3Controller] LED id is out of bounds!");
+		return;
 	}
+
+	sensor_msgs::JoyFeedbackArray msg;
+
+	sensor_msgs::JoyFeedback feedback;
+	feedback.type = sensor_msgs::JoyFeedback::TYPE_LED;
+	feedback.id = led;
+	feedback.intensity = on ? 1.f : 0.f;
+	msg.array.push_back(feedback);
+
+	mPS3FeedbackPub.publish(msg);
+}
+
+void PS3Controller::setRumble(float intensity)
+{
+	sensor_msgs::JoyFeedbackArray msg;
+
+	sensor_msgs::JoyFeedback feedback;
+	feedback.type = sensor_msgs::JoyFeedback::TYPE_RUMBLE;
+	feedback.intensity = intensity;
+	msg.array.push_back(feedback);
+
+	mPS3FeedbackPub.publish(msg);
 }
 
 void PS3Controller::addMode(ControllerMode *mode)
 {
+	if (mPS3ModeCount >= MAX_MODES)
+	{
+		ROS_ERROR("[PS3Controller] Max mode count reached!");
+		return;
+	}
+
 	mPS3Modes[mPS3ModeCount++] = mode;
 }
 
@@ -114,5 +145,6 @@ int main( int argc, char* argv[] )
 
 	PS3Controller ps3Controller;
 	ps3Controller.addMode(new DriveMode(ps3Controller.getNodeHandle()));
+	ps3Controller.addMode(new ArmMode(ps3Controller.getNodeHandle()));
 	ps3Controller.spin();
 }
