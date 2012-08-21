@@ -51,8 +51,10 @@ PersonTracker::PersonTracker() :
 	// initialise services and topics
 	mInitialPointSub		= mNodeHandle.subscribe("/PersonTracker/initial_point", 1, &PersonTracker::initialPointCb, this);
 	mColorDepthImageSub 	= mNodeHandle.subscribe("/camera/color_depth", 1, &PersonTracker::imageColorDepthCb, this);
+	mHeadSpeedSub 			= mNodeHandle.subscribe("/headSpeedFeedbackTopic", 1, &PersonTracker::headSpeedCb, this);
 	mTrackedPointPub 		= mNodeHandle.advertise<geometry_msgs::PointStamped>("/PersonTracker/point", 10);
 	mHighPointPub 			= mNodeHandle.advertise<geometry_msgs::PointStamped>("/Head/follow_point", 10);
+
 	mProjectClient			= mNodeHandle.serviceClient<nero_msgs::QueryCloud>("/KinectServer/ProjectPoints", true);
 	mFocusFaceClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/set_focus_face", true);
 
@@ -63,6 +65,11 @@ PersonTracker::PersonTracker() :
 		cv::startWindowThread();
 		cv::namedWindow("PersonTracker", 1);
 	}
+}
+
+void PersonTracker::headSpeedCb(const nero_msgs::PitchYaw &msg)
+{
+	mHeadSpeed = msg;
 }
 
 void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
@@ -95,6 +102,7 @@ void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
 	mLastDepth = mLastDepthImage.at<uint16_t>(point.y, point.x);
 	if (mLastDepth > 0)
 	{
+		mCOG = cv::Point2i(point.x, point.y);
 		mTracking = true;
 		//setFocusFace(false);
 	}
@@ -102,25 +110,25 @@ void PersonTracker::initialPointCb(const geometry_msgs::Point &point)
 		ROS_WARN("Depth at person follow point is 0.");
 }
 
-geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p, const char *frame)
+geometry_msgs::PointStamped PersonTracker::getWorldPoint(cv::Point2i p, const char *frame, uint16_t depth)
 {
 	nero_msgs::QueryCloud qc;
 	geometry_msgs::Point gp;
 	gp.x = p.x;
 	gp.y = p.y;
-	gp.z = mLastDepthImage.at<uint16_t>(p.y, p.x);
+	gp.z = depth ? depth : mLastDepthImage.at<uint16_t>(p.y, p.x);
 	qc.request.points.push_back(gp);
 
 	if (mProjectClient.call(qc) == false || qc.response.points.size() == 0)
 	{
-		ROS_WARN("Failed to call cloud save server.");
+		ROS_WARN("Failed to call project cloud server.");
 		return geometry_msgs::PointStamped();
 	}
 
 	geometry_msgs::PointStamped result;
 	try
 	{
-		mTransformListener.waitForTransform(qc.response.points[0].header.frame_id, frame, qc.response.points[0].header.stamp, ros::Duration(1.0));
+		mTransformListener.waitForTransform(frame, qc.response.points[0].header.frame_id, qc.response.points[0].header.stamp, ros::Duration(1.0));
 		mTransformListener.transformPoint(frame, qc.response.points[0], result);
 	}
 	catch (tf::TransformException &ex)
@@ -154,9 +162,9 @@ void PersonTracker::imageColorDepthCb(const nero_msgs::ColorDepthPtr &image)
 				if (mShowOutput)
 					cv::rectangle(mLastImage, mBBox, CV_RGB(0,0,255), 8, 8, 0);
 
-				if (highPoint.x && highPoint.y)
+				if (canMoveHead() && highPoint.x && highPoint.y)
 				{
-					geometry_msgs::PointStamped hp = getWorldPoint(highPoint, "/head_frame");
+					geometry_msgs::PointStamped hp = getWorldPoint(highPoint, "/head_frame", mLastDepth);
 					hp.point.z += HIGH_POINT_OFFSET;
 					//mHighPointPub.publish(hp);
 				}
@@ -181,7 +189,7 @@ bool PersonTracker::seedImage(cv::Mat depth, cv::Mat &result, cv::Point2i seed, 
 
 	cv::Point2i min(depth.cols - 1, depth.rows - 1);
 	cv::Point2i max(0, 0);
-	cv::Point2i hp(0, 0);
+	cv::Point2i hp(depth.cols, depth.rows);
 
 	double depthSum = 0.0;
 	cv::Point2f cogSum(0.f, 0.f);

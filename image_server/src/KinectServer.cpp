@@ -337,7 +337,7 @@ bool KinectServer::ProjectPoints(nero_msgs::QueryCloud::Request &req, nero_msgs:
 			geometry_msgs::PointStamped p;
 			p.header = header;
 			p.point.x = real[i].X * 0.001f;
-			p.point.y = real[i].Y * 0.001f;
+			p.point.y = real[i].Y * -0.001f; // for some reason the y-axis is inverted
 			p.point.z = real[i].Z * 0.001f;
 			res.points.push_back(p);
 		}
