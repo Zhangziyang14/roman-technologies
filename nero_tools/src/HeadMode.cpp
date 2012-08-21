@@ -21,7 +21,7 @@ void HeadMode::handleController(std::vector<int> previousButtons, std::vector<fl
 
 	// speed of the arm
 	if (joy.axes[PS3_AXIS_LEFT_HORIZONTAL] || joy.axes[PS3_AXIS_RIGHT_VERTICAL]) // we are sending speed
-		sendHeadSpeed(joy.axes[PS3_AXIS_LEFT_HORIZONTAL], joy.axes[PS3_AXIS_RIGHT_VERTICAL]);
+		sendHeadSpeed(joy.axes[PS3_AXIS_RIGHT_VERTICAL], joy.axes[PS3_AXIS_LEFT_HORIZONTAL]);
 	else if (previousAxes[PS3_AXIS_LEFT_HORIZONTAL] || previousAxes[PS3_AXIS_RIGHT_VERTICAL]) // we stopped sending speed
 		sendHeadSpeed(0.f, 0.f);
 }
