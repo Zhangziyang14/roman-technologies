@@ -18,7 +18,9 @@ PS3Controller::PS3Controller() :
 	mPS3ModeIndex(0),
 	mPS3Active(false)
 {
-	mPS3Sub = mNodeHandle.subscribe("/joy", 5, &PS3Controller::controllerCb, this);
+	mPS3Sub 		= mNodeHandle.subscribe("/joy", 5, &PS3Controller::controllerCb, this);
+	mBatteryLogSub 	= mNodeHandle.subscribe("/batteryLogTopic", 5, &PS3Controller::batteryLogCb, this);
+	mPS3FeedbackPub	= mNodeHandle.advertise<sensor_msgs::JoyFeedbackArray>("/joy/set_feedback", 1);
 
 	memset(mPS3Modes, 0, sizeof(ControllerMode) * MAX_MODES);
 
@@ -64,6 +66,21 @@ void PS3Controller::controllerCb(const sensor_msgs::Joy& joy)
 	getCurrentMode()->handleController(mPreviousButtons, mPreviousAxes, joy);
 	mPreviousButtons = joy.buttons;
 	mPreviousAxes = joy.axes;
+}
+
+void PS3Controller::batteryLogCb(const std_msgs::UInt16& log)
+{
+	if (log.data <= BATTERY_EMPTY)
+	{
+		sensor_msgs::JoyFeedbackArray msg;
+
+		sensor_msgs::JoyFeedback feedback;
+		feedback.id = sensor_msgs::JoyFeedback::TYPE_RUMBLE;
+		feedback.intensity = 1.f;
+		msg.array.push_back(feedback);
+
+		mPS3FeedbackPub.publish(msg);
+	}
 }
 
 void PS3Controller::addMode(ControllerMode *mode)
