@@ -14,6 +14,7 @@
 #include "nero_msgs/Emotion.h"
 #include "nero_msgs/SpeechCommand.h"
 #include "nero_msgs/PitchYaw.h"
+#include "geometry_msgs/Point.h"
 
 enum PS3Key
 {
@@ -88,6 +89,7 @@ private:
 	ros::Publisher mEmotionPub;
 	ros::Publisher mSpeechCommandPub;
 	ros::Publisher mHeadPosPub;
+	ros::Publisher mPersonPosPub;
 
 	bool mAwake;
 
@@ -102,6 +104,7 @@ public:
 	void sendEmotion(uint8_t emotion);
 	void sendSpeechCommand(std::string command);
 	void sendHeadPosition(float pitch, float yaw);
+	void sendPersonFollowing(int x, int y);
 
 	bool pressed(std::vector<int> previousButtons, const sensor_msgs::Joy &joy, PS3Key key);
 };

@@ -15,6 +15,7 @@ ControllerMode::ControllerMode(ros::NodeHandle *nodeHandle) :
 	mEmotionPub 		= mNodeHandle->advertise<std_msgs::UInt8>("/cmd_emotion", 1);
 	mSpeechCommandPub 	= mNodeHandle->advertise<nero_msgs::SpeechCommand>("/processedSpeechTopic", 1);
 	mHeadPosPub			= mNodeHandle->advertise<nero_msgs::PitchYaw>("/cmd_head_position", 1);
+	mPersonPosPub		= mNodeHandle->advertise<geometry_msgs::Point>("/PersonTracker/initial_point", 1);
 }
 
 bool ControllerMode::pressed(std::vector<int> previousButtons, const sensor_msgs::Joy &joy, PS3Key key)
@@ -56,6 +57,12 @@ void ControllerMode::handleController(std::vector<int> previousButtons, std::vec
 		sendSpeechCommand("cola");
 	if (pressed(previousButtons, joy, PS3_RIGHT))
 		sendSpeechCommand("juice");
+
+	// Person Follower
+	if (pressed(previousButtons, joy, PS3_UP))
+		sendPersonFollowing(320, 240);
+	if (pressed(previousButtons, joy, PS3_DOWN))
+		sendPersonFollowing(0, 0);
 }
 
 void ControllerMode::sendEmotion(uint8_t emotion)
@@ -85,4 +92,14 @@ void ControllerMode::sendHeadPosition(float pitch, float yaw)
 	mHeadPosPub.publish(msg);
 
 	ROS_INFO("[ControllerMode] Sending head position (%f, %f)", pitch, yaw);
+}
+
+void ControllerMode::sendPersonFollowing(int x, int y)
+{
+	geometry_msgs::Point msg;
+	msg.x = x;
+	msg.y = y;
+	mPersonPosPub.publish(msg);
+
+	ROS_INFO("[ControllerMode] Sending person position (%d, %d)", x, y);
 }
