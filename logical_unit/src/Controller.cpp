@@ -404,7 +404,8 @@ uint8_t Controller::get(int object)
 	{
 		// start depth for object grabbing (takes a second to start up, so we put it here)
 		setDepthForced(true);
-	
+		setCloudForced(true);
+
 		uint8_t i = 0;
 		for (i = 0; i < 3; i++)
 		{
@@ -479,6 +480,7 @@ uint8_t Controller::get(int object)
 		}
 		
 		setDepthForced(false); // we are done with object finding
+		setCloudForced(false); // we are done with object finding
 
 		ROS_INFO("yaw: %lf", yaw);
 		ROS_INFO("distance: %lf", fabs(TABLE_DISTANCE - min_y));
@@ -802,8 +804,12 @@ void Controller::init(const char *goalPath)
 	if (waitForServiceClient(&mNodeHandle, "/KinectServer/ForceDepthControl"))
 		mForceDepthClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/ForceDepthControl", true);
 
-	setDepthForced(false);
+	if (waitForServiceClient(&mNodeHandle, "/KinectServer/CloudControl"))
+		mForceCloudClient		= mNodeHandle.serviceClient<nero_msgs::SetActive>("/KinectServer/CloudControl", true);
 
+
+	setDepthForced(false);
+	setCloudForced(false);
 	//Store goal position
 
 	signal(SIGUSR1, stopHandler);

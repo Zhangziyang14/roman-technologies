@@ -10,7 +10,7 @@
 
 #include "ros/ros.h"
 
-#include "XnCppWrapper.h"
+#include "ni/XnCppWrapper.h"
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
