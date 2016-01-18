@@ -1,0 +1,1 @@
+This project contains the code of the Roman Technologies robot developed by a group at the TU Delft as part of their minor assignment.
